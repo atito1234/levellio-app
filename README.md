@@ -14,18 +14,40 @@ cosmetics monetization layered in later.
 
 ## Status
 
-This repo is being built incrementally. **Day 4** delivers the foundation:
+This repo is being built incrementally.
+
+**Day 4 — foundation:**
 
 - ✅ Expo + TypeScript scaffold with a scalable `src/` structure
 - ✅ Strongly-typed design-token / theme module (locked brand palette)
 - ✅ React Navigation shell wiring all 5 MVP screens
-- ✅ **Onboarding** screen fully built (value-prop slides + hero presentation)
+- ✅ **Onboarding** screen (value-prop slides + hero presentation choice)
 - ✅ Stub interfaces (with TODOs) for the pluggable AI layer and a
   Firebase-ready auth + data layer (local mock implementation)
-- ✅ Leveling-math utility (infra for Day 5's Dashboard)
+- ✅ Leveling-math utility
 
-Dashboard, Quest Complete, Character, and Settings/Paywall are runnable
-placeholders (Days 5–8).
+**Day 5 — core gameplay loop:**
+
+- ✅ Game state layer (`GameProvider` / `useGame`) on the mock backend
+- ✅ **Dashboard** — today's quests, XP bar, level + streak, complete action
+- ✅ **Quest Complete** — signature celebration (XP count-up, bar fill,
+  level-up state), reduced-motion aware
+- ✅ **Character** — hero variant (female/male/neutral) + Wisp companion,
+  level, total XP, tier progression
+- ✅ Hero presentation wired end-to-end (Onboarding → Dashboard → Character)
+- ✅ Jest + ts-jest test runner; 26 unit tests for the leveling math
+
+Settings/Paywall remains a runnable placeholder (Day 8).
+
+### Testing
+
+```bash
+npm test            # run the unit suite
+npm run test:watch  # watch mode
+```
+
+Game logic lives in `src/lib` as pure TypeScript and ships with tests. New
+game logic is expected to add tests alongside it.
 
 ---
 
