@@ -1,15 +1,22 @@
 /**
- * Plan configuration for the free-vs-premium surface.
+ * Plan configuration for the upgrade surface.
  *
- * IMPORTANT: prices and conversion are a separate v2 pass. Final prices are NOT
- * hardcoded — `amount` is null until launch and all copy lives here so v2 can
- * tune wording/pricing without code changes. The free plan is generous forever;
- * premium only adds optional "delight multipliers".
+ * v1.0 BETA STATUS: monetization is intentionally OFF. There is no billing, no
+ * charge path, and no purchase is ever initiated. Every working feature is free
+ * for beta members. The premium scaffolding is kept (for a future v1.5) but is
+ * presented honestly as "coming soon" and advertises NO feature that isn't live
+ * today. We never claim cloud sync, accounts, managed/no-key cloud AI, workouts,
+ * health integrations, or social features — none of those ship in v1.0.
+ *
+ * Honesty is enforced by plans.test.ts (forbidden-phrase + no-charge assertions).
  */
 export type PlanId = 'free' | 'premium';
 
+/** Master switch. v1.0 ships with charging disabled. Flip in v1.5 with real IAP. */
+export const MONETIZATION_ENABLED = false;
+
 export interface PlanPrice {
-  /** null until pricing is finalized in v2. */
+  /** null until pricing is finalized. Always null while MONETIZATION_ENABLED is false. */
   amount: number | null;
   currency: string;
   period: 'forever' | 'month' | 'year';
@@ -22,16 +29,21 @@ export interface PlanConfig {
   name: string;
   tagline: string;
   price: PlanPrice;
-  /** Bullet copy of what's included. */
+  /** Bullet copy of what's included — must describe ONLY shipping features. */
   features: string[];
+  /** CTA label. While monetization is off, premium's CTA is non-actionable. */
   ctaLabel: string;
+  /** True only when this plan can be purchased right now. */
+  purchasable: boolean;
   highlighted?: boolean;
 }
 
 export interface MonetizationConfig {
   plans: PlanConfig[];
-  /** Honest, non-dark-pattern disclosure shown on the paywall. */
+  /** Honest, non-dark-pattern disclosure shown on the upgrade surface. */
   disclosure: string;
+  /** Beta member message shown in place of any purchase flow. */
+  betaNotice: string;
 }
 
 export const PLAN_CONFIG: MonetizationConfig = {
@@ -39,37 +51,46 @@ export const PLAN_CONFIG: MonetizationConfig = {
     {
       id: 'free',
       name: 'Free',
-      tagline: 'Everything you need to build real habits.',
-      price: { amount: 0, currency: 'USD', period: 'forever', label: 'Free forever' },
+      tagline: 'Everything in the beta — free.',
+      price: { amount: 0, currency: 'USD', period: 'forever', label: 'Free' },
       features: [
         'Create your own quests',
         'Full starter habit library',
         'Streaks & leveling',
-        'On-device AI suggestions (private)',
+        'On-device AI suggestions (private, no key)',
+        'Bring-your-own-key cloud AI (your key, never ours)',
       ],
       ctaLabel: 'Your current plan',
+      purchasable: false,
     },
     {
       id: 'premium',
       name: 'Premium',
-      tagline: 'Optional delight — never required to succeed.',
-      price: { amount: null, currency: 'USD', period: 'month', label: 'Pricing announced at launch' },
-      features: [
-        'Managed cloud AI (no API key to set up)',
-        'Cosmetic themes & avatars',
-        'Cloud sync & backup across devices',
-      ],
-      ctaLabel: 'Unlock Premium',
+      tagline: 'Coming soon — thanks for being an early beta member.',
+      price: { amount: null, currency: 'USD', period: 'month', label: 'Coming soon' },
+      // Deliberately empty: we will not list a perk until it actually ships.
+      features: [],
+      ctaLabel: 'Coming soon',
+      purchasable: false,
       highlighted: true,
     },
   ],
   disclosure:
-    'The free plan stays fully featured, forever — no ads and no paywalled core features. ' +
-    'Premium only adds optional extras.',
+    'Levellio is completely free during the beta. There is no payment, and the core habit ' +
+    'tracking will always be free. Optional extras may arrive in a future update — and we will ' +
+    'never charge you without asking first.',
+  betaNotice:
+    "You're an early beta member 💜 Premium isn't available yet — there's nothing to buy, and " +
+    'no payment will ever start here. Enjoy everything for free while we build.',
 };
 
 export function getPlan(id: PlanId): PlanConfig {
   const plan = PLAN_CONFIG.plans.find((p) => p.id === id);
   // Config always contains both plans; fall back to the first defensively.
   return plan ?? PLAN_CONFIG.plans[0]!;
+}
+
+/** True only if a real, charging purchase can be initiated. Always false in v1.0. */
+export function canInitiatePurchase(): boolean {
+  return MONETIZATION_ENABLED && PLAN_CONFIG.plans.some((p) => p.purchasable);
 }

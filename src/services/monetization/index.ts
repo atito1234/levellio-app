@@ -1,4 +1,4 @@
-export { PLAN_CONFIG, getPlan } from './plans';
+export { PLAN_CONFIG, getPlan, MONETIZATION_ENABLED, canInitiatePurchase } from './plans';
 export type { PlanId, PlanConfig, PlanPrice, MonetizationConfig } from './plans';
 export {
   FREE_FEATURES,
