@@ -5,6 +5,8 @@ import type { RootStackParamList } from './types';
 import { colors } from '@/theme';
 import { OnboardingScreen } from '@/screens/OnboardingScreen';
 import { QuestCompleteScreen } from '@/screens/QuestCompleteScreen';
+import { QuestEditorScreen } from '@/screens/QuestEditorScreen';
+import { HabitLibraryScreen } from '@/screens/HabitLibraryScreen';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,6 +37,16 @@ export function RootNavigator() {
           name="QuestComplete"
           component={QuestCompleteScreen}
           options={{ presentation: 'modal', animation: 'fade' }}
+        />
+        <Stack.Screen
+          name="QuestEditor"
+          component={QuestEditorScreen}
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="HabitLibrary"
+          component={HabitLibraryScreen}
+          options={{ presentation: 'modal' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -8,11 +8,14 @@ export type MainTabParamList = {
   Settings: undefined;
 };
 
-/** Root stack: onboarding -> main app, with the celebration as a modal. */
+/** Root stack: onboarding -> main app, with modals layered on top. */
 export type RootStackParamList = {
   Onboarding: undefined;
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
   QuestComplete: { reward: QuestReward } | undefined;
+  /** Create (no param) or edit (questId) a quest. */
+  QuestEditor: { questId?: string } | undefined;
+  HabitLibrary: undefined;
 };
 
 declare global {

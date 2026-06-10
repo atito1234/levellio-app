@@ -96,6 +96,20 @@ export function DashboardScreen() {
           <Text style={styles.remaining}>{remaining} left</Text>
         </View>
 
+        <View style={styles.actionsRow}>
+          <PrimaryButton
+            label="＋ New quest"
+            onPress={() => navigation.navigate('QuestEditor')}
+            style={styles.flexBtn}
+          />
+          <PrimaryButton
+            label="📚 Browse habits"
+            variant="ghost"
+            onPress={() => navigation.navigate('HabitLibrary')}
+            style={styles.flexBtn}
+          />
+        </View>
+
         <View style={styles.questList}>
           {quests.map((quest) => (
             <QuestCard
@@ -103,6 +117,7 @@ export function DashboardScreen() {
               quest={quest}
               streakDays={character.streakDays}
               onComplete={handleComplete}
+              onEdit={(id) => navigation.navigate('QuestEditor', { questId: id })}
             />
           ))}
         </View>
@@ -112,7 +127,7 @@ export function DashboardScreen() {
         )}
 
         <PrimaryButton
-          label="✨ Suggest a quest"
+          label="✨ Suggest with AI (optional)"
           variant="ghost"
           onPress={handleSuggest}
           loading={suggesting}
@@ -165,6 +180,14 @@ const styles = StyleSheet.create({
   remaining: {
     ...typography.label,
     color: colors.textMuted,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  flexBtn: {
+    flex: 1,
+    paddingHorizontal: spacing.md,
   },
   questList: {
     gap: spacing.md,
