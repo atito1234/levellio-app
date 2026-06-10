@@ -16,6 +16,7 @@ export type RootStackParamList = {
   /** Create (no param) or edit (questId) a quest. */
   QuestEditor: { questId?: string } | undefined;
   HabitLibrary: undefined;
+  Paywall: undefined;
 };
 
 declare global {

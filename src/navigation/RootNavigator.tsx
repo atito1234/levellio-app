@@ -7,6 +7,7 @@ import { OnboardingScreen } from '@/screens/OnboardingScreen';
 import { QuestCompleteScreen } from '@/screens/QuestCompleteScreen';
 import { QuestEditorScreen } from '@/screens/QuestEditorScreen';
 import { HabitLibraryScreen } from '@/screens/HabitLibraryScreen';
+import { PaywallScreen } from '@/screens/PaywallScreen';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -46,6 +47,11 @@ export function RootNavigator() {
         <Stack.Screen
           name="HabitLibrary"
           component={HabitLibraryScreen}
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="Paywall"
+          component={PaywallScreen}
           options={{ presentation: 'modal' }}
         />
       </Stack.Navigator>

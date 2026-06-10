@@ -5,3 +5,4 @@ export { CharacterScreen } from './CharacterScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { QuestEditorScreen } from './QuestEditorScreen';
 export { HabitLibraryScreen } from './HabitLibraryScreen';
+export { PaywallScreen } from './PaywallScreen';
