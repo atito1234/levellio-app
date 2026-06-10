@@ -8,31 +8,31 @@ import { BYOKeyAdapter } from './BYOKeyAdapter';
 import { OnDeviceAdapter } from './OnDeviceAdapter';
 import { getByoApiKey } from '@/services/security/secureKeyStore';
 
-function geminiKeyFromEnv(): string | null {
-  const key = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-  return key && key.length > 0 ? key : null;
-}
-
-export function createAIEngine(id: AIEngineId = 'gemini'): AIEngine {
+/**
+ * Build an engine by id. Cloud engines read the user's OWN key from secure
+ * storage — we never ship a developer-funded key. On-device is keyless.
+ */
+export function createAIEngine(id: AIEngineId = 'on-device'): AIEngine {
   switch (id) {
-    case 'on-device':
-      return new OnDeviceAdapter();
     case 'byo-key':
       return new BYOKeyAdapter({ provider: 'openai', getApiKey: () => getByoApiKey() });
     case 'gemini':
+      return new GeminiAdapter({ getApiKey: () => getByoApiKey() });
+    case 'on-device':
     default:
-      return new GeminiAdapter({ getApiKey: async () => geminiKeyFromEnv() });
+      return new OnDeviceAdapter();
   }
 }
 
-/** Default engine until the user picks one in Settings. */
-export const defaultAIEngine: AIEngine = createAIEngine('gemini');
+/** Default engine: privacy-first on-device (no key, no network). */
+export const defaultAIEngine: AIEngine = createAIEngine('on-device');
 
 export * from './AIEngine';
 export * from './errors';
-export { GeminiAdapter } from './GeminiAdapter';
+export { GeminiAdapter, parseGeminiSuggestions } from './GeminiAdapter';
 export { BYOKeyAdapter } from './BYOKeyAdapter';
 export { OnDeviceAdapter } from './OnDeviceAdapter';
+export { buildEngine, type EngineDeps } from './engineFactory';
 export {
   generateQuests,
   suggestedToQuest,
