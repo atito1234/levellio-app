@@ -6,6 +6,8 @@ export { DifficultyBadge } from './DifficultyBadge';
 export { StatPill } from './StatPill';
 export { QuestCard } from './QuestCard';
 export { HeroAvatar } from './HeroAvatar';
+export { Wisp } from './Wisp';
 export { CompanionAvatar } from './CompanionAvatar';
 export { TextField } from './TextField';
 export { ChipSelector, type ChipOption } from './ChipSelector';
+export { ConfettiBurst } from './ConfettiBurst';
