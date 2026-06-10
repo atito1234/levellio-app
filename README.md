@@ -37,17 +37,43 @@ This repo is being built incrementally.
 - ✅ Hero presentation wired end-to-end (Onboarding → Dashboard → Character)
 - ✅ Jest + ts-jest test runner; 26 unit tests for the leveling math
 
+**Day 6 — engines, persistence, AI, a11y:**
+
+- ✅ Date-based **streak engine** (`src/lib/gameEngine.ts` + `streak.ts` +
+  `dates.ts`): real daily streaks with reset on missed days, same-day
+  completions don't double-count, bonus capped at +100%
+- ✅ **Local persistence** via AsyncStorage behind `BackendService`
+  (`PersistentBackend`) — character, XP, streak, and quests survive restarts;
+  schema-versioned with defensive migration
+- ✅ **Pluggable AI layer** finalized: Gemini (default) / BYO-key / on-device.
+  The on-device adapter holds no network client (privacy contract enforced
+  structurally); BYO keys are entered at runtime and stored in the device
+  keychain via `expo-secure-store` — never committed
+- ✅ **Resilient AI quest generation** with timeout/error/offline → deterministic
+  fallback quests
+- ✅ **WCAG AA** contrast fixes (buttons + celebration text); reduced-motion
+  and a11y labels intact
+- ✅ 71 unit tests (leveling, dates, streak, engine, persistence, AI)
+
 Settings/Paywall remains a runnable placeholder (Day 8).
 
 ### Testing
 
 ```bash
-npm test            # run the unit suite
+npm test            # run the unit suite (71 tests)
 npm run test:watch  # watch mode
 ```
 
-Game logic lives in `src/lib` as pure TypeScript and ships with tests. New
-game logic is expected to add tests alongside it.
+Game logic lives in `src/lib` (pure TypeScript) and services in `src/services`,
+both shipping with tests. New game logic is expected to add tests alongside it.
+
+### Privacy & secrets
+
+- **On-device AI** makes no network calls — user data never leaves the device.
+- **BYO API keys** are entered at runtime and stored only in the OS secure
+  store (`expo-secure-store`); they are never logged or committed.
+- Non-sensitive game state uses AsyncStorage. No real keys or Firebase config
+  live in the repo; the placeholder app id is `app.levellio.placeholder`.
 
 ---
 
