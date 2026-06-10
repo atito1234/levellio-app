@@ -20,7 +20,7 @@ const SLIDES: Slide[] = [
   {
     badge: 'WELCOME',
     title: 'Turn real life into an epic quest',
-    body: 'Habits, workouts, and goals become quests that level up your hero — from idea to lasting change.',
+    body: 'Habits, routines, and goals become quests that level up your hero — from idea to lasting change.',
     accent: colors.identity,
   },
   {

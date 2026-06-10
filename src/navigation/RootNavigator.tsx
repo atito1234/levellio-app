@@ -8,6 +8,7 @@ import { QuestCompleteScreen } from '@/screens/QuestCompleteScreen';
 import { QuestEditorScreen } from '@/screens/QuestEditorScreen';
 import { HabitLibraryScreen } from '@/screens/HabitLibraryScreen';
 import { PaywallScreen } from '@/screens/PaywallScreen';
+import { LegalScreen } from '@/screens/LegalScreen';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -54,6 +55,7 @@ export function RootNavigator() {
           component={PaywallScreen}
           options={{ presentation: 'modal' }}
         />
+        <Stack.Screen name="Legal" component={LegalScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

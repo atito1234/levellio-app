@@ -6,31 +6,30 @@ This folder holds Levellio's **Privacy Policy** and **Terms of Service**.
 - `privacy-policy.html` / `terms-of-service.html` — self-contained, printable
   HTML, **generated** from the Markdown via `npm run generate:listing`
   (do not edit the HTML by hand).
+- The same Markdown is bundled into the app (`src/content/legalContent.ts`,
+  generated) and rendered in-app from **Settings → About & Legal**.
 
-## ⚠️ Template — not legal advice
+## Status (v1.0)
 
-These documents are a careful **starting template** that reflects how the app
-actually works today (local-first storage; optional bring-your-own-key AI; no
-analytics/ads; stubbed cloud features that are not active). They are **not legal
-advice**. The app owner is responsible for having them reviewed by a qualified
-professional and for keeping them accurate as the product changes.
+The owner placeholders have been filled with real values:
 
-## Placeholder checklist (fill before publishing)
+- **App owner / legal entity:** Ethix Innova LLC
+- **Principal:** Antonio Joel Tito, PhD
+- **Contact:** doctortitoconsulting@gmail.com
+- **Effective date:** June 10, 2026
+- **Governing law:** State of Texas, USA
 
-Replace every occurrence in **both** documents:
+The mission language is intentionally **qualitative** (no fixed percentage, no
+named/registered nonprofit, no implied tax-deductibility) and future-tense
+(there are no proceeds during the free beta).
 
-- [ ] `[APP-OWNER]` — your developer / legal entity name (must match the app
-      store listing's seller/developer name).
-- [ ] `[YOUR-CONTACT-EMAIL]` — a monitored support/privacy contact address.
-- [ ] `[EFFECTIVE-DATE]` — the date you publish (e.g., `June 10, 2026`).
-- [ ] `[YOUR-JURISDICTION]` — governing law / venue (Terms §13), e.g. a country
-      or US state.
+## ⚠️ Still required before public launch
 
-Then:
-
-- [ ] Re-run `npm run generate:listing` to refresh the HTML.
-- [ ] Host both documents at public URLs (a Privacy Policy URL is **required**
-      in App Store Connect and Google Play; a Terms URL is recommended).
-- [ ] Re-confirm accuracy if you later enable accounts, cloud sync, paid plans,
-      analytics, or any health-data integration — update the docs **and** the
-      store data-safety / privacy-label answers before those features ship.
+- [ ] Host both documents publicly and set **`[HOSTED-PRIVACY-POLICY-URL]`** in
+      the store listings (`store/listing/app-store.md`, `google-play.md`). A
+      Privacy Policy URL is **required** by App Store Connect and Google Play.
+- [ ] These remain a **template prepared in good faith, not legal advice** —
+      have them reviewed by a qualified professional before publishing.
+- [ ] Re-confirm accuracy (and update the docs **and** the store data-safety /
+      privacy-label answers) before activating accounts, cloud features, paid
+      plans, analytics, or any health integration.

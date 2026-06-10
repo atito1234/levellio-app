@@ -31,8 +31,8 @@ Levellio is local-first. Your habits and progress live on your device — not on
 • Prefer a cloud AI model? Bring your own API key. It is stored only in your device's secure keychain and used only to reach the provider you choose.
 • No ads. No third-party analytics or tracking SDKs.
 
-FREE, AND FAIR
-The free plan is generous forever — no ads, and none of the core habit-tracking features are locked behind a paywall. Optional Premium adds delightful extras like cosmetic themes; it is never required to build real habits.
+FREE DURING THE BETA
+Levellio is completely free during the open beta — no ads, and none of the core habit-tracking features are behind a paywall. We may add optional extras in a future update, but we'll never charge you without asking first.
 
 Real life, leveled up. Start your first quest today.
 
@@ -45,13 +45,13 @@ Real life, leveled up. Start your first quest today.
 - Create unlimited custom quests, no AI needed
 - Private, on-device suggestions — or bring your own AI key
 - No ads, no tracking — local-first by design
-- Generous free plan; optional cosmetic Premium
+- Completely free during the open beta
 
 ---
 
 ## Also configure in Play Console
 
 - **Category:** Health & Fitness _(suggested — confirm)_
-- **Privacy Policy URL:** host `store/legal/privacy-policy.html` and paste the URL _(required)_
+- **Privacy Policy URL:** [HOSTED-PRIVACY-POLICY-URL] _(required — host `store/legal/privacy-policy.html`)_
 - **Data safety form:** see `store/listing/data-disclosure.md`
 - **Content rating (IARC):** complete the questionnaire

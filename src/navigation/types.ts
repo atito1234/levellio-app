@@ -1,5 +1,6 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { QuestReward } from '@/types';
+import type { LegalDocKey } from '@/content/aboutInfo';
 
 /** Main app tabs (shown after onboarding). */
 export type MainTabParamList = {
@@ -17,6 +18,8 @@ export type RootStackParamList = {
   QuestEditor: { questId?: string } | undefined;
   HabitLibrary: undefined;
   Paywall: undefined;
+  /** In-app legal viewer: Privacy Policy or Terms of Service. */
+  Legal: { doc: LegalDocKey };
 };
 
 declare global {
