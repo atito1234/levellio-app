@@ -42,12 +42,14 @@ export function PrimaryButton({
         : variant === 'primary'
           ? colors.identity
           : 'transparent';
-  // Gold needs dark text for contrast; ghost uses brand violet.
-  const textColor = isGhost
-    ? colors.identity
-    : variant === 'reward'
+  // Bright teal/gold fills need dark text for WCAG AA; violet takes white;
+  // ghost uses brand violet on a light surface.
+  const textColor =
+    variant === 'action' || variant === 'reward'
       ? colors.textPrimary
-      : colors.textOnBrand;
+      : isGhost
+        ? colors.identity
+        : colors.textOnBrand;
 
   return (
     <Pressable

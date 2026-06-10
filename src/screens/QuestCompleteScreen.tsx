@@ -158,13 +158,13 @@ const styles = StyleSheet.create({
   },
   heading: {
     ...typography.heading,
-    color: colors.completion,
+    color: colors.tealDeep,
     marginBottom: spacing.lg,
   },
   kicker: {
     ...typography.label,
     letterSpacing: 2,
-    color: colors.completion,
+    color: colors.tealDeep,
   },
   xpBlock: {
     flexDirection: 'row',
@@ -174,7 +174,8 @@ const styles = StyleSheet.create({
   xpValue: {
     fontSize: 72,
     fontWeight: '800',
-    color: colors.reward,
+    // goldDeep ink keeps the gold "reward" identity while meeting AA on light.
+    color: colors.goldDeep,
     lineHeight: 76,
   },
   xpUnit: {
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     ...typography.label,
-    color: colors.identity,
+    color: colors.violetDeep,
   },
   track: {
     width: '100%',

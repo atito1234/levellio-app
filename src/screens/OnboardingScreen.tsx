@@ -121,7 +121,7 @@ export function OnboardingScreen({ navigation }: Props) {
             >
               <Text style={styles.heroGlyph}>{['✦', '⚔', '✺'][step] ?? '✦'}</Text>
             </View>
-            <Text style={[styles.badge, { color: slide.accent }]}>{slide.badge}</Text>
+            <Text style={styles.badge}>{slide.badge}</Text>
             <Text style={styles.title}>{slide.title}</Text>
             <Text style={styles.subtitle}>{slide.body}</Text>
           </View>
@@ -211,7 +211,8 @@ const styles = StyleSheet.create({
   badge: {
     ...typography.label,
     letterSpacing: 1.5,
-    color: colors.identity,
+    // violetDeep ink for AA contrast on the light surface.
+    color: colors.violetDeep,
   },
   title: {
     ...typography.heading,

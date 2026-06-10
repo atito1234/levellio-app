@@ -115,7 +115,8 @@ const styles = StyleSheet.create({
   },
   completeText: {
     ...typography.label,
-    color: colors.textOnBrand,
+    // Dark text on bright teal meets WCAG AA.
+    color: colors.textPrimary,
   },
   doneBadge: {
     width: 36,

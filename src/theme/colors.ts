@@ -27,13 +27,15 @@ const violetScale = {
 const tealScale = {
   tealSoft: '#D6F7EF',
   teal: brand.teal,
-  tealDeep: '#0E9A80',
+  // `*Deep` are text-grade inks: dark enough for WCAG AA (>=4.5:1) on light and
+  // soft surfaces. The bright brand hues are reserved for fills/accents.
+  tealDeep: '#0A6E5C',
 } as const;
 
 const goldScale = {
   goldSoft: '#FFEBCC',
   gold: brand.gold,
-  goldDeep: '#D98A1A',
+  goldDeep: '#8A5A0A',
 } as const;
 
 /** Neutral light surfaces + text ramp. */
@@ -44,7 +46,8 @@ const neutral = {
   border: '#E3E3EC',
   textPrimary: '#1B1B2A',
   textSecondary: '#5A5A72',
-  textMuted: '#9A9AB0',
+  // Darkened from #9A9AB0 to meet WCAG AA on white surfaces.
+  textMuted: '#6B6B80',
   textOnBrand: '#FFFFFF',
 } as const;
 
