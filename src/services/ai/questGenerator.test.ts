@@ -13,8 +13,8 @@ function fakeEngine(suggest: AIEngine['suggestQuests']): AIEngine {
 }
 
 const AI_RESULT: SuggestedQuest[] = [
-  { title: 'Meditate 5 minutes', category: 'habit', difficulty: 'easy' },
-  { title: 'Run 2km', category: 'workout', difficulty: 'medium' },
+  { title: 'Meditate 5 minutes', category: 'mind', difficulty: 'easy' },
+  { title: 'Run 2km', category: 'fitness', difficulty: 'medium' },
 ];
 
 describe('generateQuests resilience', () => {
@@ -65,17 +65,17 @@ describe('generateQuests resilience', () => {
     const engine = fakeEngine(async () => {
       throw new AIUnavailableError();
     });
-    const result = await generateQuests(engine, { goal: 'lift', category: 'workout' });
-    expect(result.quests.every((q) => q.category === 'workout')).toBe(true);
+    const result = await generateQuests(engine, { goal: 'lift', category: 'fitness' });
+    expect(result.quests.every((q) => q.category === 'fitness')).toBe(true);
   });
 });
 
 describe('suggestedToQuest', () => {
   it('maps base XP from difficulty', () => {
-    expect(suggestedToQuest({ title: 'X', category: 'goal', difficulty: 'hard' }, 'id1')).toEqual({
+    expect(suggestedToQuest({ title: 'X', category: 'productivity', difficulty: 'hard' }, 'id1')).toEqual({
       id: 'id1',
       title: 'X',
-      category: 'goal',
+      category: 'productivity',
       difficulty: 'hard',
       baseXp: 70,
       completed: false,

@@ -47,7 +47,7 @@ describe('PersistentBackend', () => {
     };
     await backend.saveCharacter(LOCAL_UID, character);
     await backend.saveQuests(LOCAL_UID, [
-      { id: 'a', title: 'Read', category: 'habit', difficulty: 'easy', baseXp: 20, completed: true },
+      { id: 'a', title: 'Read', category: 'health', difficulty: 'easy', baseXp: 20, completed: true },
     ]);
 
     expect(await backend.loadCharacter(LOCAL_UID)).toEqual(character);

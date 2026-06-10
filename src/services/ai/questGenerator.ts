@@ -10,9 +10,9 @@ import type { Quest } from '@/types';
 
 /** Deterministic, offline-safe quests used when the AI is unavailable. */
 export const FALLBACK_QUESTS: readonly SuggestedQuest[] = [
-  { title: 'Drink a glass of water', category: 'habit', difficulty: 'easy' },
-  { title: 'Take a 15-minute walk', category: 'workout', difficulty: 'medium' },
-  { title: 'Spend 25 focused minutes on your top goal', category: 'goal', difficulty: 'hard' },
+  { title: 'Drink a glass of water', category: 'health', difficulty: 'easy' },
+  { title: 'Take a 15-minute walk', category: 'fitness', difficulty: 'medium' },
+  { title: 'Spend 25 focused minutes on your top goal', category: 'productivity', difficulty: 'hard' },
 ];
 
 export type QuestSource = 'ai' | 'fallback';

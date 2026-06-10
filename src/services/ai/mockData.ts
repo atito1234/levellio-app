@@ -6,7 +6,7 @@ import type { SuggestedQuest } from './AIEngine';
 import type { QuestSuggestionInput } from './AIEngine';
 
 export function mockSuggestQuests(input: QuestSuggestionInput): SuggestedQuest[] {
-  const category = input.category ?? 'habit';
+  const category = input.category ?? 'productivity';
   const goal = input.goal.trim() || 'feel a little better today';
   const pool: SuggestedQuest[] = [
     { title: `Take one small step toward "${goal}"`, category, difficulty: 'easy' },

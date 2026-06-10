@@ -5,11 +5,22 @@
 
 export type QuestDifficulty = 'easy' | 'medium' | 'hard';
 
-export type QuestCategory = 'habit' | 'workout' | 'goal';
+/** Curated quest categories spanning the areas of a balanced life. */
+export type QuestCategory =
+  | 'fitness'
+  | 'mind'
+  | 'learning'
+  | 'health'
+  | 'productivity'
+  | 'relationships'
+  | 'creativity'
+  | 'finance';
 
 export interface Quest {
   id: string;
   title: string;
+  /** Optional, user-authored note about the quest. */
+  description?: string;
   category: QuestCategory;
   difficulty: QuestDifficulty;
   /** Base XP awarded before any streak bonus. */
