@@ -5,7 +5,7 @@ import { ScreenContainer, PrimaryButton } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
 import type { RootStackParamList } from '@/navigation/types';
 import type { HeroPresentation } from '@/types';
-import { backend } from '@/services/backend';
+import { useGame } from '@/state/GameContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
@@ -48,6 +48,7 @@ const PRESENTATIONS: { id: HeroPresentation; label: string }[] = [
  * On finish, signs in (mock backend), persists the choice, and enters the app.
  */
 export function OnboardingScreen({ navigation }: Props) {
+  const { startGame } = useGame();
   const [step, setStep] = useState(0);
   const [presentation, setPresentation] = useState<HeroPresentation>('neutral');
   const [busy, setBusy] = useState(false);
@@ -62,11 +63,7 @@ export function OnboardingScreen({ navigation }: Props) {
   const handleBegin = async () => {
     try {
       setBusy(true);
-      const user = await backend.signInAnonymously();
-      const character = await backend.loadCharacter(user.uid);
-      if (character) {
-        await backend.saveCharacter(user.uid, { ...character, presentation });
-      }
+      await startGame(presentation);
       navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } finally {
       setBusy(false);
