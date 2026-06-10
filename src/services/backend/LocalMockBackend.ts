@@ -1,35 +1,10 @@
 /**
- * In-memory mock backend. Stands in for Firebase during development.
- * State lives only for the session; swap for a real provider later.
- * TODO(day5+): replace with FirebaseBackend + persist to AsyncStorage/Firestore.
+ * In-memory mock backend. Useful for tests and as a no-persistence fallback.
+ * State lives only for the session. The PersistentBackend is used in the app.
  */
 import type { Character, Quest } from '@/types';
 import type { AuthUser, BackendService } from './BackendService';
-
-const MOCK_UID = 'local-hero';
-
-function seedCharacter(uid: string): Character {
-  return {
-    id: uid,
-    name: 'Hero',
-    presentation: 'neutral',
-    level: 1,
-    xp: 0,
-    // Demo default so the streak bonus is visible without a daily-streak engine.
-    // TODO(day7+): drive this from real completion-date tracking.
-    streakDays: 3,
-    tier: 'novice',
-    companionStage: 'spark',
-  };
-}
-
-function seedQuests(): Quest[] {
-  return [
-    { id: 'q1', title: 'Drink a glass of water', category: 'habit', difficulty: 'easy', baseXp: 20, completed: false },
-    { id: 'q2', title: '20-minute workout', category: 'workout', difficulty: 'medium', baseXp: 40, completed: false },
-    { id: 'q3', title: 'Deep-work session on your goal', category: 'goal', difficulty: 'hard', baseXp: 70, completed: false },
-  ];
-}
+import { LOCAL_UID, seedCharacter, seedQuests } from './seed';
 
 export class LocalMockBackend implements BackendService {
   private user: AuthUser | null = null;
@@ -41,10 +16,10 @@ export class LocalMockBackend implements BackendService {
   }
 
   async signInAnonymously(): Promise<AuthUser> {
-    this.user = { uid: MOCK_UID, isAnonymous: true };
-    if (!this.characters.has(MOCK_UID)) {
-      this.characters.set(MOCK_UID, seedCharacter(MOCK_UID));
-      this.quests.set(MOCK_UID, seedQuests());
+    this.user = { uid: LOCAL_UID, isAnonymous: true };
+    if (!this.characters.has(LOCAL_UID)) {
+      this.characters.set(LOCAL_UID, seedCharacter(LOCAL_UID));
+      this.quests.set(LOCAL_UID, seedQuests());
     }
     return this.user;
   }
