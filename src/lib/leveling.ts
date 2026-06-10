@@ -48,18 +48,45 @@ export function levelProgress(character: Pick<Character, 'level' | 'xp'>): numbe
   return Math.min(character.xp / needed, 1);
 }
 
+/** Hero tier order, lowest to highest. */
+export const TIER_ORDER: readonly HeroTier[] = ['novice', 'pathfinder', 'luminary'];
+
+/** Level at which each hero tier begins. */
+export const TIER_START_LEVEL: Record<HeroTier, number> = {
+  novice: 1,
+  pathfinder: 8,
+  luminary: 20,
+};
+
 /** Hero tier derived from level. */
 export function tierForLevel(level: number): HeroTier {
-  if (level >= 20) return 'luminary';
-  if (level >= 8) return 'pathfinder';
+  if (level >= TIER_START_LEVEL.luminary) return 'luminary';
+  if (level >= TIER_START_LEVEL.pathfinder) return 'pathfinder';
   return 'novice';
 }
 
 /** Companion stage derived from level (mirrors hero tiers). */
 export function companionStageForLevel(level: number): CompanionStage {
-  if (level >= 20) return 'phoenixling';
-  if (level >= 8) return 'ember';
+  if (level >= TIER_START_LEVEL.luminary) return 'phoenixling';
+  if (level >= TIER_START_LEVEL.pathfinder) return 'ember';
   return 'spark';
+}
+
+/** Levels remaining until the next tier, or null if already at the top tier. */
+export function levelsToNextTier(level: number): number | null {
+  const tier = tierForLevel(level);
+  if (tier === 'novice') return TIER_START_LEVEL.pathfinder - level;
+  if (tier === 'pathfinder') return TIER_START_LEVEL.luminary - level;
+  return null;
+}
+
+/** Lifetime XP earned across all levels (for "total XP" displays). */
+export function lifetimeXp(character: Pick<Character, 'level' | 'xp'>): number {
+  let total = character.xp;
+  for (let l = 1; l < character.level; l += 1) {
+    total += xpForNextLevel(l);
+  }
+  return total;
 }
 
 /**
