@@ -9,12 +9,9 @@
  * come from runtime env / secure config — NO real secrets in the repo.
  */
 import type { Character, Quest } from '@/types';
+import type { AuthUser } from '@/services/auth/AuthService';
 
-export interface AuthUser {
-  uid: string;
-  isAnonymous: boolean;
-  displayName?: string;
-}
+export type { AuthUser };
 
 export interface BackendService {
   // --- Auth ---
