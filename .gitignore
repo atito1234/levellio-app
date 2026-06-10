@@ -141,3 +141,26 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Expo
+.expo/
+.expo-shared/
+web-build/
+expo-env.d.ts
+*.orig.*
+
+# Native build artifacts
+/ios
+/android
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# macOS
+.DS_Store
+
+# Local secrets / runtime config (never commit real keys)
+google-services.json
+GoogleService-Info.plist
