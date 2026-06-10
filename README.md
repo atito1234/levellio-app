@@ -120,8 +120,11 @@ labeled demo toggle. Prices/conversion are a deliberate v2 pass.
 - ✅ 144 unit tests (incl. SVG render tests + reduced-motion fallback); WCAG AA
   verified numerically.
 
-> Art is drawn in-code as SVG (no bundled binaries, no secrets). The app icon is
-> not yet wired (needs a raster export); `app.json` still uses the default.
+> Art is **faithful in-app recreations** of the concept art, drawn in-code as
+> flat geometric SVG (filled shapes, same-hue depth shading, soft drop shadows;
+> locked palette). They are intentionally not pixel-identical to the canonical
+> PNG/HTML exports (kept in Google Drive). No bundled binaries, no secrets. The
+> app icon is not yet wired (needs a raster export); `app.json` uses the default.
 
 ### Testing
 
