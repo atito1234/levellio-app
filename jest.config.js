@@ -10,6 +10,7 @@ module.exports = {
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts'],
   moduleNameMapper: {
+    '^expo-secure-store$': '<rootDir>/jest/mocks/expo-secure-store.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
 };
