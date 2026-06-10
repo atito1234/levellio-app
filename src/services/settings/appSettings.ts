@@ -10,10 +10,19 @@ export type CloudProvider = 'gemini' | 'openai' | 'anthropic';
 export interface AppSettings {
   aiMode: AIMode;
   provider: CloudProvider;
+  /** Premium entitlement flag. No real billing — default false. */
+  isPremium: boolean;
+  /** Selected cosmetic theme id (premium-gated to change). */
+  cosmeticThemeId: string;
 }
 
-/** Privacy-first default: on-device, no key required. */
-export const DEFAULT_SETTINGS: AppSettings = { aiMode: 'on-device', provider: 'gemini' };
+/** Privacy-first, free-by-default settings. */
+export const DEFAULT_SETTINGS: AppSettings = {
+  aiMode: 'on-device',
+  provider: 'gemini',
+  isPremium: false,
+  cosmeticThemeId: 'classic',
+};
 
 const SETTINGS_KEY = 'levellio:settings';
 
@@ -23,7 +32,13 @@ export function normalizeSettings(raw: unknown): AppSettings {
   const aiMode: AIMode = r.aiMode === 'cloud' ? 'cloud' : 'on-device';
   const provider: CloudProvider =
     r.provider === 'openai' || r.provider === 'anthropic' ? r.provider : 'gemini';
-  return { aiMode, provider };
+  return {
+    aiMode,
+    provider,
+    isPremium: r.isPremium === true,
+    cosmeticThemeId:
+      typeof r.cosmeticThemeId === 'string' ? r.cosmeticThemeId : DEFAULT_SETTINGS.cosmeticThemeId,
+  };
 }
 
 export class SettingsStore {

@@ -12,7 +12,10 @@ export interface EngineDeps {
   getApiKey: () => Promise<string | null>;
 }
 
-export function buildEngine(settings: AppSettings, deps: EngineDeps): AIEngine {
+/** Only the AI-related settings are needed to pick an engine. */
+type EngineSettings = Pick<AppSettings, 'aiMode' | 'provider'>;
+
+export function buildEngine(settings: EngineSettings, deps: EngineDeps): AIEngine {
   if (settings.aiMode === 'on-device') {
     return new OnDeviceAdapter();
   }

@@ -11,7 +11,14 @@ describe('normalizeSettings', () => {
     expect(normalizeSettings({ aiMode: 'cloud', provider: 'anthropic' })).toEqual({
       aiMode: 'cloud',
       provider: 'anthropic',
+      isPremium: false,
+      cosmeticThemeId: 'classic',
     });
+  });
+
+  it('coerces the premium flag to a strict boolean', () => {
+    expect(normalizeSettings({ isPremium: true }).isPremium).toBe(true);
+    expect(normalizeSettings({ isPremium: 'yes' }).isPremium).toBe(false);
   });
 });
 
@@ -23,8 +30,13 @@ describe('SettingsStore', () => {
 
   it('round-trips saved settings', async () => {
     const store = new SettingsStore(new InMemoryStore());
-    await store.save({ aiMode: 'cloud', provider: 'openai' });
-    expect(await store.load()).toEqual({ aiMode: 'cloud', provider: 'openai' });
+    await store.save({ aiMode: 'cloud', provider: 'openai', isPremium: true, cosmeticThemeId: 'emerald' });
+    expect(await store.load()).toEqual({
+      aiMode: 'cloud',
+      provider: 'openai',
+      isPremium: true,
+      cosmeticThemeId: 'emerald',
+    });
   });
 
   it('update merges a partial patch', async () => {
