@@ -117,19 +117,47 @@ labeled demo toggle. Prices/conversion are a deliberate v2 pass.
   payoff, hero + Wisp reveal, XP count-up, progress-bar fill, level-up flourish,
   GPU-driven confetti, and a Share action — with a **reduced-motion** static
   fallback (no confetti, values snap to final).
-- ✅ 144 unit tests (incl. SVG render tests + reduced-motion fallback); WCAG AA
+- ✅ 174 unit tests (incl. SVG render tests + reduced-motion fallback); WCAG AA
   verified numerically.
+
+**Day 9 — store assets (Phase 2):**
+
+- ✅ **Production app icon** + adaptive icon (foreground/background), splash and
+  favicon, generated from a vector mark and **wired into `app.json`** (closes
+  the "app icon not wired" store-review flag).
+- ✅ **Dependency-free** generator (`src/tools/icon`, run via
+  `npm run generate:assets`): from-scratch PNG encoder + anti-aliased rasterizer
+  + SVG writer, all Node built-ins — unit-tested.
+- ✅ **Five framed store screenshots** as self-contained HTML/SVG mockups that
+  render the real recreated art, sized for App Store + Play, with value-prop
+  captions, safe-area framing and AA-safe text (`store/`).
 
 > Art is **faithful in-app recreations** of the concept art, drawn in-code as
 > flat geometric SVG (filled shapes, same-hue depth shading, soft drop shadows;
 > locked palette). They are intentionally not pixel-identical to the canonical
-> PNG/HTML exports (kept in Google Drive). No bundled binaries, no secrets. The
-> app icon is not yet wired (needs a raster export); `app.json` uses the default.
+> PNG/HTML exports (kept in Google Drive). No bundled binaries, no secrets.
+
+### Store assets
+
+The production **app icon, adaptive icon, splash and favicon** are generated
+from a vector mark (level-up double chevron, locked palette) with a
+dependency-free Node renderer — and are **wired into `app.json`**
+(`icon`, `android.adaptiveIcon`, `splash`, `web.favicon`):
+
+```bash
+npm run generate:assets   # → assets/*.png + assets/*.svg (sources)
+```
+
+Renderer core lives in `src/tools/icon` (pure TS, unit-tested: PNG encoder,
+CRC-32, anti-aliased rasterizer, SVG writer). Five **framed store screenshots**
+(device mockups rendering the real recreated art, with value-prop captions)
+live as self-contained HTML/SVG templates in `store/screenshots`, sized for the
+App Store (1290×2796) and Play (1080×1920) — see `store/README.md`.
 
 ### Testing
 
 ```bash
-npm test            # run the unit suite (144 tests)
+npm test            # run the unit suite (174 tests)
 npm run test:watch  # watch mode
 ```
 

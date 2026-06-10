@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "generate:listing": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-listing.ts",
+    "generate:assets": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-assets.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint ."
