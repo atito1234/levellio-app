@@ -72,13 +72,42 @@ This repo is being built incrementally.
   graceful fallback to `FALLBACK_QUESTS`
 - ✅ 120 unit tests; WCAG AA maintained (incl. darker error red)
 
-The app is fully usable with **zero AI**. Settings now also hosts AI prefs and
-hero presentation; the paywall arrives Day 8.
+The app is fully usable with **zero AI**.
+
+**Day 8 — monetization surface + final polish (Phase 1 complete):**
+
+- ✅ Honest **free-vs-premium Paywall** (no dark patterns) driven by a
+  `PLAN_CONFIG` object — **no hardcoded prices** (premium `amount: null`,
+  copy/pricing tunable for v2)
+- ✅ **Entitlement gating** (`isPremium` flag, default false, no real billing):
+  free features never gated; premium gates only managed cloud AI, cosmetics,
+  and cloud sync — with unit tests
+- ✅ **Cosmetic themes** (premium) + **reactive settings** (`SettingsProvider`)
+- ✅ Polished flows: graceful empty/loading states, gated perks, a11y labels,
+  reduced-motion preserved
+- ✅ 136 unit tests; WCAG AA verified numerically
+
+#### Free vs Premium
+
+| Capability | Free | Premium |
+| --- | --- | --- |
+| Manual quest creator | ✅ | ✅ |
+| Full starter habit library | ✅ | ✅ |
+| Streaks & leveling | ✅ | ✅ |
+| On-device AI (private) | ✅ | ✅ |
+| Bring-your-own-key cloud AI | ✅ | ✅ |
+| Managed cloud AI (no key) | — | ✅ |
+| Cosmetic themes & avatars | — | ✅ |
+| Cloud sync & backup | — | ✅ |
+
+The free tier is generous forever. Premium adds optional "delight multipliers"
+only. `isPremium` is a flag with **no real IAP** — the paywall CTA is a clearly
+labeled demo toggle. Prices/conversion are a deliberate v2 pass.
 
 ### Testing
 
 ```bash
-npm test            # run the unit suite (120 tests)
+npm test            # run the unit suite (136 tests)
 npm run test:watch  # watch mode
 ```
 
