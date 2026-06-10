@@ -7,7 +7,9 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#6C4CF1"
     },
@@ -19,11 +21,14 @@
     "android": {
       "package": "app.levellio.placeholder",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon-foreground.png",
+        "backgroundImage": "./assets/adaptive-icon-background.png",
         "backgroundColor": "#6C4CF1"
       }
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
     }
   }
 }
