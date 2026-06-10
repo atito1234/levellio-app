@@ -7,7 +7,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>/src', '<rootDir>/store'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   // The project's tsconfig uses jsx:"preserve" (Babel transforms JSX at build).
   // For tests, have ts-jest compile JSX so react-test-renderer can run.
