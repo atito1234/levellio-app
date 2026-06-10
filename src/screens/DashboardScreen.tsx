@@ -110,19 +110,28 @@ export function DashboardScreen() {
           />
         </View>
 
-        <View style={styles.questList}>
-          {quests.map((quest) => (
-            <QuestCard
-              key={quest.id}
-              quest={quest}
-              streakDays={character.streakDays}
-              onComplete={handleComplete}
-              onEdit={(id) => navigation.navigate('QuestEditor', { questId: id })}
-            />
-          ))}
-        </View>
+        {quests.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No quests yet</Text>
+            <Text style={styles.emptyBody}>
+              Create your own quest or browse the habit library to get started — no AI needed.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.questList}>
+            {quests.map((quest) => (
+              <QuestCard
+                key={quest.id}
+                quest={quest}
+                streakDays={character.streakDays}
+                onComplete={handleComplete}
+                onEdit={(id) => navigation.navigate('QuestEditor', { questId: id })}
+              />
+            ))}
+          </View>
+        )}
 
-        {remaining === 0 && (
+        {quests.length > 0 && remaining === 0 && (
           <Text style={styles.allDone}>All quests complete — see you tomorrow! 🎉</Text>
         )}
 
@@ -191,6 +200,20 @@ const styles = StyleSheet.create({
   },
   questList: {
     gap: spacing.md,
+  },
+  emptyState: {
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.xl,
+  },
+  emptyTitle: {
+    ...typography.title,
+    color: colors.textPrimary,
+  },
+  emptyBody: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
   },
   allDone: {
     ...typography.body,
