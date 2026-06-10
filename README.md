@@ -104,10 +104,32 @@ The free tier is generous forever. Premium adds optional "delight multipliers"
 only. `isPremium` is a flag with **no real IAP** — the paywall CTA is a clearly
 labeled demo toggle. Prices/conversion are a deliberate v2 pass.
 
+**Day 8.5 — art polish (pre-Phase-2):**
+
+- ✅ **Vector hero art** — `HeroAvatar` is now a scalable SVG (`react-native-svg`)
+  with all 3 tiers (Novice / Pathfinder / Luminary) and female/male/neutral
+  variants, per the concept spec (teal hoodie → violet cape → gold laurel).
+- ✅ **Wisp companion** SVG (`Wisp`) across Spark → Ember → Phoenixling.
+- ✅ Wired into the Dashboard avatar, the Character screen (current tier + a
+  3-tier "journey" row + Wisp), and the Onboarding gender-variant picker.
+  Graceful fallback to Novice/Spark for unknown inputs.
+- ✅ **Quest Complete** elevated into the signature shareable moment: full-violet
+  payoff, hero + Wisp reveal, XP count-up, progress-bar fill, level-up flourish,
+  GPU-driven confetti, and a Share action — with a **reduced-motion** static
+  fallback (no confetti, values snap to final).
+- ✅ 144 unit tests (incl. SVG render tests + reduced-motion fallback); WCAG AA
+  verified numerically.
+
+> Art is **faithful in-app recreations** of the concept art, drawn in-code as
+> flat geometric SVG (filled shapes, same-hue depth shading, soft drop shadows;
+> locked palette). They are intentionally not pixel-identical to the canonical
+> PNG/HTML exports (kept in Google Drive). No bundled binaries, no secrets. The
+> app icon is not yet wired (needs a raster export); `app.json` uses the default.
+
 ### Testing
 
 ```bash
-npm test            # run the unit suite (136 tests)
+npm test            # run the unit suite (144 tests)
 npm run test:watch  # watch mode
 ```
 

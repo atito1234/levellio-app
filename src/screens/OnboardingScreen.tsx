@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, PrimaryButton } from '@/components';
+import { ScreenContainer, PrimaryButton, HeroAvatar } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
 import type { RootStackParamList } from '@/navigation/types';
 import type { HeroPresentation } from '@/types';
@@ -102,7 +102,7 @@ export function OnboardingScreen({ navigation }: Props) {
                     style={[styles.option, selected && styles.optionSelected]}
                   >
                     <View style={[styles.avatar, selected && styles.avatarSelected]}>
-                      <Text style={styles.avatarGlyph}>★</Text>
+                      <HeroAvatar presentation={p.id} tier="novice" size={52} />
                     </View>
                     <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>
                       {p.label}

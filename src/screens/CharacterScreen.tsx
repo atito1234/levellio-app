@@ -107,6 +107,28 @@ export function CharacterScreen() {
               : 'Top tier reached — you are a Luminary!'}
           </Text>
         </View>
+
+        {/* Tier journey — all three hero tiers, current one highlighted */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Your Journey</Text>
+          <View style={styles.journeyRow}>
+            {TIER_ORDER.map((t) => {
+              const active = t === character.tier;
+              return (
+                <View
+                  key={t}
+                  style={[styles.journeyItem, active && styles.journeyItemActive]}
+                  accessibilityLabel={`${TIER_LABEL[t]} tier${active ? ', current' : ''}`}
+                >
+                  <HeroAvatar presentation={character.presentation} tier={t} size={72} />
+                  <Text style={[styles.journeyLabel, active && styles.journeyLabelActive]}>
+                    {TIER_LABEL[t]}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
       </ScrollView>
     </ScreenContainer>
   );
@@ -177,5 +199,27 @@ const styles = StyleSheet.create({
   progressText: {
     ...typography.label,
     color: colors.textSecondary,
+  },
+  journeyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  journeyItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: spacing.xs,
+    opacity: 0.55,
+  },
+  journeyItemActive: {
+    opacity: 1,
+  },
+  journeyLabel: {
+    ...typography.caption,
+    color: colors.textSecondary,
+  },
+  journeyLabelActive: {
+    color: colors.violetDeep,
+    fontWeight: '700',
   },
 });
