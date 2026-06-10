@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   HeroAvatar,
+  PrimaryButton,
   QuestCard,
   ScreenContainer,
   StatPill,
@@ -20,8 +21,9 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 /** Day-5 dashboard: hero summary, XP bar, streak, and today's quests. */
 export function DashboardScreen() {
   const navigation = useNavigation<Nav>();
-  const { character, quests, completeQuest, status } = useGame();
+  const { character, quests, completeQuest, suggestQuest, status } = useGame();
   const [motivation, setMotivation] = useState('');
+  const [suggesting, setSuggesting] = useState(false);
 
   useEffect(() => {
     if (!character) return;
@@ -51,6 +53,15 @@ export function DashboardScreen() {
   const handleComplete = async (questId: string) => {
     const reward = await completeQuest(questId);
     if (reward) navigation.navigate('QuestComplete', { reward });
+  };
+
+  const handleSuggest = async () => {
+    try {
+      setSuggesting(true);
+      await suggestQuest('Build a better day');
+    } finally {
+      setSuggesting(false);
+    }
   };
 
   return (
@@ -99,6 +110,13 @@ export function DashboardScreen() {
         {remaining === 0 && (
           <Text style={styles.allDone}>All quests complete — see you tomorrow! 🎉</Text>
         )}
+
+        <PrimaryButton
+          label="✨ Suggest a quest"
+          variant="ghost"
+          onPress={handleSuggest}
+          loading={suggesting}
+        />
       </ScrollView>
     </ScreenContainer>
   );
