@@ -15,7 +15,9 @@ function seedCharacter(uid: string): Character {
     presentation: 'neutral',
     level: 1,
     xp: 0,
-    streakDays: 0,
+    // Demo default so the streak bonus is visible without a daily-streak engine.
+    // TODO(day7+): drive this from real completion-date tracking.
+    streakDays: 3,
     tier: 'novice',
     companionStage: 'spark',
   };
