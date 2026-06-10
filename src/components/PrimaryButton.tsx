@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { colors, radii, spacing, typography } from '@/theme';
 
-type Variant = 'primary' | 'action' | 'ghost';
+type Variant = 'primary' | 'action' | 'reward' | 'ghost';
 
 interface PrimaryButtonProps {
   label: string;
@@ -35,8 +35,19 @@ export function PrimaryButton({
 }: PrimaryButtonProps) {
   const isGhost = variant === 'ghost';
   const bg =
-    variant === 'action' ? colors.action : variant === 'primary' ? colors.identity : 'transparent';
-  const textColor = isGhost ? colors.identity : colors.textOnBrand;
+    variant === 'action'
+      ? colors.action
+      : variant === 'reward'
+        ? colors.reward
+        : variant === 'primary'
+          ? colors.identity
+          : 'transparent';
+  // Gold needs dark text for contrast; ghost uses brand violet.
+  const textColor = isGhost
+    ? colors.identity
+    : variant === 'reward'
+      ? colors.textPrimary
+      : colors.textOnBrand;
 
   return (
     <Pressable
