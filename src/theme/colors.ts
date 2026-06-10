@@ -54,7 +54,8 @@ const neutral = {
 const status = {
   success: brand.teal,
   warning: brand.gold,
-  danger: '#E5484D',
+  // Darkened to meet WCAG AA (6:1 on white) for error text.
+  danger: '#C0202C',
 } as const;
 
 export const colors = {

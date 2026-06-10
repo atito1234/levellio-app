@@ -55,12 +55,30 @@ This repo is being built incrementally.
   and a11y labels intact
 - ✅ 71 unit tests (leveling, dates, streak, engine, persistence, AI)
 
-Settings/Paywall remains a runnable placeholder (Day 8).
+**Day 7 — value without AI, BYO-key, auth/sync scaffolding:**
+
+- ✅ **Manual quest creator** (no AI): create/edit/delete with validation
+  (`QuestEditor` screen + `questForm`/`questCrud` logic)
+- ✅ **Starter habit library** (no AI): 35+ curated habits across 8 categories,
+  one-tap add (`HabitLibrary` screen + structured data)
+- ✅ **Bring-your-own-key** is the primary cloud path — **no developer-funded
+  key**. Settings screen to paste/clear a provider key, stored only in the OS
+  keychain. "Gemini (your own key)" relabel.
+- ✅ **On-device AI** fully wired as the default (no key, no network)
+- ✅ **Firebase auth still stubbed**: `AuthService` + `MockAuthService`;
+  **cloud-sync scaffolding** (`SyncService` + `MockSyncService` + pure
+  `mergeSnapshots`), no real network
+- ✅ Real-shaped **Gemini response parser** (valid key → real quests) with
+  graceful fallback to `FALLBACK_QUESTS`
+- ✅ 120 unit tests; WCAG AA maintained (incl. darker error red)
+
+The app is fully usable with **zero AI**. Settings now also hosts AI prefs and
+hero presentation; the paywall arrives Day 8.
 
 ### Testing
 
 ```bash
-npm test            # run the unit suite (71 tests)
+npm test            # run the unit suite (120 tests)
 npm run test:watch  # watch mode
 ```
 
