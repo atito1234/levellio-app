@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Levellio",
+    "slug": "levellio",
+    "scheme": "levellio",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#6C4CF1"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.levellio.placeholder"
+    },
+    "android": {
+      "package": "app.levellio.placeholder",
+      "adaptiveIcon": {
+        "backgroundColor": "#6C4CF1"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
