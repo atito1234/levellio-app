@@ -1,14 +1,13 @@
 /**
- * On-device engine (privacy mode) — data never leaves the device.
- * TODO(day5+): load a small on-device model / runtime. Until then this returns
- * the same deterministic mock data, fully offline.
+ * On-device engine (privacy mode).
+ *
+ * PRIVACY CONTRACT: this adapter holds NO HttpClient and performs NO network
+ * I/O whatsoever. Suggestions are produced by a deterministic local heuristic,
+ * so user data never leaves the device and the engine works fully offline.
+ * TODO(day7+): swap the heuristic for a bundled on-device model.
  */
-import type {
-  AIEngine,
-  QuestSuggestionInput,
-  SuggestedQuest,
-} from './AIEngine';
-import { mockSuggestQuests, mockMotivate } from './mockData';
+import { mockMotivate, mockSuggestQuests } from './mockData';
+import type { AIEngine, QuestSuggestionInput, SuggestedQuest } from './AIEngine';
 
 export class OnDeviceAdapter implements AIEngine {
   readonly id = 'on-device' as const;
@@ -16,12 +15,10 @@ export class OnDeviceAdapter implements AIEngine {
   readonly isPrivate = true;
 
   async suggestQuests(input: QuestSuggestionInput): Promise<SuggestedQuest[]> {
-    // TODO(day5+): run local inference; nothing leaves the device.
     return mockSuggestQuests(input);
   }
 
   async motivate(context: { streakDays: number; level: number }): Promise<string> {
-    // TODO(day5+): local inference.
     return mockMotivate(context);
   }
 }
