@@ -1,16 +1,11 @@
 # Levellio — Terms of Service
 
-**Effective date: [EFFECTIVE-DATE]**
-
-> **Template notice:** This document is a starting template, not legal advice.
-> The app owner must review it with a qualified professional, fill every
-> `[PLACEHOLDER]`, and confirm it fits the final product and jurisdiction before
-> publishing. See `store/legal/README.md` for the placeholder checklist.
+**Effective date: June 10, 2026**
 
 ## 1. Agreement to these terms
 
 These Terms of Service ("Terms") govern your use of the Levellio mobile app
-("the App") provided by **[APP-OWNER]** ("we", "us"). By downloading or using
+("the App") provided by **Ethix Innova LLC** (principal: Antonio Joel Tito, PhD) ("we", "us"). By downloading or using
 the App, you agree to these Terms. If you do not agree, do not use the App. Your
 use is also subject to the rules of the app store you downloaded from.
 
@@ -65,7 +60,7 @@ help; in an emergency, contact your local emergency services.
 ## 7. Intellectual property
 
 The App, including its design, artwork, characters (such as the hero and Wisp),
-text, and software, is owned by **[APP-OWNER]** or its licensors and is protected
+text, and software, is owned by **Ethix Innova LLC** or its licensors and is protected
 by intellectual-property laws. Except for the license in Section 2, no rights are
 granted to you.
 
@@ -76,6 +71,11 @@ when offered, will be sold through the applicable app store and are subject to
 that store's payment, billing, renewal, and refund terms. Prices and the exact
 contents of any paid plan will be disclosed at the point of purchase. **No paid
 features are sold in this version.**
+
+Our mission: when Levellio introduces paid features in the future, a portion of
+the proceeds will support community health efforts in Fort Liberté, Haiti. This
+is a statement of intent, not a fixed percentage, a charitable solicitation, or
+a promise of any tax-deductible donation.
 
 ## 9. Disclaimer of warranties
 
@@ -89,7 +89,7 @@ you.
 
 ## 10. Limitation of liability
 
-To the maximum extent permitted by law, **[APP-OWNER]** and its suppliers will
+To the maximum extent permitted by law, **Ethix Innova LLC** and its suppliers will
 not be liable for any indirect, incidental, special, consequential, or punitive
 damages, or for any loss of data, profits, or goodwill, arising out of or related
 to your use of (or inability to use) the App, even if advised of the possibility
@@ -100,7 +100,7 @@ do not allow certain limitations, so some of the above may not apply to you.
 
 ## 11. Indemnification
 
-You agree to indemnify and hold harmless **[APP-OWNER]** from any claims, losses,
+You agree to indemnify and hold harmless **Ethix Innova LLC** from any claims, losses,
 liabilities, and expenses (including reasonable legal fees) arising from your
 misuse of the App or your violation of these Terms or applicable law.
 
@@ -113,8 +113,8 @@ termination.
 
 ## 13. Governing law
 
-These Terms are governed by the laws of **[YOUR-JURISDICTION]**, without regard
-to its conflict-of-laws rules. The courts located in **[YOUR-JURISDICTION]** will
+These Terms are governed by the laws of **State of Texas, USA**, without regard
+to its conflict-of-laws rules. The courts located in **State of Texas, USA** will
 have jurisdiction, except where applicable law grants you the right to bring
 proceedings in your local courts.
 
@@ -126,4 +126,4 @@ Continued use after changes take effect constitutes acceptance.
 
 ## 15. Contact
 
-Questions about these Terms? Contact **[APP-OWNER]** at **[YOUR-CONTACT-EMAIL]**.
+Questions about these Terms? Contact **Ethix Innova LLC** at **doctortitoconsulting@gmail.com**.

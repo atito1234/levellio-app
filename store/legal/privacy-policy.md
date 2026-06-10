@@ -1,16 +1,11 @@
 # Levellio — Privacy Policy
 
-**Effective date: [EFFECTIVE-DATE]**
-
-> **Template notice:** This document is a starting template, not legal advice.
-> The app owner must review it, fill every `[PLACEHOLDER]`, and confirm it
-> matches the app's behavior at submission before publishing. See
-> `store/legal/README.md` for the placeholder checklist.
+**Effective date: June 10, 2026**
 
 ## The short version
 
 Levellio is **local-first**. Your habits, quests, and progress are stored **on
-your device**. We (**[APP-OWNER]**) do **not** operate a server that collects
+your device**. We (**Ethix Innova LLC**) do **not** operate a server that collects
 your personal data, we do **not** require an account, and we do **not** use
 advertising or third-party analytics SDKs. If you choose to use a cloud AI
 model, you bring your own API key — it stays in your device's secure keychain
@@ -21,7 +16,7 @@ and is sent only to the AI provider you pick.
 ## 1. Who this policy covers
 
 This policy applies to the Levellio mobile app ("the App") published by
-**[APP-OWNER]** ("we", "us"). It explains what information the App handles and
+**Ethix Innova LLC** (principal: Antonio Joel Tito, PhD) ("we", "us"). It explains what information the App handles and
 how. It does not cover third-party services you separately choose to use (such
 as an AI provider whose API key you supply, or the app store you downloaded
 from), which are governed by their own policies.
@@ -126,4 +121,4 @@ date and, where appropriate, an in-app or store notice.
 
 ## 11. Contact
 
-Questions about this policy? Contact **[APP-OWNER]** at **[YOUR-CONTACT-EMAIL]**.
+Questions about this policy? Contact **Ethix Innova LLC** at **doctortitoconsulting@gmail.com**.
