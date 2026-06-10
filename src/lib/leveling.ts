@@ -90,8 +90,33 @@ export function lifetimeXp(character: Pick<Character, 'level' | 'xp'>): number {
 }
 
 /**
- * Apply a completed quest to a character. Returns the next character state and
- * a reward summary describing the celebration to show. Pure — no mutation.
+ * Add XP to a (level, xp) pair, rolling over as many levels as the XP allows.
+ * Pure helper shared by the quest-completion paths.
+ */
+export function addXp(
+  level: number,
+  xp: number,
+  gainedXp: number,
+): { level: number; xp: number; leveledUp: boolean } {
+  let nextLevel = level;
+  let nextXp = xp + gainedXp;
+  let leveledUp = false;
+
+  while (nextXp >= xpForNextLevel(nextLevel)) {
+    nextXp -= xpForNextLevel(nextLevel);
+    nextLevel += 1;
+    leveledUp = true;
+  }
+
+  return { level: nextLevel, xp: nextXp, leveledUp };
+}
+
+/**
+ * Apply a completed quest to a character using the character's current streak.
+ * Returns the next character state and a reward summary. Pure — no mutation.
+ *
+ * NOTE: This does not advance the streak. Date-based streak progression lives
+ * in the game engine (`src/lib/gameEngine.ts`); use that for real completions.
  */
 export function applyQuestCompletion(
   character: Character,
@@ -100,17 +125,7 @@ export function applyQuestCompletion(
 ): { character: Character; reward: QuestReward } {
   const totalXp = awardedXp(baseXp, character.streakDays);
   const bonusXp = totalXp - baseXp;
-
-  let level = character.level;
-  let xp = character.xp + totalXp;
-  let leveledUp = false;
-
-  // Roll over as many levels as the XP allows.
-  while (xp >= xpForNextLevel(level)) {
-    xp -= xpForNextLevel(level);
-    level += 1;
-    leveledUp = true;
-  }
+  const { level, xp, leveledUp } = addXp(character.level, character.xp, totalXp);
 
   const next: Character = {
     ...character,
@@ -122,6 +137,14 @@ export function applyQuestCompletion(
 
   return {
     character: next,
-    reward: { questId, baseXp, bonusXp, totalXp, leveledUp, newLevel: level },
+    reward: {
+      questId,
+      baseXp,
+      bonusXp,
+      totalXp,
+      leveledUp,
+      newLevel: level,
+      streakDays: character.streakDays,
+    },
   };
 }

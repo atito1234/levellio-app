@@ -35,6 +35,8 @@ export interface Character {
   xp: number;
   /** Consecutive days the user has completed at least one quest. */
   streakDays: number;
+  /** Local calendar day (YYYY-MM-DD) of the last completion; drives streaks. */
+  lastCompletionDate?: string;
   tier: HeroTier;
   companionStage: CompanionStage;
 }
@@ -47,4 +49,6 @@ export interface QuestReward {
   totalXp: number;
   leveledUp: boolean;
   newLevel: number;
+  /** Streak (in days) in effect for this completion. */
+  streakDays: number;
 }
