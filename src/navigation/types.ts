@@ -20,6 +20,8 @@ export type RootStackParamList = {
   Paywall: undefined;
   /** In-app legal viewer: Privacy Policy or Terms of Service. */
   Legal: { doc: LegalDocKey };
+  /** World Cup nation kit picker. */
+  KitSelect: undefined;
 };
 
 declare global {

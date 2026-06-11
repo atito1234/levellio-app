@@ -1,14 +1,19 @@
 import React from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   CompanionAvatar,
   HeroAvatar,
+  PrimaryButton,
   ProgressBar,
   ScreenContainer,
   StatPill,
 } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { getKit } from '@/data/worldCupKits';
+import type { RootStackParamList } from '@/navigation/types';
 import {
   TIER_ORDER,
   TIER_START_LEVEL,
@@ -33,6 +38,7 @@ const COMPANION_LABEL: Record<CompanionStage, string> = {
 /** Day-5 character screen: hero variant, Wisp companion, and tier progression. */
 export function CharacterScreen() {
   const { character } = useGame();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   if (!character) {
     return (
@@ -59,11 +65,29 @@ export function CharacterScreen() {
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.heroBlock}>
-          <HeroAvatar presentation={character.presentation} tier={character.tier} size={180} />
+          <HeroAvatar
+            presentation={character.presentation}
+            tier={character.tier}
+            kitId={character.kitId}
+            size={180}
+          />
           <Text style={styles.name}>{character.name}</Text>
           <View style={styles.tierChip}>
             <Text style={styles.tierChipText}>{TIER_LABEL[character.tier]}</Text>
           </View>
+        </View>
+
+        {/* Kit customization */}
+        <View style={styles.card}>
+          <View style={styles.kitHead}>
+            <Text style={styles.cardTitle}>Kit</Text>
+            <Text style={styles.kitCurrent}>{getKit(character.kitId)?.nationName ?? 'Classic'}</Text>
+          </View>
+          <PrimaryButton
+            label="Change kit"
+            variant="action"
+            onPress={() => navigation.navigate('KitSelect')}
+          />
         </View>
 
         <View style={styles.stats}>
@@ -120,7 +144,12 @@ export function CharacterScreen() {
                   style={[styles.journeyItem, active && styles.journeyItemActive]}
                   accessibilityLabel={`${TIER_LABEL[t]} tier${active ? ', current' : ''}`}
                 >
-                  <HeroAvatar presentation={character.presentation} tier={t} size={72} />
+                  <HeroAvatar
+                    presentation={character.presentation}
+                    tier={t}
+                    kitId={character.kitId}
+                    size={72}
+                  />
                   <Text style={[styles.journeyLabel, active && styles.journeyLabelActive]}>
                     {TIER_LABEL[t]}
                   </Text>
@@ -178,6 +207,15 @@ const styles = StyleSheet.create({
   cardTitle: {
     ...typography.title,
     color: colors.textPrimary,
+  },
+  kitHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  kitCurrent: {
+    ...typography.label,
+    color: colors.violetDeep,
   },
   companionRow: {
     flexDirection: 'row',

@@ -107,7 +107,12 @@ export function QuestCompleteScreen({ route, navigation }: Props) {
         {/* Hero + companion payoff */}
         <Animated.View style={[styles.heroWrap, { transform: [{ scale: heroScale }] }]}>
           <View style={styles.glow} />
-          <HeroAvatar presentation={character.presentation} tier={character.tier} size={150} />
+          <HeroAvatar
+            presentation={character.presentation}
+            tier={character.tier}
+            kitId={character.kitId}
+            size={150}
+          />
           <View style={styles.companion}>
             <CompanionAvatar stage={character.companionStage} size={56} />
           </View>
