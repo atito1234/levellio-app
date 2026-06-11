@@ -118,5 +118,11 @@ describe('migrations', () => {
     expect(quests[0]?.difficulty).toBe('easy');
     expect(quests[0]?.baseXp).toBe(20);
     expect(quests[0]?.completed).toBe(false);
+    expect(quests[0]?.lastCompletedDate).toBeUndefined();
+  });
+
+  it('migrateQuests preserves a valid lastCompletedDate (daily reset)', () => {
+    const quests = migrateQuests([{ title: 'X', completed: true, lastCompletedDate: '2026-06-11' }]);
+    expect(quests[0]?.lastCompletedDate).toBe('2026-06-11');
   });
 });

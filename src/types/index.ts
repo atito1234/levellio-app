@@ -26,6 +26,8 @@ export interface Quest {
   /** Base XP awarded before any streak bonus. */
   baseXp: number;
   completed: boolean;
+  /** Local day (YYYY-MM-DD) this habit was last completed; drives daily reset. */
+  lastCompletedDate?: string;
 }
 
 /** Hero progression tiers. */

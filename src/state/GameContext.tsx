@@ -5,7 +5,11 @@ import React, {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from 'react';
+import { AppState } from 'react-native';
+import { dayKey } from '@/lib/dates';
+import { rolloverQuests } from '@/lib/habitDay';
 import type { AuthUser } from '@/services/backend';
 import { backend } from '@/services/backend';
 import { completeQuest as engineCompleteQuest } from '@/lib/gameEngine';
@@ -106,11 +110,33 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         backend.loadCharacter(user.uid),
         backend.loadQuests(user.uid),
       ]);
-      if (active) dispatch({ type: 'ready', payload: { user, character, quests } });
+      // Daily reset: yesterday's completions re-open for today.
+      const rolled = rolloverQuests(quests, dayKey(new Date()));
+      if (rolled.changed) await backend.saveQuests(user.uid, rolled.quests);
+      if (active) dispatch({ type: 'ready', payload: { user, character, quests: rolled.quests } });
     })();
     return () => {
       active = false;
     };
+  }, []);
+
+  // Keep a live ref to state for the foreground listener (no re-subscribe churn).
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  // When the app returns to the foreground, roll over to the new day if needed.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next !== 'active') return;
+      const s = stateRef.current;
+      if (!s.user || !s.character) return;
+      const rolled = rolloverQuests(s.quests, dayKey(new Date()));
+      if (rolled.changed) {
+        dispatch({ type: 'update', payload: { character: s.character, quests: rolled.quests } });
+        void backend.saveQuests(s.user.uid, rolled.quests);
+      }
+    });
+    return () => sub.remove();
   }, []);
 
   const startGame = useCallback(async (presentation: HeroPresentation) => {
@@ -120,7 +146,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const character = existing ? { ...existing, presentation } : null;
     if (character) await backend.saveCharacter(user.uid, character);
     const quests = await backend.loadQuests(user.uid);
-    dispatch({ type: 'ready', payload: { user, character, quests } });
+    const rolled = rolloverQuests(quests, dayKey(new Date()));
+    if (rolled.changed) await backend.saveQuests(user.uid, rolled.quests);
+    dispatch({ type: 'ready', payload: { user, character, quests: rolled.quests } });
   }, []);
 
   const completeQuest = useCallback(
@@ -137,7 +165,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         new Date(),
       );
       const nextQuests = state.quests.map((q) =>
-        q.id === questId ? { ...q, completed: true } : q,
+        q.id === questId ? { ...q, completed: true, lastCompletedDate: dayKey(new Date()) } : q,
       );
 
       dispatch({ type: 'update', payload: { character: nextCharacter, quests: nextQuests } });
