@@ -42,8 +42,8 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
  */
 export function DashboardScreen() {
   const navigation = useNavigation<Nav>();
-  const { character, quests, completeQuest, suggestQuest, status } = useGame();
-  const { recordContribution, buckets, assignments } = useBuckets();
+  const { character, quests, suggestQuest, status } = useGame();
+  const { buckets, assignments } = useBuckets();
   const reduced = useReducedMotion();
   const [motivation, setMotivation] = useState('');
   const [suggesting, setSuggesting] = useState(false);
@@ -74,16 +74,11 @@ export function DashboardScreen() {
     Animated.timing(fill, { toValue: to, duration: 800, easing: Easing.inOut(Easing.cubic), useNativeDriver: false }).start();
   }, [progress.pct, reduced, fill]);
 
-  const handleComplete = useCallback(
-    async (questId: string) => {
-      const quest = quests.find((q) => q.id === questId);
-      const reward = await completeQuest(questId);
-      if (reward) {
-        await recordContribution({ id: questId, category: quest?.category, difficulty: quest?.difficulty, xp: reward.totalXp });
-        navigation.navigate('QuestComplete', { reward });
-      }
-    },
-    [quests, completeQuest, recordContribution, navigation],
+  // Completion now flows through the Ripple habit-detail (one unified moment),
+  // so tapping a habit opens its ring rather than silently checking a box.
+  const openHabit = useCallback(
+    (questId: string) => navigation.navigate('Ripple', { questId }),
+    [navigation],
   );
 
   const handleSuggest = useCallback(async () => {
@@ -178,7 +173,7 @@ export function DashboardScreen() {
               </Text>
               {/* Fitts: large, full-width, thumb-reachable primary action. */}
               <Pressable
-                onPress={() => handleComplete(focus.id)}
+                onPress={() => openHabit(focus.id)}
                 accessibilityRole="button"
                 accessibilityLabel={`Do it now: ${focus.title}`}
                 style={styles.primaryBtn}
@@ -219,7 +214,7 @@ export function DashboardScreen() {
             key={rail.id}
             rail={rail}
             buckets={buckets}
-            onComplete={handleComplete}
+            onOpen={openHabit}
             onEdit={(id) => navigation.navigate('QuestEditor', { questId: id })}
           />
         ))}
@@ -241,12 +236,12 @@ function QuickChip({ label, onPress }: { label: string; onPress: () => void }) {
 function Rail({
   rail,
   buckets,
-  onComplete,
+  onOpen,
   onEdit,
 }: {
   rail: HabitRail;
   buckets: ReturnType<typeof useBuckets>['buckets'];
-  onComplete: (id: string) => void;
+  onOpen: (id: string) => void;
   onEdit: (id: string) => void;
 }) {
   const open = rail.habits.filter((h) => !h.completed).length;
@@ -270,7 +265,7 @@ function Rail({
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.railScroll}>
         {rail.habits.map((h) => (
-          <HabitCard key={h.id} quest={h} onComplete={onComplete} onEdit={onEdit} />
+          <HabitCard key={h.id} quest={h} onOpen={onOpen} onEdit={onEdit} />
         ))}
       </ScrollView>
     </View>
@@ -279,23 +274,23 @@ function Rail({
 
 function HabitCard({
   quest,
-  onComplete,
+  onOpen,
   onEdit,
 }: {
   quest: Quest;
-  onComplete: (id: string) => void;
+  onOpen: (id: string) => void;
   onEdit: (id: string) => void;
 }) {
   const done = quest.completed;
   // Honest: a binary habit is 0% (open ring, Zeigarnik) or 100% (gold win).
   return (
     <Pressable
-      onPress={() => (done ? undefined : onComplete(quest.id))}
+      onPress={() => onOpen(quest.id)}
       onLongPress={() => onEdit(quest.id)}
       accessibilityRole="button"
       accessibilityState={{ checked: done }}
       accessibilityLabel={`${quest.title}, ${done ? 'completed' : 'not done'}`}
-      accessibilityHint={done ? 'Long press to edit' : 'Double tap to complete, long press to edit'}
+      accessibilityHint={done ? 'Opens the habit. Long press to edit.' : 'Opens the habit to complete it. Long press to edit.'}
       style={[styles.card, done && styles.cardDone]}
     >
       <View style={styles.cardRing}>

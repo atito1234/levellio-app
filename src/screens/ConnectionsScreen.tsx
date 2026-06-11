@@ -14,6 +14,7 @@ import {
   type LinkWeight,
 } from '@/lib/compounding';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useCapacities } from '@/state/CapacitiesContext';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Connections'>;
@@ -97,39 +98,14 @@ const EDGES: Edge[] = DISPLAY_ACTIONS.flatMap((actionId) =>
 
 export function ConnectionsScreen({ navigation }: Props) {
   const reduced = useReducedMotion();
+  const { levels } = useCapacities(); // real, persisted capacity levels
   const [selected, setSelected] = useState<string | null>(null);
-  const [capShown, setCapShown] = useState<Record<string, number>>({});
 
   const dash = useRef(new Animated.Value(0)).current;
-  const capVal = useRef<Record<string, Animated.Value>>(
-    Object.fromEntries(DISPLAY_CAPS.map((c) => [c, new Animated.Value(0)])),
-  ).current;
   const loopRef = useRef<Animated.CompositeAnimation | null>(null);
 
-  // Count-up listeners so the capacity rings visibly fill as they're fed.
+  // Flowing dash on the selected edges (processing fluency); skip if reduced.
   useEffect(() => {
-    const subs = DISPLAY_CAPS.map((c) =>
-      capVal[c]!.addListener(({ value }) =>
-        setCapShown((s) => (s[c] === Math.round(value) ? s : { ...s, [c]: Math.round(value) })),
-      ),
-    );
-    return () => DISPLAY_CAPS.forEach((c, i) => capVal[c]!.removeListener(subs[i]!));
-  }, [capVal]);
-
-  // On selection: fed capacities ring up to their real delta; others settle to 0.
-  useEffect(() => {
-    const fed = selected ? new Set(capacitiesForAction(selected)) : new Set<string>();
-    DISPLAY_CAPS.forEach((c) => {
-      const target = selected && fed.has(c) ? deltaFor(selected, c) : 0;
-      if (reduced) {
-        capVal[c]!.setValue(target);
-        setCapShown((s) => ({ ...s, [c]: target }));
-      } else {
-        Animated.timing(capVal[c]!, { toValue: target, duration: 520, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start();
-      }
-    });
-
-    // Flowing dash on the selected edges (processing fluency); skip if reduced.
     loopRef.current?.stop();
     dash.setValue(0);
     if (selected && !reduced) {
@@ -139,7 +115,7 @@ export function ConnectionsScreen({ navigation }: Props) {
       loopRef.current.start();
     }
     return () => loopRef.current?.stop();
-  }, [selected, reduced, capVal, dash]);
+  }, [selected, reduced, dash]);
 
   const dashOffset = dash.interpolate({ inputRange: [0, 1], outputRange: [0, -18] });
   const fedBySelected = selected ? new Set(capacitiesForAction(selected)) : null;
@@ -194,25 +170,30 @@ export function ConnectionsScreen({ navigation }: Props) {
             })}
           </Svg>
 
-          {/* Capacity nodes — soft ringed circles; % appears only when fed (honest). */}
+          {/* Capacity nodes — rings show REAL persisted levels; a "+N" preview
+              appears when an action that feeds them is selected (honest). */}
           {DISPLAY_CAPS.map((capId) => {
             const cap = getCapacity(capId);
             const pos = CAP_POS[capId]!;
             const fed = fedBySelected?.has(capId) ?? false;
             const dim = selected !== null && !fed;
-            const level = capShown[capId] ?? 0;
+            const level = Math.round(levels[capId]);
             return (
               <View
                 key={capId}
                 accessible
                 accessibilityRole="image"
-                accessibilityLabel={`${cap.name}${selected && fed ? `, plus ${deltaFor(selected, capId)} percent from ${ACTION_SHORT[selected]}` : ''}`}
+                accessibilityLabel={`${cap.name} ${level} percent${selected && fed ? `, plus ${deltaFor(selected, capId)} from ${ACTION_SHORT[selected]}` : ''}`}
                 style={[styles.capNode, { left: pos.x - CAP_SIZE / 2, top: pos.y - CAP_SIZE / 2, opacity: dim ? 0.38 : 1 }]}
               >
                 <CapacityRing level={level} colorId={cap.colorId} size={CAP_SIZE} strokeWidth={6} />
                 <View style={styles.capCenter} pointerEvents="none">
                   <Text style={styles.capName}>{cap.name}</Text>
-                  {fed && <Text style={[styles.capPct, { color: CAPACITY_HEX[cap.colorId] }]}>+{level}%</Text>}
+                  {selected && fed ? (
+                    <Text style={[styles.capPct, { color: CAPACITY_HEX[cap.colorId] }]}>+{deltaFor(selected, capId)}</Text>
+                  ) : (
+                    <Text style={styles.capPct}>{level}%</Text>
+                  )}
                 </View>
               </View>
             );
