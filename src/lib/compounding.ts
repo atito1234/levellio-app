@@ -141,17 +141,22 @@ function clamp(n: number): number {
   return Math.max(0, Math.min(100, n));
 }
 
+/** Apply a list of capacity deltas to a levels map (clamped 0-100). Pure. */
+export function applyDeltas(levels: CapacityLevels, deltas: readonly CapacityDelta[]): CapacityLevels {
+  const next: CapacityLevels = { ...levels };
+  for (const d of deltas) {
+    next[d.capacityId] = clamp(next[d.capacityId] + d.delta);
+  }
+  return next;
+}
+
 /** Apply one action's ripple to a levels map (clamped 0-100). Pure. */
 export function applyRipple(
   levels: CapacityLevels,
   actionId: string,
   links: readonly ActionCapacityLink[] = ACTION_CAPACITY_LINKS,
 ): CapacityLevels {
-  const next: CapacityLevels = { ...levels };
-  for (const d of ripple(actionId, links)) {
-    next[d.capacityId] = clamp(next[d.capacityId] + d.delta);
-  }
-  return next;
+  return applyDeltas(levels, ripple(actionId, links));
 }
 
 /** Derive capacity levels from a list of completed action ids (in order). */
