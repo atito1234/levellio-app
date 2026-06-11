@@ -5,6 +5,7 @@
  */
 import { companionStageForLevel, tierForLevel, QUEST_XP } from '@/lib/leveling';
 import { resolveCategory } from '@/lib/categories';
+import { isValidKitId, NO_KIT_ID } from '@/data/worldCupKits';
 import type { Character, Quest, QuestDifficulty } from '@/types';
 import { LOCAL_UID } from './seed';
 
@@ -42,6 +43,10 @@ export function migrateCharacter(raw: unknown): Character {
     // Re-derive from level so tier/companion can never drift out of sync.
     tier: tierForLevel(level),
     companionStage: companionStageForLevel(level),
+    // Keep a valid kit selection; drop unknown/sentinel ids to "no kit".
+    ...(typeof r.kitId === 'string' && isValidKitId(r.kitId) && r.kitId !== NO_KIT_ID
+      ? { kitId: r.kitId }
+      : {}),
   };
 }
 

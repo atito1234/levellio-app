@@ -105,6 +105,13 @@ describe('migrations', () => {
     expect(c.streakDays).toBe(0);
   });
 
+  it('migrateCharacter keeps a valid kit and drops unknown/none ones', () => {
+    expect(migrateCharacter({ level: 1, kitId: 'kit-bra' }).kitId).toBe('kit-bra');
+    expect(migrateCharacter({ level: 1, kitId: 'kit-zzz' }).kitId).toBeUndefined();
+    expect(migrateCharacter({ level: 1, kitId: 'none' }).kitId).toBeUndefined();
+    expect(migrateCharacter({ level: 1 }).kitId).toBeUndefined();
+  });
+
   it('migrateQuests returns [] for non-array input and fills defaults', () => {
     expect(migrateQuests(null)).toEqual([]);
     const quests = migrateQuests([{ title: 'X' }]);
