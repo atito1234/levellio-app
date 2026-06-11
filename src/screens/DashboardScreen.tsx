@@ -8,9 +8,12 @@ import { BucketIcon } from '@/components/BucketIcon';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { useCapacities } from '@/state/CapacitiesContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { dayProgress, groupHabitsIntoRails, pickFocusHabit, type HabitRail } from '@/lib/dashboard';
 import { CATEGORY_META } from '@/lib/categories';
+import { CAPACITIES, getCapacity } from '@/lib/compounding';
+import { rippleForQuest } from '@/lib/habitCapacity';
 import { getBucketColor } from '@/lib/buckets';
 import { defaultAIEngine } from '@/services/ai';
 import type { Quest, QuestCategory } from '@/types';
@@ -44,6 +47,7 @@ export function DashboardScreen() {
   const navigation = useNavigation<Nav>();
   const { character, quests, suggestQuest, status } = useGame();
   const { buckets, assignments } = useBuckets();
+  const { levels } = useCapacities();
   const reduced = useReducedMotion();
   const [motivation, setMotivation] = useState('');
   const [suggesting, setSuggesting] = useState(false);
@@ -171,6 +175,9 @@ export function DashboardScreen() {
               <Text style={styles.focusName} numberOfLines={2}>
                 {focus.title}
               </Text>
+              <Text style={styles.focusFeeds}>
+                Strengthens {rippleForQuest(focus).slice(0, 2).map((d) => getCapacity(d.capacityId).name).join(' · ')}
+              </Text>
               {/* Fitts: large, full-width, thumb-reachable primary action. */}
               <Pressable
                 onPress={() => openHabit(focus.id)}
@@ -203,9 +210,36 @@ export function DashboardScreen() {
           <QuickChip label="＋ New" onPress={() => navigation.navigate('QuestEditor')} />
           <QuickChip label="📚 Library" onPress={() => navigation.navigate('HabitLibrary')} />
           <QuickChip label="🗂 Buckets" onPress={() => navigation.navigate('Organize')} />
-          <QuickChip label="💧 Ripple" onPress={() => navigation.navigate('Ripple', { actionId: 'water' })} />
           <QuickChip label="🔗 Connections" onPress={() => navigation.navigate('Connections')} />
           <QuickChip label={suggesting ? '…' : '✨ Suggest'} onPress={handleSuggest} />
+        </ScrollView>
+
+        {/* Your capacities — the shared rings every completion feeds (real data). */}
+        <View style={styles.capHead}>
+          <Text style={styles.railLabel}>Your capacities</Text>
+          <Pressable
+            onPress={() => navigation.navigate('Connections')}
+            accessibilityRole="button"
+            accessibilityLabel="See how your actions connect"
+          >
+            <Text style={styles.capLink}>See connections ›</Text>
+          </Pressable>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
+          {CAPACITIES.map((cap) => {
+            const lvl = Math.round(levels[cap.id]);
+            return (
+              <View key={cap.id} style={styles.capCell} accessibilityLabel={`${cap.name} ${lvl} percent`}>
+                <View style={styles.capRingWrap}>
+                  <CapacityRing level={lvl} colorId={cap.colorId} size={56} strokeWidth={6} />
+                  <View style={styles.capRingCenter} pointerEvents="none">
+                    <Text style={styles.capRingPct}>{lvl}%</Text>
+                  </View>
+                </View>
+                <Text style={styles.capCellName}>{cap.name}</Text>
+              </View>
+            );
+          })}
         </ScrollView>
 
         {/* Rails — Gestalt grouping: each life-area reads as one coherent row. */}
@@ -339,6 +373,7 @@ const styles = StyleSheet.create({
   ringPct: { ...typography.heading, color: INK, fontWeight: '900', fontSize: 40 },
   ringSub: { ...typography.caption, color: MUTED },
   focusName: { ...typography.title, color: INK, textAlign: 'center', fontWeight: '700' },
+  focusFeeds: { ...typography.caption, color: MUTED, textAlign: 'center' },
   primaryBtn: {
     alignSelf: 'stretch',
     backgroundColor: VIOLET,
@@ -355,6 +390,14 @@ const styles = StyleSheet.create({
   primaryBtnText: { ...typography.title, color: '#FFF', fontWeight: '800' },
   allDone: { ...typography.body, color: TEAL, fontWeight: '700', marginTop: spacing.xs },
 
+  capHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: PAD },
+  capLink: { ...typography.caption, color: VIOLET, fontWeight: '700' },
+  capStrip: { gap: spacing.md, paddingHorizontal: PAD },
+  capCell: { alignItems: 'center', gap: 4, width: 64 },
+  capRingWrap: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center' },
+  capRingCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  capRingPct: { ...typography.caption, color: INK, fontWeight: '800', fontSize: 11 },
+  capCellName: { ...typography.caption, color: MUTED, fontSize: 11 },
   quickRow: { gap: spacing.sm, paddingHorizontal: PAD },
   quickChip: { backgroundColor: '#FFF', borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#E8E6E0' },
   quickChipText: { ...typography.label, color: INK },
