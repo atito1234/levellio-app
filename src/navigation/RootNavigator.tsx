@@ -12,6 +12,8 @@ import { LegalScreen } from '@/screens/LegalScreen';
 import { KitSelectScreen } from '@/screens/KitSelectScreen';
 import { OrganizeScreen } from '@/screens/OrganizeScreen';
 import { BucketEditScreen } from '@/screens/BucketEditScreen';
+import { RippleScreen } from '@/screens/RippleScreen';
+import { ConnectionsScreen } from '@/screens/ConnectionsScreen';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -70,6 +72,8 @@ export function RootNavigator() {
           component={BucketEditScreen}
           options={{ presentation: 'modal' }}
         />
+        <Stack.Screen name="Ripple" component={RippleScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Connections" component={ConnectionsScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
