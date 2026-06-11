@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from 'react-native';
@@ -21,6 +22,7 @@ import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useSettings } from '@/state/SettingsContext';
 import { type AIMode, type CloudProvider } from '@/services/settings';
+import type { MetadataPrivacy } from '@/lib/metadata';
 import { clearByoApiKey, getByoApiKey, setByoApiKey } from '@/services/security/secureKeyStore';
 import { SETTINGS_COPY } from '@/content/uiCopy';
 import {
@@ -173,6 +175,51 @@ export function SettingsScreen() {
           </View>
         )}
 
+        {/* Habit insights & privacy (on-device, opt-in) */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Habit insights</Text>
+          <Text style={styles.note}>
+            Levellio keeps simple notes on your device about how your habits form, so a future update
+            can show you insights. Nothing is uploaded — no analytics, no accounts. You choose exactly
+            what&apos;s recorded.
+          </Text>
+          <PrivacyToggle
+            label="Remember how buckets are formed"
+            value={settings.metadataPrivacy.recordProvenance}
+            field="recordProvenance"
+            privacy={settings.metadataPrivacy}
+            update={update}
+          />
+          <PrivacyToggle
+            label="Track which activities build which buckets"
+            value={settings.metadataPrivacy.recordContribution}
+            field="recordContribution"
+            privacy={settings.metadataPrivacy}
+            update={update}
+          />
+          <PrivacyToggle
+            label="Include activity details (category, difficulty, XP)"
+            value={settings.metadataPrivacy.includeContext}
+            field="includeContext"
+            privacy={settings.metadataPrivacy}
+            update={update}
+          />
+          <PrivacyToggle
+            label="Include which activities inspired a bucket"
+            value={settings.metadataPrivacy.includeSourceActivities}
+            field="includeSourceActivities"
+            privacy={settings.metadataPrivacy}
+            update={update}
+          />
+          <PrivacyToggle
+            label="Keep exact timestamps"
+            value={settings.metadataPrivacy.includeTimestamps}
+            field="includeTimestamps"
+            privacy={settings.metadataPrivacy}
+            update={update}
+          />
+        </View>
+
         {/* About & Legal */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>About &amp; Legal</Text>
@@ -212,8 +259,45 @@ export function SettingsScreen() {
   );
 }
 
+/** A single per-field metadata privacy toggle (accessible Switch row). */
+function PrivacyToggle({
+  label,
+  value,
+  field,
+  privacy,
+  update,
+}: {
+  label: string;
+  value: boolean;
+  field: keyof MetadataPrivacy;
+  privacy: MetadataPrivacy;
+  update: (patch: { metadataPrivacy: MetadataPrivacy }) => Promise<void>;
+}) {
+  return (
+    <View style={styles.toggleRow}>
+      <Text style={styles.toggleLabel}>{label}</Text>
+      <Switch
+        value={value}
+        onValueChange={(next) => void update({ metadataPrivacy: { ...privacy, [field]: next } })}
+        accessibilityLabel={label}
+        accessibilityRole="switch"
+        trackColor={{ true: colors.identity, false: colors.border }}
+        thumbColor={colors.surface}
+      />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  toggleLabel: { ...typography.body, color: colors.textPrimary, flex: 1 },
   content: {
     gap: spacing.lg,
     paddingVertical: spacing.lg,
