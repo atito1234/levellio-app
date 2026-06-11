@@ -133,6 +133,21 @@ export function DashboardScreen() {
           onPress={() => navigation.navigate('Organize')}
         />
 
+        <View style={styles.actionsRow}>
+          <PrimaryButton
+            label="💧 The Ripple"
+            variant="ghost"
+            onPress={() => navigation.navigate('Ripple', { actionId: 'water' })}
+            style={styles.flexBtn}
+          />
+          <PrimaryButton
+            label="🔗 Connections"
+            variant="ghost"
+            onPress={() => navigation.navigate('Connections')}
+            style={styles.flexBtn}
+          />
+        </View>
+
         {quests.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>No quests yet</Text>
