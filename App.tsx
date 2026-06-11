@@ -5,8 +5,9 @@ import { RootNavigator } from '@/navigation';
 import { GameProvider } from '@/state/GameContext';
 import { SettingsProvider } from '@/state/SettingsContext';
 import { BucketsProvider } from '@/state/BucketsContext';
+import { CapacitiesProvider } from '@/state/CapacitiesContext';
 
-/** App entry point. Wraps the navigation shell in settings + game + buckets + safe-area. */
+/** App entry point. Wraps the nav shell in settings + game + buckets + capacities. */
 export default function App() {
   return (
     <SafeAreaProvider>
@@ -14,7 +15,9 @@ export default function App() {
       <SettingsProvider>
         <GameProvider>
           <BucketsProvider>
-            <RootNavigator />
+            <CapacitiesProvider>
+              <RootNavigator />
+            </CapacitiesProvider>
           </BucketsProvider>
         </GameProvider>
       </SettingsProvider>
