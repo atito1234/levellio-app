@@ -1,167 +1,195 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, G } from 'react-native-svg';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { CapacityRing, ScreenContainer } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { CAPACITY_HEX, getAction, getCapacity, ripple } from '@/lib/compounding';
+import { ACHIEVEMENT_GOLD, getAction, getCapacity, ripple } from '@/lib/compounding';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Ripple'>;
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+// Locked palette only.
 const INK = '#1F2937';
 const BG = '#F7F6F2';
-const ACTION_TEAL = '#16C8A8';
+const CARD = '#FFFFFF';
+const TEAL = '#16C8A8';
+const VIOLET = '#6C4CF1';
+const MUTED = '#5A5A72';
 const TRACK = '#E8E6E0';
 
-const RING = 200;
-const STROKE = 16;
-const R = (RING - STROKE) / 2;
-const CIRC = 2 * Math.PI * R;
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+const HRING = 236;
+const HSTROKE = 18;
+const HR = (HRING - HSTROKE) / 2;
+const HC = 2 * Math.PI * HR;
 
 export function RippleScreen({ route, navigation }: Props) {
   const reduced = useReducedMotion();
   const actionId = route.params?.actionId ?? 'water';
   const action = getAction(actionId) ?? getAction('water')!;
-  // Real model output — the screen never shows invented numbers.
+  // Honest UI: every number below is real model output, never invented.
   const deltas = ripple(action.id).slice(0, 3);
 
   const [done, setDone] = useState(false);
-  const fill = useRef(new Animated.Value(0)).current;
-  const rippleAnim = useRef(new Animated.Value(0)).current;
-  const pulse = useRef(new Animated.Value(0)).current;
-  const chipAnims = useRef(deltas.map(() => new Animated.Value(0))).current;
+  const [shown, setShown] = useState<number[]>(deltas.map(() => 0));
+
+  const fill = useRef(new Animated.Value(0)).current; // hero ring 0→1
+  const ripA = useRef(new Animated.Value(0)).current; // expanding ripple (the peak)
+  const heroPulse = useRef(new Animated.Value(0)).current; // calm end-state loop
+  const chipVal = useRef(deltas.map(() => new Animated.Value(0))).current; // count-up
+  const chipPulse = useRef(deltas.map(() => new Animated.Value(0))).current; // settle pulse
+
+  // Count-up listeners drive the ticking numbers (and the small rings filling).
+  useEffect(() => {
+    const subs = chipVal.map((v, i) =>
+      v.addListener(({ value }) => setShown((s) => (s[i] === Math.round(value) ? s : s.map((x, j) => (j === i ? Math.round(value) : x))))),
+    );
+    return () => chipVal.forEach((v, i) => v.removeListener(subs[i]!));
+  }, [chipVal]);
+
+  const startHeroLoop = useCallback(() => {
+    // Peak-end rule: after the peak, settle into a calm, alive end-state.
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(heroPulse, { toValue: 1, duration: 1500, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(heroPulse, { toValue: 0, duration: 1500, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ]),
+    ).start();
+  }, [heroPulse]);
+
+  const playPayoff = useCallback(() => {
+    // Peak: a soft ripple radiates outward at the climax.
+    Animated.timing(ripA, { toValue: 1, duration: 1100, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
+    // Staggered cascade — Gestalt common-fate; each capacity ticks + pulses in turn.
+    Animated.stagger(
+      170,
+      chipVal.map((v, i) =>
+        Animated.parallel([
+          // Goal-gradient: the count-up eases faster as it approaches its target.
+          Animated.timing(v, { toValue: deltas[i]!.delta, duration: 620, easing: Easing.in(Easing.quad), useNativeDriver: false }),
+          Animated.sequence([
+            Animated.spring(chipPulse[i]!, { toValue: 1, friction: 5, tension: 90, useNativeDriver: true }),
+            Animated.spring(chipPulse[i]!, { toValue: 0, friction: 6, tension: 70, useNativeDriver: true }),
+          ]),
+        ]),
+      ),
+    ).start(startHeroLoop);
+  }, [ripA, chipVal, chipPulse, deltas, startHeroLoop]);
 
   const handleDone = useCallback(() => {
     if (done) return;
     setDone(true);
 
     if (reduced) {
-      // Static completed state — no motion.
+      // Reduced motion: render the satisfying completed end-state instantly.
       fill.setValue(1);
-      chipAnims.forEach((a) => a.setValue(1));
+      chipVal.forEach((v, i) => v.setValue(deltas[i]!.delta));
+      setShown(deltas.map((d) => d.delta));
       return;
     }
 
-    Animated.timing(fill, { toValue: 1, duration: 700, useNativeDriver: false }).start();
-    Animated.timing(rippleAnim, { toValue: 1, duration: 900, useNativeDriver: true }).start();
-    Animated.stagger(
-      150,
-      chipAnims.map((a) => Animated.spring(a, { toValue: 1, friction: 6, tension: 80, useNativeDriver: true })),
-    ).start(() => {
-      // Subtle, calm loop once the ripple has landed.
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulse, { toValue: 1, duration: 1400, useNativeDriver: true }),
-          Animated.timing(pulse, { toValue: 0, duration: 1400, useNativeDriver: true }),
-        ]),
-      ).start();
-    });
-  }, [done, reduced, fill, rippleAnim, pulse, chipAnims]);
+    Animated.sequence([
+      // Goal-gradient: the hero ring visibly accelerates as it nears 100%.
+      Animated.timing(fill, { toValue: 1, duration: 900, easing: Easing.in(Easing.cubic), useNativeDriver: false }),
+      // Variable-reward / dopaminergic anticipation: a brief held beat before payoff.
+      Animated.delay(240),
+    ]).start(playPayoff);
+  }, [done, reduced, fill, chipVal, deltas, playPayoff]);
 
-  const dashoffset = fill.interpolate({ inputRange: [0, 1], outputRange: [CIRC, 0] });
-  const ringScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.03] });
-  const rippleScale = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1.9] });
-  const rippleOpacity = rippleAnim.interpolate({ inputRange: [0, 0.15, 1], outputRange: [0, 0.35, 0] });
+  // Hero ring stroke: teal while filling; von Restorff gold ONLY at the 100% win.
+  const heroStroke = fill.interpolate({ inputRange: [0, 0.92, 1], outputRange: [TEAL, TEAL, ACHIEVEMENT_GOLD] });
+  const heroOffset = fill.interpolate({ inputRange: [0, 1], outputRange: [HC, 0] });
+  const heroScale = heroPulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.025] });
+  const ripScale = ripA.interpolate({ inputRange: [0, 1], outputRange: [0.72, 1.9] });
+  const ripOpacity = ripA.interpolate({ inputRange: [0, 0.12, 1], outputRange: [0, 0.32, 0] });
 
-  const summary = deltas
-    .map((d) => `${getCapacity(d.capacityId).name} up ${d.delta} percent`)
-    .join(', ');
+  const summary = deltas.map((d) => `${getCapacity(d.capacityId).name} up ${d.delta} percent`).join(', ');
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => navigation.goBack()}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          hitSlop={12}
-        >
-          <Text style={styles.back}>‹ Back</Text>
-        </Pressable>
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        {/* Top bar — Hick's law: minimal chrome, one journey. */}
+        <View style={styles.topbar}>
+          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+            <Text style={styles.chevron}>‹</Text>
+          </Pressable>
+          <Text style={styles.crumb}>Health · daily</Text>
+          <View style={styles.chevronSpacer} />
+        </View>
 
-      <View style={styles.body}>
-        <Text style={styles.actionName} accessibilityRole="header">
+        <Text style={styles.kicker}>TODAY&apos;S RING</Text>
+        <Text style={styles.title} accessibilityRole="header">
           {action.name}
         </Text>
 
-        <View style={styles.ringStage}>
-          {/* Expanding ripple (decorative, motion only) */}
+        {/* Hero ring — Zeigarnik: an open ring pulls you to close it. */}
+        <View style={styles.heroStage}>
           {!reduced && (
             <Animated.View
               pointerEvents="none"
-              style={[
-                styles.ripple,
-                { opacity: rippleOpacity, transform: [{ scale: rippleScale }] },
-              ]}
+              style={[styles.ripple, { opacity: ripOpacity, transform: [{ scale: ripScale }] }]}
             />
           )}
-          <Animated.View style={{ transform: [{ scale: reduced ? 1 : ringScale }] }}>
-            <Svg width={RING} height={RING} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-              <Circle cx={RING / 2} cy={RING / 2} r={R} stroke={TRACK} strokeWidth={STROKE} fill="none" />
-              <G transform={`rotate(-90, ${RING / 2}, ${RING / 2})`}>
+          <Animated.View style={{ transform: [{ scale: reduced ? 1 : heroScale }] }}>
+            <Svg width={HRING} height={HRING} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <Circle cx={HRING / 2} cy={HRING / 2} r={HR} stroke={TRACK} strokeWidth={HSTROKE} fill="none" />
+              <G transform={`rotate(-90, ${HRING / 2}, ${HRING / 2})`}>
                 <AnimatedCircle
-                  cx={RING / 2}
-                  cy={RING / 2}
-                  r={R}
-                  stroke={ACTION_TEAL}
-                  strokeWidth={STROKE}
+                  cx={HRING / 2}
+                  cy={HRING / 2}
+                  r={HR}
+                  stroke={done && reduced ? ACHIEVEMENT_GOLD : heroStroke}
+                  strokeWidth={HSTROKE}
                   strokeLinecap="round"
                   fill="none"
-                  strokeDasharray={CIRC}
-                  strokeDashoffset={done && reduced ? 0 : dashoffset}
+                  strokeDasharray={HC}
+                  strokeDashoffset={done && reduced ? 0 : heroOffset}
                 />
               </G>
+              <GlassGlyph cx={HRING / 2} cy={HRING / 2} />
             </Svg>
-            <View style={styles.ringCenter} pointerEvents="none">
-              <Text style={styles.ringCenterText}>{done ? 'Done' : 'Today'}</Text>
-            </View>
           </Animated.View>
         </View>
 
-        {/* Capacity chips — real deltas, staggered in on completion */}
-        <View style={styles.chips} accessibilityLiveRegion="polite">
-          {done ? (
-            deltas.map((d, i) => {
-              const cap = getCapacity(d.capacityId);
-              const hue = CAPACITY_HEX[cap.colorId];
-              const a = chipAnims[i]!;
-              return (
-                <Animated.View
-                  key={d.capacityId}
-                  accessibilityLabel={`${cap.name} up ${d.delta} percent`}
-                  style={[
-                    styles.chip,
-                    { borderColor: hue },
-                    {
-                      opacity: a,
-                      transform: [
-                        { translateY: a.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) },
-                        { scale: a.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.9, 1.06, 1] }) },
-                      ],
-                    },
-                  ]}
-                >
-                  <View style={[styles.chipDot, { backgroundColor: hue }]} />
-                  <Text style={styles.chipText}>
-                    {cap.name} <Text style={[styles.chipDelta, { color: hue }]}>+{d.delta}%</Text>
-                  </Text>
-                </Animated.View>
-              );
-            })
-          ) : (
-            <Text style={styles.hint}>Tap Done to feel the ripple.</Text>
-          )}
+        {/* Capacities it feeds — honest preview before, real deltas after. */}
+        <Text style={styles.sectionLabel}>ALSO STRENGTHENS</Text>
+        <View style={styles.chipsRow}>
+          {deltas.map((d, i) => {
+            const cap = getCapacity(d.capacityId);
+            const scale = chipPulse[i]!.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] });
+            return (
+              <Animated.View
+                key={d.capacityId}
+                style={[styles.chip, { transform: [{ scale: reduced ? 1 : scale }] }]}
+                accessibilityLabel={`${cap.name} plus ${d.delta} percent`}
+              >
+                <View style={styles.ringWrap}>
+                  <CapacityRing level={shown[i] ?? 0} colorId={cap.colorId} size={64} strokeWidth={6} />
+                  <View style={styles.ringCenter} pointerEvents="none">
+                    <Text style={styles.ringCenterText}>{done ? `+${shown[i] ?? 0}%` : '—'}</Text>
+                  </View>
+                </View>
+                <Text style={styles.chipName}>{cap.name}</Text>
+              </Animated.View>
+            );
+          })}
         </View>
 
-        {done && <Text style={styles.srOnly} accessibilityLiveRegion="polite">{summary}</Text>}
-
         <Text style={styles.caption}>One action. Many rings move.</Text>
-      </View>
+        <Text style={styles.footnote}>
+          A habit is a node, not a checkbox — closing one ring quietly lifts everything it feeds.
+        </Text>
+        {done && (
+          <Text style={styles.srOnly} accessibilityLiveRegion="polite">
+            {summary}
+          </Text>
+        )}
+      </ScrollView>
 
+      {/* Primary action — Fitts's law: large, full-width, thumb-reachable. */}
       <Pressable
         onPress={handleDone}
         disabled={done}
@@ -170,52 +198,80 @@ export function RippleScreen({ route, navigation }: Props) {
         accessibilityLabel={done ? `${action.name} completed` : `Mark ${action.name} done`}
         style={[styles.doneBtn, done && styles.doneBtnDone]}
       >
-        <Text style={styles.doneText}>{done ? '✓ Logged' : 'Done'}</Text>
+        <Text style={[styles.doneText, done && styles.doneTextDone]}>{done ? '✓ Logged' : 'Done'}</Text>
       </Pressable>
     </ScreenContainer>
   );
 }
 
+/** Simple tumbler-of-water glyph centered in the hero ring (decorative). */
+function GlassGlyph({ cx, cy }: { cx: number; cy: number }) {
+  const w = 44;
+  const h = 56;
+  const x = cx - w / 2;
+  const y = cy - h / 2;
+  return (
+    <G>
+      {/* water fill (lower ~58%) */}
+      <Rect x={x + 5} y={y + h * 0.42} width={w - 10} height={h * 0.5} rx={3} fill={TEAL} opacity={0.85} />
+      {/* glass outline */}
+      <Path
+        d={`M ${x + 3} ${y} L ${x + w - 3} ${y} L ${x + w - 8} ${y + h} L ${x + 8} ${y + h} Z`}
+        stroke={INK}
+        strokeWidth={3}
+        fill="none"
+        strokeLinejoin="round"
+      />
+    </G>
+  );
+}
+
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', paddingVertical: spacing.sm },
-  back: { ...typography.body, color: INK, fontWeight: '600' },
-  body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xl },
-  actionName: { ...typography.heading, color: INK, textAlign: 'center' },
-  ringStage: { width: RING, height: RING, alignItems: 'center', justifyContent: 'center' },
-  ripple: {
-    position: 'absolute',
-    width: RING,
-    height: RING,
-    borderRadius: RING / 2,
-    borderWidth: 3,
-    borderColor: ACTION_TEAL,
-  },
+  scroll: { paddingBottom: spacing.lg, alignItems: 'stretch', gap: spacing.md },
+  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: spacing.sm },
+  chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
+  chevronSpacer: { width: 28 },
+  crumb: { ...typography.label, color: MUTED },
+  kicker: { ...typography.label, color: MUTED, letterSpacing: 2, textAlign: 'center', marginTop: spacing.md },
+  title: { ...typography.heading, color: INK, textAlign: 'center', marginTop: spacing.xs },
+  heroStage: { height: HRING + 24, alignItems: 'center', justifyContent: 'center', marginVertical: spacing.md },
+  ripple: { position: 'absolute', width: HRING, height: HRING, borderRadius: HRING / 2, borderWidth: 3, borderColor: TEAL },
+  ringWrap: { width: 64, height: 64, alignItems: 'center', justifyContent: 'center' },
   ringCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
-  ringCenterText: { ...typography.title, color: INK },
-  chips: { gap: spacing.sm, minHeight: 120, alignItems: 'center', justifyContent: 'center' },
+  ringCenterText: { ...typography.caption, color: INK, fontWeight: '800', fontSize: 12 },
+  sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2, textAlign: 'center' },
+  chipsRow: { flexDirection: 'row', justifyContent: 'space-around', marginTop: spacing.sm },
   chip: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderRadius: radii.pill,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
+    gap: spacing.xs,
+    backgroundColor: CARD,
+    borderRadius: 24,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    minWidth: 96,
+    shadowColor: '#1B1B2A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
   },
-  chipDot: { width: 10, height: 10, borderRadius: 5 },
-  chipText: { ...typography.body, color: INK, fontWeight: '600' },
-  chipDelta: { fontWeight: '800' },
-  hint: { ...typography.body, color: '#5A5A72' },
-  caption: { ...typography.body, color: '#5A5A72', textAlign: 'center', fontStyle: 'italic' },
+  chipName: { ...typography.caption, color: INK, fontWeight: '700' },
+  caption: { ...typography.body, color: INK, textAlign: 'center', fontStyle: 'italic', marginTop: spacing.lg },
+  footnote: { ...typography.caption, color: MUTED, textAlign: 'center', marginTop: spacing.xs, paddingHorizontal: spacing.lg },
   srOnly: { width: 1, height: 1, opacity: 0 },
   doneBtn: {
-    backgroundColor: ACTION_TEAL,
+    backgroundColor: VIOLET,
     borderRadius: radii.pill,
     paddingVertical: spacing.lg,
     alignItems: 'center',
     marginBottom: spacing.md,
+    shadowColor: VIOLET,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.32,
+    shadowRadius: 18,
+    elevation: 8,
   },
-  doneBtnDone: { backgroundColor: '#D6F7EF' },
-  doneText: { ...typography.title, color: '#06281F', fontWeight: '800' },
+  doneBtnDone: { backgroundColor: '#EDE9FE', shadowOpacity: 0 },
+  doneText: { ...typography.title, color: '#FFFFFF', fontWeight: '800' },
+  doneTextDone: { color: VIOLET },
 });
