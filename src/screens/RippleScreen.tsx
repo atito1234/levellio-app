@@ -5,7 +5,13 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CapacityRing, ScreenContainer } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useGame } from '@/state/GameContext';
+import { useBuckets } from '@/state/BucketsContext';
+import { useCapacities } from '@/state/CapacitiesContext';
 import { ACHIEVEMENT_GOLD, getAction, getCapacity, ripple } from '@/lib/compounding';
+import { rippleForQuest } from '@/lib/habitCapacity';
+import { CATEGORY_META } from '@/lib/categories';
+import type { QuestReward } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Ripple'>;
@@ -28,13 +34,26 @@ const HC = 2 * Math.PI * HR;
 
 export function RippleScreen({ route, navigation }: Props) {
   const reduced = useReducedMotion();
-  const actionId = route.params?.actionId ?? 'water';
-  const action = getAction(actionId) ?? getAction('water')!;
-  // Honest UI: every number below is real model output, never invented.
-  const deltas = ripple(action.id).slice(0, 3);
+  const { quests, completeQuest } = useGame();
+  const { recordContribution } = useBuckets();
+  const { recordCompletion } = useCapacities();
 
-  const [done, setDone] = useState(false);
-  const [shown, setShown] = useState<number[]>(deltas.map(() => 0));
+  // The Ripple is the real habit detail when given a questId; otherwise it's the
+  // seed-action demo (the "💧 The Ripple" quick chip).
+  const questId = route.params?.questId;
+  const quest = questId ? quests.find((q) => q.id === questId) : undefined;
+  const actionId = route.params?.actionId ?? 'water';
+  const seedAction = getAction(actionId) ?? getAction('water')!;
+
+  const title = quest ? quest.title : seedAction.name;
+  const crumb = quest ? `${CATEGORY_META[quest.category].label} · daily` : 'Health · daily';
+  const showGlass = !quest && actionId === 'water';
+  // Honest UI: real deltas, derived from the habit's category (or the seed action).
+  const deltas = (quest ? rippleForQuest(quest) : ripple(seedAction.id)).slice(0, 3);
+  const alreadyDone = quest?.completed ?? false;
+
+  const [done, setDone] = useState(alreadyDone);
+  const [shown, setShown] = useState<number[]>(deltas.map((d) => (alreadyDone ? d.delta : 0)));
 
   const fill = useRef(new Animated.Value(0)).current; // hero ring 0→1
   const ripA = useRef(new Animated.Value(0)).current; // expanding ripple (the peak)
@@ -49,6 +68,15 @@ export function RippleScreen({ route, navigation }: Props) {
     );
     return () => chipVal.forEach((v, i) => v.removeListener(subs[i]!));
   }, [chipVal]);
+
+  // If the habit is already done today, open straight into the completed state.
+  useEffect(() => {
+    if (alreadyDone) {
+      fill.setValue(1);
+      chipVal.forEach((v, i) => v.setValue(deltas[i]!.delta));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const startHeroLoop = useCallback(() => {
     // Peak-end rule: after the peak, settle into a calm, alive end-state.
@@ -79,15 +107,30 @@ export function RippleScreen({ route, navigation }: Props) {
     ).start(startHeroLoop);
   }, [ripA, chipVal, chipPulse, deltas, startHeroLoop]);
 
-  const handleDone = useCallback(() => {
+  const handleDone = useCallback(async () => {
     if (done) return;
     setDone(true);
+
+    // Real habit: persist the completion ONCE and ripple it into the shared
+    // capacity levels + bucket contribution — every screen reflects it.
+    let reward: QuestReward | null = null;
+    if (quest && !alreadyDone) {
+      reward = await completeQuest(quest.id);
+      if (reward) {
+        await recordContribution({ id: quest.id, category: quest.category, difficulty: quest.difficulty, xp: reward.totalXp });
+        await recordCompletion(quest);
+      }
+    }
+    const celebrate = () => {
+      if (reward?.leveledUp) navigation.navigate('QuestComplete', { reward: reward! });
+    };
 
     if (reduced) {
       // Reduced motion: render the satisfying completed end-state instantly.
       fill.setValue(1);
       chipVal.forEach((v, i) => v.setValue(deltas[i]!.delta));
       setShown(deltas.map((d) => d.delta));
+      celebrate();
       return;
     }
 
@@ -97,7 +140,9 @@ export function RippleScreen({ route, navigation }: Props) {
       // Variable-reward / dopaminergic anticipation: a brief held beat before payoff.
       Animated.delay(240),
     ]).start(playPayoff);
-  }, [done, reduced, fill, chipVal, deltas, playPayoff]);
+    // Let the ripple play, then hand off to the level-up celebration if earned.
+    if (reward?.leveledUp) setTimeout(celebrate, 2000);
+  }, [done, reduced, fill, chipVal, deltas, playPayoff, quest, alreadyDone, completeQuest, recordContribution, recordCompletion, navigation]);
 
   // Hero ring stroke: teal while filling; von Restorff gold ONLY at the 100% win.
   const heroStroke = fill.interpolate({ inputRange: [0, 0.92, 1], outputRange: [TEAL, TEAL, ACHIEVEMENT_GOLD] });
@@ -116,13 +161,13 @@ export function RippleScreen({ route, navigation }: Props) {
           <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
             <Text style={styles.chevron}>‹</Text>
           </Pressable>
-          <Text style={styles.crumb}>Health · daily</Text>
+          <Text style={styles.crumb}>{crumb}</Text>
           <View style={styles.chevronSpacer} />
         </View>
 
         <Text style={styles.kicker}>TODAY&apos;S RING</Text>
         <Text style={styles.title} accessibilityRole="header">
-          {action.name}
+          {title}
         </Text>
 
         {/* Hero ring — Zeigarnik: an open ring pulls you to close it. */}
@@ -149,7 +194,7 @@ export function RippleScreen({ route, navigation }: Props) {
                   strokeDashoffset={done && reduced ? 0 : heroOffset}
                 />
               </G>
-              <GlassGlyph cx={HRING / 2} cy={HRING / 2} />
+              {showGlass && <GlassGlyph cx={HRING / 2} cy={HRING / 2} />}
             </Svg>
           </Animated.View>
         </View>
@@ -195,7 +240,7 @@ export function RippleScreen({ route, navigation }: Props) {
         disabled={done}
         accessibilityRole="button"
         accessibilityState={{ disabled: done }}
-        accessibilityLabel={done ? `${action.name} completed` : `Mark ${action.name} done`}
+        accessibilityLabel={done ? `${title} completed` : `Mark ${title} done`}
         style={[styles.doneBtn, done && styles.doneBtnDone]}
       >
         <Text style={[styles.doneText, done && styles.doneTextDone]}>{done ? '✓ Logged' : 'Done'}</Text>

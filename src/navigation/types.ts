@@ -26,8 +26,8 @@ export type RootStackParamList = {
   Organize: undefined;
   /** Create (no param) or edit (bucketId) a habit bucket. */
   BucketEdit: { bucketId?: string } | undefined;
-  /** "The Ripple" — habit-detail signature moment for an action. */
-  Ripple: { actionId?: string } | undefined;
+  /** "The Ripple" — the real habit detail (questId), or the seed-action demo. */
+  Ripple: { actionId?: string; questId?: string } | undefined;
   /** "Connections" — the calm action↔capacity network map. */
   Connections: undefined;
 };
