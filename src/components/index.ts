@@ -11,3 +11,4 @@ export { CompanionAvatar } from './CompanionAvatar';
 export { TextField } from './TextField';
 export { ChipSelector, type ChipOption } from './ChipSelector';
 export { ConfettiBurst } from './ConfettiBurst';
+export { CapacityRing } from './CapacityRing';
