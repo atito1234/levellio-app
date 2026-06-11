@@ -68,6 +68,7 @@ export function migrateQuests(raw: unknown): Quest[] {
       difficulty,
       baseXp: num(q.baseXp, QUEST_XP[difficulty]),
       completed: q.completed === true,
+      ...(typeof q.lastCompletedDate === 'string' ? { lastCompletedDate: q.lastCompletedDate } : {}),
     };
   });
 }
