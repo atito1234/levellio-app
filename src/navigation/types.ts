@@ -22,6 +22,10 @@ export type RootStackParamList = {
   Legal: { doc: LegalDocKey };
   /** World Cup nation kit picker. */
   KitSelect: undefined;
+  /** Organize activities into habit buckets (list / buckets view). */
+  Organize: undefined;
+  /** Create (no param) or edit (bucketId) a habit bucket. */
+  BucketEdit: { bucketId?: string } | undefined;
 };
 
 declare global {

@@ -10,6 +10,8 @@ import { HabitLibraryScreen } from '@/screens/HabitLibraryScreen';
 import { PaywallScreen } from '@/screens/PaywallScreen';
 import { LegalScreen } from '@/screens/LegalScreen';
 import { KitSelectScreen } from '@/screens/KitSelectScreen';
+import { OrganizeScreen } from '@/screens/OrganizeScreen';
+import { BucketEditScreen } from '@/screens/BucketEditScreen';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -60,6 +62,12 @@ export function RootNavigator() {
         <Stack.Screen
           name="KitSelect"
           component={KitSelectScreen}
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen name="Organize" component={OrganizeScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen
+          name="BucketEdit"
+          component={BucketEditScreen}
           options={{ presentation: 'modal' }}
         />
       </Stack.Navigator>
