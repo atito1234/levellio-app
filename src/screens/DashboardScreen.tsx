@@ -72,7 +72,12 @@ export function DashboardScreen() {
       >
         {/* Hero summary card */}
         <View style={styles.heroCard}>
-          <HeroAvatar presentation={character.presentation} tier={character.tier} size={72} />
+          <HeroAvatar
+            presentation={character.presentation}
+            tier={character.tier}
+            kitId={character.kitId}
+            size={72}
+          />
           <View style={styles.heroInfo}>
             <Text style={styles.greeting}>Welcome back, hero</Text>
             {motivation ? <Text style={styles.motivation}>{motivation}</Text> : null}

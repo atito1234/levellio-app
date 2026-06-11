@@ -15,6 +15,7 @@ import { getByoApiKey } from '@/services/security/secureKeyStore';
 import { addQuestToList, removeQuestFromList, updateQuestInList } from '@/lib/questCrud';
 import { draftToQuest, validateQuestDraft, type QuestDraft } from '@/lib/questForm';
 import { libraryHabitToQuest, type LibraryHabit } from '@/data/habitLibrary';
+import { NO_KIT_ID } from '@/data/worldCupKits';
 import type { Character, HeroPresentation, Quest, QuestReward } from '@/types';
 
 let questSeq = 0;
@@ -86,6 +87,8 @@ interface GameContextValue extends GameState {
   addLibraryHabit: (habit: LibraryHabit) => Promise<Quest | null>;
   /** Update the hero presentation (female / male / neutral) and persist. */
   setPresentation: (presentation: HeroPresentation) => Promise<void>;
+  /** Select a World Cup nation kit (or NO_KIT_ID for the classic look) and persist. */
+  setKit: (kitId: string) => Promise<void>;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -225,6 +228,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     [state.user, state.character, state.quests],
   );
 
+  const setKit = useCallback(
+    async (kitId: string): Promise<void> => {
+      if (!state.user || !state.character) return;
+      // NO_KIT_ID clears back to the classic hoodie (stored as undefined).
+      const next: Character = { ...state.character, kitId: kitId === NO_KIT_ID ? undefined : kitId };
+      dispatch({ type: 'update', payload: { character: next, quests: state.quests } });
+      await backend.saveCharacter(state.user.uid, next);
+    },
+    [state.user, state.character, state.quests],
+  );
+
   const value = useMemo<GameContextValue>(
     () => ({
       ...state,
@@ -236,6 +250,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       deleteQuest,
       addLibraryHabit,
       setPresentation,
+      setKit,
     }),
     [
       state,
@@ -247,6 +262,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       deleteQuest,
       addLibraryHabit,
       setPresentation,
+      setKit,
     ],
   );
 

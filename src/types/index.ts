@@ -50,6 +50,8 @@ export interface Character {
   lastCompletionDate?: string;
   tier: HeroTier;
   companionStage: CompanionStage;
+  /** Selected World Cup nation kit id, or undefined for the classic hoodie. */
+  kitId?: string;
 }
 
 /** Result of completing a quest — drives the Quest Complete celebration. */

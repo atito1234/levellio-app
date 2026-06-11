@@ -37,6 +37,25 @@ describe('HeroAvatar (SVG)', () => {
     luminary.unmount();
   });
 
+  it('renders a selected nation kit (colorway on the torso + nation in the label)', () => {
+    const tree = render(<HeroAvatar presentation="male" tier="novice" kitId="kit-bra" size={120} />);
+    const svg = tree.root.findByProps({ accessibilityRole: 'image' });
+    expect(String(svg.props.accessibilityLabel)).toMatch(/Brazil kit/);
+    // Brazil primary (yellow #FFDF00) is painted somewhere on the torso.
+    const yellow = tree.root.findAll(
+      (n) => typeof n.props?.fill === 'string' && n.props.fill.toUpperCase() === '#FFDF00',
+    );
+    expect(yellow.length).toBeGreaterThan(0);
+    tree.unmount();
+  });
+
+  it('ignores an unknown kit id and shows no kit in the label', () => {
+    const tree = render(<HeroAvatar presentation="male" tier="novice" kitId="kit-zzz" size={120} />);
+    const svg = tree.root.findByProps({ accessibilityRole: 'image' });
+    expect(String(svg.props.accessibilityLabel)).not.toMatch(/kit/);
+    tree.unmount();
+  });
+
   it('falls back gracefully for unknown tier/presentation', () => {
     const tree = render(
       <HeroAvatar

@@ -25,6 +25,7 @@ export const Rect = host('Rect');
 export const Polygon = host('Polygon');
 export const Line = host('Line');
 export const Defs = host('Defs');
+export const ClipPath = host('ClipPath');
 export const RadialGradient = host('RadialGradient');
 export const LinearGradient = host('LinearGradient');
 export const Stop = host('Stop');

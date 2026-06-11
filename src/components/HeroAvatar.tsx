@@ -1,6 +1,7 @@
 import React from 'react';
 import Svg, {
   Circle,
+  ClipPath,
   Defs,
   Ellipse,
   G,
@@ -11,6 +12,8 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 import { colors } from '@/theme';
+import { getKit, type WorldCupKit } from '@/data/worldCupKits';
+import { kitOverlay } from '@/components/kitGraphics';
 import type { HeroPresentation, HeroTier } from '@/types';
 
 /**
@@ -53,11 +56,14 @@ const TIER_LABEL: Record<HeroTier, string> = {
 interface HeroAvatarProps {
   presentation: HeroPresentation;
   tier: HeroTier;
+  /** Optional World Cup nation kit id; renders on the torso + sleeves. */
+  kitId?: string;
   size?: number;
 }
 
-export function HeroAvatar({ presentation, tier, size = 160 }: HeroAvatarProps) {
+export function HeroAvatar({ presentation, tier, kitId, size = 160 }: HeroAvatarProps) {
   const safeTier: HeroTier = TIERS.includes(tier) ? tier : 'novice';
+  const kit = getKit(kitId);
   const safePresentation: HeroPresentation = PRESENTATIONS.includes(presentation)
     ? presentation
     : 'neutral';
@@ -68,7 +74,9 @@ export function HeroAvatar({ presentation, tier, size = 160 }: HeroAvatarProps) 
       height={size}
       viewBox="0 0 100 100"
       accessibilityRole="image"
-      accessibilityLabel={`${cap(safePresentation)} hero, ${TIER_LABEL[safeTier]} tier`}
+      accessibilityLabel={`${cap(safePresentation)} hero, ${TIER_LABEL[safeTier]} tier${
+        kit ? `, ${kit.nationName} kit` : ''
+      }`}
     >
       <Defs>
         <RadialGradient id="heroAura" cx="50%" cy="50%" r="50%">
@@ -91,11 +99,11 @@ export function HeroAvatar({ presentation, tier, size = 160 }: HeroAvatarProps) 
       {/* Cape (pathfinder + luminary) behind the body */}
       {safeTier !== 'novice' && <Cape tier={safeTier} />}
 
-      {/* Arms (soft rounded limbs) */}
-      <Arms tier={safeTier} />
+      {/* Arms (soft rounded limbs) — sleeves match the kit when one is chosen */}
+      <Arms tier={safeTier} sleeveColor={kit ? kit.primaryColor : PALETTE.teal} />
 
-      {/* Body: hoodie + same-hue shade + pocket + drawstrings */}
-      <Body />
+      {/* Body: classic hoodie, or the selected nation kit */}
+      {kit ? <KitBody kit={kit} /> : <Body />}
 
       {/* Pants + shoes */}
       <Legs />
@@ -131,6 +139,25 @@ function Body() {
       <Rect x={52.8} y={47} width={1.8} height={8} rx={0.9} fill={PALETTE.white} />
       <Circle cx={46.3} cy={55.5} r={1.2} fill={PALETTE.white} />
       <Circle cx={53.7} cy={55.5} r={1.2} fill={PALETTE.white} />
+    </G>
+  );
+}
+
+/** Nation kit on the torso: primary base + geometric pattern + accent collar. */
+function KitBody({ kit }: { kit: WorldCupKit }) {
+  const torso = 'M33 47 Q33 42 39 42 L61 42 Q67 42 67 47 L67 72 Q67 75 63 75 L37 75 Q34 75 34 72 Z';
+  return (
+    <G>
+      <Defs>
+        <ClipPath id="kitClip">
+          <Path d={torso} />
+        </ClipPath>
+      </Defs>
+      <Path d={torso} fill={kit.primaryColor} />
+      <G clipPath="url(#kitClip)">
+        {kitOverlay(kit.pattern, kit.secondaryColor, { x: 33, y: 42, w: 34, h: 33 }, 'kb')}
+      </G>
+      <Path d="M44 42 L56 42 L50 49 Z" fill={kit.accentColor} />
     </G>
   );
 }
@@ -179,8 +206,8 @@ function Head({ presentation, tier }: { presentation: HeroPresentation; tier: He
   );
 }
 
-function Arms({ tier }: { tier: HeroTier }) {
-  const sleeve = { stroke: PALETTE.teal, strokeWidth: 7, strokeLinecap: 'round' as const, fill: 'none' };
+function Arms({ tier, sleeveColor = PALETTE.teal }: { tier: HeroTier; sleeveColor?: string }) {
+  const sleeve = { stroke: sleeveColor, strokeWidth: 7, strokeLinecap: 'round' as const, fill: 'none' };
   if (tier === 'pathfinder') {
     return (
       <G>
