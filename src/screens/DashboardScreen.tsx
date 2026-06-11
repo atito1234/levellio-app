@@ -12,6 +12,7 @@ import {
 } from '@/components';
 import { colors, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { useBuckets } from '@/state/BucketsContext';
 import { lifetimeXp } from '@/lib/leveling';
 import { defaultAIEngine } from '@/services/ai';
 import type { RootStackParamList } from '@/navigation/types';
@@ -22,6 +23,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export function DashboardScreen() {
   const navigation = useNavigation<Nav>();
   const { character, quests, completeQuest, suggestQuest, status } = useGame();
+  const { recordContribution } = useBuckets();
   const [motivation, setMotivation] = useState('');
   const [suggesting, setSuggesting] = useState(false);
 
@@ -51,8 +53,18 @@ export function DashboardScreen() {
   }
 
   const handleComplete = async (questId: string) => {
+    const quest = quests.find((q) => q.id === questId);
     const reward = await completeQuest(questId);
-    if (reward) navigation.navigate('QuestComplete', { reward });
+    if (reward) {
+      // Record a privacy-gated contribution event if this activity is filed.
+      await recordContribution({
+        id: questId,
+        category: quest?.category,
+        difficulty: quest?.difficulty,
+        xp: reward.totalXp,
+      });
+      navigation.navigate('QuestComplete', { reward });
+    }
   };
 
   const handleSuggest = async () => {
@@ -114,6 +126,12 @@ export function DashboardScreen() {
             style={styles.flexBtn}
           />
         </View>
+
+        <PrimaryButton
+          label="🗂 Organize into buckets"
+          variant="ghost"
+          onPress={() => navigation.navigate('Organize')}
+        />
 
         {quests.length === 0 ? (
           <View style={styles.emptyState}>

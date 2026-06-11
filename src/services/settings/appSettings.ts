@@ -3,9 +3,17 @@
  * AI preference: on-device (private, no key) or cloud (their own key + provider).
  */
 import type { KeyValueStore } from '@/services/storage';
+import {
+  DEFAULT_METADATA_PRIVACY,
+  normalizeMetadataPrivacy,
+  type MetadataPrivacy,
+} from '@/lib/metadata';
 
 export type AIMode = 'on-device' | 'cloud';
 export type CloudProvider = 'gemini' | 'openai' | 'anthropic';
+
+/** How the activity/organize surface is displayed. */
+export type BucketViewMode = 'list' | 'buckets';
 
 export interface AppSettings {
   aiMode: AIMode;
@@ -14,6 +22,10 @@ export interface AppSettings {
   isPremium: boolean;
   /** Selected cosmetic theme id (premium-gated to change). */
   cosmeticThemeId: string;
+  /** Remembered organize view: classic flat list vs. bucket cards. */
+  bucketViewMode: BucketViewMode;
+  /** Per-field opt-in toggles for habit-formation metadata capture. */
+  metadataPrivacy: MetadataPrivacy;
 }
 
 /** Privacy-first, free-by-default settings. */
@@ -22,6 +34,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   provider: 'gemini',
   isPremium: false,
   cosmeticThemeId: 'classic',
+  bucketViewMode: 'list',
+  metadataPrivacy: { ...DEFAULT_METADATA_PRIVACY },
 };
 
 const SETTINGS_KEY = 'levellio:settings';
@@ -38,6 +52,8 @@ export function normalizeSettings(raw: unknown): AppSettings {
     isPremium: r.isPremium === true,
     cosmeticThemeId:
       typeof r.cosmeticThemeId === 'string' ? r.cosmeticThemeId : DEFAULT_SETTINGS.cosmeticThemeId,
+    bucketViewMode: r.bucketViewMode === 'buckets' ? 'buckets' : 'list',
+    metadataPrivacy: normalizeMetadataPrivacy(r.metadataPrivacy),
   };
 }
 

@@ -8,3 +8,5 @@ export { HabitLibraryScreen } from './HabitLibraryScreen';
 export { PaywallScreen } from './PaywallScreen';
 export { LegalScreen } from './LegalScreen';
 export { KitSelectScreen } from './KitSelectScreen';
+export { OrganizeScreen } from './OrganizeScreen';
+export { BucketEditScreen } from './BucketEditScreen';
