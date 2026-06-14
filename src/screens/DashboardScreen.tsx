@@ -87,6 +87,8 @@ export function DashboardScreen() {
   const canBrowse = openHabits.length > 1;
 
   const cardX = useRef(new Animated.Value(0)).current;
+  const flash = useRef(new Animated.Value(0)).current; // "Up next!" flourish
+  const [dragging, setDragging] = useState(false); // locks vertical scroll mid-swipe
 
   // Swipe LEFT → next open activity (browse). Reduced-motion just switches.
   const goNext = useCallback(() => {
@@ -111,6 +113,14 @@ export function DashboardScreen() {
     const apply = () => {
       void reorderQuests(prioritizeAfterFirstOpen(quests, focusId));
       setFocusIndex(0);
+      if (!reduced) {
+        // Little celebratory flourish — like a "match" confirmation.
+        flash.setValue(0);
+        Animated.sequence([
+          Animated.spring(flash, { toValue: 1, friction: 5, tension: 120, useNativeDriver: true }),
+          Animated.timing(flash, { toValue: 0, delay: 600, duration: 300, useNativeDriver: true }),
+        ]).start();
+      }
     };
     if (reduced) return apply();
     Animated.timing(cardX, { toValue: SCREEN_W, duration: 170, easing: Easing.in(Easing.quad), useNativeDriver: true }).start(() => {
@@ -130,18 +140,33 @@ export function DashboardScreen() {
   const reducedRef = useRef(reduced);
   reducedRef.current = reduced;
 
+  const settle = useCallback(() => {
+    setDragging(false);
+    Animated.spring(cardX, { toValue: 0, friction: 7, tension: 70, useNativeDriver: true }).start();
+  }, [cardX]);
+  const settleRef = useRef(settle);
+  settleRef.current = settle;
+
   const pan = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_e, g) =>
-        canBrowseRef.current && Math.abs(g.dx) > 14 && Math.abs(g.dx) > Math.abs(g.dy) * 1.4,
+      // Capture early on a horizontal intent so the vertical ScrollView never
+      // steals the gesture (this is what stopped the card from "pushing down").
+      onMoveShouldSetPanResponderCapture: (_e, g) =>
+        canBrowseRef.current && Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy) * 1.2,
+      onPanResponderGrant: () => {
+        if (!reducedRef.current) setDragging(true);
+      },
       onPanResponderMove: (_e, g) => {
-        if (!reducedRef.current) cardX.setValue(g.dx * 0.5);
+        if (!reducedRef.current) cardX.setValue(g.dx); // 1:1, like a real card
       },
       onPanResponderRelease: (_e, g) => {
-        if (g.dx < -SWIPE_THRESHOLD) goNextRef.current();
-        else if (g.dx > SWIPE_THRESHOLD) prioritizeRef.current();
-        else Animated.spring(cardX, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }).start();
+        setDragging(false);
+        const fling = Math.abs(g.vx) > 0.35;
+        if (g.dx < -SWIPE_THRESHOLD || (fling && g.vx < 0)) goNextRef.current();
+        else if (g.dx > SWIPE_THRESHOLD || (fling && g.vx > 0)) prioritizeRef.current();
+        else settleRef.current();
       },
+      onPanResponderTerminate: () => settleRef.current(),
     }),
   ).current;
 
@@ -188,9 +213,21 @@ export function DashboardScreen() {
   const heroDone = progress.pct >= 100; // von Restorff: the single gold win.
   const offset = fill.interpolate({ inputRange: [0, 1], outputRange: [HC, 0] });
 
+  // Tinder-style drag transforms (whole card tilts + fades as it flies).
+  const cardRotate = cardX.interpolate({ inputRange: [-SCREEN_W, 0, SCREEN_W], outputRange: ['-7deg', '0deg', '7deg'], extrapolate: 'clamp' });
+  const cardOpacity = cardX.interpolate({ inputRange: [-SCREEN_W, -SCREEN_W * 0.55, 0, SCREEN_W * 0.55, SCREEN_W], outputRange: [0, 1, 1, 1, 0], extrapolate: 'clamp' });
+  const stampNextOpacity = cardX.interpolate({ inputRange: [-140, -40, 0], outputRange: [1, 0.3, 0], extrapolate: 'clamp' });
+  const stampDoOpacity = cardX.interpolate({ inputRange: [0, 40, 140], outputRange: [0, 0.3, 1], extrapolate: 'clamp' });
+  const flashOpacity = flash;
+  const flashScale = flash.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] });
+
   return (
     <ScreenContainer backgroundColor={BG} noPadding edges={['top', 'left', 'right']}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scroll}
+        scrollEnabled={!dragging}
+      >
         {/* Greeting — real name + real streak + level. */}
         <View style={styles.greetRow}>
           <Pressable
@@ -223,6 +260,13 @@ export function DashboardScreen() {
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}
         <View style={styles.billboard} {...(canBrowse ? pan.panHandlers : {})}>
+         <View style={styles.billboardClip}>
+          <Animated.View
+            style={[
+              styles.heroCard,
+              canBrowse && { transform: [{ translateX: cardX }, { rotate: cardRotate }], opacity: cardOpacity },
+            ]}
+          >
           <Text style={styles.billboardKicker}>YOUR FOCUS RIGHT NOW</Text>
           <View style={styles.ringStage}>
             {/* subtle glassmorphism glow behind the ring */}
@@ -256,8 +300,8 @@ export function DashboardScreen() {
           </View>
 
           {focus ? (
-            <Animated.View
-              style={[styles.focusBlock, { transform: [{ translateX: cardX }] }]}
+            <View
+              style={styles.focusBlock}
               accessible
               accessibilityLabel={`Focus activity ${safeIndex + 1} of ${openHabits.length}: ${focus.title}`}
               accessibilityActions={
@@ -310,7 +354,7 @@ export function DashboardScreen() {
                   </Pressable>
                 </View>
               )}
-            </Animated.View>
+            </View>
           ) : quests.length === 0 ? (
             <>
               <Text style={styles.focusName}>Add your first habit</Text>
@@ -326,6 +370,22 @@ export function DashboardScreen() {
           ) : (
             <Text style={styles.allDone}>All done for today 🎉</Text>
           )}
+          </Animated.View>
+
+          {canBrowse && (
+            <>
+              <Animated.View pointerEvents="none" style={[styles.stamp, styles.stampLeft, { opacity: stampNextOpacity }]}>
+                <Text style={styles.stampNextText}>‹ NEXT</Text>
+              </Animated.View>
+              <Animated.View pointerEvents="none" style={[styles.stamp, styles.stampRight, { opacity: stampDoOpacity }]}>
+                <Text style={styles.stampDoText}>DO NEXT ⤴</Text>
+              </Animated.View>
+            </>
+          )}
+          <Animated.View pointerEvents="none" style={[styles.flash, { opacity: flashOpacity, transform: [{ scale: flashScale }] }]}>
+            <Text style={styles.flashText}>Up next! ⤴</Text>
+          </Animated.View>
+         </View>
         </View>
 
         {/* Quick actions — keeps every feature, low clutter (Hick's law). */}
@@ -341,11 +401,11 @@ export function DashboardScreen() {
         <View style={styles.capHead}>
           <Text style={styles.railLabel}>Your capacities</Text>
           <Pressable
-            onPress={() => navigation.navigate('Connections')}
+            onPress={() => navigation.navigate('MonthlyProgress')}
             accessibilityRole="button"
-            accessibilityLabel="See how your actions connect"
+            accessibilityLabel="See your monthly progress"
           >
-            <Text style={styles.capLink}>See connections ›</Text>
+            <Text style={styles.capLink}>This month ›</Text>
           </Pressable>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
@@ -480,14 +540,37 @@ const styles = StyleSheet.create({
     marginHorizontal: PAD,
     backgroundColor: CARD,
     borderRadius: 24,
-    padding: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.sm,
     shadowColor: '#1B1B2A',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.12,
     shadowRadius: 28,
     elevation: 8,
+  },
+  billboardClip: { borderRadius: 24, overflow: 'hidden' },
+  heroCard: { padding: spacing.lg, alignItems: 'center', gap: spacing.sm },
+  stamp: {
+    position: 'absolute',
+    top: 18,
+    borderWidth: 3,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    transform: [{ rotate: '-12deg' }],
+  },
+  stampLeft: { left: 18, borderColor: TEAL },
+  stampRight: { right: 18, borderColor: VIOLET, transform: [{ rotate: '12deg' }] },
+  stampNextText: { ...typography.label, color: TEAL, fontWeight: '900', letterSpacing: 1 },
+  stampDoText: { ...typography.label, color: VIOLET, fontWeight: '900', letterSpacing: 1 },
+  flash: { position: 'absolute', bottom: 24, left: 0, right: 0, alignItems: 'center' },
+  flashText: {
+    ...typography.label,
+    color: '#FFFFFF',
+    fontWeight: '800',
+    backgroundColor: VIOLET,
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    overflow: 'hidden',
   },
   billboardKicker: { ...typography.label, color: MUTED, letterSpacing: 2 },
   ringStage: { width: HRING, height: HRING, alignItems: 'center', justifyContent: 'center', marginVertical: spacing.sm },
