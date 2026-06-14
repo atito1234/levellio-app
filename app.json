@@ -14,6 +14,14 @@
       "backgroundColor": "#6C4CF1"
     },
     "assetBundlePatterns": ["**/*"],
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Levellio can attach where and how fast an activity happened (e.g. a run) to your logs, only when you turn this on — to power your personal analytics."
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.levellio.placeholder"
