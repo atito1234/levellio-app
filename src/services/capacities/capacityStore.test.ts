@@ -1,4 +1,4 @@
-import { CapacityStore, normalizeLevels } from './capacityStore';
+import { CapacityStore, normalizeHistory, normalizeLevels } from './capacityStore';
 import { emptyLevels } from '@/lib/compounding';
 import { InMemoryStore } from '@/services/storage/InMemoryStore';
 
@@ -17,16 +17,29 @@ describe('normalizeLevels', () => {
   });
 });
 
-describe('CapacityStore', () => {
-  it('returns empty levels when nothing saved', async () => {
-    const store = new CapacityStore(new InMemoryStore());
-    expect(await store.load('u1')).toEqual(emptyLevels());
+describe('normalizeHistory', () => {
+  it('keeps only valid YYYY-MM-DD keys with positive numbers', () => {
+    const h = normalizeHistory({
+      history: { '2026-06-14': 12, '2026-06-13': 0, bad: 5, '2026-6-1': 3, '2026-06-12': 7.6 },
+    });
+    expect(h).toEqual({ '2026-06-14': 12, '2026-06-12': 8 });
   });
 
-  it('round-trips levels', async () => {
+  it('returns {} for junk', () => {
+    expect(normalizeHistory(null)).toEqual({});
+  });
+});
+
+describe('CapacityStore', () => {
+  it('returns empty data when nothing saved', async () => {
     const store = new CapacityStore(new InMemoryStore());
-    const levels = { ...emptyLevels(), hydration: 24, focus: 12 };
-    await store.save('u1', levels);
-    expect(await store.load('u1')).toEqual(levels);
+    expect(await store.load('u1')).toEqual({ levels: emptyLevels(), history: {} });
+  });
+
+  it('round-trips levels + history', async () => {
+    const store = new CapacityStore(new InMemoryStore());
+    const data = { levels: { ...emptyLevels(), hydration: 24, focus: 12 }, history: { '2026-06-14': 14 } };
+    await store.save('u1', data);
+    expect(await store.load('u1')).toEqual(data);
   });
 });

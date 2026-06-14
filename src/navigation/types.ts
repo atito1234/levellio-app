@@ -30,6 +30,8 @@ export type RootStackParamList = {
   Ripple: { actionId?: string; questId?: string } | undefined;
   /** "Connections" — the calm action↔capacity network map. */
   Connections: undefined;
+  /** Monthly capacity progress (heatmap). */
+  MonthlyProgress: undefined;
 };
 
 declare global {
