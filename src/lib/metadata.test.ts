@@ -1,6 +1,7 @@
 import {
   buildContributionEvent,
   buildProvenanceEvent,
+  buildSessionEvent,
   DEFAULT_METADATA_PRIVACY,
   normalizeMetadataPrivacy,
   type MetadataPrivacy,
@@ -95,5 +96,43 @@ describe('contribution events', () => {
   it('returns null when contribution capture is disabled', () => {
     const privacy: MetadataPrivacy = { ...DEFAULT_METADATA_PRIVACY, recordContribution: false };
     expect(buildContributionEvent(contribInput, privacy, deps)).toBeNull();
+  });
+});
+
+describe('activity session events', () => {
+  const sessionInput = {
+    activityId: 'q1',
+    category: 'fitness',
+    method: 'timer' as const,
+    durationSec: 1200,
+    location: { lat: 1, lng: 2, speed: 3 },
+  };
+
+  it('captures duration/method + time-of-day by default, but not location', () => {
+    const e = buildSessionEvent(sessionInput, DEFAULT_METADATA_PRIVACY, deps)!;
+    expect(e.type).toBe('activity_session');
+    expect(e.method).toBe('timer');
+    expect(e.durationSec).toBe(1200);
+    expect(typeof e.hourOfDay).toBe('number');
+    expect(typeof e.weekday).toBe('number');
+    expect(e.location).toBeUndefined(); // opted out by default
+    expect(e.category).toBeUndefined(); // context off by default
+  });
+
+  it('includes location only when opted in', () => {
+    const privacy: MetadataPrivacy = { ...DEFAULT_METADATA_PRIVACY, includeLocation: true };
+    expect(buildSessionEvent(sessionInput, privacy, deps)!.location).toEqual({ lat: 1, lng: 2, speed: 3 });
+  });
+
+  it('omits time-of-day when timestamps are coarsened', () => {
+    const privacy: MetadataPrivacy = { ...DEFAULT_METADATA_PRIVACY, includeTimestamps: false };
+    const e = buildSessionEvent(sessionInput, privacy, deps)!;
+    expect(e.hourOfDay).toBeUndefined();
+    expect(e.weekday).toBeUndefined();
+  });
+
+  it('returns null when session capture is disabled', () => {
+    const privacy: MetadataPrivacy = { ...DEFAULT_METADATA_PRIVACY, recordSession: false };
+    expect(buildSessionEvent(sessionInput, privacy, deps)).toBeNull();
   });
 });

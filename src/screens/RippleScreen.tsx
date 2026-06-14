@@ -6,10 +6,10 @@ import { CapacityRing, ScreenContainer } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useGame } from '@/state/GameContext';
-import { useBuckets } from '@/state/BucketsContext';
-import { useCapacities } from '@/state/CapacitiesContext';
+import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { ACHIEVEMENT_GOLD, getAction, getCapacity, ripple } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
+import { activityTiming } from '@/lib/activityTimer';
 import { CATEGORY_META } from '@/lib/categories';
 import type { QuestReward } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
@@ -34,9 +34,8 @@ const HC = 2 * Math.PI * HR;
 
 export function RippleScreen({ route, navigation }: Props) {
   const reduced = useReducedMotion();
-  const { quests, completeQuest } = useGame();
-  const { recordContribution } = useBuckets();
-  const { recordCompletion } = useCapacities();
+  const { quests } = useGame();
+  const complete = useCompleteActivity();
 
   // The Ripple is the real habit detail when given a questId; otherwise it's the
   // seed-action demo (the "💧 The Ripple" quick chip).
@@ -51,6 +50,12 @@ export function RippleScreen({ route, navigation }: Props) {
   // Honest UI: real deltas, derived from the habit's category (or the seed action).
   const deltas = (quest ? rippleForQuest(quest) : ripple(seedAction.id)).slice(0, 3);
   const alreadyDone = quest?.completed ?? false;
+  const timing = quest ? activityTiming(quest) : null;
+  const startLabel = timing
+    ? timing.method === 'pomodoro'
+      ? `Start focus · ${timing.minutes} min`
+      : `Start ${timing.minutes}-min timer`
+    : null;
 
   const [done, setDone] = useState(alreadyDone);
   const [shown, setShown] = useState<number[]>(deltas.map((d) => (alreadyDone ? d.delta : 0)));
@@ -111,15 +116,11 @@ export function RippleScreen({ route, navigation }: Props) {
     if (done) return;
     setDone(true);
 
-    // Real habit: persist the completion ONCE and ripple it into the shared
-    // capacity levels + bucket contribution — every screen reflects it.
+    // Real habit: complete ONCE (manual log) and ripple into the shared capacity
+    // levels + bucket contribution + a session record — every screen reflects it.
     let reward: QuestReward | null = null;
     if (quest && !alreadyDone) {
-      reward = await completeQuest(quest.id);
-      if (reward) {
-        await recordContribution({ id: quest.id, category: quest.category, difficulty: quest.difficulty, xp: reward.totalXp });
-        await recordCompletion(quest);
-      }
+      reward = await complete(quest, { method: 'manual', durationSec: 0 });
     }
     const celebrate = () => {
       if (reward?.leveledUp) navigation.navigate('QuestComplete', { reward: reward! });
@@ -142,7 +143,7 @@ export function RippleScreen({ route, navigation }: Props) {
     ]).start(playPayoff);
     // Let the ripple play, then hand off to the level-up celebration if earned.
     if (reward?.leveledUp) setTimeout(celebrate, 2000);
-  }, [done, reduced, fill, chipVal, deltas, playPayoff, quest, alreadyDone, completeQuest, recordContribution, recordCompletion, navigation]);
+  }, [done, reduced, fill, chipVal, deltas, playPayoff, quest, alreadyDone, complete, navigation]);
 
   // Hero ring stroke: teal while filling; von Restorff gold ONLY at the 100% win.
   const heroStroke = fill.interpolate({ inputRange: [0, 0.92, 1], outputRange: [TEAL, TEAL, ACHIEVEMENT_GOLD] });
@@ -227,6 +228,16 @@ export function RippleScreen({ route, navigation }: Props) {
         <Text style={styles.footnote}>
           A habit is a node, not a checkbox — closing one ring quietly lifts everything it feeds.
         </Text>
+        {quest && (
+          <Pressable
+            onPress={() => navigation.navigate('Connections', { questId: quest.id })}
+            accessibilityRole="button"
+            accessibilityLabel="See how this activity connects"
+            style={styles.connLink}
+          >
+            <Text style={styles.connLinkText}>🔗 See how this connects ›</Text>
+          </Pressable>
+        )}
         {done && (
           <Text style={styles.srOnly} accessibilityLiveRegion="polite">
             {summary}
@@ -234,17 +245,33 @@ export function RippleScreen({ route, navigation }: Props) {
         )}
       </ScrollView>
 
-      {/* Primary action — Fitts's law: large, full-width, thumb-reachable. */}
-      <Pressable
-        onPress={handleDone}
-        disabled={done}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: done }}
-        accessibilityLabel={done ? `${title} completed` : `Mark ${title} done`}
-        style={[styles.doneBtn, done && styles.doneBtnDone]}
-      >
-        <Text style={[styles.doneText, done && styles.doneTextDone]}>{done ? '✓ Logged' : 'Done'}</Text>
-      </Pressable>
+      {/* Per-activity actions — timer/Pomodoro to DO it, or log it now (Fitts). */}
+      {quest && !done ? (
+        <View style={styles.actions}>
+          <Pressable
+            onPress={() => navigation.navigate('ActivityTimer', { questId: quest.id })}
+            accessibilityRole="button"
+            accessibilityLabel={startLabel ?? 'Start'}
+            style={styles.timerBtn}
+          >
+            <Text style={styles.timerBtnText}>⏱ {startLabel}</Text>
+          </Pressable>
+          <Pressable onPress={handleDone} accessibilityRole="button" accessibilityLabel={`Just log ${title}`} style={styles.logBtn}>
+            <Text style={styles.logBtnText}>Just log it now</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Pressable
+          onPress={handleDone}
+          disabled={done}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: done }}
+          accessibilityLabel={done ? `${title} completed` : `Mark ${title} done`}
+          style={[styles.doneBtn, done && styles.doneBtnDone]}
+        >
+          <Text style={[styles.doneText, done && styles.doneTextDone]}>{done ? '✓ Logged' : 'Done'}</Text>
+        </Pressable>
+      )}
     </ScreenContainer>
   );
 }
@@ -319,4 +346,21 @@ const styles = StyleSheet.create({
   doneBtnDone: { backgroundColor: '#EDE9FE', shadowOpacity: 0 },
   doneText: { ...typography.title, color: '#FFFFFF', fontWeight: '800' },
   doneTextDone: { color: VIOLET },
+  connLink: { alignSelf: 'center', paddingVertical: spacing.sm },
+  connLinkText: { ...typography.label, color: VIOLET, fontWeight: '700' },
+  actions: { gap: spacing.sm, marginBottom: spacing.md },
+  timerBtn: {
+    backgroundColor: VIOLET,
+    borderRadius: radii.pill,
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+    shadowColor: VIOLET,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  timerBtnText: { ...typography.title, color: '#FFFFFF', fontWeight: '800' },
+  logBtn: { alignItems: 'center', paddingVertical: spacing.sm },
+  logBtnText: { ...typography.label, color: MUTED, fontWeight: '700' },
 });

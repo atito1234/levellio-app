@@ -13,7 +13,7 @@
  * users/{uid}/metadataEvents/{event.id}, discriminated by `type`.
  */
 
-export type MetadataEventType = 'habit_provenance' | 'activity_contribution';
+export type MetadataEventType = 'habit_provenance' | 'activity_contribution' | 'activity_session';
 
 interface BaseEvent {
   id: string;
@@ -44,7 +44,37 @@ export interface ActivityContributionEvent extends BaseEvent {
   context?: { category?: string; difficulty?: string; xp?: number };
 }
 
-export type MetadataEvent = HabitProvenanceEvent | ActivityContributionEvent;
+/** A coordinate sample (only captured when location is opted in + permitted). */
+export interface LocationSample {
+  lat: number;
+  lng: number;
+  accuracy?: number;
+  /** Metres per second, when the device reports it (e.g. while running). */
+  speed?: number;
+}
+
+/**
+ * A completed activity "session" — the rich, analytics-oriented record captured
+ * when an activity is done (via timer, Pomodoro, or a manual log). Everything
+ * beyond the basics is governed by per-field privacy toggles.
+ */
+export interface ActivitySessionEvent extends BaseEvent {
+  type: 'activity_session';
+  activityId: string;
+  category?: string;
+  /** How it was completed. */
+  method: 'timer' | 'pomodoro' | 'manual';
+  /** Actual seconds spent (0 for a manual log). */
+  durationSec: number;
+  /** 0-23 local hour the activity completed (coarse time-of-day signal). */
+  hourOfDay?: number;
+  /** 0 (Sun) - 6 (Sat). */
+  weekday?: number;
+  /** Only present when location capture is opted in AND permission was granted. */
+  location?: LocationSample;
+}
+
+export type MetadataEvent = HabitProvenanceEvent | ActivityContributionEvent | ActivitySessionEvent;
 
 /** Per-field opt-in toggles. Defaults are privacy-preserving. */
 export interface MetadataPrivacy {
@@ -60,6 +90,10 @@ export interface MetadataPrivacy {
   includeContext: boolean;
   /** Keep exact timestamps; when off, timestamps are coarsened to the day. */
   includeTimestamps: boolean;
+  /** Master switch for activity session capture (duration/method/time-of-day). */
+  recordSession: boolean;
+  /** Include location/speed on sessions (requires permission; sensitive). */
+  includeLocation: boolean;
 }
 
 export const DEFAULT_METADATA_PRIVACY: MetadataPrivacy = {
@@ -69,6 +103,9 @@ export const DEFAULT_METADATA_PRIVACY: MetadataPrivacy = {
   includeSourceActivities: false,
   includeContext: false,
   includeTimestamps: true,
+  // Session metrics (on-device, non-sensitive) on by default; location off.
+  recordSession: true,
+  includeLocation: false,
 };
 
 /** Coerce arbitrary stored data into a valid privacy object. */
@@ -82,6 +119,8 @@ export function normalizeMetadataPrivacy(raw: unknown): MetadataPrivacy {
     includeSourceActivities: bool(r.includeSourceActivities, DEFAULT_METADATA_PRIVACY.includeSourceActivities),
     includeContext: bool(r.includeContext, DEFAULT_METADATA_PRIVACY.includeContext),
     includeTimestamps: bool(r.includeTimestamps, DEFAULT_METADATA_PRIVACY.includeTimestamps),
+    recordSession: bool(r.recordSession, DEFAULT_METADATA_PRIVACY.recordSession),
+    includeLocation: bool(r.includeLocation, DEFAULT_METADATA_PRIVACY.includeLocation),
   };
 }
 
@@ -160,5 +199,40 @@ export function buildContributionEvent(
     activityId: input.activityId,
     bucketId: input.bucketId,
     ...(privacy.includeContext && input.context ? { context: input.context } : {}),
+  };
+}
+
+export interface SessionInput {
+  activityId: string;
+  category?: string;
+  method: 'timer' | 'pomodoro' | 'manual';
+  durationSec: number;
+  /** Pre-captured location (only when opted in + permitted); omitted otherwise. */
+  location?: LocationSample;
+}
+
+/**
+ * Build a privacy-filtered activity-session event (for later analytics), or null
+ * if session capture is opted out. Time-of-day/weekday are derived from `now`
+ * and included only with exact timestamps; location only when opted in.
+ */
+export function buildSessionEvent(
+  input: SessionInput,
+  privacy: MetadataPrivacy,
+  deps: BuildDeps,
+): ActivitySessionEvent | null {
+  if (!privacy.recordSession) return null;
+  const when = new Date(deps.now);
+  return {
+    id: genEventId(deps.now),
+    type: 'activity_session',
+    createdAt: stamp(deps.now, privacy),
+    appVersion: deps.appVersion,
+    activityId: input.activityId,
+    ...(privacy.includeContext && input.category ? { category: input.category } : {}),
+    method: input.method,
+    durationSec: Math.max(0, Math.round(input.durationSec)),
+    ...(privacy.includeTimestamps ? { hourOfDay: when.getHours(), weekday: when.getDay() } : {}),
+    ...(privacy.includeLocation && input.location ? { location: input.location } : {}),
   };
 }

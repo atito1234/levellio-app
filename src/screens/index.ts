@@ -11,5 +11,6 @@ export { KitSelectScreen } from './KitSelectScreen';
 export { OrganizeScreen } from './OrganizeScreen';
 export { BucketEditScreen } from './BucketEditScreen';
 export { RippleScreen } from './RippleScreen';
+export { ActivityTimerScreen } from './ActivityTimerScreen';
 export { ConnectionsScreen } from './ConnectionsScreen';
 export { MonthlyProgressScreen } from './MonthlyProgressScreen';

@@ -320,9 +320,16 @@ export function DashboardScreen() {
               <Text style={styles.focusName} numberOfLines={2}>
                 {focus.title}
               </Text>
-              <Text style={styles.focusFeeds}>
-                Strengthens {rippleForQuest(focus).slice(0, 2).map((d) => getCapacity(d.capacityId).name).join(' · ')}
-              </Text>
+              <Pressable
+                onPress={() => navigation.navigate('Connections', { questId: focus.id })}
+                accessibilityRole="button"
+                accessibilityLabel={`See how ${focus.title} connects`}
+              >
+                <Text style={styles.focusFeeds}>
+                  Strengthens {rippleForQuest(focus).slice(0, 2).map((d) => getCapacity(d.capacityId).name).join(' · ')}
+                  {'  '}🔗
+                </Text>
+              </Pressable>
               {/* Fitts: large, full-width, thumb-reachable primary action. */}
               <Pressable
                 onPress={() => openHabit(focus.id)}

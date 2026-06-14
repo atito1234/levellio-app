@@ -28,8 +28,10 @@ export type RootStackParamList = {
   BucketEdit: { bucketId?: string } | undefined;
   /** "The Ripple" — the real habit detail (questId), or the seed-action demo. */
   Ripple: { actionId?: string; questId?: string } | undefined;
-  /** "Connections" — the calm action↔capacity network map. */
-  Connections: undefined;
+  /** Countdown ("alarm") for a timed activity, or a Pomodoro focus session. */
+  ActivityTimer: { questId: string };
+  /** "Connections" — the network map, optionally focused on one activity. */
+  Connections: { questId?: string } | undefined;
   /** Monthly capacity progress (heatmap). */
   MonthlyProgress: undefined;
 };

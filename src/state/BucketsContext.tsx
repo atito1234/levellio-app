@@ -30,7 +30,10 @@ import {
 import {
   buildContributionEvent,
   buildProvenanceEvent,
+  buildSessionEvent,
   type ContributionInput,
+  type MetadataEvent,
+  type SessionInput,
 } from '@/lib/metadata';
 
 interface CreateInput {
@@ -55,6 +58,8 @@ interface BucketsContextValue {
   bucketIdFor: (activityId: string) => string | undefined;
   /** Record a contribution event when a filed activity is completed (privacy-gated). */
   recordContribution: (activity: { id: string; category?: string; difficulty?: string; xp?: number }) => Promise<void>;
+  /** Record a rich activity-session event (duration/method/time/location) — privacy-gated. */
+  recordSession: (input: SessionInput) => Promise<void>;
 }
 
 const BucketsContext = createContext<BucketsContextValue | null>(null);
@@ -95,7 +100,7 @@ export function BucketsProvider({ children }: { children: React.ReactNode }) {
   );
 
   const appendEvent = useCallback(
-    async (event: ReturnType<typeof buildProvenanceEvent> | ReturnType<typeof buildContributionEvent>) => {
+    async (event: MetadataEvent | null) => {
       if (uid && event) await metadataStore.append(uid, event);
     },
     [uid],
@@ -218,6 +223,16 @@ export function BucketsProvider({ children }: { children: React.ReactNode }) {
     [uid, state, appendEvent, settings.metadataPrivacy],
   );
 
+  // Rich, analytics-oriented session record (duration/method/time-of-day +
+  // optional location), captured for EVERY completion — privacy-gated.
+  const recordSession = useCallback(
+    async (input: SessionInput) => {
+      if (!uid) return;
+      await appendEvent(buildSessionEvent(input, settings.metadataPrivacy, { now: Date.now(), appVersion: APP_VERSION }));
+    },
+    [uid, appendEvent, settings.metadataPrivacy],
+  );
+
   const value = useMemo<BucketsContextValue>(
     () => ({
       ready,
@@ -233,6 +248,7 @@ export function BucketsProvider({ children }: { children: React.ReactNode }) {
       assignActivity,
       bucketIdFor,
       recordContribution,
+      recordSession,
     }),
     [
       ready,
@@ -246,6 +262,7 @@ export function BucketsProvider({ children }: { children: React.ReactNode }) {
       assignActivity,
       bucketIdFor,
       recordContribution,
+      recordSession,
     ],
   );
 

@@ -19,7 +19,7 @@ function isEvent(value: unknown): value is MetadataEvent {
   return (
     !!e &&
     typeof e.id === 'string' &&
-    (e.type === 'habit_provenance' || e.type === 'activity_contribution') &&
+    (e.type === 'habit_provenance' || e.type === 'activity_contribution' || e.type === 'activity_session') &&
     typeof e.createdAt === 'number'
   );
 }
