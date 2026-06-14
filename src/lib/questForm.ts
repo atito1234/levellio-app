@@ -43,6 +43,25 @@ export function validateQuestDraft(draft: QuestDraft): ValidationResult {
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
+/** Normalize a title for duplicate comparison (trim + lowercase + collapse spaces). */
+export function normalizeTitle(title: string): string {
+  return title.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/**
+ * Find an existing activity with the same title (case/space-insensitive), so the
+ * UI can warn before adding a duplicate. `ignoreId` skips the quest being edited.
+ */
+export function findDuplicateActivity(
+  quests: readonly Quest[],
+  title: string,
+  ignoreId?: string,
+): Quest | undefined {
+  const key = normalizeTitle(title);
+  if (!key) return undefined;
+  return quests.find((q) => q.id !== ignoreId && normalizeTitle(q.title) === key);
+}
+
 /** Convert a validated draft into a Quest (trims text, derives base XP). */
 export function draftToQuest(draft: QuestDraft, id: string, completed = false): Quest {
   const description = draft.description?.trim();
