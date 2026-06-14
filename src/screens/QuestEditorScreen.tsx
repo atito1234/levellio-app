@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ChipSelector,
@@ -13,8 +13,18 @@ import { useGame } from '@/state/GameContext';
 import { validateQuestDraft, findDuplicateActivity, TITLE_MAX, DESCRIPTION_MAX, type QuestDraft } from '@/lib/questForm';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import { QUEST_XP } from '@/lib/leveling';
+import {
+  isValidScheduleMinutes,
+  minutesToLabel,
+  minutesToParts,
+  partsToMinutes,
+  type Meridiem,
+  type TimeParts,
+} from '@/lib/schedule';
 import type { QuestCategory, QuestDifficulty } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
+
+const DEFAULT_SCHEDULE_PARTS: TimeParts = { hour12: 9, minute: 0, meridiem: 'AM' };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'QuestEditor'>;
 
@@ -42,8 +52,21 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   const [category, setCategory] = useState<QuestCategory>(existing?.category ?? 'health');
   const [titleError, setTitleError] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
+  const [scheduleOn, setScheduleOn] = useState(isValidScheduleMinutes(existing?.scheduledTime));
+  const [parts, setParts] = useState<TimeParts>(
+    isValidScheduleMinutes(existing?.scheduledTime)
+      ? minutesToParts(existing!.scheduledTime!)
+      : DEFAULT_SCHEDULE_PARTS,
+  );
 
   const isEditing = Boolean(existing);
+  const scheduledTime = scheduleOn ? partsToMinutes(parts) : undefined;
+
+  const bumpHour = (dir: 1 | -1) =>
+    setParts((p) => ({ ...p, hour12: ((p.hour12 - 1 + dir + 12) % 12) + 1 }));
+  const bumpMinute = (dir: 1 | -1) =>
+    setParts((p) => ({ ...p, minute: (p.minute + dir * 5 + 60) % 60 }));
+  const setMeridiem = (meridiem: Meridiem) => setParts((p) => ({ ...p, meridiem }));
 
   const persist = async (draft: QuestDraft) => {
     setSaving(true);
@@ -60,7 +83,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   };
 
   const handleSave = async () => {
-    const draft: QuestDraft = { title, description, category, difficulty };
+    const draft: QuestDraft = { title, description, category, difficulty, scheduledTime };
     const { valid, errors } = validateQuestDraft(draft);
     if (!valid) {
       setTitleError(errors.title);
@@ -135,6 +158,65 @@ export function QuestEditorScreen({ route, navigation }: Props) {
             selected={category}
             onSelect={setCategory}
           />
+
+          {/* Optional pinned time — works for timed and untimed activities alike. */}
+          <View style={styles.scheduleBlock}>
+            <View style={styles.scheduleHead}>
+              <View style={styles.scheduleHeadText}>
+                <Text style={styles.scheduleLabel}>Set a time</Text>
+                <Text style={styles.scheduleHint}>Pin this activity to a specific time of day.</Text>
+              </View>
+              <Switch
+                value={scheduleOn}
+                onValueChange={setScheduleOn}
+                trackColor={{ true: colors.identity, false: colors.border }}
+                accessibilityLabel="Set a specific time for this activity"
+              />
+            </View>
+
+            {scheduleOn && (
+              <View style={styles.picker}>
+                <Stepper
+                  label="Hour"
+                  value={`${parts.hour12}`}
+                  onDown={() => bumpHour(-1)}
+                  onUp={() => bumpHour(1)}
+                  unit="hour"
+                />
+                <Text style={styles.colon}>:</Text>
+                <Stepper
+                  label="Minute"
+                  value={`${parts.minute}`.padStart(2, '0')}
+                  onDown={() => bumpMinute(-1)}
+                  onUp={() => bumpMinute(1)}
+                  unit="minute"
+                />
+                <View style={styles.meridiemCol}>
+                  {(['AM', 'PM'] as const).map((m) => {
+                    const active = parts.meridiem === m;
+                    return (
+                      <Pressable
+                        key={m}
+                        onPress={() => setMeridiem(m)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: active }}
+                        accessibilityLabel={m === 'AM' ? 'Morning' : 'Afternoon or evening'}
+                        style={[styles.meridiemBtn, active && styles.meridiemBtnOn]}
+                      >
+                        <Text style={[styles.meridiemText, active && styles.meridiemTextOn]}>{m}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
+
+            {scheduleOn && (
+              <Text style={styles.scheduledFor} accessibilityLiveRegion="polite">
+                Scheduled for {minutesToLabel(partsToMinutes(parts))}
+              </Text>
+            )}
+          </View>
         </ScrollView>
 
         <View style={styles.actions}>
@@ -152,6 +234,47 @@ export function QuestEditorScreen({ route, navigation }: Props) {
         </View>
       </KeyboardAvoidingView>
     </ScreenContainer>
+  );
+}
+
+/** Compact −/+ stepper for one time field (built on plain Pressables, no native dep). */
+function Stepper({
+  label,
+  value,
+  unit,
+  onDown,
+  onUp,
+}: {
+  label: string;
+  value: string;
+  unit: string;
+  onDown: () => void;
+  onUp: () => void;
+}) {
+  return (
+    <View style={styles.stepper}>
+      <Pressable
+        onPress={onUp}
+        accessibilityRole="button"
+        accessibilityLabel={`Increase ${unit}`}
+        hitSlop={8}
+        style={styles.stepBtn}
+      >
+        <Text style={styles.stepBtnText}>＋</Text>
+      </Pressable>
+      <Text style={styles.stepValue} accessibilityLabel={`${label} ${value}`}>
+        {value}
+      </Text>
+      <Pressable
+        onPress={onDown}
+        accessibilityRole="button"
+        accessibilityLabel={`Decrease ${unit}`}
+        hitSlop={8}
+        style={styles.stepBtn}
+      >
+        <Text style={styles.stepBtnText}>－</Text>
+      </Pressable>
+    </View>
   );
 }
 
@@ -178,4 +301,37 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingTop: spacing.md,
   },
+  scheduleBlock: { gap: spacing.md },
+  scheduleHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
+  scheduleHeadText: { flex: 1, gap: 2 },
+  scheduleLabel: { ...typography.label, color: colors.textPrimary, fontWeight: '700' },
+  scheduleHint: { ...typography.caption, color: colors.textSecondary },
+  picker: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
+  colon: { ...typography.heading, color: colors.textPrimary, marginHorizontal: spacing.xs },
+  stepper: { alignItems: 'center', gap: spacing.xs },
+  stepBtn: {
+    width: 44,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepBtnText: { ...typography.title, color: colors.identity, fontWeight: '800' },
+  stepValue: { ...typography.heading, color: colors.textPrimary, minWidth: 52, textAlign: 'center' },
+  meridiemCol: { gap: spacing.xs, marginLeft: spacing.sm },
+  meridiemBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+  },
+  meridiemBtnOn: { backgroundColor: colors.identity, borderColor: colors.identity },
+  meridiemText: { ...typography.label, color: colors.textSecondary, fontWeight: '700' },
+  meridiemTextOn: { color: '#FFFFFF' },
+  scheduledFor: { ...typography.body, color: colors.identity, fontWeight: '700', textAlign: 'center' },
 });

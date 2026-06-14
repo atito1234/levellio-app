@@ -25,6 +25,7 @@ import { dayProgress, groupHabitsIntoRails, prioritizeAfterFirstOpen, type Habit
 import { CATEGORY_META } from '@/lib/categories';
 import { CAPACITIES, getCapacity } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
+import { isValidScheduleMinutes, minutesToLabel } from '@/lib/schedule';
 import { getBucketColor } from '@/lib/buckets';
 import { defaultAIEngine } from '@/services/ai';
 import type { Quest, QuestCategory } from '@/types';
@@ -320,6 +321,11 @@ export function DashboardScreen() {
               <Text style={styles.focusName} numberOfLines={2}>
                 {focus.title}
               </Text>
+              {isValidScheduleMinutes(focus.scheduledTime) && (
+                <Text style={styles.focusTime} accessibilityLabel={`Scheduled for ${minutesToLabel(focus.scheduledTime)}`}>
+                  ⏰ {minutesToLabel(focus.scheduledTime)}
+                </Text>
+              )}
               <Pressable
                 onPress={() => navigation.navigate('Connections', { questId: focus.id })}
                 accessibilityRole="button"
@@ -590,6 +596,7 @@ const styles = StyleSheet.create({
   focusBlock: { width: '100%', alignItems: 'center', gap: spacing.sm },
   focusName: { ...typography.title, color: INK, textAlign: 'center', fontWeight: '700' },
   focusFeeds: { ...typography.caption, color: MUTED, textAlign: 'center' },
+  focusTime: { ...typography.caption, color: '#6C4CF1', fontWeight: '700', textAlign: 'center' },
   focusNav: {
     flexDirection: 'row',
     alignItems: 'center',

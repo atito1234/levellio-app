@@ -28,6 +28,11 @@ export interface Quest {
   completed: boolean;
   /** Local day (YYYY-MM-DD) this habit was last completed; drives daily reset. */
   lastCompletedDate?: string;
+  /**
+   * Optional pinned time of day, as whole minutes since local midnight (0..1439).
+   * Lets users schedule a specific time even for untimed activities.
+   */
+  scheduledTime?: number;
 }
 
 /** Hero progression tiers. */

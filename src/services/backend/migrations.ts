@@ -5,6 +5,7 @@
  */
 import { companionStageForLevel, tierForLevel, QUEST_XP } from '@/lib/leveling';
 import { resolveCategory } from '@/lib/categories';
+import { isValidScheduleMinutes } from '@/lib/schedule';
 import { isValidKitId, NO_KIT_ID } from '@/data/worldCupKits';
 import type { Character, Quest, QuestDifficulty } from '@/types';
 import { LOCAL_UID } from './seed';
@@ -69,6 +70,7 @@ export function migrateQuests(raw: unknown): Quest[] {
       baseXp: num(q.baseXp, QUEST_XP[difficulty]),
       completed: q.completed === true,
       ...(typeof q.lastCompletedDate === 'string' ? { lastCompletedDate: q.lastCompletedDate } : {}),
+      ...(isValidScheduleMinutes(q.scheduledTime) ? { scheduledTime: q.scheduledTime } : {}),
     };
   });
 }
