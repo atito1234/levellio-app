@@ -93,6 +93,8 @@ interface GameContextValue extends GameState {
   setPresentation: (presentation: HeroPresentation) => Promise<void>;
   /** Select a World Cup nation kit (or NO_KIT_ID for the classic look) and persist. */
   setKit: (kitId: string) => Promise<void>;
+  /** Replace the quest order (e.g. re-prioritizing the focus) and persist. */
+  reorderQuests: (next: Quest[]) => Promise<void>;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -246,6 +248,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     [state.quests, persistQuests],
   );
 
+  const reorderQuests = useCallback(
+    async (next: Quest[]): Promise<void> => {
+      await persistQuests(next, true);
+    },
+    [persistQuests],
+  );
+
   const setPresentation = useCallback(
     async (presentation: HeroPresentation): Promise<void> => {
       if (!state.user || !state.character) return;
@@ -279,6 +288,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       addLibraryHabit,
       setPresentation,
       setKit,
+      reorderQuests,
     }),
     [
       state,
@@ -291,6 +301,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       addLibraryHabit,
       setPresentation,
       setKit,
+      reorderQuests,
     ],
   );
 

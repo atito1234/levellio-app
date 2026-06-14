@@ -1,5 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  Easing,
+  PanResponder,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
@@ -8,9 +19,12 @@ import { BucketIcon } from '@/components/BucketIcon';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { useCapacities } from '@/state/CapacitiesContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { dayProgress, groupHabitsIntoRails, pickFocusHabit, type HabitRail } from '@/lib/dashboard';
+import { dayProgress, groupHabitsIntoRails, prioritizeAfterFirstOpen, type HabitRail } from '@/lib/dashboard';
 import { CATEGORY_META } from '@/lib/categories';
+import { CAPACITIES, getCapacity } from '@/lib/compounding';
+import { rippleForQuest } from '@/lib/habitCapacity';
 import { getBucketColor } from '@/lib/buckets';
 import { defaultAIEngine } from '@/services/ai';
 import type { Quest, QuestCategory } from '@/types';
@@ -33,6 +47,8 @@ const HSTROKE = 16;
 const HR = (HRING - HSTROKE) / 2;
 const HC = 2 * Math.PI * HR;
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const SCREEN_W = Dimensions.get('window').width;
+const SWIPE_THRESHOLD = 56;
 
 /**
  * Home — the ring-first "Today billboard". Replaces the old checklist home in
@@ -42,8 +58,9 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
  */
 export function DashboardScreen() {
   const navigation = useNavigation<Nav>();
-  const { character, quests, suggestQuest, status } = useGame();
+  const { character, quests, suggestQuest, reorderQuests, status } = useGame();
   const { buckets, assignments } = useBuckets();
+  const { levels } = useCapacities();
   const reduced = useReducedMotion();
   const [motivation, setMotivation] = useState('');
   const [suggesting, setSuggesting] = useState(false);
@@ -60,8 +77,73 @@ export function DashboardScreen() {
   }, [character]);
 
   const progress = useMemo(() => dayProgress(quests), [quests]);
-  const focus = useMemo(() => pickFocusHabit(quests), [quests]);
   const rails = useMemo(() => groupHabitsIntoRails(quests, buckets, assignments), [quests, buckets, assignments]);
+
+  // Browse the open habits with a swipe to choose what to tackle now.
+  const openHabits = useMemo(() => quests.filter((q) => !q.completed), [quests]);
+  const [focusIndex, setFocusIndex] = useState(0);
+  const safeIndex = openHabits.length ? Math.min(focusIndex, openHabits.length - 1) : 0;
+  const focus = openHabits[safeIndex] ?? null;
+  const canBrowse = openHabits.length > 1;
+
+  const cardX = useRef(new Animated.Value(0)).current;
+
+  // Swipe LEFT → next open activity (browse). Reduced-motion just switches.
+  const goNext = useCallback(() => {
+    if (openHabits.length < 2) return;
+    const advance = () => setFocusIndex((i) => (Math.min(i, openHabits.length - 1) + 1) % openHabits.length);
+    if (reduced) return advance();
+    Animated.timing(cardX, { toValue: -SCREEN_W, duration: 170, easing: Easing.in(Easing.quad), useNativeDriver: true }).start(() => {
+      advance();
+      cardX.setValue(SCREEN_W);
+      Animated.spring(cardX, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }).start();
+    });
+  }, [openHabits.length, reduced, cardX]);
+
+  // Swipe RIGHT → prioritize this activity to come right after the current one.
+  const doPrioritize = useCallback(() => {
+    if (!focus || openHabits.length < 2 || safeIndex === 0) {
+      // Already first (or nothing to do): gently snap back.
+      Animated.spring(cardX, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }).start();
+      return;
+    }
+    const focusId = focus.id;
+    const apply = () => {
+      void reorderQuests(prioritizeAfterFirstOpen(quests, focusId));
+      setFocusIndex(0);
+    };
+    if (reduced) return apply();
+    Animated.timing(cardX, { toValue: SCREEN_W, duration: 170, easing: Easing.in(Easing.quad), useNativeDriver: true }).start(() => {
+      apply();
+      cardX.setValue(-SCREEN_W);
+      Animated.spring(cardX, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }).start();
+    });
+  }, [focus, openHabits.length, safeIndex, quests, reduced, reorderQuests, cardX]);
+
+  // Stable refs so the once-created PanResponder always calls the latest handlers.
+  const goNextRef = useRef(goNext);
+  goNextRef.current = goNext;
+  const prioritizeRef = useRef(doPrioritize);
+  prioritizeRef.current = doPrioritize;
+  const canBrowseRef = useRef(canBrowse);
+  canBrowseRef.current = canBrowse;
+  const reducedRef = useRef(reduced);
+  reducedRef.current = reduced;
+
+  const pan = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_e, g) =>
+        canBrowseRef.current && Math.abs(g.dx) > 14 && Math.abs(g.dx) > Math.abs(g.dy) * 1.4,
+      onPanResponderMove: (_e, g) => {
+        if (!reducedRef.current) cardX.setValue(g.dx * 0.5);
+      },
+      onPanResponderRelease: (_e, g) => {
+        if (g.dx < -SWIPE_THRESHOLD) goNextRef.current();
+        else if (g.dx > SWIPE_THRESHOLD) prioritizeRef.current();
+        else Animated.spring(cardX, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }).start();
+      },
+    }),
+  ).current;
 
   // Hero ring fill — goal-gradient: eases toward 100% as today's habits close.
   const fill = useRef(new Animated.Value(0)).current;
@@ -138,8 +220,9 @@ export function DashboardScreen() {
           </View>
         </View>
 
-        {/* Hero billboard — Zeigarnik: a large open ring pulls completion. */}
-        <View style={styles.billboard}>
+        {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
+            Swipe to browse open activities: left = next, right = prioritize. */}
+        <View style={styles.billboard} {...(canBrowse ? pan.panHandlers : {})}>
           <Text style={styles.billboardKicker}>YOUR FOCUS RIGHT NOW</Text>
           <View style={styles.ringStage}>
             {/* subtle glassmorphism glow behind the ring */}
@@ -161,15 +244,40 @@ export function DashboardScreen() {
               </G>
             </Svg>
             <View style={styles.ringCenter} pointerEvents="none">
-              <Text style={styles.ringPct}>{progress.pct}%</Text>
-              <Text style={styles.ringSub}>{progress.done} of {progress.total} today</Text>
+              <View style={styles.ringPctWrap}>
+                <Text style={styles.ringPct} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+                  {progress.pct}%
+                </Text>
+              </View>
+              <Text style={styles.ringSub}>
+                {progress.done} of {progress.total} today
+              </Text>
             </View>
           </View>
 
           {focus ? (
-            <>
+            <Animated.View
+              style={[styles.focusBlock, { transform: [{ translateX: cardX }] }]}
+              accessible
+              accessibilityLabel={`Focus activity ${safeIndex + 1} of ${openHabits.length}: ${focus.title}`}
+              accessibilityActions={
+                canBrowse
+                  ? [
+                      { name: 'next', label: 'Next activity' },
+                      { name: 'prioritize', label: 'Prioritize this activity to be next' },
+                    ]
+                  : []
+              }
+              onAccessibilityAction={(e) => {
+                if (e.nativeEvent.actionName === 'next') goNext();
+                else if (e.nativeEvent.actionName === 'prioritize') doPrioritize();
+              }}
+            >
               <Text style={styles.focusName} numberOfLines={2}>
                 {focus.title}
+              </Text>
+              <Text style={styles.focusFeeds}>
+                Strengthens {rippleForQuest(focus).slice(0, 2).map((d) => getCapacity(d.capacityId).name).join(' · ')}
               </Text>
               {/* Fitts: large, full-width, thumb-reachable primary action. */}
               <Pressable
@@ -180,7 +288,29 @@ export function DashboardScreen() {
               >
                 <Text style={styles.primaryBtnText}>Do it now</Text>
               </Pressable>
-            </>
+
+              {/* Non-gesture controls + position (swipe is an enhancement). */}
+              {canBrowse && (
+                <View style={styles.focusNav}>
+                  <Pressable
+                    onPress={doPrioritize}
+                    disabled={safeIndex === 0}
+                    accessibilityRole="button"
+                    accessibilityLabel="Prioritize this activity to be next"
+                    hitSlop={8}
+                    style={safeIndex === 0 && styles.navDisabled}
+                  >
+                    <Text style={styles.navBtn}>⤴ Do next</Text>
+                  </Pressable>
+                  <Text style={styles.navPos}>
+                    {safeIndex + 1} of {openHabits.length}
+                  </Text>
+                  <Pressable onPress={goNext} accessibilityRole="button" accessibilityLabel="Next activity" hitSlop={8}>
+                    <Text style={styles.navBtn}>Next ›</Text>
+                  </Pressable>
+                </View>
+              )}
+            </Animated.View>
           ) : quests.length === 0 ? (
             <>
               <Text style={styles.focusName}>Add your first habit</Text>
@@ -203,9 +333,36 @@ export function DashboardScreen() {
           <QuickChip label="＋ New" onPress={() => navigation.navigate('QuestEditor')} />
           <QuickChip label="📚 Library" onPress={() => navigation.navigate('HabitLibrary')} />
           <QuickChip label="🗂 Buckets" onPress={() => navigation.navigate('Organize')} />
-          <QuickChip label="💧 Ripple" onPress={() => navigation.navigate('Ripple', { actionId: 'water' })} />
           <QuickChip label="🔗 Connections" onPress={() => navigation.navigate('Connections')} />
           <QuickChip label={suggesting ? '…' : '✨ Suggest'} onPress={handleSuggest} />
+        </ScrollView>
+
+        {/* Your capacities — the shared rings every completion feeds (real data). */}
+        <View style={styles.capHead}>
+          <Text style={styles.railLabel}>Your capacities</Text>
+          <Pressable
+            onPress={() => navigation.navigate('Connections')}
+            accessibilityRole="button"
+            accessibilityLabel="See how your actions connect"
+          >
+            <Text style={styles.capLink}>See connections ›</Text>
+          </Pressable>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
+          {CAPACITIES.map((cap) => {
+            const lvl = Math.round(levels[cap.id]);
+            return (
+              <View key={cap.id} style={styles.capCell} accessibilityLabel={`${cap.name} ${lvl} percent`}>
+                <View style={styles.capRingWrap}>
+                  <CapacityRing level={lvl} colorId={cap.colorId} size={56} strokeWidth={6} />
+                  <View style={styles.capRingCenter} pointerEvents="none">
+                    <Text style={styles.capRingPct}>{lvl}%</Text>
+                  </View>
+                </View>
+                <Text style={styles.capCellName}>{cap.name}</Text>
+              </View>
+            );
+          })}
         </ScrollView>
 
         {/* Rails — Gestalt grouping: each life-area reads as one coherent row. */}
@@ -336,9 +493,23 @@ const styles = StyleSheet.create({
   ringStage: { width: HRING, height: HRING, alignItems: 'center', justifyContent: 'center', marginVertical: spacing.sm },
   glow: { position: 'absolute', width: HRING - 30, height: HRING - 30, borderRadius: HRING, opacity: 0.08 },
   ringCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
-  ringPct: { ...typography.heading, color: INK, fontWeight: '900', fontSize: 40 },
+  // Keep the big % comfortably inside the inner disc; auto-shrinks for "100%".
+  ringPctWrap: { width: HRING - 2 * HSTROKE - 24, alignItems: 'center' },
+  ringPct: { ...typography.heading, color: INK, fontWeight: '900', fontSize: 34 },
   ringSub: { ...typography.caption, color: MUTED },
+  focusBlock: { width: '100%', alignItems: 'center', gap: spacing.sm },
   focusName: { ...typography.title, color: INK, textAlign: 'center', fontWeight: '700' },
+  focusFeeds: { ...typography.caption, color: MUTED, textAlign: 'center' },
+  focusNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignSelf: 'stretch',
+    marginTop: spacing.xs,
+  },
+  navBtn: { ...typography.label, color: VIOLET, fontWeight: '700' },
+  navPos: { ...typography.caption, color: MUTED },
+  navDisabled: { opacity: 0.35 },
   primaryBtn: {
     alignSelf: 'stretch',
     backgroundColor: VIOLET,
@@ -355,6 +526,14 @@ const styles = StyleSheet.create({
   primaryBtnText: { ...typography.title, color: '#FFF', fontWeight: '800' },
   allDone: { ...typography.body, color: TEAL, fontWeight: '700', marginTop: spacing.xs },
 
+  capHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: PAD },
+  capLink: { ...typography.caption, color: VIOLET, fontWeight: '700' },
+  capStrip: { gap: spacing.md, paddingHorizontal: PAD },
+  capCell: { alignItems: 'center', gap: 4, width: 64 },
+  capRingWrap: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center' },
+  capRingCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  capRingPct: { ...typography.caption, color: INK, fontWeight: '800', fontSize: 11 },
+  capCellName: { ...typography.caption, color: MUTED, fontSize: 11 },
   quickRow: { gap: spacing.sm, paddingHorizontal: PAD },
   quickChip: { backgroundColor: '#FFF', borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#E8E6E0' },
   quickChipText: { ...typography.label, color: INK },

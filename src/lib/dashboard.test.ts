@@ -1,4 +1,4 @@
-import { dayProgress, groupHabitsIntoRails, pickFocusHabit } from './dashboard';
+import { dayProgress, groupHabitsIntoRails, pickFocusHabit, prioritizeAfterFirstOpen } from './dashboard';
 import type { HabitBucket } from '@/lib/buckets';
 import type { Quest } from '@/types';
 
@@ -69,5 +69,25 @@ describe('groupHabitsIntoRails', () => {
   it('treats assignments to deleted buckets as unfiled', () => {
     const rails = groupHabitsIntoRails([q('a', 'fitness')], [bucket('B1', 'Health', 0)], { a: 'ghost' });
     expect(rails.map((r) => r.id)).toEqual(['unfiled']);
+  });
+});
+
+describe('prioritizeAfterFirstOpen', () => {
+  it('moves a later open habit to be right after the first open one', () => {
+    // a(open), b(done), c(open), d(open)
+    const quests = [q('a', 'fitness'), q('b', 'health', true), q('c', 'mind'), q('d', 'fitness')];
+    const out = prioritizeAfterFirstOpen(quests, 'd');
+    // a stays first open; d is inserted right after a; order of others preserved
+    expect(out.map((x) => x.id)).toEqual(['a', 'd', 'b', 'c']);
+  });
+
+  it('is a no-op when the habit is already the first open', () => {
+    const quests = [q('a', 'fitness'), q('c', 'mind')];
+    expect(prioritizeAfterFirstOpen(quests, 'a')).toBe(quests);
+  });
+
+  it('is a no-op for an unknown id', () => {
+    const quests = [q('a', 'fitness')];
+    expect(prioritizeAfterFirstOpen(quests, 'zzz')).toBe(quests);
   });
 });

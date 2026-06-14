@@ -42,7 +42,7 @@ export function OrganizeScreen() {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer backgroundColor="#F7F6F2">
       <View style={styles.header}>
         <Text style={styles.title} accessibilityRole="header">
           Organize
@@ -340,11 +340,15 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radii.lg,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
     padding: spacing.md,
     gap: spacing.md,
-    ...shadows.sm,
+    shadowColor: '#1B1B2A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 3,
   },
   rowMain: { flex: 1, gap: 4 },
   rowTitle: { ...typography.body, color: colors.textPrimary, fontWeight: '600' },
@@ -370,10 +374,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radii.lg,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
     padding: spacing.md,
-    ...shadows.sm,
+    shadowColor: '#1B1B2A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 3,
   },
   bucketIcon: {
     width: 48,

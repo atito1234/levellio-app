@@ -36,7 +36,23 @@ export interface HabitRail {
   habits: Quest[];
 }
 
-/** Open habits lead each rail so the actionable (open) rings come first. */
+/**
+ * Move a habit to be the next focus — placed immediately after the current
+ * first open habit, so it comes up right after you finish the current one.
+ * Pure; returns the same reference when it's already first (no-op).
+ */
+export function prioritizeAfterFirstOpen(quests: readonly Quest[], questId: string): Quest[] {
+  const firstOpen = quests.findIndex((q) => !q.completed);
+  const targetIdx = quests.findIndex((q) => q.id === questId);
+  if (firstOpen < 0 || targetIdx < 0 || targetIdx === firstOpen) return quests as Quest[];
+  const arr = [...quests];
+  const [target] = arr.splice(targetIdx, 1);
+  // target is open and not the first open, so targetIdx > firstOpen — firstOpen's
+  // position is unchanged after the splice; insert right after it.
+  arr.splice(firstOpen + 1, 0, target!);
+  return arr;
+}
+
 function leadWithOpen(habits: Quest[]): Quest[] {
   return [...habits].sort((a, b) => Number(a.completed) - Number(b.completed));
 }
