@@ -218,6 +218,20 @@ export function SettingsScreen() {
             privacy={settings.metadataPrivacy}
             update={update}
           />
+          <PrivacyToggle
+            label="Record activity sessions (duration, time of day)"
+            value={settings.metadataPrivacy.recordSession}
+            field="recordSession"
+            privacy={settings.metadataPrivacy}
+            update={update}
+          />
+          <PrivacyToggle
+            label="Capture location &amp; speed (needs permission)"
+            value={settings.metadataPrivacy.includeLocation}
+            field="includeLocation"
+            privacy={settings.metadataPrivacy}
+            update={update}
+          />
         </View>
 
         {/* About & Legal */}

@@ -15,6 +15,8 @@ import {
 } from '@/lib/compounding';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useCapacities } from '@/state/CapacitiesContext';
+import { useGame } from '@/state/GameContext';
+import { rippleForQuest } from '@/lib/habitCapacity';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Connections'>;
@@ -96,10 +98,19 @@ const EDGES: Edge[] = DISPLAY_ACTIONS.flatMap((actionId) =>
     })),
 );
 
-export function ConnectionsScreen({ navigation }: Props) {
+export function ConnectionsScreen({ route, navigation }: Props) {
   const reduced = useReducedMotion();
   const { levels } = useCapacities(); // real, persisted capacity levels
+  const { quests } = useGame();
   const [selected, setSelected] = useState<string | null>(null);
+
+  // Per-activity focus: highlight the capacities THIS activity strengthens, plus
+  // every action that also feeds them (its place in the web).
+  const focusQuest = route.params?.questId ? quests.find((q) => q.id === route.params!.questId) : undefined;
+  const focusDeltas = focusQuest ? rippleForQuest(focusQuest) : [];
+  const focusCaps = new Set<CapacityId>(focusDeltas.map((d) => d.capacityId));
+  const focusDeltaFor = (capId: CapacityId): number => focusDeltas.find((d) => d.capacityId === capId)?.delta ?? 0;
+  const focusMode = !selected && focusQuest !== undefined;
 
   const dash = useRef(new Animated.Value(0)).current;
   const loopRef = useRef<Animated.CompositeAnimation | null>(null);
@@ -118,7 +129,7 @@ export function ConnectionsScreen({ navigation }: Props) {
   }, [selected, reduced, dash]);
 
   const dashOffset = dash.interpolate({ inputRange: [0, 1], outputRange: [0, -18] });
-  const fedBySelected = selected ? new Set(capacitiesForAction(selected)) : null;
+  const highlightedCaps = selected ? new Set(capacitiesForAction(selected)) : focusMode ? focusCaps : null;
 
   return (
     <ScreenContainer backgroundColor={BG}>
@@ -129,18 +140,24 @@ export function ConnectionsScreen({ navigation }: Props) {
       </View>
 
       <Text style={styles.title} accessibilityRole="header">
-        How your actions connect
+        {focusQuest ? 'How this connects' : 'How your actions connect'}
       </Text>
-      <Text style={styles.helper}>Tap any action to see everything it strengthens.</Text>
+      <Text style={styles.helper}>
+        {focusQuest
+          ? `${focusQuest.title} strengthens ${focusDeltas.map((d) => getCapacity(d.capacityId).name).join(', ')}. Tap any action to explore.`
+          : 'Tap any action to see everything it strengthens.'}
+      </Text>
 
       <View style={styles.stage}>
         <View style={{ width: CANVAS_W, height: CANVAS_H }}>
           {/* Edges (decorative; the nodes carry the semantics) */}
           <Svg width={CANVAS_W} height={CANVAS_H} style={StyleSheet.absoluteFill} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
             {EDGES.map((e) => {
-              const isOn = selected === e.actionId;
-              const dim = selected !== null && !isOn;
-              if (isOn && !reduced) {
+              // On when an action is tapped, or (focus mode) when the edge feeds
+              // a capacity the focused activity strengthens.
+              const isOn = selected ? selected === e.actionId : focusMode && focusCaps.has(e.capId);
+              const dim = (selected !== null || focusMode) && !isOn;
+              if (isOn && !reduced && selected) {
                 // von Restorff focus: the selected path glows violet and flows.
                 return (
                   <AnimatedPath
@@ -175,22 +192,23 @@ export function ConnectionsScreen({ navigation }: Props) {
           {DISPLAY_CAPS.map((capId) => {
             const cap = getCapacity(capId);
             const pos = CAP_POS[capId]!;
-            const fed = fedBySelected?.has(capId) ?? false;
-            const dim = selected !== null && !fed;
+            const fed = highlightedCaps?.has(capId) ?? false;
+            const dim = highlightedCaps !== null && !fed;
             const level = Math.round(levels[capId]);
+            const previewDelta = selected ? deltaFor(selected, capId) : focusMode ? focusDeltaFor(capId) : 0;
             return (
               <View
                 key={capId}
                 accessible
                 accessibilityRole="image"
-                accessibilityLabel={`${cap.name} ${level} percent${selected && fed ? `, plus ${deltaFor(selected, capId)} from ${ACTION_SHORT[selected]}` : ''}`}
+                accessibilityLabel={`${cap.name} ${level} percent${fed && previewDelta ? `, plus ${previewDelta}` : ''}`}
                 style={[styles.capNode, { left: pos.x - CAP_SIZE / 2, top: pos.y - CAP_SIZE / 2, opacity: dim ? 0.38 : 1 }]}
               >
                 <CapacityRing level={level} colorId={cap.colorId} size={CAP_SIZE} strokeWidth={6} />
                 <View style={styles.capCenter} pointerEvents="none">
                   <Text style={styles.capName}>{cap.name}</Text>
-                  {selected && fed ? (
-                    <Text style={[styles.capPct, { color: CAPACITY_HEX[cap.colorId] }]}>+{deltaFor(selected, capId)}</Text>
+                  {fed && previewDelta ? (
+                    <Text style={[styles.capPct, { color: CAPACITY_HEX[cap.colorId] }]}>+{previewDelta}</Text>
                   ) : (
                     <Text style={styles.capPct}>{level}%</Text>
                   )}
@@ -238,7 +256,9 @@ export function ConnectionsScreen({ navigation }: Props) {
       <Text style={styles.footnote} accessibilityLiveRegion="polite">
         {selected
           ? `${ACTION_SHORT[selected]} strengthens ${capacitiesForAction(selected).map((c) => getCapacity(c).name).join(', ')}.`
-          : 'Thicker lines mean a stronger effect.'}
+          : focusMode
+            ? 'Highlighted rings are what this activity builds — and the actions that share them.'
+            : 'Thicker lines mean a stronger effect.'}
       </Text>
     </ScreenContainer>
   );

@@ -13,6 +13,7 @@ import { KitSelectScreen } from '@/screens/KitSelectScreen';
 import { OrganizeScreen } from '@/screens/OrganizeScreen';
 import { BucketEditScreen } from '@/screens/BucketEditScreen';
 import { RippleScreen } from '@/screens/RippleScreen';
+import { ActivityTimerScreen } from '@/screens/ActivityTimerScreen';
 import { ConnectionsScreen } from '@/screens/ConnectionsScreen';
 import { MonthlyProgressScreen } from '@/screens/MonthlyProgressScreen';
 import { MainTabs } from './MainTabs';
@@ -74,6 +75,7 @@ export function RootNavigator() {
           options={{ presentation: 'modal' }}
         />
         <Stack.Screen name="Ripple" component={RippleScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="ActivityTimer" component={ActivityTimerScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Connections" component={ConnectionsScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="MonthlyProgress" component={MonthlyProgressScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
