@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ChipSelector,
@@ -10,7 +10,7 @@ import {
 } from '@/components';
 import { colors, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
-import { validateQuestDraft, TITLE_MAX, DESCRIPTION_MAX, type QuestDraft } from '@/lib/questForm';
+import { validateQuestDraft, findDuplicateActivity, TITLE_MAX, DESCRIPTION_MAX, type QuestDraft } from '@/lib/questForm';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import { QUEST_XP } from '@/lib/leveling';
 import type { QuestCategory, QuestDifficulty } from '@/types';
@@ -45,13 +45,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
 
   const isEditing = Boolean(existing);
 
-  const handleSave = async () => {
-    const draft: QuestDraft = { title, description, category, difficulty };
-    const { valid, errors } = validateQuestDraft(draft);
-    if (!valid) {
-      setTitleError(errors.title);
-      return;
-    }
+  const persist = async (draft: QuestDraft) => {
     setSaving(true);
     try {
       if (isEditing && editingId) {
@@ -63,6 +57,29 @@ export function QuestEditorScreen({ route, navigation }: Props) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSave = async () => {
+    const draft: QuestDraft = { title, description, category, difficulty };
+    const { valid, errors } = validateQuestDraft(draft);
+    if (!valid) {
+      setTitleError(errors.title);
+      return;
+    }
+    // Don't quietly pile up the same activity day after day — warn on duplicates.
+    const dup = findDuplicateActivity(quests, draft.title, editingId);
+    if (dup) {
+      Alert.alert(
+        'Already on your list',
+        `You already have “${dup.title}”. It repeats every day, so you don't need to add it again.`,
+        [
+          { text: 'Keep one', style: 'cancel' },
+          { text: 'Add anyway', style: 'destructive', onPress: () => void persist(draft) },
+        ],
+      );
+      return;
+    }
+    await persist(draft);
   };
 
   const handleDelete = async () => {

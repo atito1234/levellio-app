@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { DifficultyBadge, PrimaryButton, ScreenContainer } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { findDuplicateActivity } from '@/lib/questForm';
 import { libraryByCategory, type LibraryHabit } from '@/data/habitLibrary';
 import { CATEGORY_META } from '@/lib/categories';
 import { QUEST_XP } from '@/lib/leveling';
@@ -13,11 +14,13 @@ type Props = NativeStackScreenProps<RootStackParamList, 'HabitLibrary'>;
 
 /** Curated starter library (no AI). Add any habit to active quests in one tap. */
 export function HabitLibraryScreen({ navigation }: Props) {
-  const { addLibraryHabit } = useGame();
+  const { quests, addLibraryHabit } = useGame();
   const [addedIds, setAddedIds] = useState<string[]>([]);
   const sections = libraryByCategory();
 
   const handleAdd = async (habit: LibraryHabit) => {
+    // Guard against piling up the same daily activity.
+    if (findDuplicateActivity(quests, habit.title)) return;
     setAddedIds((prev) => [...prev, habit.id]);
     await addLibraryHabit(habit);
   };
@@ -36,7 +39,8 @@ export function HabitLibraryScreen({ navigation }: Props) {
               {CATEGORY_META[section.category].icon} {CATEGORY_META[section.category].label}
             </Text>
             {section.habits.map((habit) => {
-              const added = addedIds.includes(habit.id);
+              // "Added" if added this session OR already on the user's list.
+              const added = addedIds.includes(habit.id) || findDuplicateActivity(quests, habit.title) !== undefined;
               return (
                 <View key={habit.id} style={styles.row}>
                   <View style={styles.info}>
