@@ -34,6 +34,7 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
       const location = await captureLocationSafely(includeLocation);
       await recordSession({
         activityId: quest.id,
+        title: quest.title,
         category: quest.category,
         method: opts.method,
         durationSec: opts.durationSec,

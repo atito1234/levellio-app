@@ -61,6 +61,8 @@ export interface LocationSample {
 export interface ActivitySessionEvent extends BaseEvent {
   type: 'activity_session';
   activityId: string;
+  /** Activity title (kept so history stays readable even if the quest is deleted). */
+  title?: string;
   category?: string;
   /** How it was completed. */
   method: 'timer' | 'pomodoro' | 'manual';
@@ -204,6 +206,7 @@ export function buildContributionEvent(
 
 export interface SessionInput {
   activityId: string;
+  title?: string;
   category?: string;
   method: 'timer' | 'pomodoro' | 'manual';
   durationSec: number;
@@ -229,7 +232,10 @@ export function buildSessionEvent(
     createdAt: stamp(deps.now, privacy),
     appVersion: deps.appVersion,
     activityId: input.activityId,
-    ...(privacy.includeContext && input.category ? { category: input.category } : {}),
+    // Title + category are the activity's own descriptors — always kept so the
+    // user's history/insights are meaningful (not gated by includeContext).
+    ...(input.title ? { title: input.title } : {}),
+    ...(input.category ? { category: input.category } : {}),
     method: input.method,
     durationSec: Math.max(0, Math.round(input.durationSec)),
     ...(privacy.includeTimestamps ? { hourOfDay: when.getHours(), weekday: when.getDay() } : {}),

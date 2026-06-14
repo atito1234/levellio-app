@@ -238,6 +238,16 @@ export function RippleScreen({ route, navigation }: Props) {
             <Text style={styles.connLinkText}>🔗 See how this connects ›</Text>
           </Pressable>
         )}
+        {quest && (
+          <Pressable
+            onPress={() => navigation.navigate('Insights', { activityId: quest.id })}
+            accessibilityRole="button"
+            accessibilityLabel="See this activity's history and best times"
+            style={styles.connLink}
+          >
+            <Text style={styles.connLinkText}>📈 See its history ›</Text>
+          </Pressable>
+        )}
         {done && (
           <Text style={styles.srOnly} accessibilityLiveRegion="polite">
             {summary}

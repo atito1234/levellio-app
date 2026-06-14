@@ -16,6 +16,7 @@ import { RippleScreen } from '@/screens/RippleScreen';
 import { ActivityTimerScreen } from '@/screens/ActivityTimerScreen';
 import { ConnectionsScreen } from '@/screens/ConnectionsScreen';
 import { MonthlyProgressScreen } from '@/screens/MonthlyProgressScreen';
+import { InsightsScreen } from '@/screens/InsightsScreen';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -78,6 +79,7 @@ export function RootNavigator() {
         <Stack.Screen name="ActivityTimer" component={ActivityTimerScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Connections" component={ConnectionsScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="MonthlyProgress" component={MonthlyProgressScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Insights" component={InsightsScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
