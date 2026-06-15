@@ -8,13 +8,14 @@ import { usePlan } from '@/state/PlanContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { useGoals } from '@/state/GoalContext';
 import { useBattles } from '@/state/BattlesContext';
+import { useJournal } from '@/state/JournalContext';
 import { activitiesInBucket } from '@/lib/buckets';
 import { goalHabits } from '@/lib/goal';
 import { plannedOpen } from '@/lib/plan';
 import { CATEGORY_META } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
 import { TECHNIQUES, clampCustomMinutes, type TechniqueId } from '@/lib/timeTechniques';
-import { DRAGONS, CUSTOM_DRAGON_ID } from '@/data/dragons';
+import { DRAGONS, CUSTOM_DRAGON_ID, getDragon } from '@/data/dragons';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'BattleSetup'>;
@@ -29,11 +30,12 @@ const TRACK = '#ECEAE4';
 
 export function BattleSetupScreen({ route, navigation }: Props) {
   const { questId, bucketId, goalId } = route.params ?? {};
-  const { quests } = useGame();
+  const { quests, addQuest } = useGame();
   const { getPlan } = usePlan();
   const { assignments, buckets } = useBuckets();
   const { goals } = useGoals();
   const { lastTechniqueId, lastCustomMin, setTechnique } = useBattles();
+  const { entriesForDragon } = useJournal();
 
   const activeQuests = useMemo(() => quests.filter((q) => !q.completed), [quests]);
 
@@ -53,6 +55,18 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const [customMin, setCustomMin] = useState<number>(lastCustomMin ?? 20);
   const [dragonId, setDragonId] = useState<string>(DRAGONS[0]!.id);
   const [dragonName, setDragonName] = useState('');
+  const [customActivity, setCustomActivity] = useState('');
+
+  const resolvedDragon = getDragon(dragonId, dragonName);
+  const pastReflections = entriesForDragon(dragonId).length;
+
+  const addCustomActivity = async () => {
+    const title = customActivity.trim();
+    if (title.length === 0) return;
+    const quest = await addQuest({ title, category: 'health', difficulty: 'easy' });
+    if (quest) setSelected((prev) => new Set(prev).add(quest.id));
+    setCustomActivity('');
+  };
 
   const toggle = (id: string) =>
     setSelected((prev) => {
@@ -114,6 +128,24 @@ export function BattleSetupScreen({ route, navigation }: Props) {
               );
             })
           )}
+        </View>
+
+        {/* Add something you actually did, on the fly (e.g. "boiled eggs"). */}
+        <View style={styles.addRow}>
+          <TextInput
+            value={customActivity}
+            onChangeText={setCustomActivity}
+            placeholder="＋ Add a custom activity (e.g. boiled eggs)"
+            placeholderTextColor={MUTED}
+            style={styles.addInput}
+            onSubmitEditing={() => void addCustomActivity()}
+            returnKeyType="done"
+            maxLength={60}
+            accessibilityLabel="Add a custom activity"
+          />
+          <Pressable onPress={() => void addCustomActivity()} disabled={customActivity.trim().length === 0} accessibilityRole="button" accessibilityLabel="Add activity" style={styles.addBtn}>
+            <Text style={[styles.addBtnText, customActivity.trim().length === 0 && styles.addBtnOff]}>Add</Text>
+          </Pressable>
         </View>
 
         <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>TECHNIQUE</Text>
@@ -184,6 +216,33 @@ export function BattleSetupScreen({ route, navigation }: Props) {
             accessibilityLabel="Custom dragon name"
           />
         )}
+
+        {/* Reflect before you fight — name what's stopping you. */}
+        <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>REFLECT FIRST</Text>
+        <Pressable
+          onPress={() =>
+            navigation.navigate('JournalComposer', {
+              dragonId,
+              dragonName: resolvedDragon.name,
+              questIds: [...selected],
+            })
+          }
+          accessibilityRole="button"
+          accessibilityLabel="Journal what's stopping you"
+          style={styles.reflectBtn}
+        >
+          <Text style={styles.reflectIcon}>📓</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.reflectTitle}>Journal what’s stopping you</Text>
+            <Text style={styles.reflectSub}>Name the dragon — text, mood, a photo or video.</Text>
+          </View>
+          <Text style={styles.reflectChevron}>›</Text>
+        </Pressable>
+        {pastReflections > 0 && (
+          <Pressable onPress={() => navigation.navigate('Journal', { dragonId })} accessibilityRole="button" accessibilityLabel={`View ${pastReflections} past reflections`} style={styles.pastLink}>
+            <Text style={styles.pastLinkText}>View {pastReflections} past reflection{pastReflections === 1 ? '' : 's'} ›</Text>
+          </Pressable>
+        )}
       </ScrollView>
 
       <Pressable
@@ -231,6 +290,20 @@ const styles = StyleSheet.create({
   stepVal: { ...typography.title, color: INK, fontWeight: '700', minWidth: 80, textAlign: 'center' },
 
   input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: TRACK, marginTop: spacing.xs },
+
+  addRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  addInput: { ...typography.body, color: INK, flex: 1, backgroundColor: CARD, borderRadius: 14, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
+  addBtn: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  addBtnText: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  addBtnOff: { color: MUTED, opacity: 0.5 },
+
+  reflectBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: VIOLET_SOFT, borderRadius: 16, padding: spacing.md, borderWidth: 1, borderColor: '#E2DBFB' },
+  reflectIcon: { fontSize: 24 },
+  reflectTitle: { ...typography.body, color: INK, fontWeight: '800' },
+  reflectSub: { ...typography.caption, color: MUTED },
+  reflectChevron: { fontSize: 22, color: VIOLET, fontWeight: '800' },
+  pastLink: { paddingVertical: spacing.xs },
+  pastLinkText: { ...typography.label, color: VIOLET, fontWeight: '700' },
 
   cta: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm },
   ctaOff: { opacity: 0.4 },

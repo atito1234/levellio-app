@@ -22,3 +22,5 @@ export { GoalFocusScreen } from './GoalFocusScreen';
 export { QuickCaptureScreen } from './QuickCaptureScreen';
 export { BattleSetupScreen } from './BattleSetupScreen';
 export { BattleScreen } from './BattleScreen';
+export { JournalComposerScreen } from './JournalComposerScreen';
+export { JournalScreen } from './JournalScreen';
