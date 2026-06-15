@@ -20,7 +20,7 @@ const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
 export function JournalComposerScreen({ route, navigation }: Props) {
-  const { dragonId, dragonName, questIds } = route.params ?? {};
+  const { dragonId, dragonName, questIds, prompt, teaching } = route.params ?? {};
   const { character } = useGame();
   const { addEntry } = useJournal();
 
@@ -84,12 +84,21 @@ export function JournalComposerScreen({ route, navigation }: Props) {
           </View>
         </View>
 
+        {teaching ? (
+          <View style={styles.teachingCard}>
+            <Text style={styles.teachingLabel}>🧠 WHY THIS MATTERS</Text>
+            <Text style={styles.teachingText}>{teaching}</Text>
+          </View>
+        ) : null}
+
+        {prompt ? <Text style={styles.promptText}>{prompt}</Text> : null}
+
         <TextInput
           value={text}
           onChangeText={setText}
           autoFocus
           multiline
-          placeholder="What’s stopping you from this habit? Name the dragon…"
+          placeholder={prompt ?? 'What’s stopping you from this habit? Name the dragon…'}
           placeholderTextColor={MUTED}
           style={styles.input}
           accessibilityLabel="Your reflection"
@@ -169,6 +178,10 @@ const styles = StyleSheet.create({
   you: { ...typography.body, color: INK, fontWeight: '800' },
   context: { ...typography.caption, color: MUTED },
 
+  teachingCard: { backgroundColor: VIOLET_SOFT, borderRadius: 14, padding: spacing.md, gap: 4, borderWidth: 1, borderColor: '#E2DBFB' },
+  teachingLabel: { ...typography.caption, color: VIOLET, fontWeight: '800', letterSpacing: 1 },
+  teachingText: { ...typography.body, color: INK },
+  promptText: { ...typography.title, color: INK, fontWeight: '800' },
   input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: 16, padding: spacing.md, minHeight: 120, textAlignVertical: 'top', borderWidth: 1, borderColor: TRACK },
 
   mediaWrap: { position: 'relative' },
