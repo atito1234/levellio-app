@@ -17,3 +17,5 @@ export { MonthlyProgressScreen } from './MonthlyProgressScreen';
 export { InsightsScreen } from './InsightsScreen';
 export { PlanScreen } from './PlanScreen';
 export { CapacityFocusScreen } from './CapacityFocusScreen';
+export { GoalEditorScreen } from './GoalEditorScreen';
+export { GoalFocusScreen } from './GoalFocusScreen';
