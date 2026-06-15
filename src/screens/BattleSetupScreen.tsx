@@ -9,6 +9,7 @@ import { useBuckets } from '@/state/BucketsContext';
 import { useGoals } from '@/state/GoalContext';
 import { useBattles } from '@/state/BattlesContext';
 import { useJournal } from '@/state/JournalContext';
+import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { activitiesInBucket } from '@/lib/buckets';
 import { goalHabits } from '@/lib/goal';
 import { plannedOpen } from '@/lib/plan';
@@ -60,6 +61,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const { goals } = useGoals();
   const { lastTechniqueId, lastCustomMin, setTechnique, coins } = useBattles();
   const { entriesForDragon } = useJournal();
+  const guardAbandon = useAbandonGuard();
 
   const activeQuests = useMemo(() => quests.filter((q) => !q.completed), [quests]);
 
@@ -116,6 +118,21 @@ export function BattleSetupScreen({ route, navigation }: Props) {
 
   const canFight = selected.size > 0 && (dragonId !== CUSTOM_DRAGON_ID || dragonName.trim().length > 0);
 
+  const onClose = () => {
+    if (
+      guardAbandon({
+        kind: 'setup-close',
+        ctx: { selectedCount: selected.size },
+        dragonId,
+        ...(dragonId === CUSTOM_DRAGON_ID && dragonName.trim() ? { dragonName: dragonName.trim() } : {}),
+        ...(primary ? { questId: primary.id } : {}),
+        onProceed: () => navigation.goBack(),
+      })
+    )
+      return;
+    navigation.goBack();
+  };
+
   const begin = async () => {
     if (!canFight) return;
     await setTechnique(techniqueId, techniqueId === 'custom' ? clampCustomMinutes(customMin) : undefined);
@@ -149,7 +166,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Close" hitSlop={12}>
+        <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">

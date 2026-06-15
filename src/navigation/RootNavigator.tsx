@@ -29,6 +29,7 @@ import { JournalScreen } from '@/screens/JournalScreen';
 import { AnalyticsScreen } from '@/screens/AnalyticsScreen';
 import { CoachingEncounterScreen } from '@/screens/CoachingEncounterScreen';
 import { MilestoneCelebration } from '@/components/MilestoneCelebration';
+import { InterventionOverlay } from '@/components/InterventionOverlay';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -106,6 +107,8 @@ export function RootNavigator() {
       </Stack.Navigator>
       {/* Overlays any screen to celebrate earned milestones (queue-driven). */}
       <MilestoneCelebration />
+      {/* "Think twice" coaching pause when quitting something with stakes. */}
+      <InterventionOverlay />
     </NavigationContainer>
   );
 }

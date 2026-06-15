@@ -13,6 +13,7 @@ import { useGame } from '@/state/GameContext';
 import { validateQuestDraft, findDuplicateActivity, TITLE_MAX, DESCRIPTION_MAX, WHY_MAX, type QuestDraft } from '@/lib/questForm';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import { habitScience } from '@/data/habitScience';
+import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { QUEST_XP } from '@/lib/leveling';
 import {
   isValidScheduleMinutes,
@@ -43,7 +44,8 @@ const CATEGORY_OPTIONS: ChipOption<QuestCategory>[] = CATEGORY_ORDER.map((c) => 
 
 /** Manual quest creator/editor (no AI). Create, edit, and delete quests. */
 export function QuestEditorScreen({ route, navigation }: Props) {
-  const { quests, addQuest, updateQuest, deleteQuest } = useGame();
+  const { quests, character, addQuest, updateQuest, deleteQuest } = useGame();
+  const guardAbandon = useAbandonGuard();
   const editingId = route.params?.questId;
   const existing = editingId ? quests.find((q) => q.id === editingId) : undefined;
 
@@ -124,10 +126,17 @@ export function QuestEditorScreen({ route, navigation }: Props) {
     await persist(draft);
   };
 
-  const handleDelete = async () => {
+  const doDelete = async () => {
     if (!editingId) return;
     await deleteQuest(editingId);
     navigation.goBack();
+  };
+
+  const handleDelete = () => {
+    if (!editingId) return;
+    // Deleting a habit with a real streak earns a "think twice" pause.
+    if (guardAbandon({ kind: 'quest-delete', ctx: { streakDays: character?.streakDays ?? 0 }, onProceed: () => void doDelete() })) return;
+    void doDelete();
   };
 
   return (
