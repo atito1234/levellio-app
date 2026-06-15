@@ -20,6 +20,7 @@ import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { usePlan } from '@/state/PlanContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
+import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
@@ -28,7 +29,6 @@ import { CAPACITIES, getCapacity } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { isValidScheduleMinutes, minutesToLabel } from '@/lib/schedule';
 import { dayKey } from '@/lib/dates';
-import { defaultAIEngine } from '@/services/ai';
 import type { Quest } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -70,19 +70,9 @@ export function DashboardScreen() {
   // effectivePlan falls back to all habits, and we nudge the user to curate.
   const todayKey = dayKey(new Date());
   const plan = getPlan(todayKey);
-  const [motivation, setMotivation] = useState('');
   const [suggesting, setSuggesting] = useState(false);
-
-  useEffect(() => {
-    if (!character) return;
-    let active = true;
-    defaultAIEngine.motivate({ streakDays: character.streakDays, level: character.level }).then((line) => {
-      if (active) setMotivation(line);
-    });
-    return () => {
-      active = false;
-    };
-  }, [character]);
+  // Personalized, science-backed line from the user's real history + today.
+  const motivation = useMotivation().text;
 
   const progress = useMemo(() => planProgress(quests, plan), [quests, plan]);
 
@@ -255,7 +245,7 @@ export function DashboardScreen() {
               {partOfDay}, {name}
             </Text>
             {motivation ? (
-              <Text style={styles.motivation} numberOfLines={1}>
+              <Text style={styles.motivation} numberOfLines={2}>
                 {motivation}
               </Text>
             ) : null}
