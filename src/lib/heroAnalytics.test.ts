@@ -4,6 +4,7 @@ import {
   directionVerdict,
   longestDayStreak,
   nextLockedTier,
+  ratingStats,
   tierStatus,
   unlockedCount,
   weekCells,
@@ -12,7 +13,7 @@ import {
 import type { ActivitySessionEvent } from './metadata';
 
 // Build a session on a given local day key at noon.
-const sess = (dayKey: string, activityId = 'a'): ActivitySessionEvent => {
+const sess = (dayKey: string, activityId = 'a', rating?: 1 | 2 | 3 | 4 | 5): ActivitySessionEvent => {
   const [y, m, d] = dayKey.split('-').map(Number);
   return {
     id: `${dayKey}-${activityId}`,
@@ -22,6 +23,7 @@ const sess = (dayKey: string, activityId = 'a'): ActivitySessionEvent => {
     activityId,
     method: 'manual',
     durationSec: 0,
+    ...(rating ? { rating } : {}),
   };
 };
 
@@ -75,6 +77,39 @@ describe('directionVerdict', () => {
   });
   it('mentions the weekly trend in the reason', () => {
     expect(directionVerdict({ daysDone: 10, streakDays: 4, activeThisWeek: 5, activePrevWeek: 2 }).reason).toContain('up from last week');
+  });
+});
+
+describe('ratingStats', () => {
+  it('returns null when nothing is rated', () => {
+    expect(ratingStats([sess('2026-06-01'), sess('2026-06-02')])).toBeNull();
+  });
+
+  it('averages ratings and ignores unrated sessions', () => {
+    const s = [sess('2026-06-01', 'a', 4), sess('2026-06-02', 'a', 2), sess('2026-06-03', 'b')];
+    const r = ratingStats(s)!;
+    expect(r.count).toBe(2);
+    expect(r.average).toBe(3);
+  });
+
+  it('detects an upward trend across the timeline', () => {
+    const s = [
+      sess('2026-06-01', 'a', 2),
+      sess('2026-06-02', 'a', 2),
+      sess('2026-06-03', 'a', 5),
+      sess('2026-06-04', 'a', 5),
+    ];
+    expect(ratingStats(s)!.trend).toBeGreaterThan(0);
+  });
+
+  it('names the best-feeling activity (needs ≥2 ratings)', () => {
+    const s = [
+      sess('2026-06-01', 'a', 5),
+      sess('2026-06-02', 'a', 5),
+      sess('2026-06-03', 'b', 2),
+      sess('2026-06-04', 'b', 2),
+    ];
+    expect(ratingStats(s)!.best?.activityId).toBe('a');
   });
 });
 

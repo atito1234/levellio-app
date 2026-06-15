@@ -10,8 +10,9 @@ import {
 } from '@/components';
 import { colors, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
-import { validateQuestDraft, findDuplicateActivity, TITLE_MAX, DESCRIPTION_MAX, type QuestDraft } from '@/lib/questForm';
+import { validateQuestDraft, findDuplicateActivity, TITLE_MAX, DESCRIPTION_MAX, WHY_MAX, type QuestDraft } from '@/lib/questForm';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
+import { habitScience } from '@/data/habitScience';
 import { QUEST_XP } from '@/lib/leveling';
 import {
   isValidScheduleMinutes,
@@ -58,9 +59,18 @@ export function QuestEditorScreen({ route, navigation }: Props) {
       ? minutesToParts(existing!.scheduledTime!)
       : DEFAULT_SCHEDULE_PARTS,
   );
+  // Optional measurement: a quick 1–5 "how did it go?" at completion + the
+  // user's own reason it matters (the personalization source for any habit).
+  const [rateOn, setRateOn] = useState(existing?.metric === 'rating');
+  const [why, setWhy] = useState(existing?.why ?? '');
+  const [whyError, setWhyError] = useState<string | undefined>();
 
   const isEditing = Boolean(existing);
   const scheduledTime = scheduleOn ? partsToMinutes(parts) : undefined;
+  // Smart suggestion (never imposed): a science-grounded reason for known habits.
+  const whyPlaceholder = title.trim()
+    ? habitScience({ title, category }).why.replace(/^a /, '').concat(' …')
+    : 'e.g. so I feel calmer and more focused';
 
   const bumpHour = (dir: 1 | -1) =>
     setParts((p) => ({ ...p, hour12: ((p.hour12 - 1 + dir + 12) % 12) + 1 }));
@@ -83,10 +93,19 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   };
 
   const handleSave = async () => {
-    const draft: QuestDraft = { title, description, category, difficulty, scheduledTime };
+    const draft: QuestDraft = {
+      title,
+      description,
+      category,
+      difficulty,
+      scheduledTime,
+      ...(rateOn ? { metric: 'rating' as const } : {}),
+      ...(why.trim() ? { why } : {}),
+    };
     const { valid, errors } = validateQuestDraft(draft);
     if (!valid) {
       setTitleError(errors.title);
+      setWhyError(errors.why);
       return;
     }
     // Don't quietly pile up the same activity day after day — warn on duplicates.
@@ -216,6 +235,37 @@ export function QuestEditorScreen({ route, navigation }: Props) {
                 Scheduled for {minutesToLabel(partsToMinutes(parts))}
               </Text>
             )}
+          </View>
+
+          {/* Optional: rate how it goes (1–5) + your own reason it matters. */}
+          <View style={styles.scheduleBlock}>
+            <View style={styles.scheduleHead}>
+              <View style={styles.scheduleHeadText}>
+                <Text style={styles.scheduleLabel}>Rate how it goes (1–5)</Text>
+                <Text style={styles.scheduleHint}>
+                  A quick “how did it go?” after each focus session — works for any habit, and powers
+                  your insights.
+                </Text>
+              </View>
+              <Switch
+                value={rateOn}
+                onValueChange={setRateOn}
+                trackColor={{ true: colors.identity, false: colors.border }}
+                accessibilityLabel="Ask for a 1 to 5 rating after completing this habit"
+              />
+            </View>
+            <TextField
+              label="Why this matters to you (optional)"
+              value={why}
+              onChangeText={(t) => {
+                setWhy(t);
+                if (whyError) setWhyError(undefined);
+              }}
+              placeholder={whyPlaceholder}
+              maxLength={WHY_MAX}
+              error={whyError}
+              multiline
+            />
           </View>
         </ScrollView>
 

@@ -65,6 +65,15 @@ describe('draftToQuest', () => {
     const quest = draftToQuest({ ...base, description: '  notes ' }, 'q1');
     expect(quest.description).toBe('notes');
   });
+
+  it('carries an opt-in rating metric and a trimmed why, omitting blanks', () => {
+    const quest = draftToQuest({ ...base, metric: 'rating', why: '  so I feel calmer ' }, 'q1');
+    expect(quest.metric).toBe('rating');
+    expect(quest.why).toBe('so I feel calmer');
+    const plain = draftToQuest(base, 'q2');
+    expect(plain.metric).toBeUndefined();
+    expect(plain.why).toBeUndefined();
+  });
 });
 
 describe('findDuplicateActivity', () => {

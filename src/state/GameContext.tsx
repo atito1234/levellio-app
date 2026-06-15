@@ -241,6 +241,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         difficulty: draft.difficulty,
         baseXp: draftToQuest(draft, questId).baseXp,
         scheduledTime: draftToQuest(draft, questId).scheduledTime,
+        metric: draft.metric,
+        why: draft.why?.trim() || undefined,
       });
       return (await persistQuests(next, true)) ?? false;
     },

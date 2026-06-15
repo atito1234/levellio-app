@@ -137,4 +137,9 @@ describe('activity session events', () => {
     const privacy: MetadataPrivacy = { ...DEFAULT_METADATA_PRIVACY, recordSession: false };
     expect(buildSessionEvent(sessionInput, privacy, deps)).toBeNull();
   });
+
+  it('captures a self-reported rating when provided, omits it otherwise', () => {
+    expect(buildSessionEvent({ ...sessionInput, rating: 4 }, DEFAULT_METADATA_PRIVACY, deps)!.rating).toBe(4);
+    expect(buildSessionEvent(sessionInput, DEFAULT_METADATA_PRIVACY, deps)!.rating).toBeUndefined();
+  });
 });

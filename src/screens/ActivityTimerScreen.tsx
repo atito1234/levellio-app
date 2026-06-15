@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, AnimatedHero } from '@/components';
+import { ScreenContainer, AnimatedHero, RatingPrompt } from '@/components';
+import type { RatingValue } from '@/types';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
@@ -36,6 +37,9 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
   const [remaining, setRemaining] = useState(totalSec);
   const [running, setRunning] = useState(false);
   const [logged, setLogged] = useState(false);
+  // When the habit asks for a rating, a finish first parks the duration here and
+  // opens the prompt; the real completion runs once a rating is picked/skipped.
+  const [pendingSec, setPendingSec] = useState<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopTick = useCallback(() => {
@@ -47,16 +51,30 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
 
   useEffect(() => stopTick, [stopTick]);
 
+  // Persist the completion (optionally with a rating) and hand off to celebration.
+  const commit = useCallback(
+    async (durationSec: number, rating?: RatingValue) => {
+      if (logged || !quest || !timing) return;
+      setLogged(true);
+      const reward = await complete(quest, { method: timing.method, durationSec, ...(rating ? { rating } : {}) });
+      if (reward?.leveledUp) navigation.navigate('QuestComplete', { reward });
+    },
+    [logged, quest, timing, complete, navigation],
+  );
+
   const finish = useCallback(
     async (durationSec: number) => {
       stopTick();
       setRunning(false);
       if (logged || !quest || !timing) return;
-      setLogged(true);
-      const reward = await complete(quest, { method: timing.method, durationSec });
-      if (reward?.leveledUp) navigation.navigate('QuestComplete', { reward });
+      // Rating habits: pause for the quick 1–5 self-report before committing.
+      if (quest.metric === 'rating') {
+        setPendingSec(durationSec);
+        return;
+      }
+      await commit(durationSec);
     },
-    [stopTick, logged, quest, timing, complete, navigation],
+    [stopTick, logged, quest, timing, commit],
   );
 
   // The "alarm": when the countdown reaches zero, auto-log the full session.
@@ -177,6 +195,21 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
           </View>
         </View>
       )}
+
+      <RatingPrompt
+        visible={pendingSec !== null}
+        title={quest.title}
+        onSelect={(rating) => {
+          const sec = pendingSec ?? 0;
+          setPendingSec(null);
+          void commit(sec, rating);
+        }}
+        onSkip={() => {
+          const sec = pendingSec ?? 0;
+          setPendingSec(null);
+          void commit(sec);
+        }}
+      />
     </ScreenContainer>
   );
 }

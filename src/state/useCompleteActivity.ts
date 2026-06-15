@@ -20,6 +20,8 @@ export interface CompletionOpts {
   method: 'timer' | 'pomodoro' | 'manual';
   /** Actual seconds spent (0 for a manual log). */
   durationSec: number;
+  /** Self-reported 1–5 "how did it go?", for habits that opt into a rating. */
+  rating?: 1 | 2 | 3 | 4 | 5;
 }
 
 /**
@@ -52,6 +54,7 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
         method: opts.method,
         durationSec: opts.durationSec,
         ...(location ? { location } : {}),
+        ...(opts.rating ? { rating: opts.rating } : {}),
       });
 
       // Detect & celebrate milestones from this completion. prevLevels is the

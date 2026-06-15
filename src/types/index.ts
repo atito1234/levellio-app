@@ -5,6 +5,17 @@
 
 export type QuestDifficulty = 'easy' | 'medium' | 'hard';
 
+/**
+ * How a habit is measured beyond simple done/not-done. Absent = a plain "Done"
+ * check (the default). 'rating' asks for a quick self-reported 1–5 ("how did it
+ * go?") at completion — a universal, metric-agnostic signal that works for any
+ * habit, including ones we have no curated science for.
+ */
+export type HabitMetric = 'rating';
+
+/** A self-reported 1–5 rating value. */
+export type RatingValue = 1 | 2 | 3 | 4 | 5;
+
 /** Curated quest categories spanning the areas of a balanced life. */
 export type QuestCategory =
   | 'fitness'
@@ -39,6 +50,16 @@ export interface Quest {
    * legacy data and migrations stay backward-compatible (backfilled on load).
    */
   canonicalKey?: string;
+  /**
+   * Optional measurement beyond done/not-done. When 'rating', completing the
+   * habit asks for a 1–5 "how did it go?". Absent = a plain Done check.
+   */
+  metric?: HabitMetric;
+  /**
+   * The user's own reason this habit matters — the personalization source for
+   * habits we can't science-match. Shown in the War Room and analytics.
+   */
+  why?: string;
 }
 
 /** Hero progression tiers. */
