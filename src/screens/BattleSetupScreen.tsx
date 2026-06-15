@@ -136,6 +136,16 @@ export function BattleSetupScreen({ route, navigation }: Props) {
       ...(ctx ? { prompt: ctx.prompt, teaching: ctx.teaching } : {}),
     });
 
+  const openCoaching = () => {
+    const secs = workSeconds(getTechnique(techniqueId), customMin);
+    navigation.navigate('CoachingEncounter', {
+      dragonId,
+      ...(dragonId === CUSTOM_DRAGON_ID && dragonName.trim() ? { dragonName: dragonName.trim() } : {}),
+      ...(primary ? { questId: primary.id } : {}),
+      ...(secs != null ? { minutesAvailable: Math.round(secs / 60) } : {}),
+    });
+  };
+
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
@@ -174,6 +184,11 @@ export function BattleSetupScreen({ route, navigation }: Props) {
             </Text>
           )}
           <Text style={styles.reflectCta}>{latest ? 'Add another reflection ›' : 'Journal what’s stopping you ›'}</Text>
+        </Pressable>
+
+        {/* Coach: critical-thinking questions + a matched tactic for this dragon. */}
+        <Pressable onPress={openCoaching} accessibilityRole="button" accessibilityLabel={`Confront ${resolvedDragon.name}`} style={styles.confrontBtn}>
+          <Text style={styles.confrontText}>🐉 Confront your dragon — questions + a tactic ›</Text>
         </Pressable>
 
         {/* 2 — Choose your dragon. */}
@@ -359,6 +374,9 @@ const styles = StyleSheet.create({
   goalChipText: { ...typography.caption, color: VIOLET, fontWeight: '700' },
   latestText: { ...typography.caption, color: MUTED },
   reflectCta: { ...typography.label, color: VIOLET, fontWeight: '700' },
+
+  confrontBtn: { backgroundColor: VIOLET_SOFT, borderRadius: 16, paddingVertical: spacing.md, paddingHorizontal: spacing.md, alignItems: 'center', borderWidth: 1, borderColor: '#E2DBFB' },
+  confrontText: { ...typography.label, color: VIOLET, fontWeight: '800' },
 
   // Dragon carousel
   carousel: { gap: spacing.sm, paddingVertical: 2, paddingRight: spacing.md },

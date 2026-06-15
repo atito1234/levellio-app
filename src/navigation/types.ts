@@ -65,6 +65,8 @@ export type RootStackParamList = {
   Journal: { dragonId?: string } | undefined;
   /** Hero analytics — milestone-gated "are you headed the right way?" dashboard. */
   Analytics: undefined;
+  /** "Confront your dragon" — Socratic questions + a matched tactic for a blocker. */
+  CoachingEncounter: { dragonId: string; dragonName?: string; questId?: string; minutesAvailable?: number; blockerId?: string } | undefined;
 };
 
 declare global {
