@@ -39,6 +39,10 @@ export type RootStackParamList = {
    * specific day. With no params it shows the overall overview.
    */
   Insights: { activityId?: string; category?: string; day?: string } | undefined;
+  /** Curate the habits planned for a day (defaults to today). */
+  Plan: { day?: string } | undefined;
+  /** "What strengthens this capacity" — the planned/unplanned habits feeding it. */
+  CapacityFocus: { capacityId: string };
 };
 
 declare global {
