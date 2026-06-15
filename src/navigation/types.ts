@@ -47,6 +47,8 @@ export type RootStackParamList = {
   GoalEditor: undefined;
   /** A goal's contributing habits + progress. */
   GoalFocus: { goalId: string };
+  /** Frictionless typed/dictated capture of one or more habits. */
+  QuickCapture: undefined;
 };
 
 declare global {

@@ -20,6 +20,7 @@ import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { usePlan } from '@/state/PlanContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
+import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
@@ -28,7 +29,6 @@ import { CAPACITIES, getCapacity } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { isValidScheduleMinutes, minutesToLabel } from '@/lib/schedule';
 import { dayKey } from '@/lib/dates';
-import { defaultAIEngine } from '@/services/ai';
 import type { Quest } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -70,19 +70,9 @@ export function DashboardScreen() {
   // effectivePlan falls back to all habits, and we nudge the user to curate.
   const todayKey = dayKey(new Date());
   const plan = getPlan(todayKey);
-  const [motivation, setMotivation] = useState('');
   const [suggesting, setSuggesting] = useState(false);
-
-  useEffect(() => {
-    if (!character) return;
-    let active = true;
-    defaultAIEngine.motivate({ streakDays: character.streakDays, level: character.level }).then((line) => {
-      if (active) setMotivation(line);
-    });
-    return () => {
-      active = false;
-    };
-  }, [character]);
+  // Personalized, science-backed line from the user's real history + today.
+  const motivation = useMotivation().text;
 
   const progress = useMemo(() => planProgress(quests, plan), [quests, plan]);
 
@@ -255,7 +245,7 @@ export function DashboardScreen() {
               {partOfDay}, {name}
             </Text>
             {motivation ? (
-              <Text style={styles.motivation} numberOfLines={1}>
+              <Text style={styles.motivation} numberOfLines={2}>
                 {motivation}
               </Text>
             ) : null}
@@ -363,6 +353,15 @@ export function DashboardScreen() {
                 style={styles.primaryBtn}
               >
                 <Text style={styles.primaryBtnText}>Do it now</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => navigation.navigate('ActivityTimer', { questId: focus.id })}
+                accessibilityRole="button"
+                accessibilityLabel={`Start a focus session: ${focus.title}`}
+                style={styles.focusBtn}
+                hitSlop={8}
+              >
+                <Text style={styles.focusBtnText}>🎯 Focus session</Text>
               </Pressable>
 
               {/* Non-gesture controls + position (swipe is an enhancement). */}
@@ -478,6 +477,7 @@ export function DashboardScreen() {
 
         {/* Quick actions — keeps every feature, low clutter (Hick's law). */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
+          <QuickChip label="🎤 Quick add" onPress={() => navigation.navigate('QuickCapture')} />
           <QuickChip label="＋ New" onPress={() => navigation.navigate('QuestEditor')} />
           <QuickChip label="📚 Library" onPress={() => navigation.navigate('HabitLibrary')} />
           <QuickChip label="🗂 Buckets" onPress={() => navigation.navigate('Organize')} />
@@ -487,13 +487,13 @@ export function DashboardScreen() {
 
         {/* Your capacities — the shared rings every completion feeds (real data). */}
         <View style={styles.capHead}>
-          <Text style={styles.railLabel}>Your capacities</Text>
+          <Text style={styles.railLabel}>Your capacities · last 7 days</Text>
           <Pressable
             onPress={() => navigation.navigate('MonthlyProgress')}
             accessibilityRole="button"
             accessibilityLabel="See your monthly progress"
           >
-            <Text style={styles.capLink}>This month ›</Text>
+            <Text style={styles.capLink}>Trends ›</Text>
           </Pressable>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
@@ -686,6 +686,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   primaryBtnText: { ...typography.title, color: '#FFF', fontWeight: '800' },
+  focusBtn: { alignSelf: 'center', paddingVertical: spacing.sm, marginTop: spacing.xs },
+  focusBtnText: { ...typography.label, color: VIOLET, fontWeight: '700' },
   allDone: { ...typography.body, color: TEAL, fontWeight: '700', marginTop: spacing.xs },
 
   upNext: { gap: spacing.xs },

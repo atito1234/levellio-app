@@ -1,12 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { ScreenContainer, AnimatedHero } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { activityTiming, formatClock } from '@/lib/activityTimer';
+import { pickFocusQuote } from '@/data/focusQuotes';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ActivityTimer'>;
@@ -23,9 +24,11 @@ const R = (RING - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
 
 export function ActivityTimerScreen({ route, navigation }: Props) {
-  const { quests } = useGame();
+  const { quests, character } = useGame();
   const complete = useCompleteActivity();
   const quest = quests.find((q) => q.id === route.params.questId);
+  // One stable, science-grounded quote per focus session.
+  const quote = useMemo(() => pickFocusQuote(route.params.questId.length + new Date().getDate()), [route.params.questId]);
 
   const timing = quest ? activityTiming(quest) : null;
   const totalSec = (timing?.minutes ?? 25) * 60;
@@ -99,12 +102,21 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.kicker}>{timing.method === 'pomodoro' ? 'FOCUS SESSION' : "TODAY'S TIMER"}</Text>
+        <Text style={styles.kicker}>{running ? 'IN FOCUS' : 'FOCUS SESSION'}</Text>
+        {character && (
+          <AnimatedHero
+            presentation={character.presentation}
+            tier={character.tier}
+            kitId={character.kitId}
+            size={84}
+            animate={running && !logged}
+          />
+        )}
         <Text style={styles.title} accessibilityRole="header">
           {quest.title}
         </Text>
-        <Text style={styles.sub}>
-          {timing.method === 'pomodoro' ? `Pomodoro · ${timing.minutes} min` : `${timing.minutes}-minute timer`}
+        <Text style={styles.quote} accessibilityLabel={quote.text}>
+          “{quote.text}”
         </Text>
 
         <View style={styles.ringStage} accessibilityLabel={`${formatClock(remaining)} remaining`}>
@@ -177,6 +189,7 @@ const styles = StyleSheet.create({
   kicker: { ...typography.label, color: MUTED, letterSpacing: 2 },
   title: { ...typography.heading, color: INK, textAlign: 'center' },
   sub: { ...typography.body, color: MUTED },
+  quote: { ...typography.body, color: MUTED, fontStyle: 'italic', textAlign: 'center', paddingHorizontal: spacing.lg, marginTop: spacing.xs },
   ringStage: { width: RING, height: RING, alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg },
   clockWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   clock: { ...typography.heading, color: INK, fontWeight: '900', fontSize: 52 },

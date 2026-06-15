@@ -1,4 +1,4 @@
-import { CATEGORY_CAPACITY_WEIGHTS, rippleForQuest } from './habitCapacity';
+import { CATEGORY_CAPACITY_WEIGHTS, rippleForQuest, capacityLevelsFromSessions } from './habitCapacity';
 import { CAPACITIES, WEIGHT_VALUE } from './compounding';
 import { CATEGORY_ORDER } from './categories';
 import type { Quest } from '@/types';
@@ -41,5 +41,35 @@ describe('rippleForQuest', () => {
 
   it('never produces an empty ripple', () => {
     for (const c of CATEGORY_ORDER) expect(rippleForQuest(q(c)).length).toBeGreaterThan(0);
+  });
+});
+
+describe('capacityLevelsFromSessions (rolling window)', () => {
+  const now = new Date('2026-06-15T09:00:00');
+  const at = (key: string) => new Date(`${key}T08:00:00`).getTime();
+
+  it('is all zeros with no recent sessions (a fresh day is honest, not 100%)', () => {
+    const levels = capacityLevelsFromSessions([], 7, now);
+    expect(Object.values(levels).every((v) => v === 0)).toBe(true);
+  });
+
+  it('reflects only sessions inside the window', () => {
+    const sessions = [
+      { category: 'fitness', createdAt: at('2026-06-15') }, // today, in window
+      { category: 'fitness', createdAt: at('2026-06-01') }, // 14 days ago, out of window
+    ];
+    const levels = capacityLevelsFromSessions(sessions, 7, now);
+    // fitness → endurance Strong(8); only the in-window session counts.
+    expect(levels.endurance).toBe(8);
+  });
+
+  it('accumulates within the window and clamps at 100', () => {
+    const many = Array.from({ length: 30 }, () => ({ category: 'health', createdAt: at('2026-06-15') }));
+    // health → hydration Strong(8) × 30 = 240, clamped to 100.
+    expect(capacityLevelsFromSessions(many, 7, now).hydration).toBe(100);
+  });
+
+  it('ignores sessions without a category', () => {
+    expect(capacityLevelsFromSessions([{ createdAt: at('2026-06-15') }], 7, now).endurance).toBe(0);
   });
 });
