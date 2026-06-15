@@ -102,21 +102,23 @@ describe('contribution events', () => {
 describe('activity session events', () => {
   const sessionInput = {
     activityId: 'q1',
+    title: '20-minute workout',
     category: 'fitness',
     method: 'timer' as const,
     durationSec: 1200,
     location: { lat: 1, lng: 2, speed: 3 },
   };
 
-  it('captures duration/method + time-of-day by default, but not location', () => {
+  it('captures title/category/duration/method + time-of-day by default, but not location', () => {
     const e = buildSessionEvent(sessionInput, DEFAULT_METADATA_PRIVACY, deps)!;
     expect(e.type).toBe('activity_session');
     expect(e.method).toBe('timer');
     expect(e.durationSec).toBe(1200);
+    expect(e.title).toBe('20-minute workout'); // always kept for readable history
+    expect(e.category).toBe('fitness'); // always kept for analytics
     expect(typeof e.hourOfDay).toBe('number');
     expect(typeof e.weekday).toBe('number');
     expect(e.location).toBeUndefined(); // opted out by default
-    expect(e.category).toBeUndefined(); // context off by default
   });
 
   it('includes location only when opted in', () => {

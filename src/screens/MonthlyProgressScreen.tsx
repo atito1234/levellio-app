@@ -47,7 +47,14 @@ export function MonthlyProgressScreen({ navigation }: Props) {
         <Text style={styles.title} accessibilityRole="header">
           Your progress
         </Text>
-        <View style={styles.chevronSpacer} />
+        <Pressable
+          onPress={() => navigation.navigate('Insights')}
+          accessibilityRole="button"
+          accessibilityLabel="See your activity insights"
+          hitSlop={10}
+        >
+          <Text style={styles.insightsLink}>Insights ›</Text>
+        </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -103,16 +110,17 @@ export function MonthlyProgressScreen({ navigation }: Props) {
                 if (!cell.key) return <View key={ci} style={styles.cellPad} />;
                 const pts = history[cell.key] ?? 0;
                 const isToday = cell.key === todayKey;
+                const dayK = cell.key;
                 return (
-                  <View
+                  <Pressable
                     key={ci}
-                    accessible
-                    accessibilityRole="image"
-                    accessibilityLabel={`${cell.key}, ${pts} capacity ${pts === 1 ? 'point' : 'points'}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${cell.key}, ${pts} capacity ${pts === 1 ? 'point' : 'points'}. See this day's activities`}
+                    onPress={() => navigation.navigate('Insights', { day: dayK })}
                     style={[styles.cell, { backgroundColor: HEAT[intensityLevel(pts)] }, isToday && styles.cellToday]}
                   >
                     <Text style={[styles.cellDay, intensityLevel(pts) >= 3 && styles.cellDayOnDark]}>{cell.day}</Text>
-                  </View>
+                  </Pressable>
                 );
               })}
             </View>
@@ -142,6 +150,7 @@ const styles = StyleSheet.create({
   topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm },
   chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
   chevronSpacer: { width: 28 },
+  insightsLink: { ...typography.label, color: '#6C4CF1', fontWeight: '700' },
   title: { ...typography.heading, color: INK },
   content: { gap: spacing.md, paddingBottom: spacing.xl },
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },

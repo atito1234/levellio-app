@@ -34,6 +34,15 @@ export type RootStackParamList = {
   Connections: { questId?: string } | undefined;
   /** Monthly capacity progress (heatmap). */
   MonthlyProgress: undefined;
+  /**
+   * Activity insights. Scope it by one of: a single activity, a category, or a
+   * specific day. With no params it shows the overall overview.
+   */
+  Insights: { activityId?: string; category?: string; day?: string } | undefined;
+  /** Curate the habits planned for a day (defaults to today). */
+  Plan: { day?: string } | undefined;
+  /** "What strengthens this capacity" — the planned/unplanned habits feeding it. */
+  CapacityFocus: { capacityId: string };
 };
 
 declare global {

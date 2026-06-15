@@ -3,6 +3,7 @@
  * No AI, no React — fully unit-testable.
  */
 import { QUEST_XP } from './leveling';
+import { isValidScheduleMinutes } from './schedule';
 import type { Quest, QuestCategory, QuestDifficulty } from '@/types';
 
 export interface QuestDraft {
@@ -10,6 +11,8 @@ export interface QuestDraft {
   description?: string;
   category: QuestCategory;
   difficulty: QuestDifficulty;
+  /** Optional pinned time of day (minutes since local midnight, 0..1439). */
+  scheduledTime?: number;
 }
 
 export const TITLE_MAX = 80;
@@ -73,5 +76,6 @@ export function draftToQuest(draft: QuestDraft, id: string, completed = false): 
     difficulty: draft.difficulty,
     baseXp: QUEST_XP[draft.difficulty],
     completed,
+    ...(isValidScheduleMinutes(draft.scheduledTime) ? { scheduledTime: draft.scheduledTime } : {}),
   };
 }

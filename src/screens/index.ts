@@ -14,3 +14,6 @@ export { RippleScreen } from './RippleScreen';
 export { ActivityTimerScreen } from './ActivityTimerScreen';
 export { ConnectionsScreen } from './ConnectionsScreen';
 export { MonthlyProgressScreen } from './MonthlyProgressScreen';
+export { InsightsScreen } from './InsightsScreen';
+export { PlanScreen } from './PlanScreen';
+export { CapacityFocusScreen } from './CapacityFocusScreen';
