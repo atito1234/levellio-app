@@ -6,6 +6,7 @@ import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBattles } from '@/state/BattlesContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
+import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { getCelebrationTimings } from '@/lib/celebration';
 import { battleStateAt } from '@/lib/battle';
@@ -42,6 +43,7 @@ export function BattleScreen({ route, navigation }: Props) {
   const { quests, character } = useGame();
   const { recordVictory } = useBattles();
   const complete = useCompleteActivity();
+  const guardAbandon = useAbandonGuard();
   const reduced = useReducedMotion();
   const timings = getCelebrationTimings(reduced);
 
@@ -145,6 +147,21 @@ export function BattleScreen({ route, navigation }: Props) {
     );
   }
 
+  const onRetreat = () => {
+    if (
+      guardAbandon({
+        kind: 'battle-retreat',
+        ctx: { battleRunning: running },
+        dragonId,
+        ...(dragonName ? { dragonName } : {}),
+        ...(battleQuests[0] ? { questId: battleQuests[0].id } : {}),
+        onProceed: () => navigation.goBack(),
+      })
+    )
+      return;
+    navigation.goBack();
+  };
+
   const clock = totalSec === null ? formatClock(elapsed) : formatClock(state.remainingSec ?? 0);
 
   return (
@@ -152,7 +169,7 @@ export function BattleScreen({ route, navigation }: Props) {
       {won && timings.confetti && <ConfettiBurst />}
       <View style={styles.topbar}>
         {!won && (
-          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Retreat" hitSlop={12}>
+          <Pressable onPress={onRetreat} accessibilityRole="button" accessibilityLabel="Retreat" hitSlop={12}>
             <Text style={styles.retreat}>Retreat</Text>
           </Pressable>
         )}

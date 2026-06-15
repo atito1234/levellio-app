@@ -7,6 +7,7 @@ import { useGame } from '@/state/GameContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { usePlan } from '@/state/PlanContext';
 import { useActivityLog } from '@/state/useActivityLog';
+import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { groupHabitsIntoRails } from '@/lib/dashboard';
 import { gapsFor } from '@/lib/plan';
 import { completedActivityIds, sessionsForDay, sessionsOf } from '@/lib/analytics';
@@ -28,10 +29,11 @@ const MUTED = '#5A5A72';
 const TRACK = '#E3E3EC';
 
 export function PlanScreen({ route, navigation }: Props) {
-  const { quests } = useGame();
+  const { quests, character } = useGame();
   const { buckets, assignments } = useBuckets();
   const { getPlan, togglePlanned } = usePlan();
   const { events } = useActivityLog();
+  const guardAbandon = useAbandonGuard();
 
   const todayK = dayKey(new Date());
   const tomorrowK = shiftDayKey(todayK, 1);
@@ -67,11 +69,25 @@ export function PlanScreen({ route, navigation }: Props) {
     );
   };
 
+  const onToggle = (quest: Quest, checked: boolean) => {
+    // Un-planning a habit with a real streak earns a "think twice" pause.
+    if (
+      checked &&
+      guardAbandon({
+        kind: 'unplan',
+        ctx: { streakDays: character?.streakDays ?? 0 },
+        onProceed: () => void togglePlanned(targetDay, quest.id),
+      })
+    )
+      return;
+    void togglePlanned(targetDay, quest.id);
+  };
+
   const Row = ({ quest }: { quest: Quest }) => {
     const checked = plannedSet.has(quest.id);
     return (
       <Pressable
-        onPress={() => void togglePlanned(targetDay, quest.id)}
+        onPress={() => onToggle(quest, checked)}
         accessibilityRole="checkbox"
         accessibilityState={{ checked }}
         accessibilityLabel={`${quest.title}${quest.scheduledTime !== undefined ? `, at ${minutesToLabel(quest.scheduledTime)}` : ''}`}

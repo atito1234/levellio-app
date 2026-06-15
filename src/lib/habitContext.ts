@@ -21,13 +21,20 @@ export interface HabitContext {
   goalTitle?: string;
 }
 
-export function habitContext(quest: Pick<Quest, 'title' | 'category'>, goals: readonly Goal[]): HabitContext {
+export function habitContext(quest: Pick<Quest, 'title' | 'category' | 'why'>, goals: readonly Goal[]): HabitContext {
   const s = habitScience(quest);
   const goal = goals.find((g) => g.categories.includes(quest.category));
   const prompt = `What’s stopping you from ${s.phrase} right now?`;
-  const teaching = goal
-    ? `${s.science} For your goal “${goal.title}”, that means ${s.why}.`
-    : `${s.science} This builds ${s.why}.`;
+  const userWhy = quest.why?.trim();
+  // The user's own reason wins — it's the truest personalization we have. We
+  // fall back to honest, science-grounded teaching only when they haven't said why.
+  const teaching = userWhy
+    ? goal
+      ? `Your reason: “${userWhy}” — and it builds toward your goal “${goal.title}.”`
+      : `Your reason: “${userWhy}”`
+    : goal
+      ? `${s.science} For your goal “${goal.title}”, that means ${s.why}.`
+      : `${s.science} This builds ${s.why}.`;
   return {
     phrase: s.phrase,
     prompt,

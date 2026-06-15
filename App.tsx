@@ -11,8 +11,9 @@ import { GoalProvider } from '@/state/GoalContext';
 import { MilestonesProvider } from '@/state/MilestonesContext';
 import { BattlesProvider } from '@/state/BattlesContext';
 import { JournalProvider } from '@/state/JournalContext';
+import { InterventionProvider } from '@/state/InterventionContext';
 
-/** App entry point. Wraps the nav shell in settings + game + buckets + capacities + plan + goals + milestones + battles. */
+/** App entry point. Wraps the nav shell in settings + game + buckets + capacities + plan + goals + milestones + battles + journal + interventions. */
 export default function App() {
   return (
     <SafeAreaProvider>
@@ -26,7 +27,9 @@ export default function App() {
                   <MilestonesProvider>
                     <BattlesProvider>
                       <JournalProvider>
-                        <RootNavigator />
+                        <InterventionProvider>
+                          <RootNavigator />
+                        </InterventionProvider>
                       </JournalProvider>
                     </BattlesProvider>
                   </MilestonesProvider>

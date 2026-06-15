@@ -14,3 +14,4 @@ export { TextField } from './TextField';
 export { ChipSelector, type ChipOption } from './ChipSelector';
 export { ConfettiBurst } from './ConfettiBurst';
 export { CapacityRing } from './CapacityRing';
+export { RatingPrompt } from './RatingPrompt';

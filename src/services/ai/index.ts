@@ -41,3 +41,4 @@ export {
   type GenerateOptions,
   type QuestSource,
 } from './questGenerator';
+export { generateCoaching, type CoachResult, type CoachOptions } from './coachGenerator';

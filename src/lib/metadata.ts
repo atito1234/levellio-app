@@ -74,6 +74,8 @@ export interface ActivitySessionEvent extends BaseEvent {
   weekday?: number;
   /** Only present when location capture is opted in AND permission was granted. */
   location?: LocationSample;
+  /** Self-reported "how did it go?" 1–5, when the habit opts into a rating. */
+  rating?: 1 | 2 | 3 | 4 | 5;
 }
 
 export type MetadataEvent = HabitProvenanceEvent | ActivityContributionEvent | ActivitySessionEvent;
@@ -212,6 +214,8 @@ export interface SessionInput {
   durationSec: number;
   /** Pre-captured location (only when opted in + permitted); omitted otherwise. */
   location?: LocationSample;
+  /** Self-reported 1–5 rating for this completion, when the habit asks for one. */
+  rating?: 1 | 2 | 3 | 4 | 5;
 }
 
 /**
@@ -240,5 +244,7 @@ export function buildSessionEvent(
     durationSec: Math.max(0, Math.round(input.durationSec)),
     ...(privacy.includeTimestamps ? { hourOfDay: when.getHours(), weekday: when.getDay() } : {}),
     ...(privacy.includeLocation && input.location ? { location: input.location } : {}),
+    // Rating is a non-sensitive self-report — kept whenever the habit provides one.
+    ...(input.rating ? { rating: input.rating } : {}),
   };
 }

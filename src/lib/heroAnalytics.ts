@@ -180,3 +180,57 @@ export function nextLockedTier(daysDone: number): InsightTier | null {
 export function unlockedCount(daysDone: number): number {
   return INSIGHT_TIERS.filter((t) => daysDone >= t.unlockDays).length;
 }
+
+// --- Self-reported rating insights ("how it feels") -------------------------
+
+export interface RatingStats {
+  /** Number of rated completions. */
+  count: number;
+  /** Mean rating across all rated completions. */
+  average: number;
+  /** Recent-half mean minus earlier-half mean (>0 = trending up). */
+  trend: number;
+  /** The activity that feels best (highest average, ≥2 ratings). */
+  best?: { activityId: string; title: string; average: number; count: number };
+}
+
+function mean(ns: number[]): number {
+  return ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : 0;
+}
+
+/**
+ * Aggregate self-reported 1–5 ratings into an honest "how it feels" read.
+ * Returns null when nothing has been rated yet, so the UI can hide the section.
+ */
+export function ratingStats(sessions: readonly ActivitySessionEvent[]): RatingStats | null {
+  const rated = sessions.filter((s): s is ActivitySessionEvent & { rating: number } => typeof s.rating === 'number');
+  if (rated.length === 0) return null;
+
+  const sorted = [...rated].sort((a, b) => a.createdAt - b.createdAt);
+  const mid = Math.floor(sorted.length / 2);
+  const older = sorted.slice(0, mid).map((s) => s.rating);
+  const newer = sorted.slice(mid).map((s) => s.rating);
+  const trend = older.length && newer.length ? mean(newer) - mean(older) : 0;
+
+  // Best-feeling activity: highest average among those rated at least twice.
+  const groups = new Map<string, { title: string; values: number[] }>();
+  for (const s of rated) {
+    const g = groups.get(s.activityId) ?? { title: s.title ?? 'Activity', values: [] };
+    g.values.push(s.rating);
+    g.title = s.title ?? g.title;
+    groups.set(s.activityId, g);
+  }
+  let best: RatingStats['best'];
+  for (const [activityId, g] of groups) {
+    if (g.values.length < 2) continue;
+    const avg = mean(g.values);
+    if (!best || avg > best.average) best = { activityId, title: g.title, average: avg, count: g.values.length };
+  }
+
+  return {
+    count: rated.length,
+    average: mean(rated.map((s) => s.rating)),
+    trend,
+    ...(best ? { best } : {}),
+  };
+}

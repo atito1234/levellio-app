@@ -4,7 +4,7 @@
  */
 import { QUEST_XP } from './leveling';
 import { isValidScheduleMinutes } from './schedule';
-import type { Quest, QuestCategory, QuestDifficulty } from '@/types';
+import type { HabitMetric, Quest, QuestCategory, QuestDifficulty } from '@/types';
 
 export interface QuestDraft {
   title: string;
@@ -13,14 +13,20 @@ export interface QuestDraft {
   difficulty: QuestDifficulty;
   /** Optional pinned time of day (minutes since local midnight, 0..1439). */
   scheduledTime?: number;
+  /** Optional measurement (e.g. 'rating' for a 1–5 check-in at completion). */
+  metric?: HabitMetric;
+  /** The user's own reason this habit matters. */
+  why?: string;
 }
 
 export const TITLE_MAX = 80;
 export const DESCRIPTION_MAX = 200;
+export const WHY_MAX = 140;
 
 export interface QuestDraftErrors {
   title?: string;
   description?: string;
+  why?: string;
 }
 
 export interface ValidationResult {
@@ -41,6 +47,10 @@ export function validateQuestDraft(draft: QuestDraft): ValidationResult {
 
   if (draft.description && draft.description.trim().length > DESCRIPTION_MAX) {
     errors.description = `Keep the description under ${DESCRIPTION_MAX} characters.`;
+  }
+
+  if (draft.why && draft.why.trim().length > WHY_MAX) {
+    errors.why = `Keep your reason under ${WHY_MAX} characters.`;
   }
 
   return { valid: Object.keys(errors).length === 0, errors };
@@ -68,6 +78,7 @@ export function findDuplicateActivity(
 /** Convert a validated draft into a Quest (trims text, derives base XP). */
 export function draftToQuest(draft: QuestDraft, id: string, completed = false): Quest {
   const description = draft.description?.trim();
+  const why = draft.why?.trim();
   const title = draft.title.trim();
   return {
     id,
@@ -78,6 +89,8 @@ export function draftToQuest(draft: QuestDraft, id: string, completed = false): 
     baseXp: QUEST_XP[draft.difficulty],
     completed,
     ...(isValidScheduleMinutes(draft.scheduledTime) ? { scheduledTime: draft.scheduledTime } : {}),
+    ...(draft.metric ? { metric: draft.metric } : {}),
+    ...(why ? { why } : {}),
     canonicalKey: normalizeTitle(title),
   };
 }

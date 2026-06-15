@@ -14,6 +14,7 @@ import {
   directionVerdict,
   longestDayStreak,
   nextLockedTier,
+  ratingStats,
   tierStatus,
   unlockedCount,
   weekCells,
@@ -40,6 +41,7 @@ interface ScreenData {
   activities: ReturnType<typeof byActivity>;
   categories: ReturnType<typeof byCategory>;
   longest: number;
+  ratings: ReturnType<typeof ratingStats>;
 }
 
 // Locked palette (gold stays reserved for 100% rings).
@@ -83,6 +85,7 @@ export function AnalyticsScreen({ navigation }: Props) {
       activities: byActivity(sessions),
       categories: byCategory(sessions),
       longest: longestDayStreak(sessions),
+      ratings: ratingStats(sessions),
     };
   }, [events, character?.streakDays]);
 
@@ -147,6 +150,27 @@ export function AnalyticsScreen({ navigation }: Props) {
               </View>
             </View>
 
+            {/* How it feels — self-reported ratings, when any exist. */}
+            {data.ratings && (
+              <View style={styles.feelCard}>
+                <View style={styles.insightHead}>
+                  <Text style={styles.insightIcon}>⭐</Text>
+                  <Text style={styles.insightTitle}>How it feels</Text>
+                  <Text style={styles.feelAvg}>{data.ratings.average.toFixed(1)}/5</Text>
+                </View>
+                <Text style={styles.insightBody}>
+                  Across {data.ratings.count} rated {data.ratings.count === 1 ? 'session' : 'sessions'}, your habits feel{' '}
+                  {feelWord(data.ratings.average)}
+                  {Math.abs(data.ratings.trend) >= 0.3
+                    ? data.ratings.trend > 0
+                      ? ' — and trending up lately.'
+                      : ' — dipping a little lately.'
+                    : '.'}
+                  {data.ratings.best ? ` You rate ${data.ratings.best.title} highest.` : ''}
+                </Text>
+              </View>
+            )}
+
             {/* Progress toward the next unlock. */}
             {next ? (
               <View style={styles.nextCard}>
@@ -186,6 +210,13 @@ export function AnalyticsScreen({ navigation }: Props) {
       </ScrollView>
     </ScreenContainer>
   );
+}
+
+function feelWord(avg: number): string {
+  if (avg >= 4.5) return 'excellent';
+  if (avg >= 3.5) return 'good';
+  if (avg >= 2.5) return 'okay';
+  return 'like a grind';
 }
 
 function Counter({ value, label, tint = INK }: { value: string; label: string; tint?: string }) {
@@ -371,6 +402,9 @@ const styles = StyleSheet.create({
   insightTitle: { ...typography.title, color: INK, fontWeight: '700', flex: 1 },
   insightBody: { ...typography.body, color: INK },
   bodyStrong: { fontWeight: '800', color: VIOLET },
+
+  feelCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, ...cardShadow },
+  feelAvg: { ...typography.title, color: '#B5740A', fontWeight: '800' },
 
   lockedCard: { backgroundColor: '#F4F3F8', shadowOpacity: 0, elevation: 0 },
   lockIcon: { fontSize: 18 },
