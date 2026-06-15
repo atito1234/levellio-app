@@ -5,6 +5,7 @@
  */
 import { QUEST_XP } from '@/lib/leveling';
 import { CATEGORY_ORDER } from '@/lib/categories';
+import { normalizeTitle } from '@/lib/questForm';
 import type { Quest, QuestCategory, QuestDifficulty } from '@/types';
 
 export interface LibraryHabit {
@@ -87,5 +88,6 @@ export function libraryHabitToQuest(habit: LibraryHabit, id: string): Quest {
     difficulty: habit.difficulty,
     baseXp: QUEST_XP[habit.difficulty],
     completed: false,
+    canonicalKey: normalizeTitle(habit.title),
   };
 }

@@ -12,11 +12,12 @@ import { dayKey } from '@/lib/dates';
 import { rolloverQuests } from '@/lib/habitDay';
 import type { AuthUser } from '@/services/backend';
 import { backend } from '@/services/backend';
+import { migrateDuplicatesOnce } from '@/services/backend/dedupeMigration';
 import { completeQuest as engineCompleteQuest } from '@/lib/gameEngine';
 import { buildEngine, generateQuests, suggestedToQuest } from '@/services/ai';
 import { settingsStore } from '@/services/settings';
 import { getByoApiKey } from '@/services/security/secureKeyStore';
-import { addQuestToList, removeQuestFromList, updateQuestInList } from '@/lib/questCrud';
+import { removeQuestFromList, updateQuestInList, upsertQuestByCanonical } from '@/lib/questCrud';
 import { draftToQuest, validateQuestDraft, type QuestDraft } from '@/lib/questForm';
 import { libraryHabitToQuest, type LibraryHabit } from '@/data/habitLibrary';
 import { NO_KIT_ID } from '@/data/worldCupKits';
@@ -112,8 +113,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         backend.loadCharacter(user.uid),
         backend.loadQuests(user.uid),
       ]);
-      // Daily reset: yesterday's completions re-open for today.
-      const rolled = rolloverQuests(quests, dayKey(new Date()));
+      // One-time: collapse any legacy duplicate activities into a single canonical
+      // one (repointing plan + buckets), then daily-reset for today.
+      const { quests: deduped } = await migrateDuplicatesOnce(
+        user.uid,
+        () => Promise.resolve(quests),
+        (q) => backend.saveQuests(user.uid, q),
+      );
+      const rolled = rolloverQuests(deduped, dayKey(new Date()));
       if (rolled.changed) await backend.saveQuests(user.uid, rolled.quests);
       if (active) dispatch({ type: 'ready', payload: { user, character, quests: rolled.quests } });
     })();
@@ -148,7 +155,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const character = existing ? { ...existing, presentation } : null;
     if (character) await backend.saveCharacter(user.uid, character);
     const quests = await backend.loadQuests(user.uid);
-    const rolled = rolloverQuests(quests, dayKey(new Date()));
+    const { quests: deduped } = await migrateDuplicatesOnce(
+      user.uid,
+      () => Promise.resolve(quests),
+      (q) => backend.saveQuests(user.uid, q),
+    );
+    const rolled = rolloverQuests(deduped, dayKey(new Date()));
     if (rolled.changed) await backend.saveQuests(user.uid, rolled.quests);
     dispatch({ type: 'ready', payload: { user, character, quests: rolled.quests } });
   }, []);
@@ -202,8 +214,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const first = suggestions[0];
       if (!first) return null;
 
-      const quest = suggestedToQuest(first, genQuestId());
-      return persistQuests(addQuestToList(state.quests, quest), quest);
+      // Merge instead of appending so the AI path can't create a duplicate.
+      const { quests, quest } = upsertQuestByCanonical(state.quests, suggestedToQuest(first, genQuestId()));
+      return persistQuests(quests, quest);
     },
     [state.user, state.character, state.quests, persistQuests],
   );
@@ -211,8 +224,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const addQuest = useCallback(
     async (draft: QuestDraft): Promise<Quest | null> => {
       if (!validateQuestDraft(draft).valid) return null;
-      const quest = draftToQuest(draft, genQuestId());
-      return persistQuests(addQuestToList(state.quests, quest), quest);
+      const { quests, quest } = upsertQuestByCanonical(state.quests, draftToQuest(draft, genQuestId()));
+      return persistQuests(quests, quest);
     },
     [state.quests, persistQuests],
   );
@@ -243,8 +256,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const addLibraryHabit = useCallback(
     async (habit: LibraryHabit): Promise<Quest | null> => {
-      const quest = libraryHabitToQuest(habit, genQuestId());
-      return persistQuests(addQuestToList(state.quests, quest), quest);
+      const { quests, quest } = upsertQuestByCanonical(state.quests, libraryHabitToQuest(habit, genQuestId()));
+      return persistQuests(quests, quest);
     },
     [state.quests, persistQuests],
   );

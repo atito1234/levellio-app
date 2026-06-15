@@ -6,11 +6,12 @@
 import { companionStageForLevel, tierForLevel, QUEST_XP } from '@/lib/leveling';
 import { resolveCategory } from '@/lib/categories';
 import { isValidScheduleMinutes } from '@/lib/schedule';
+import { normalizeTitle } from '@/lib/questForm';
 import { isValidKitId, NO_KIT_ID } from '@/data/worldCupKits';
 import type { Character, Quest, QuestDifficulty } from '@/types';
 import { LOCAL_UID } from './seed';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 const PRESENTATIONS = ['female', 'male', 'neutral'] as const;
 const DIFFICULTIES: readonly QuestDifficulty[] = ['easy', 'medium', 'hard'];
@@ -61,9 +62,10 @@ export function migrateQuests(raw: unknown): Quest[] {
       : 'easy';
     const category = resolveCategory(q.category);
     const description = typeof q.description === 'string' ? q.description : undefined;
+    const title = str(q.title, 'Untitled quest');
     return {
       id: str(q.id, `q${index + 1}`),
-      title: str(q.title, 'Untitled quest'),
+      title,
       ...(description ? { description } : {}),
       category,
       difficulty,
@@ -71,6 +73,8 @@ export function migrateQuests(raw: unknown): Quest[] {
       completed: q.completed === true,
       ...(typeof q.lastCompletedDate === 'string' ? { lastCompletedDate: q.lastCompletedDate } : {}),
       ...(isValidScheduleMinutes(q.scheduledTime) ? { scheduledTime: q.scheduledTime } : {}),
+      // Backfill the dedup key so legacy quests gain a canonical identity.
+      canonicalKey: normalizeTitle(title),
     };
   });
 }
