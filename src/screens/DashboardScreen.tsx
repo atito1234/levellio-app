@@ -15,20 +15,19 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
 import { CapacityRing, HeroAvatar, ScreenContainer } from '@/components';
-import { BucketIcon } from '@/components/BucketIcon';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
-import { useBuckets } from '@/state/BucketsContext';
 import { useCapacities } from '@/state/CapacitiesContext';
+import { usePlan } from '@/state/PlanContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { dayProgress, groupHabitsIntoRails, prioritizeAfterFirstOpen, type HabitRail } from '@/lib/dashboard';
-import { CATEGORY_META } from '@/lib/categories';
+import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
+import { effectivePlan, plannedOpen, planProgress } from '@/lib/plan';
 import { CAPACITIES, getCapacity } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { isValidScheduleMinutes, minutesToLabel } from '@/lib/schedule';
-import { getBucketColor } from '@/lib/buckets';
+import { dayKey } from '@/lib/dates';
 import { defaultAIEngine } from '@/services/ai';
-import type { Quest, QuestCategory } from '@/types';
+import type { Quest } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -60,9 +59,14 @@ const SWIPE_THRESHOLD = 56;
 export function DashboardScreen() {
   const navigation = useNavigation<Nav>();
   const { character, quests, suggestQuest, reorderQuests, status } = useGame();
-  const { buckets, assignments } = useBuckets();
   const { levels } = useCapacities();
+  const { getPlan, reorderPlan } = usePlan();
   const reduced = useReducedMotion();
+
+  // The home reflects only TODAY'S PLAN (so it stays glanceable). No plan yet →
+  // effectivePlan falls back to all habits, and we nudge the user to curate.
+  const todayKey = dayKey(new Date());
+  const plan = getPlan(todayKey);
   const [motivation, setMotivation] = useState('');
   const [suggesting, setSuggesting] = useState(false);
 
@@ -77,11 +81,10 @@ export function DashboardScreen() {
     };
   }, [character]);
 
-  const progress = useMemo(() => dayProgress(quests), [quests]);
-  const rails = useMemo(() => groupHabitsIntoRails(quests, buckets, assignments), [quests, buckets, assignments]);
+  const progress = useMemo(() => planProgress(quests, plan), [quests, plan]);
 
-  // Browse the open habits with a swipe to choose what to tackle now.
-  const openHabits = useMemo(() => quests.filter((q) => !q.completed), [quests]);
+  // The planned, still-open habits (timed first) — the Now card + up-next strip.
+  const openHabits = useMemo(() => plannedOpen(quests, plan), [quests, plan]);
   const [focusIndex, setFocusIndex] = useState(0);
   const safeIndex = openHabits.length ? Math.min(focusIndex, openHabits.length - 1) : 0;
   const focus = openHabits[safeIndex] ?? null;
@@ -112,7 +115,13 @@ export function DashboardScreen() {
     }
     const focusId = focus.id;
     const apply = () => {
-      void reorderQuests(prioritizeAfterFirstOpen(quests, focusId));
+      // Prioritize within the plan when one exists; otherwise reorder globally.
+      if (plan !== undefined) {
+        const ids = prioritizeAfterFirstOpen(effectivePlan(quests, plan), focusId).map((q) => q.id);
+        void reorderPlan(todayKey, ids);
+      } else {
+        void reorderQuests(prioritizeAfterFirstOpen(quests, focusId));
+      }
       setFocusIndex(0);
       if (!reduced) {
         // Little celebratory flourish — like a "match" confirmation.
@@ -129,7 +138,7 @@ export function DashboardScreen() {
       cardX.setValue(-SCREEN_W);
       Animated.spring(cardX, { toValue: 0, friction: 8, tension: 60, useNativeDriver: true }).start();
     });
-  }, [focus, openHabits.length, safeIndex, quests, reduced, reorderQuests, cardX]);
+  }, [focus, openHabits.length, safeIndex, quests, plan, todayKey, reduced, reorderQuests, reorderPlan, cardX, flash]);
 
   // Stable refs so the once-created PanResponder always calls the latest handlers.
   const goNextRef = useRef(goNext);
@@ -380,8 +389,20 @@ export function DashboardScreen() {
                 <Text style={styles.primaryBtnText}>＋ Add a habit</Text>
               </Pressable>
             </>
+          ) : progress.total > 0 ? (
+            <Text style={styles.allDone}>All planned done 🎉</Text>
           ) : (
-            <Text style={styles.allDone}>All done for today 🎉</Text>
+            <>
+              <Text style={styles.focusName}>Nothing planned yet</Text>
+              <Pressable
+                onPress={() => navigation.navigate('Plan')}
+                accessibilityRole="button"
+                accessibilityLabel="Plan your day"
+                style={styles.primaryBtn}
+              >
+                <Text style={styles.primaryBtnText}>🗓 Plan your day</Text>
+              </Pressable>
+            </>
           )}
           </Animated.View>
 
@@ -400,6 +421,50 @@ export function DashboardScreen() {
           </Animated.View>
          </View>
         </View>
+
+        {/* Up next today — the rest of the plan, one tap to bring it forward. */}
+        {openHabits.length > 1 && (
+          <View style={styles.upNext}>
+            <Text style={styles.upNextLabel}>Up next today</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.upNextRow}>
+              {openHabits.map((q, i) =>
+                i === safeIndex ? null : (
+                  <Pressable
+                    key={q.id}
+                    onPress={() => setFocusIndex(i)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Bring ${q.title} to focus`}
+                    style={styles.upNextChip}
+                  >
+                    {isValidScheduleMinutes(q.scheduledTime) && (
+                      <Text style={styles.upNextTime}>⏰ {minutesToLabel(q.scheduledTime)}</Text>
+                    )}
+                    <Text style={styles.upNextChipText} numberOfLines={1}>
+                      {q.title}
+                    </Text>
+                  </Pressable>
+                ),
+              )}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Plan CTA — the one place to curate today/tomorrow (declutters home). */}
+        <Pressable
+          onPress={() => navigation.navigate('Plan')}
+          accessibilityRole="button"
+          accessibilityLabel="Plan your day"
+          accessibilityHint="Choose which habits to work on today or tomorrow"
+          style={styles.planCta}
+        >
+          <View style={styles.planCtaMain}>
+            <Text style={styles.planCtaTitle}>🗓 Plan your day</Text>
+            <Text style={styles.planCtaSub}>
+              {plan === undefined ? 'Pick what to focus on — today or tomorrow' : `${progress.total} planned today`}
+            </Text>
+          </View>
+          <Text style={styles.planCtaChevron}>›</Text>
+        </Pressable>
 
         {/* Quick actions — keeps every feature, low clutter (Hick's law). */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
@@ -425,7 +490,13 @@ export function DashboardScreen() {
           {CAPACITIES.map((cap) => {
             const lvl = Math.round(levels[cap.id]);
             return (
-              <View key={cap.id} style={styles.capCell} accessibilityLabel={`${cap.name} ${lvl} percent`}>
+              <Pressable
+                key={cap.id}
+                onPress={() => navigation.navigate('CapacityFocus', { capacityId: cap.id })}
+                accessibilityRole="button"
+                accessibilityLabel={`${cap.name} ${lvl} percent. See habits that strengthen it`}
+                style={styles.capCell}
+              >
                 <View style={styles.capRingWrap}>
                   <CapacityRing level={lvl} colorId={cap.colorId} size={56} strokeWidth={6} />
                   <View style={styles.capRingCenter} pointerEvents="none">
@@ -433,21 +504,10 @@ export function DashboardScreen() {
                   </View>
                 </View>
                 <Text style={styles.capCellName}>{cap.name}</Text>
-              </View>
+              </Pressable>
             );
           })}
         </ScrollView>
-
-        {/* Rails — Gestalt grouping: each life-area reads as one coherent row. */}
-        {rails.map((rail) => (
-          <Rail
-            key={rail.id}
-            rail={rail}
-            buckets={buckets}
-            onOpen={openHabit}
-            onEdit={(id) => navigation.navigate('QuestEditor', { questId: id })}
-          />
-        ))}
 
         <View style={{ height: spacing.xl }} />
       </ScrollView>
@@ -459,79 +519,6 @@ function QuickChip({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.quickChip}>
       <Text style={styles.quickChipText}>{label}</Text>
-    </Pressable>
-  );
-}
-
-function Rail({
-  rail,
-  buckets,
-  onOpen,
-  onEdit,
-}: {
-  rail: HabitRail;
-  buckets: ReturnType<typeof useBuckets>['buckets'];
-  onOpen: (id: string) => void;
-  onEdit: (id: string) => void;
-}) {
-  const open = rail.habits.filter((h) => !h.completed).length;
-  const bucket = rail.source === 'bucket' ? buckets.find((b) => b.id === rail.sourceId) : undefined;
-  const accent = bucket ? getBucketColor(bucket.colorId).accent : VIOLET;
-
-  return (
-    <View style={styles.rail}>
-      <View style={styles.railHead}>
-        <View style={styles.railLabelWrap}>
-          {bucket ? (
-            <BucketIcon iconId={bucket.iconId} size={18} tint={accent} />
-          ) : (
-            <Text style={styles.railGlyph}>
-              {rail.source === 'category' ? CATEGORY_META[rail.sourceId as QuestCategory].icon : '🗂'}
-            </Text>
-          )}
-          <Text style={styles.railLabel}>{rail.label}</Text>
-        </View>
-        <Text style={styles.railCount}>{open ? `${open} to do` : 'all done'}</Text>
-      </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.railScroll}>
-        {rail.habits.map((h) => (
-          <HabitCard key={h.id} quest={h} onOpen={onOpen} onEdit={onEdit} />
-        ))}
-      </ScrollView>
-    </View>
-  );
-}
-
-function HabitCard({
-  quest,
-  onOpen,
-  onEdit,
-}: {
-  quest: Quest;
-  onOpen: (id: string) => void;
-  onEdit: (id: string) => void;
-}) {
-  const done = quest.completed;
-  // Honest: a binary habit is 0% (open ring, Zeigarnik) or 100% (gold win).
-  return (
-    <Pressable
-      onPress={() => onOpen(quest.id)}
-      onLongPress={() => onEdit(quest.id)}
-      accessibilityRole="button"
-      accessibilityState={{ checked: done }}
-      accessibilityLabel={`${quest.title}, ${done ? 'completed' : 'not done'}`}
-      accessibilityHint={done ? 'Opens the habit. Long press to edit.' : 'Opens the habit to complete it. Long press to edit.'}
-      style={[styles.card, done && styles.cardDone]}
-    >
-      <View style={styles.cardRing}>
-        <CapacityRing level={done ? 100 : 0} colorId="teal" size={56} strokeWidth={6} />
-        <View style={styles.cardRingCenter} pointerEvents="none">
-          <Text style={styles.cardRingMark}>{done ? '✓' : ''}</Text>
-        </View>
-      </View>
-      <Text style={[styles.cardName, done && styles.cardNameDone]} numberOfLines={2}>
-        {quest.title}
-      </Text>
     </Pressable>
   );
 }
@@ -622,6 +609,30 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: { ...typography.title, color: '#FFF', fontWeight: '800' },
   allDone: { ...typography.body, color: TEAL, fontWeight: '700', marginTop: spacing.xs },
+
+  upNext: { gap: spacing.xs },
+  upNextLabel: { ...typography.label, color: MUTED, letterSpacing: 1, paddingHorizontal: PAD },
+  upNextRow: { gap: spacing.sm, paddingHorizontal: PAD },
+  upNextChip: { backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, maxWidth: 180, borderWidth: 1, borderColor: '#ECEAE4' },
+  upNextTime: { ...typography.caption, color: VIOLET, fontWeight: '700', fontSize: 10 },
+  upNextChipText: { ...typography.label, color: INK, fontWeight: '600' },
+
+  planCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginHorizontal: PAD,
+    backgroundColor: '#F4F1FE',
+    borderRadius: radii.xl,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    borderWidth: 1,
+    borderColor: '#E2DBFB',
+  },
+  planCtaMain: { flex: 1, gap: 2 },
+  planCtaTitle: { ...typography.title, color: INK, fontWeight: '800' },
+  planCtaSub: { ...typography.caption, color: MUTED },
+  planCtaChevron: { fontSize: 26, color: VIOLET, fontWeight: '800' },
 
   capHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: PAD },
   capLink: { ...typography.caption, color: VIOLET, fontWeight: '700' },
