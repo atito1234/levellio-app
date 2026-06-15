@@ -20,22 +20,29 @@ describe('normalizeBattleProgress', () => {
     expect(p.lastCustomMin).toBe(30);
   });
 
+  it('keeps a valid coin balance and floors bad ones to 0', () => {
+    expect(normalizeBattleProgress({ coins: 120 }).coins).toBe(120);
+    expect(normalizeBattleProgress({ coins: -5 }).coins).toBe(0);
+    expect(normalizeBattleProgress({ coins: 'lots' }).coins).toBe(0);
+  });
+
   it('returns empty on garbage', () => {
-    expect(normalizeBattleProgress(null)).toEqual({ totalSlain: 0, perDragon: {} });
+    expect(normalizeBattleProgress(null)).toEqual({ totalSlain: 0, perDragon: {}, coins: 0 });
   });
 });
 
 describe('BattleStore', () => {
   it('round-trips progression', async () => {
     const store = new BattleStore(new InMemoryStore());
-    await store.save('u1', { totalSlain: 2, perDragon: { fear: 2 }, lastTechniqueId: 'pomodoro' });
+    await store.save('u1', { totalSlain: 2, perDragon: { fear: 2 }, coins: 60, lastTechniqueId: 'pomodoro' });
     const out = await store.load('u1');
     expect(out.totalSlain).toBe(2);
     expect(out.perDragon.fear).toBe(2);
+    expect(out.coins).toBe(60);
     expect(out.lastTechniqueId).toBe('pomodoro');
   });
 
   it('returns empty progress for a new user', async () => {
-    expect(await new BattleStore(new InMemoryStore()).load('new')).toEqual({ totalSlain: 0, perDragon: {} });
+    expect(await new BattleStore(new InMemoryStore()).load('new')).toEqual({ totalSlain: 0, perDragon: {}, coins: 0 });
   });
 });

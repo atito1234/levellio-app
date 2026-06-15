@@ -59,6 +59,10 @@ export type RootStackParamList = {
     dragonId: string;
     dragonName?: string;
   };
+  /** Write a battle-journal reflection (what's stopping you). */
+  JournalComposer: { dragonId?: string; dragonName?: string; questIds?: string[] } | undefined;
+  /** The battle-journal feed (optionally filtered to one dragon). */
+  Journal: { dragonId?: string } | undefined;
 };
 
 declare global {
