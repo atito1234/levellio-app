@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
+import { DotGrid, Sparkline } from '@/components/charts';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals } from '@/state/GoalContext';
@@ -22,8 +23,11 @@ import {
   type DirectionTone,
   type InsightTier,
 } from '@/lib/heroAnalytics';
+import { activityDayCells, activityJourney, automaticityCurve, JOURNEY_MARKERS, type JourneyStatus } from '@/lib/journey';
 import { CATEGORY_META, resolveCategory } from '@/lib/categories';
+import { RING_SCIENCE } from '@/data/ringScience';
 import { dayKey, shiftDayKey } from '@/lib/dates';
+import type { ActivitySessionEvent } from '@/lib/metadata';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Analytics'>;
@@ -197,6 +201,34 @@ export function AnalyticsScreen({ navigation }: Props) {
               return <InsightCard key={tier.id} tier={tier} data={data} goals={goals} />;
             })}
 
+            {/* From repetition to habit — real per-activity journeys. */}
+            {data.activities.length > 0 && (
+              <>
+                <Text style={styles.sectionLabel}>FROM REPETITION TO HABIT</Text>
+                {data.activities.slice(0, 5).map((a) => (
+                  <JourneyRow key={a.activityId} sessions={data.sessions} today={data.today} activityId={a.activityId} title={a.title} />
+                ))}
+              </>
+            )}
+
+            {/* Why the ring works — the science, honestly. */}
+            <Text style={styles.sectionLabel}>WHY THE RING WORKS</Text>
+            {RING_SCIENCE.map((c) => (
+              <View key={c.id} style={styles.scienceCard}>
+                <View style={styles.insightHead}>
+                  <Text style={styles.insightIcon}>{c.icon}</Text>
+                  <Text style={styles.scienceTag}>{c.tag}</Text>
+                </View>
+                <Text style={styles.scienceTitle}>{c.title}</Text>
+                <Text style={styles.insightBody}>{c.body}</Text>
+                {c.id === 'repetition' && (
+                  <View style={styles.curveWrap}>
+                    <Sparkline values={automaticityCurve(14)} markers={JOURNEY_MARKERS.map((m) => ({ at: m.at, label: m.label }))} />
+                  </View>
+                )}
+              </View>
+            ))}
+
             <Pressable
               onPress={() => navigation.navigate('Insights')}
               accessibilityRole="button"
@@ -209,6 +241,34 @@ export function AnalyticsScreen({ navigation }: Props) {
         )}
       </ScrollView>
     </ScreenContainer>
+  );
+}
+
+const STATUS_META: Record<JourneyStatus, { label: string; color: string }> = {
+  graduated: { label: '🏅 Habit unlocked', color: '#B5740A' },
+  solidified: { label: '🌱 Locked in', color: TEAL },
+  building: { label: 'Building', color: VIOLET },
+  new: { label: 'Just started', color: MUTED },
+};
+
+function JourneyRow({ sessions, today, activityId, title }: { sessions: readonly ActivitySessionEvent[]; today: string; activityId: string; title: string }) {
+  const j = activityJourney(sessions, activityId, title, today);
+  const cells = activityDayCells(sessions, activityId, today, 28);
+  const status = STATUS_META[j.status];
+  return (
+    <View style={styles.journeyCard}>
+      <View style={styles.journeyHead}>
+        <Text style={styles.journeyTitle} numberOfLines={1}>
+          {title}
+        </Text>
+        <Text style={[styles.journeyStatus, { color: status.color }]}>{status.label}</Text>
+      </View>
+      <DotGrid cells={cells} />
+      <Text style={styles.journeySub}>
+        {j.currentStreak > 0 ? `Day ${j.currentStreak} in a row` : 'Start again today'} ·{' '}
+        {j.graduated ? 'runs on its own' : `${j.progressPct}% toward automatic`}
+      </Text>
+    </View>
   );
 }
 
@@ -405,6 +465,17 @@ const styles = StyleSheet.create({
 
   feelCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, ...cardShadow },
   feelAvg: { ...typography.title, color: '#B5740A', fontWeight: '800' },
+
+  journeyCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, ...cardShadow },
+  journeyHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  journeyTitle: { ...typography.title, color: INK, fontWeight: '800', flex: 1 },
+  journeyStatus: { ...typography.caption, fontWeight: '800' },
+  journeySub: { ...typography.caption, color: MUTED },
+
+  scienceCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.xs, ...cardShadow },
+  scienceTag: { ...typography.caption, color: MUTED, letterSpacing: 2, fontWeight: '800' },
+  scienceTitle: { ...typography.title, color: INK, fontWeight: '800' },
+  curveWrap: { marginTop: spacing.sm },
 
   lockedCard: { backgroundColor: '#F4F3F8', shadowOpacity: 0, elevation: 0 },
   lockIcon: { fontSize: 18 },
