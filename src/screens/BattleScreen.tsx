@@ -29,6 +29,12 @@ interface VictoryResult {
   completed: number;
   selected: number;
   totalXp: number;
+  coins: number;
+}
+
+/** Coins awarded for a victory: a per-habit bounty + a dragon bounty. */
+function coinsFor(completed: number): number {
+  return completed * 10 + 25;
 }
 
 export function BattleScreen({ route, navigation }: Props) {
@@ -105,8 +111,9 @@ export function BattleScreen({ route, navigation }: Props) {
         totalXp += reward.totalXp;
       }
     }
-    await recordVictory(dragon.id);
-    setResult({ completed, selected: battleQuests.length, totalXp });
+    const coins = coinsFor(completed);
+    await recordVictory(dragon.id, coins);
+    setResult({ completed, selected: battleQuests.length, totalXp, coins });
   }, [stop, reduced, technique.countsUp, battleQuests, elapsed, complete, recordVictory, dragon.id]);
 
   // Auto-slay when a timed block fully elapses.
@@ -164,6 +171,7 @@ export function BattleScreen({ route, navigation }: Props) {
                 {result!.completed}/{result!.selected} habit{result!.selected === 1 ? '' : 's'} done
                 {result!.totalXp > 0 ? ` · +${result!.totalXp} XP` : ''}
               </Text>
+              <Text style={styles.summaryCoins}>🪙 +{result!.coins} coins</Text>
             </View>
           </>
         ) : (
@@ -252,8 +260,9 @@ const styles = StyleSheet.create({
 
   victory: { ...typography.heading, fontWeight: '900' },
   victoryLine: { ...typography.body, color: INK, textAlign: 'center', paddingHorizontal: spacing.lg },
-  summary: { marginTop: spacing.md, backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
+  summary: { marginTop: spacing.md, backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: spacing.lg, paddingVertical: spacing.md, alignItems: 'center', gap: 4 },
   summaryText: { ...typography.body, color: INK, fontWeight: '700' },
+  summaryCoins: { ...typography.label, color: '#B8860B', fontWeight: '800' },
 
   controls: { gap: spacing.sm, marginBottom: spacing.md },
   primaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.lg, alignItems: 'center', marginBottom: spacing.md },

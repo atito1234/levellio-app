@@ -17,11 +17,13 @@ export interface BattleProgress {
   totalSlain: number;
   /** Victory count keyed by dragon id. */
   perDragon: Record<string, number>;
+  /** Coins earned from battles, spendable on gadgets. */
+  coins: number;
   lastTechniqueId?: TechniqueId;
   lastCustomMin?: number;
 }
 
-export const EMPTY_BATTLE_PROGRESS: BattleProgress = { totalSlain: 0, perDragon: {} };
+export const EMPTY_BATTLE_PROGRESS: BattleProgress = { totalSlain: 0, perDragon: {}, coins: 0 };
 
 export function normalizeBattleProgress(raw: unknown): BattleProgress {
   const r = (raw ?? {}) as Partial<BattleProgress>;
@@ -38,6 +40,7 @@ export function normalizeBattleProgress(raw: unknown): BattleProgress {
   return {
     totalSlain,
     perDragon,
+    coins: typeof r.coins === 'number' && Number.isFinite(r.coins) && r.coins >= 0 ? Math.floor(r.coins) : 0,
     ...(typeof r.lastTechniqueId === 'string' && TECHNIQUE_IDS.has(r.lastTechniqueId as TechniqueId)
       ? { lastTechniqueId: r.lastTechniqueId as TechniqueId }
       : {}),

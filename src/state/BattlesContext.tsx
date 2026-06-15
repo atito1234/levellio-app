@@ -7,10 +7,13 @@ interface BattlesContextValue {
   ready: boolean;
   totalSlain: number;
   perDragon: Record<string, number>;
+  coins: number;
   lastTechniqueId?: TechniqueId;
   lastCustomMin?: number;
-  /** Record a slain dragon (called on battle victory). */
-  recordVictory: (dragonId: string) => Promise<void>;
+  /** Record a slain dragon + award coins (called on battle victory). */
+  recordVictory: (dragonId: string, coinsEarned?: number) => Promise<void>;
+  /** Spend coins (e.g. unlocking a gadget). Returns false if too few. */
+  spendCoins: (amount: number) => Promise<boolean>;
   /** Remember the user's last technique choice for next time. */
   setTechnique: (id: TechniqueId, customMin?: number) => Promise<void>;
 }
@@ -22,13 +25,13 @@ export function BattlesProvider({ children }: { children: React.ReactNode }) {
   const { user } = useGame();
   const uid = user?.uid ?? null;
 
-  const [progress, setProgress] = useState<BattleProgress>({ totalSlain: 0, perDragon: {} });
+  const [progress, setProgress] = useState<BattleProgress>({ totalSlain: 0, perDragon: {}, coins: 0 });
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let active = true;
     if (!uid) {
-      setProgress({ totalSlain: 0, perDragon: {} });
+      setProgress({ totalSlain: 0, perDragon: {}, coins: 0 });
       setReady(false);
       return;
     }
@@ -52,12 +55,23 @@ export function BattlesProvider({ children }: { children: React.ReactNode }) {
   );
 
   const recordVictory = useCallback(
-    (dragonId: string) =>
+    (dragonId: string, coinsEarned = 0) =>
       commit({
         ...progress,
         totalSlain: progress.totalSlain + 1,
         perDragon: { ...progress.perDragon, [dragonId]: (progress.perDragon[dragonId] ?? 0) + 1 },
+        coins: progress.coins + Math.max(0, Math.floor(coinsEarned)),
       }),
+    [progress, commit],
+  );
+
+  const spendCoins = useCallback(
+    async (amount: number): Promise<boolean> => {
+      const cost = Math.max(0, Math.floor(amount));
+      if (progress.coins < cost) return false;
+      await commit({ ...progress, coins: progress.coins - cost });
+      return true;
+    },
     [progress, commit],
   );
 
@@ -72,12 +86,14 @@ export function BattlesProvider({ children }: { children: React.ReactNode }) {
       ready,
       totalSlain: progress.totalSlain,
       perDragon: progress.perDragon,
+      coins: progress.coins,
       lastTechniqueId: progress.lastTechniqueId,
       lastCustomMin: progress.lastCustomMin,
       recordVictory,
+      spendCoins,
       setTechnique,
     }),
-    [ready, progress, recordVictory, setTechnique],
+    [ready, progress, recordVictory, spendCoins, setTechnique],
   );
 
   return <BattlesContext.Provider value={value}>{children}</BattlesContext.Provider>;

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { ScreenContainer, DragonSprite } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
@@ -12,9 +12,10 @@ import { useJournal } from '@/state/JournalContext';
 import { activitiesInBucket } from '@/lib/buckets';
 import { goalHabits } from '@/lib/goal';
 import { plannedOpen } from '@/lib/plan';
+import { moodMeta } from '@/lib/journal';
 import { CATEGORY_META } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
-import { TECHNIQUES, clampCustomMinutes, type TechniqueId } from '@/lib/timeTechniques';
+import { TECHNIQUES, clampCustomMinutes, workSeconds, getTechnique, type TechniqueId } from '@/lib/timeTechniques';
 import { DRAGONS, CUSTOM_DRAGON_ID, getDragon } from '@/data/dragons';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -28,18 +29,39 @@ const VIOLET_SOFT = '#EDE9FE';
 const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
+const shadow = {
+  shadowColor: '#1B1B2A',
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.08,
+  shadowRadius: 14,
+  elevation: 3,
+};
+
+// Techniques, reframed as fun "war gadgets".
+const GADGETS: Record<TechniqueId, { icon: string; tag: string }> = {
+  pomodoro: { icon: '⚔️', tag: 'Sprint Blade' },
+  deepwork: { icon: '🛡️', tag: 'Siege Shield' },
+  quick10: { icon: '🗡️', tag: 'Quick Strike' },
+  custom: { icon: '🎛️', tag: 'Custom Rig' },
+  flowtime: { icon: '🌊', tag: 'Flow Saber' },
+};
+
+function gadgetSub(id: TechniqueId, customMin: number): string {
+  const secs = workSeconds(getTechnique(id), customMin);
+  return secs === null ? 'open-ended' : `${Math.round(secs / 60)} min`;
+}
+
 export function BattleSetupScreen({ route, navigation }: Props) {
   const { questId, bucketId, goalId } = route.params ?? {};
   const { quests, addQuest } = useGame();
   const { getPlan } = usePlan();
   const { assignments, buckets } = useBuckets();
   const { goals } = useGoals();
-  const { lastTechniqueId, lastCustomMin, setTechnique } = useBattles();
+  const { lastTechniqueId, lastCustomMin, setTechnique, coins } = useBattles();
   const { entriesForDragon } = useJournal();
 
   const activeQuests = useMemo(() => quests.filter((q) => !q.completed), [quests]);
 
-  // Which habits are preselected, based on where the battle was started from.
   const preselected = useMemo(() => {
     if (questId) return new Set([questId]);
     if (bucketId) return new Set(activitiesInBucket({ buckets, assignments }, bucketId));
@@ -56,24 +78,30 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const [dragonId, setDragonId] = useState<string>(DRAGONS[0]!.id);
   const [dragonName, setDragonName] = useState('');
   const [customActivity, setCustomActivity] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const resolvedDragon = getDragon(dragonId, dragonName);
-  const pastReflections = entriesForDragon(dragonId).length;
+  const reflections = entriesForDragon(dragonId);
+  const latest = reflections[0];
+
+  const selectedQuests = activeQuests.filter((q) => selected.has(q.id));
+  const available = activeQuests.filter((q) => !selected.has(q.id));
+
+  const add = (id: string) => setSelected((prev) => new Set(prev).add(id));
+  const remove = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
 
   const addCustomActivity = async () => {
     const title = customActivity.trim();
     if (title.length === 0) return;
     const quest = await addQuest({ title, category: 'health', difficulty: 'easy' });
-    if (quest) setSelected((prev) => new Set(prev).add(quest.id));
+    if (quest) add(quest.id);
     setCustomActivity('');
   };
-
-  const toggle = (id: string) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
 
   const canFight = selected.size > 0 && (dragonId !== CUSTOM_DRAGON_ID || dragonName.trim().length > 0);
 
@@ -89,6 +117,9 @@ export function BattleSetupScreen({ route, navigation }: Props) {
     });
   };
 
+  const openReflect = () =>
+    navigation.navigate('JournalComposer', { dragonId, dragonName: resolvedDragon.name, questIds: [...selected] });
+
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
@@ -96,72 +127,101 @@ export function BattleSetupScreen({ route, navigation }: Props) {
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          Prepare for battle
+          War room
         </Text>
-        <View style={styles.chevronSpacer} />
+        <View style={styles.coinPill} accessibilityLabel={`${coins} coins`}>
+          <Text style={styles.coinText}>🪙 {coins}</Text>
+        </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Text style={styles.sectionLabel}>HABITS TO TACKLE ({selected.size})</Text>
-        <Text style={styles.hint}>Bundle as many as you like into one block — or just one.</Text>
-        <View style={styles.list}>
-          {activeQuests.length === 0 ? (
-            <Text style={styles.empty}>No open habits today. Add some first.</Text>
+        {/* 1 — Reflection on top (social post). */}
+        <Pressable onPress={openReflect} accessibilityRole="button" accessibilityLabel="Reflect on your dragon" style={[styles.reflectCard, shadow]}>
+          <View style={styles.reflectHead}>
+            <Text style={styles.reflectKicker}>📓 REFLECT FIRST</Text>
+            {reflections.length > 0 && (
+              <Pressable onPress={() => navigation.navigate('Journal', { dragonId })} accessibilityRole="button" accessibilityLabel={`View ${reflections.length} past reflections`} hitSlop={8}>
+                <Text style={styles.reflectLink}>{reflections.length} past ›</Text>
+              </Pressable>
+            )}
+          </View>
+          {latest ? (
+            <View style={styles.latestWrap}>
+              <Text style={styles.latestText} numberOfLines={2}>
+                {moodMeta(latest.mood)?.emoji ?? '🗒️'} {latest.text || 'Reflection saved'}
+              </Text>
+              <Text style={styles.reflectCta}>Add another reflection ›</Text>
+            </View>
           ) : (
-            activeQuests.map((q) => {
-              const on = selected.has(q.id);
-              return (
-                <Pressable
-                  key={q.id}
-                  onPress={() => toggle(q.id)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: on }}
-                  accessibilityLabel={`${q.title}${on ? ', selected' : ''}`}
-                  style={[styles.row, on && styles.rowOn]}
-                >
-                  <Text style={styles.rowIcon}>{CATEGORY_META[q.category].icon}</Text>
-                  <Text style={[styles.rowTitle, on && styles.rowTitleOn]} numberOfLines={1}>
-                    {q.title}
-                  </Text>
-                  <Text style={[styles.check, on && styles.checkOn]}>{on ? '✓' : '+'}</Text>
-                </Pressable>
-              );
-            })
+            <View style={styles.latestWrap}>
+              <Text style={styles.reflectPrompt}>What’s stopping you from this? Name the dragon — text, mood, a photo.</Text>
+              <Text style={styles.reflectCta}>Journal what’s stopping you ›</Text>
+            </View>
           )}
-        </View>
+        </Pressable>
 
-        {/* Add something you actually did, on the fly (e.g. "boiled eggs"). */}
-        <View style={styles.addRow}>
-          <TextInput
-            value={customActivity}
-            onChangeText={setCustomActivity}
-            placeholder="＋ Add a custom activity (e.g. boiled eggs)"
-            placeholderTextColor={MUTED}
-            style={styles.addInput}
-            onSubmitEditing={() => void addCustomActivity()}
-            returnKeyType="done"
-            maxLength={60}
-            accessibilityLabel="Add a custom activity"
-          />
-          <Pressable onPress={() => void addCustomActivity()} disabled={customActivity.trim().length === 0} accessibilityRole="button" accessibilityLabel="Add activity" style={styles.addBtn}>
-            <Text style={[styles.addBtnText, customActivity.trim().length === 0 && styles.addBtnOff]}>Add</Text>
+        {/* 2 — Choose your dragon. */}
+        <Text style={styles.sectionLabel}>YOUR DRAGON</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
+          {DRAGONS.map((d) => {
+            const on = dragonId === d.id;
+            return (
+              <Pressable
+                key={d.id}
+                onPress={() => setDragonId(d.id)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: on }}
+                accessibilityLabel={`Fight ${d.name}`}
+                style={[styles.dragonCard, on && styles.cardOn]}
+              >
+                <DragonSprite colorId={d.colorId} size={66} />
+                <Text style={[styles.dragonCardName, on && styles.cardTextOn]} numberOfLines={1}>
+                  {d.name.replace('the Dragon of ', '')}
+                </Text>
+              </Pressable>
+            );
+          })}
+          <Pressable
+            onPress={() => setDragonId(CUSTOM_DRAGON_ID)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: dragonId === CUSTOM_DRAGON_ID }}
+            accessibilityLabel="Name your own dragon"
+            style={[styles.dragonCard, dragonId === CUSTOM_DRAGON_ID && styles.cardOn]}
+          >
+            <Text style={styles.customDragonPlus}>＋</Text>
+            <Text style={[styles.dragonCardName, dragonId === CUSTOM_DRAGON_ID && styles.cardTextOn]}>Custom</Text>
           </Pressable>
-        </View>
+        </ScrollView>
+        {dragonId === CUSTOM_DRAGON_ID && (
+          <TextInput
+            value={dragonName}
+            onChangeText={setDragonName}
+            placeholder="Name your dragon (Sugar, Snooze, Self-Doubt…)"
+            placeholderTextColor={MUTED}
+            style={styles.input}
+            maxLength={32}
+            accessibilityLabel="Custom dragon name"
+          />
+        )}
 
-        <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>TECHNIQUE</Text>
-        <View style={styles.chips}>
+        {/* 3 — Pick your gadget (technique). */}
+        <Text style={styles.sectionLabel}>YOUR WAR GADGET</Text>
+        <View style={styles.gadgetGrid}>
           {TECHNIQUES.map((t) => {
             const on = techniqueId === t.id;
+            const g = GADGETS[t.id];
             return (
               <Pressable
                 key={t.id}
                 onPress={() => setTechniqueId(t.id)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
-                accessibilityLabel={`${t.name}. ${t.blurb}`}
-                style={[styles.chip, on && styles.chipOn]}
+                accessibilityLabel={`${g.tag}, ${t.name}, ${gadgetSub(t.id, customMin)}`}
+                style={[styles.gadgetCard, on && styles.cardOn]}
               >
-                <Text style={[styles.chipText, on && styles.chipTextOn]}>{t.name}</Text>
+                <Text style={styles.gadgetIcon}>{g.icon}</Text>
+                <Text style={[styles.gadgetTag, on && styles.cardTextOn]}>{g.tag}</Text>
+                <Text style={styles.gadgetSub}>{gadgetSub(t.id, customMin)}</Text>
               </Pressable>
             );
           })}
@@ -178,70 +238,28 @@ export function BattleSetupScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>CHOOSE YOUR DRAGON</Text>
-        <View style={styles.chips}>
-          {DRAGONS.map((d) => {
-            const on = dragonId === d.id;
-            return (
-              <Pressable
-                key={d.id}
-                onPress={() => setDragonId(d.id)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: on }}
-                accessibilityLabel={`Fight ${d.name}`}
-                style={[styles.chip, on && styles.chipOn]}
-              >
-                <Text style={[styles.chipText, on && styles.chipTextOn]}>🐉 {d.name.replace('the Dragon of ', '')}</Text>
-              </Pressable>
-            );
-          })}
-          <Pressable
-            onPress={() => setDragonId(CUSTOM_DRAGON_ID)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: dragonId === CUSTOM_DRAGON_ID }}
-            accessibilityLabel="Name your own dragon"
-            style={[styles.chip, dragonId === CUSTOM_DRAGON_ID && styles.chipOn]}
-          >
-            <Text style={[styles.chipText, dragonId === CUSTOM_DRAGON_ID && styles.chipTextOn]}>＋ Custom</Text>
+        {/* 4 — Missions (habits), compact: chips + add. */}
+        <View style={styles.missionHead}>
+          <Text style={styles.sectionLabel}>MISSIONS ({selected.size})</Text>
+          <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" accessibilityLabel="Add missions" hitSlop={8}>
+            <Text style={styles.addMissions}>＋ Add</Text>
           </Pressable>
         </View>
-        {dragonId === CUSTOM_DRAGON_ID && (
-          <TextInput
-            value={dragonName}
-            onChangeText={setDragonName}
-            placeholder="Name your dragon (e.g. Sugar, Snooze, Self-Doubt)"
-            placeholderTextColor={MUTED}
-            style={styles.input}
-            maxLength={32}
-            accessibilityLabel="Custom dragon name"
-          />
-        )}
-
-        {/* Reflect before you fight — name what's stopping you. */}
-        <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>REFLECT FIRST</Text>
-        <Pressable
-          onPress={() =>
-            navigation.navigate('JournalComposer', {
-              dragonId,
-              dragonName: resolvedDragon.name,
-              questIds: [...selected],
-            })
-          }
-          accessibilityRole="button"
-          accessibilityLabel="Journal what's stopping you"
-          style={styles.reflectBtn}
-        >
-          <Text style={styles.reflectIcon}>📓</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.reflectTitle}>Journal what’s stopping you</Text>
-            <Text style={styles.reflectSub}>Name the dragon — text, mood, a photo or video.</Text>
-          </View>
-          <Text style={styles.reflectChevron}>›</Text>
-        </Pressable>
-        {pastReflections > 0 && (
-          <Pressable onPress={() => navigation.navigate('Journal', { dragonId })} accessibilityRole="button" accessibilityLabel={`View ${pastReflections} past reflections`} style={styles.pastLink}>
-            <Text style={styles.pastLinkText}>View {pastReflections} past reflection{pastReflections === 1 ? '' : 's'} ›</Text>
+        {selectedQuests.length === 0 ? (
+          <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" style={styles.emptyMissions}>
+            <Text style={styles.emptyMissionsText}>Pick the habits for this block ›</Text>
           </Pressable>
+        ) : (
+          <View style={styles.missionChips}>
+            {selectedQuests.map((q) => (
+              <Pressable key={q.id} onPress={() => remove(q.id)} accessibilityRole="button" accessibilityLabel={`Remove ${q.title}`} style={styles.missionChip}>
+                <Text style={styles.missionChipText} numberOfLines={1}>
+                  {CATEGORY_META[q.category].icon} {q.title}
+                </Text>
+                <Text style={styles.missionChipX}>✕</Text>
+              </Pressable>
+            ))}
+          </View>
         )}
       </ScrollView>
 
@@ -254,6 +272,51 @@ export function BattleSetupScreen({ route, navigation }: Props) {
       >
         <Text style={styles.ctaText}>⚔️ Begin battle</Text>
       </Pressable>
+
+      {/* Mission picker — a clean overlay, not an always-on crowded list. */}
+      <Modal visible={pickerOpen} animationType="slide" transparent onRequestClose={() => setPickerOpen(false)}>
+        <View style={styles.sheetBackdrop}>
+          <View style={styles.sheet}>
+            <View style={styles.sheetHead}>
+              <Text style={styles.sheetTitle}>Add missions</Text>
+              <Pressable onPress={() => setPickerOpen(false)} accessibilityRole="button" accessibilityLabel="Done" hitSlop={12}>
+                <Text style={styles.sheetDone}>Done</Text>
+              </Pressable>
+            </View>
+            <View style={styles.addRow}>
+              <TextInput
+                value={customActivity}
+                onChangeText={setCustomActivity}
+                placeholder="＋ Type a custom one (e.g. boiled eggs)"
+                placeholderTextColor={MUTED}
+                style={styles.addInput}
+                onSubmitEditing={() => void addCustomActivity()}
+                returnKeyType="done"
+                maxLength={60}
+                accessibilityLabel="Add a custom activity"
+              />
+              <Pressable onPress={() => void addCustomActivity()} disabled={customActivity.trim().length === 0} accessibilityRole="button" accessibilityLabel="Add activity" style={styles.addBtn}>
+                <Text style={[styles.addBtnText, customActivity.trim().length === 0 && styles.addBtnOff]}>Add</Text>
+              </Pressable>
+            </View>
+            <ScrollView style={styles.sheetList} contentContainerStyle={styles.sheetListContent} showsVerticalScrollIndicator={false}>
+              {available.length === 0 ? (
+                <Text style={styles.sheetEmpty}>Everything’s in. Type a custom one above.</Text>
+              ) : (
+                available.map((q) => (
+                  <Pressable key={q.id} onPress={() => add(q.id)} accessibilityRole="button" accessibilityLabel={`Add ${q.title}`} style={styles.sheetRow}>
+                    <Text style={styles.sheetRowIcon}>{CATEGORY_META[q.category].icon}</Text>
+                    <Text style={styles.sheetRowTitle} numberOfLines={1}>
+                      {q.title}
+                    </Text>
+                    <Text style={styles.sheetRowAdd}>＋</Text>
+                  </Pressable>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }
@@ -261,51 +324,74 @@ export function BattleSetupScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm },
   chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
-  chevronSpacer: { width: 28 },
   title: { ...typography.heading, color: INK },
+  coinPill: { backgroundColor: '#FFF6E6', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 6, borderWidth: 1, borderColor: '#F4D793' },
+  coinText: { ...typography.label, color: '#B8860B', fontWeight: '800' },
 
-  content: { gap: spacing.sm, paddingBottom: spacing.xl },
+  content: { gap: spacing.md, paddingBottom: spacing.xl },
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
-  hint: { ...typography.caption, color: MUTED },
-  empty: { ...typography.body, color: MUTED, textAlign: 'center', paddingVertical: spacing.lg },
 
-  list: { gap: spacing.sm },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 16, padding: spacing.md, borderWidth: 1, borderColor: TRACK },
-  rowOn: { borderColor: VIOLET, backgroundColor: VIOLET_SOFT },
-  rowIcon: { fontSize: 20 },
-  rowTitle: { ...typography.body, color: INK, flex: 1, fontWeight: '600' },
-  rowTitleOn: { color: VIOLET },
-  check: { ...typography.title, color: MUTED, width: 24, textAlign: 'center' },
-  checkOn: { color: VIOLET, fontWeight: '800' },
+  // Reflect card
+  reflectCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.md, gap: spacing.sm, borderWidth: 1, borderColor: '#E2DBFB' },
+  reflectHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  reflectKicker: { ...typography.label, color: VIOLET, fontWeight: '800', letterSpacing: 1 },
+  reflectLink: { ...typography.label, color: VIOLET, fontWeight: '700' },
+  latestWrap: { gap: 4 },
+  latestText: { ...typography.body, color: INK },
+  reflectPrompt: { ...typography.body, color: MUTED },
+  reflectCta: { ...typography.label, color: VIOLET, fontWeight: '700' },
 
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: { backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
-  chipOn: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET },
-  chipText: { ...typography.label, color: MUTED, fontWeight: '600' },
-  chipTextOn: { color: VIOLET, fontWeight: '700' },
+  // Dragon carousel
+  carousel: { gap: spacing.sm, paddingVertical: 2, paddingRight: spacing.md },
+  dragonCard: { width: 104, backgroundColor: CARD, borderRadius: 18, paddingVertical: spacing.sm, alignItems: 'center', gap: 4, borderWidth: 2, borderColor: TRACK },
+  dragonCardName: { ...typography.caption, color: INK, fontWeight: '700', textTransform: 'capitalize' },
+  customDragonPlus: { fontSize: 40, color: VIOLET, height: 66, lineHeight: 66, fontWeight: '300' },
+  cardOn: { borderColor: VIOLET, backgroundColor: VIOLET_SOFT, ...shadow },
+  cardTextOn: { color: VIOLET },
 
-  stepper: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, alignSelf: 'flex-start', marginTop: spacing.xs },
+  input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: TRACK },
+
+  // Gadgets
+  gadgetGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  gadgetCard: { width: '31%', backgroundColor: CARD, borderRadius: 16, paddingVertical: spacing.md, alignItems: 'center', gap: 2, borderWidth: 2, borderColor: TRACK },
+  gadgetIcon: { fontSize: 22 },
+  gadgetTag: { ...typography.caption, color: INK, fontWeight: '800', textAlign: 'center' },
+  gadgetSub: { ...typography.caption, color: MUTED, fontSize: 11 },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, alignSelf: 'flex-start' },
   stepBtn: { width: 40, height: 40, borderRadius: 999, backgroundColor: CARD, borderWidth: 1, borderColor: TRACK, alignItems: 'center', justifyContent: 'center' },
   stepBtnText: { ...typography.heading, color: VIOLET },
   stepVal: { ...typography.title, color: INK, fontWeight: '700', minWidth: 80, textAlign: 'center' },
 
-  input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: TRACK, marginTop: spacing.xs },
+  // Missions
+  missionHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  addMissions: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  emptyMissions: { backgroundColor: CARD, borderRadius: 16, padding: spacing.md, borderWidth: 1, borderColor: TRACK, borderStyle: 'dashed' },
+  emptyMissionsText: { ...typography.body, color: MUTED },
+  missionChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  missionChip: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: VIOLET_SOFT, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#E2DBFB', maxWidth: '100%' },
+  missionChipText: { ...typography.label, color: VIOLET, fontWeight: '700', flexShrink: 1 },
+  missionChipX: { ...typography.caption, color: VIOLET, fontWeight: '800' },
 
+  cta: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm },
+  ctaOff: { opacity: 0.4 },
+  ctaText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
+
+  // Picker sheet
+  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(31,41,55,0.45)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: BG, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, maxHeight: '80%', gap: spacing.md },
+  sheetHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  sheetTitle: { ...typography.heading, color: INK },
+  sheetDone: { ...typography.label, color: VIOLET, fontWeight: '800' },
   addRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   addInput: { ...typography.body, color: INK, flex: 1, backgroundColor: CARD, borderRadius: 14, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
   addBtn: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   addBtnText: { ...typography.label, color: VIOLET, fontWeight: '800' },
   addBtnOff: { color: MUTED, opacity: 0.5 },
-
-  reflectBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: VIOLET_SOFT, borderRadius: 16, padding: spacing.md, borderWidth: 1, borderColor: '#E2DBFB' },
-  reflectIcon: { fontSize: 24 },
-  reflectTitle: { ...typography.body, color: INK, fontWeight: '800' },
-  reflectSub: { ...typography.caption, color: MUTED },
-  reflectChevron: { fontSize: 22, color: VIOLET, fontWeight: '800' },
-  pastLink: { paddingVertical: spacing.xs },
-  pastLinkText: { ...typography.label, color: VIOLET, fontWeight: '700' },
-
-  cta: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm },
-  ctaOff: { opacity: 0.4 },
-  ctaText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
+  sheetList: { alignSelf: 'stretch' },
+  sheetListContent: { gap: spacing.sm, paddingBottom: spacing.md },
+  sheetEmpty: { ...typography.body, color: MUTED, textAlign: 'center', paddingVertical: spacing.lg },
+  sheetRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: TRACK },
+  sheetRowIcon: { fontSize: 18 },
+  sheetRowTitle: { ...typography.body, color: INK, flex: 1, fontWeight: '600' },
+  sheetRowAdd: { fontSize: 20, color: VIOLET, fontWeight: '800' },
 });

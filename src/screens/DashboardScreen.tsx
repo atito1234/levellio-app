@@ -65,7 +65,7 @@ export function DashboardScreen() {
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
   const { goals } = useGoals();
-  const { totalSlain } = useBattles();
+  const { totalSlain, coins } = useBattles();
   const reduced = useReducedMotion();
 
   // The home reflects only TODAY'S PLAN (so it stays glanceable). No plan yet →
@@ -259,6 +259,11 @@ export function DashboardScreen() {
             {totalSlain > 0 && (
               <View style={styles.pill} accessibilityLabel={`${totalSlain} dragons slain`}>
                 <Text style={styles.pillText}>⚔️ {totalSlain}</Text>
+              </View>
+            )}
+            {coins > 0 && (
+              <View style={styles.pill} accessibilityLabel={`${coins} coins`}>
+                <Text style={styles.pillText}>🪙 {coins}</Text>
               </View>
             )}
             <View style={[styles.pill, styles.pillViolet]} accessibilityLabel={`Level ${character.level}`}>
