@@ -1,0 +1,76 @@
+import { capacitiesForCategories, goalHabits, goalProgress, goalWeeklyDays, type Goal } from './goal';
+import { emptyLevels } from './compounding';
+import type { Quest } from '@/types';
+
+const goal: Goal = {
+  id: 'g1',
+  title: 'Get fit & strong',
+  emoji: '💪',
+  colorId: 'violet',
+  categories: ['fitness', 'health'],
+  createdAt: 0,
+  order: 0,
+};
+
+const q = (id: string, category: Quest['category'], over: Partial<Quest> = {}): Quest => ({
+  id,
+  title: id,
+  category,
+  difficulty: 'medium',
+  baseXp: 40,
+  completed: false,
+  ...over,
+});
+
+describe('capacitiesForCategories', () => {
+  it('returns the unique capacities the areas build', () => {
+    const caps = capacitiesForCategories(['fitness']);
+    expect(caps).toContain('endurance');
+    expect(new Set(caps).size).toBe(caps.length); // unique
+  });
+});
+
+describe('goalHabits', () => {
+  it('returns only habits in the goal’s life areas', () => {
+    const quests = [q('a', 'fitness'), q('b', 'finance'), q('c', 'health')];
+    expect(goalHabits(quests, goal).map((x) => x.id)).toEqual(['a', 'c']);
+  });
+});
+
+describe('goalProgress', () => {
+  it('counts done/planned contributing habits and weekly consistency — no scale numbers', () => {
+    const quests = [q('a', 'fitness', { completed: true }), q('b', 'health'), q('c', 'finance')];
+    const p = goalProgress({ goal, quests, plannedTodayIds: ['a', 'b'], levels: emptyLevels(), weeklyDays: 3 });
+    expect(p.contributingCount).toBe(2);
+    expect(p.doneTodayInGoal).toBe(1);
+    expect(p.plannedTodayInGoal).toBe(2);
+    expect(p.weeklyConsistencyPct).toBe(43); // 3/7
+    expect(p).not.toHaveProperty('weight');
+  });
+
+  it('treats all contributing habits as planned when there is no plan', () => {
+    const quests = [q('a', 'fitness'), q('b', 'health')];
+    const p = goalProgress({ goal, quests, levels: emptyLevels(), weeklyDays: 0 });
+    expect(p.plannedTodayInGoal).toBe(2);
+  });
+});
+
+describe('goalWeeklyDays', () => {
+  it('counts distinct in-window days with a contributing session', () => {
+    const day = (key: string) => new Date(`${key}T12:00:00`).getTime();
+    const sessions = [
+      { category: 'fitness', createdAt: day('2026-06-15') },
+      { category: 'fitness', createdAt: day('2026-06-15') }, // same day → counts once
+      { category: 'health', createdAt: day('2026-06-14') },
+      { category: 'finance', createdAt: day('2026-06-13') }, // outside goal areas
+      { category: 'fitness', createdAt: day('2026-05-01') }, // outside window
+    ];
+    const weekDays = ['2026-06-15', '2026-06-14', '2026-06-13', '2026-06-12'];
+    expect(goalWeeklyDays(sessions, goal, weekDays)).toBe(2);
+  });
+
+  it('ignores sessions without a category', () => {
+    const sessions = [{ createdAt: new Date('2026-06-15T12:00:00').getTime() }];
+    expect(goalWeeklyDays(sessions, goal, ['2026-06-15'])).toBe(0);
+  });
+});
