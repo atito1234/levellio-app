@@ -63,6 +63,8 @@ export type RootStackParamList = {
   JournalComposer: { dragonId?: string; dragonName?: string; questIds?: string[]; prompt?: string; teaching?: string } | undefined;
   /** The battle-journal feed (optionally filtered to one dragon). */
   Journal: { dragonId?: string } | undefined;
+  /** Hero analytics — milestone-gated "are you headed the right way?" dashboard. */
+  Analytics: undefined;
 };
 
 declare global {

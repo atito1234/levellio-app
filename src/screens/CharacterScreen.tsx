@@ -100,6 +100,20 @@ export function CharacterScreen() {
           />
         </View>
 
+        {/* Habit analytics — reflect on direction, unlock insights with days done */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Your analytics</Text>
+          <Text style={styles.analyticsHint}>
+            Take 3 seconds to see if you’re headed the right way — and unlock deeper insights as your
+            days accomplished add up.
+          </Text>
+          <PrimaryButton
+            label="Reflect on your progress"
+            variant="primary"
+            onPress={() => navigation.navigate('Analytics')}
+          />
+        </View>
+
         {/* Companion */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Your Wisp</Text>
@@ -216,6 +230,10 @@ const styles = StyleSheet.create({
   kitCurrent: {
     ...typography.label,
     color: colors.violetDeep,
+  },
+  analyticsHint: {
+    ...typography.body,
+    color: colors.textSecondary,
   },
   companionRow: {
     flexDirection: 'row',
