@@ -468,6 +468,7 @@ export function DashboardScreen() {
 
         {/* Quick actions — keeps every feature, low clutter (Hick's law). */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
+          <QuickChip label="🎤 Quick add" onPress={() => navigation.navigate('QuickCapture')} />
           <QuickChip label="＋ New" onPress={() => navigation.navigate('QuestEditor')} />
           <QuickChip label="📚 Library" onPress={() => navigation.navigate('HabitLibrary')} />
           <QuickChip label="🗂 Buckets" onPress={() => navigation.navigate('Organize')} />
