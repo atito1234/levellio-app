@@ -79,6 +79,7 @@ describe('suggestedToQuest', () => {
       difficulty: 'hard',
       baseXp: 70,
       completed: false,
+      canonicalKey: 'x',
     });
   });
 });

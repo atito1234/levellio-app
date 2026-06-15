@@ -33,6 +33,12 @@ export interface Quest {
    * Lets users schedule a specific time even for untimed activities.
    */
   scheduledTime?: number;
+  /**
+   * Canonical dedup key (= normalizeTitle(title)). Two quests with the same key
+   * are the *same activity*; the list holds at most one per key. Optional so
+   * legacy data and migrations stay backward-compatible (backfilled on load).
+   */
+  canonicalKey?: string;
 }
 
 /** Hero progression tiers. */

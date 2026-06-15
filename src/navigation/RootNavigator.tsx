@@ -19,6 +19,9 @@ import { MonthlyProgressScreen } from '@/screens/MonthlyProgressScreen';
 import { InsightsScreen } from '@/screens/InsightsScreen';
 import { PlanScreen } from '@/screens/PlanScreen';
 import { CapacityFocusScreen } from '@/screens/CapacityFocusScreen';
+import { GoalEditorScreen } from '@/screens/GoalEditorScreen';
+import { GoalFocusScreen } from '@/screens/GoalFocusScreen';
+import { MilestoneCelebration } from '@/components/MilestoneCelebration';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -84,7 +87,11 @@ export function RootNavigator() {
         <Stack.Screen name="Insights" component={InsightsScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Plan" component={PlanScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="CapacityFocus" component={CapacityFocusScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="GoalEditor" component={GoalEditorScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="GoalFocus" component={GoalFocusScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
+      {/* Overlays any screen to celebrate earned milestones (queue-driven). */}
+      <MilestoneCelebration />
     </NavigationContainer>
   );
 }

@@ -19,7 +19,9 @@ import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { usePlan } from '@/state/PlanContext';
+import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import type { Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
 import { effectivePlan, plannedOpen, planProgress } from '@/lib/plan';
 import { CAPACITIES, getCapacity } from '@/lib/compounding';
@@ -61,6 +63,7 @@ export function DashboardScreen() {
   const { character, quests, suggestQuest, reorderQuests, status } = useGame();
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
+  const { goals } = useGoals();
   const reduced = useReducedMotion();
 
   // The home reflects only TODAY'S PLAN (so it stays glanceable). No plan yet →
@@ -266,6 +269,13 @@ export function DashboardScreen() {
             </View>
           </View>
         </View>
+
+        {/* Life goals — the "why" habits ladder up to. Tap to focus a goal. */}
+        <GoalsStrip
+          goals={goals}
+          onOpen={(id) => navigation.navigate('GoalFocus', { goalId: id })}
+          onNew={() => navigation.navigate('GoalEditor')}
+        />
 
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}
@@ -523,6 +533,74 @@ function QuickChip({ label, onPress }: { label: string; onPress: () => void }) {
   );
 }
 
+/** The horizontal strip of life goals (the "why"), plus a New-goal card. */
+function GoalsStrip({
+  goals,
+  onOpen,
+  onNew,
+}: {
+  goals: Goal[];
+  onOpen: (id: string) => void;
+  onNew: () => void;
+}) {
+  if (goals.length === 0) {
+    return (
+      <Pressable
+        onPress={onNew}
+        accessibilityRole="button"
+        accessibilityLabel="Set a goal"
+        accessibilityHint="Create a life goal your habits build toward"
+        style={styles.goalEmpty}
+      >
+        <Text style={styles.goalEmojiLg}>🎯</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.goalEmptyTitle}>What do you want to build toward?</Text>
+          <Text style={styles.goalEmptySub}>Set a goal — your habits do the rest</Text>
+        </View>
+        <Text style={styles.goalChevron}>›</Text>
+      </Pressable>
+    );
+  }
+  return (
+    <View style={styles.goalsWrap}>
+      <Text style={styles.railLabel}>Your goals</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalsRow}>
+        {goals.map((g) => (
+          <GoalCard key={g.id} goal={g} onPress={() => onOpen(g.id)} />
+        ))}
+        <Pressable onPress={onNew} accessibilityRole="button" accessibilityLabel="New goal" style={styles.goalNew}>
+          <Text style={styles.goalNewPlus}>＋</Text>
+          <Text style={styles.goalNewText}>New goal</Text>
+        </Pressable>
+      </ScrollView>
+    </View>
+  );
+}
+
+function GoalCard({ goal, onPress }: { goal: Goal; onPress: () => void }) {
+  const progress = useGoalProgress(goal);
+  const accent = goal.colorId === 'teal' ? TEAL : VIOLET;
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${goal.title}. ${progress.doneTodayInGoal} of ${progress.plannedTodayInGoal} done today, ${progress.weeklyConsistencyPct} percent this week.`}
+      style={styles.goalCard}
+    >
+      <Text style={styles.goalEmoji}>{goal.emoji}</Text>
+      <Text style={styles.goalTitle} numberOfLines={2}>
+        {goal.title}
+      </Text>
+      <View style={styles.goalBar}>
+        <View style={[styles.goalBarFill, { backgroundColor: accent, width: `${Math.max(3, progress.weeklyConsistencyPct)}%` }]} />
+      </View>
+      <Text style={styles.goalMeta}>
+        {progress.doneTodayInGoal}/{progress.plannedTodayInGoal} today
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll: { paddingTop: spacing.md, gap: spacing.lg, paddingBottom: spacing.xl },
@@ -633,6 +711,23 @@ const styles = StyleSheet.create({
   planCtaTitle: { ...typography.title, color: INK, fontWeight: '800' },
   planCtaSub: { ...typography.caption, color: MUTED },
   planCtaChevron: { fontSize: 26, color: VIOLET, fontWeight: '800' },
+
+  goalsWrap: { gap: spacing.xs },
+  goalsRow: { gap: spacing.sm, paddingHorizontal: PAD },
+  goalCard: { width: 150, backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, gap: 6, borderWidth: 1, borderColor: '#ECEAE4' },
+  goalEmoji: { fontSize: 24 },
+  goalTitle: { ...typography.label, color: INK, fontWeight: '700', minHeight: 34 },
+  goalBar: { height: 6, borderRadius: 999, backgroundColor: '#ECEAE4', overflow: 'hidden' },
+  goalBarFill: { height: 6, borderRadius: 999 },
+  goalMeta: { ...typography.caption, color: MUTED, fontSize: 11 },
+  goalNew: { width: 110, backgroundColor: '#F4F1FE', borderRadius: radii.lg, padding: spacing.md, alignItems: 'center', justifyContent: 'center', gap: 4, borderWidth: 1, borderColor: '#E2DBFB' },
+  goalNewPlus: { fontSize: 22, color: VIOLET, fontWeight: '800' },
+  goalNewText: { ...typography.label, color: VIOLET, fontWeight: '700' },
+  goalEmpty: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginHorizontal: PAD, backgroundColor: '#F4F1FE', borderRadius: radii.xl, padding: spacing.lg, borderWidth: 1, borderColor: '#E2DBFB' },
+  goalEmojiLg: { fontSize: 28 },
+  goalEmptyTitle: { ...typography.body, color: INK, fontWeight: '800' },
+  goalEmptySub: { ...typography.caption, color: MUTED },
+  goalChevron: { fontSize: 24, color: VIOLET, fontWeight: '800' },
 
   capHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: PAD },
   capLink: { ...typography.caption, color: VIOLET, fontWeight: '700' },

@@ -5,6 +5,7 @@
  */
 import { AITimeoutError } from './errors';
 import { QUEST_XP } from '@/lib/leveling';
+import { normalizeTitle } from '@/lib/questForm';
 import type { AIEngine, QuestSuggestionInput, SuggestedQuest } from './AIEngine';
 import type { Quest } from '@/types';
 
@@ -55,6 +56,7 @@ export function suggestedToQuest(suggestion: SuggestedQuest, id: string): Quest 
     difficulty: suggestion.difficulty,
     baseXp: QUEST_XP[suggestion.difficulty],
     completed: false,
+    canonicalKey: normalizeTitle(suggestion.title),
   };
 }
 
