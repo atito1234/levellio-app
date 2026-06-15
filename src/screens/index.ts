@@ -20,3 +20,5 @@ export { CapacityFocusScreen } from './CapacityFocusScreen';
 export { GoalEditorScreen } from './GoalEditorScreen';
 export { GoalFocusScreen } from './GoalFocusScreen';
 export { QuickCaptureScreen } from './QuickCaptureScreen';
+export { BattleSetupScreen } from './BattleSetupScreen';
+export { BattleScreen } from './BattleScreen';

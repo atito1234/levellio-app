@@ -9,8 +9,9 @@ import { CapacitiesProvider } from '@/state/CapacitiesContext';
 import { PlanProvider } from '@/state/PlanContext';
 import { GoalProvider } from '@/state/GoalContext';
 import { MilestonesProvider } from '@/state/MilestonesContext';
+import { BattlesProvider } from '@/state/BattlesContext';
 
-/** App entry point. Wraps the nav shell in settings + game + buckets + capacities + plan + goals + milestones. */
+/** App entry point. Wraps the nav shell in settings + game + buckets + capacities + plan + goals + milestones + battles. */
 export default function App() {
   return (
     <SafeAreaProvider>
@@ -22,7 +23,9 @@ export default function App() {
               <PlanProvider>
                 <GoalProvider>
                   <MilestonesProvider>
-                    <RootNavigator />
+                    <BattlesProvider>
+                      <RootNavigator />
+                    </BattlesProvider>
                   </MilestonesProvider>
                 </GoalProvider>
               </PlanProvider>

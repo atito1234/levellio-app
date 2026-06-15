@@ -49,6 +49,16 @@ export type RootStackParamList = {
   GoalFocus: { goalId: string };
   /** Frictionless typed/dictated capture of one or more habits. */
   QuickCapture: undefined;
+  /** Set up a focus Battle: choose habits, technique, and dragon. */
+  BattleSetup: { questId?: string; bucketId?: string; goalId?: string } | undefined;
+  /** The gamified focus session — slay the dragon, complete the bundled habits. */
+  Battle: {
+    questIds: string[];
+    techniqueId: import('@/lib/timeTechniques').TechniqueId;
+    customMin?: number;
+    dragonId: string;
+    dragonName?: string;
+  };
 };
 
 declare global {

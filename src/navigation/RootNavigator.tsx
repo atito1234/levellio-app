@@ -22,6 +22,8 @@ import { CapacityFocusScreen } from '@/screens/CapacityFocusScreen';
 import { GoalEditorScreen } from '@/screens/GoalEditorScreen';
 import { GoalFocusScreen } from '@/screens/GoalFocusScreen';
 import { QuickCaptureScreen } from '@/screens/QuickCaptureScreen';
+import { BattleSetupScreen } from '@/screens/BattleSetupScreen';
+import { BattleScreen } from '@/screens/BattleScreen';
 import { MilestoneCelebration } from '@/components/MilestoneCelebration';
 import { MainTabs } from './MainTabs';
 
@@ -91,6 +93,8 @@ export function RootNavigator() {
         <Stack.Screen name="GoalEditor" component={GoalEditorScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="GoalFocus" component={GoalFocusScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="QuickCapture" component={QuickCaptureScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="BattleSetup" component={BattleSetupScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Battle" component={BattleScreen} options={{ presentation: 'fullScreenModal' }} />
       </Stack.Navigator>
       {/* Overlays any screen to celebrate earned milestones (queue-driven). */}
       <MilestoneCelebration />
