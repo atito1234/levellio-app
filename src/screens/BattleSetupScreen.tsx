@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, DragonSprite } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -13,6 +13,7 @@ import { activitiesInBucket } from '@/lib/buckets';
 import { goalHabits } from '@/lib/goal';
 import { plannedOpen } from '@/lib/plan';
 import { moodMeta } from '@/lib/journal';
+import { habitContext } from '@/lib/habitContext';
 import { CATEGORY_META } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
 import { TECHNIQUES, clampCustomMinutes, workSeconds, getTechnique, type TechniqueId } from '@/lib/timeTechniques';
@@ -37,13 +38,13 @@ const shadow = {
   elevation: 3,
 };
 
-// Techniques, reframed as fun "war gadgets".
-const GADGETS: Record<TechniqueId, { icon: string; tag: string }> = {
-  pomodoro: { icon: '⚔️', tag: 'Sprint Blade' },
-  deepwork: { icon: '🛡️', tag: 'Siege Shield' },
-  quick10: { icon: '🗡️', tag: 'Quick Strike' },
-  custom: { icon: '🎛️', tag: 'Custom Rig' },
-  flowtime: { icon: '🌊', tag: 'Flow Saber' },
+// Techniques, reframed as fun "war gadgets" — each with the science behind it.
+const GADGETS: Record<TechniqueId, { icon: string; tag: string; why: string }> = {
+  pomodoro: { icon: '⚔️', tag: 'Sprint Blade', why: '25-minute sprints ride your brain’s natural focus cycle; the short break prevents burnout.' },
+  deepwork: { icon: '🛡️', tag: 'Siege Shield', why: 'Longer 52-minute blocks let you reach flow, where the deepest work happens; 17 min restores you.' },
+  quick10: { icon: '🗡️', tag: 'Quick Strike', why: 'Ten minutes beats zero — a tiny start defuses procrastination (the hardest part is beginning).' },
+  custom: { icon: '🎛️', tag: 'Custom Rig', why: 'Your tempo — pick a length you can fully commit to and finish.' },
+  flowtime: { icon: '🌊', tag: 'Flow Saber', why: 'No clock pressure — work until you naturally stop. Great for creative momentum.' },
 };
 
 function gadgetSub(id: TechniqueId, customMin: number): string {
@@ -87,6 +88,16 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const selectedQuests = activeQuests.filter((q) => selected.has(q.id));
   const available = activeQuests.filter((q) => !selected.has(q.id));
 
+  // Personalized, goal-driven context anchored on the first selected mission.
+  const primary = selectedQuests[0];
+  const ctx = primary ? habitContext(primary, goals) : null;
+
+  const explainCoins = () =>
+    Alert.alert(
+      '🪙 Coins',
+      `You have ${coins}. Win a battle to earn coins — more for tougher blocks. Soon you’ll spend them in the Arsenal to collect war gadgets.`,
+    );
+
   const add = (id: string) => setSelected((prev) => new Set(prev).add(id));
   const remove = (id: string) =>
     setSelected((prev) => {
@@ -118,7 +129,12 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   };
 
   const openReflect = () =>
-    navigation.navigate('JournalComposer', { dragonId, dragonName: resolvedDragon.name, questIds: [...selected] });
+    navigation.navigate('JournalComposer', {
+      dragonId,
+      dragonName: resolvedDragon.name,
+      questIds: [...selected],
+      ...(ctx ? { prompt: ctx.prompt, teaching: ctx.teaching } : {}),
+    });
 
   return (
     <ScreenContainer backgroundColor={BG}>
@@ -129,9 +145,9 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         <Text style={styles.title} accessibilityRole="header">
           War room
         </Text>
-        <View style={styles.coinPill} accessibilityLabel={`${coins} coins`}>
+        <Pressable onPress={explainCoins} style={styles.coinPill} accessibilityRole="button" accessibilityLabel={`${coins} coins. What are coins?`}>
           <Text style={styles.coinText}>🪙 {coins}</Text>
-        </View>
+        </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -145,19 +161,19 @@ export function BattleSetupScreen({ route, navigation }: Props) {
               </Pressable>
             )}
           </View>
-          {latest ? (
-            <View style={styles.latestWrap}>
-              <Text style={styles.latestText} numberOfLines={2}>
-                {moodMeta(latest.mood)?.emoji ?? '🗒️'} {latest.text || 'Reflection saved'}
-              </Text>
-              <Text style={styles.reflectCta}>Add another reflection ›</Text>
-            </View>
-          ) : (
-            <View style={styles.latestWrap}>
-              <Text style={styles.reflectPrompt}>What’s stopping you from this? Name the dragon — text, mood, a photo.</Text>
-              <Text style={styles.reflectCta}>Journal what’s stopping you ›</Text>
+          <Text style={styles.reflectPromptStrong}>{ctx ? ctx.prompt : 'What’s stopping you? Name the dragon.'}</Text>
+          {ctx && <Text style={styles.reflectTeaching}>🧠 {ctx.teaching}</Text>}
+          {ctx?.goalTitle && (
+            <View style={styles.goalChip}>
+              <Text style={styles.goalChipText}>🎯 {ctx.goalTitle}</Text>
             </View>
           )}
+          {latest && (
+            <Text style={styles.latestText} numberOfLines={1}>
+              Last: {moodMeta(latest.mood)?.emoji ?? '🗒️'} {latest.text || 'Reflection saved'}
+            </Text>
+          )}
+          <Text style={styles.reflectCta}>{latest ? 'Add another reflection ›' : 'Journal what’s stopping you ›'}</Text>
         </Pressable>
 
         {/* 2 — Choose your dragon. */}
@@ -226,6 +242,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
             );
           })}
         </View>
+        <Text style={styles.gadgetWhy}>🧠 {GADGETS[techniqueId].why}</Text>
         {techniqueId === 'custom' && (
           <View style={styles.stepper}>
             <Pressable onPress={() => setCustomMin((m) => clampCustomMinutes(m - 5))} accessibilityRole="button" accessibilityLabel="Decrease minutes" style={styles.stepBtn}>
@@ -336,9 +353,11 @@ const styles = StyleSheet.create({
   reflectHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   reflectKicker: { ...typography.label, color: VIOLET, fontWeight: '800', letterSpacing: 1 },
   reflectLink: { ...typography.label, color: VIOLET, fontWeight: '700' },
-  latestWrap: { gap: 4 },
-  latestText: { ...typography.body, color: INK },
-  reflectPrompt: { ...typography.body, color: MUTED },
+  reflectPromptStrong: { ...typography.title, color: INK, fontWeight: '800' },
+  reflectTeaching: { ...typography.body, color: MUTED },
+  goalChip: { alignSelf: 'flex-start', backgroundColor: VIOLET_SOFT, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 4 },
+  goalChipText: { ...typography.caption, color: VIOLET, fontWeight: '700' },
+  latestText: { ...typography.caption, color: MUTED },
   reflectCta: { ...typography.label, color: VIOLET, fontWeight: '700' },
 
   // Dragon carousel
@@ -357,6 +376,7 @@ const styles = StyleSheet.create({
   gadgetIcon: { fontSize: 22 },
   gadgetTag: { ...typography.caption, color: INK, fontWeight: '800', textAlign: 'center' },
   gadgetSub: { ...typography.caption, color: MUTED, fontSize: 11 },
+  gadgetWhy: { ...typography.caption, color: MUTED },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, alignSelf: 'flex-start' },
   stepBtn: { width: 40, height: 40, borderRadius: 999, backgroundColor: CARD, borderWidth: 1, borderColor: TRACK, alignItems: 'center', justifyContent: 'center' },
   stepBtnText: { ...typography.heading, color: VIOLET },
