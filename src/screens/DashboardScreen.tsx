@@ -478,13 +478,13 @@ export function DashboardScreen() {
 
         {/* Your capacities — the shared rings every completion feeds (real data). */}
         <View style={styles.capHead}>
-          <Text style={styles.railLabel}>Your capacities</Text>
+          <Text style={styles.railLabel}>Your capacities · last 7 days</Text>
           <Pressable
             onPress={() => navigation.navigate('MonthlyProgress')}
             accessibilityRole="button"
             accessibilityLabel="See your monthly progress"
           >
-            <Text style={styles.capLink}>This month ›</Text>
+            <Text style={styles.capLink}>Trends ›</Text>
           </Pressable>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
