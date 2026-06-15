@@ -354,6 +354,15 @@ export function DashboardScreen() {
               >
                 <Text style={styles.primaryBtnText}>Do it now</Text>
               </Pressable>
+              <Pressable
+                onPress={() => navigation.navigate('ActivityTimer', { questId: focus.id })}
+                accessibilityRole="button"
+                accessibilityLabel={`Start a focus session: ${focus.title}`}
+                style={styles.focusBtn}
+                hitSlop={8}
+              >
+                <Text style={styles.focusBtnText}>🎯 Focus session</Text>
+              </Pressable>
 
               {/* Non-gesture controls + position (swipe is an enhancement). */}
               {canBrowse && (
@@ -677,6 +686,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   primaryBtnText: { ...typography.title, color: '#FFF', fontWeight: '800' },
+  focusBtn: { alignSelf: 'center', paddingVertical: spacing.sm, marginTop: spacing.xs },
+  focusBtnText: { ...typography.label, color: VIOLET, fontWeight: '700' },
   allDone: { ...typography.body, color: TEAL, fontWeight: '700', marginTop: spacing.xs },
 
   upNext: { gap: spacing.xs },
