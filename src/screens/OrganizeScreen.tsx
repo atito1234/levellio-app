@@ -82,6 +82,7 @@ export function OrganizeScreen() {
             onNew={() => navigation.navigate('BucketEdit', {})}
             onEdit={(id) => navigation.navigate('BucketEdit', { bucketId: id })}
             onMoveBucket={(id, delta) => void moveBucket(id, delta)}
+            onBattle={(id) => navigation.navigate('BattleSetup', { bucketId: id })}
           />
         )}
       </ScrollView>
@@ -222,6 +223,7 @@ function BucketsView({
   onNew,
   onEdit,
   onMoveBucket,
+  onBattle,
 }: {
   buckets: HabitBucket[];
   counts: Record<string, number>;
@@ -229,6 +231,7 @@ function BucketsView({
   onNew: () => void;
   onEdit: (id: string) => void;
   onMoveBucket: (id: string, delta: number) => void;
+  onBattle: (id: string) => void;
 }) {
   return (
     <View style={styles.list}>
@@ -265,6 +268,7 @@ function BucketsView({
                   onPress={() => onMoveBucket(b.id, 1)}
                 />
                 <IconBtn label={`Edit ${b.name}`} text="✎" onPress={() => onEdit(b.id)} />
+                {count > 0 && <IconBtn label={`Battle the ${b.name} ritual`} text="⚔️" onPress={() => onBattle(b.id)} />}
               </View>
             </View>
           );

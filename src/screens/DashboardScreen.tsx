@@ -20,6 +20,7 @@ import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { usePlan } from '@/state/PlanContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
+import { useBattles } from '@/state/BattlesContext';
 import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { Goal } from '@/lib/goal';
@@ -64,6 +65,7 @@ export function DashboardScreen() {
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
   const { goals } = useGoals();
+  const { totalSlain } = useBattles();
   const reduced = useReducedMotion();
 
   // The home reflects only TODAY'S PLAN (so it stays glanceable). No plan yet →
@@ -254,6 +256,11 @@ export function DashboardScreen() {
             <View style={styles.pill} accessibilityLabel={`${character.streakDays} day streak`}>
               <Text style={styles.pillText}>🔥 {character.streakDays}</Text>
             </View>
+            {totalSlain > 0 && (
+              <View style={styles.pill} accessibilityLabel={`${totalSlain} dragons slain`}>
+                <Text style={styles.pillText}>⚔️ {totalSlain}</Text>
+              </View>
+            )}
             <View style={[styles.pill, styles.pillViolet]} accessibilityLabel={`Level ${character.level}`}>
               <Text style={[styles.pillText, { color: VIOLET }]}>Lv {character.level}</Text>
             </View>
@@ -355,13 +362,13 @@ export function DashboardScreen() {
                 <Text style={styles.primaryBtnText}>Do it now</Text>
               </Pressable>
               <Pressable
-                onPress={() => navigation.navigate('ActivityTimer', { questId: focus.id })}
+                onPress={() => navigation.navigate('BattleSetup', { questId: focus.id })}
                 accessibilityRole="button"
-                accessibilityLabel={`Start a focus session: ${focus.title}`}
+                accessibilityLabel={`Start a focus battle: ${focus.title}`}
                 style={styles.focusBtn}
                 hitSlop={8}
               >
-                <Text style={styles.focusBtnText}>🎯 Focus session</Text>
+                <Text style={styles.focusBtnText}>⚔️ Start a battle</Text>
               </Pressable>
 
               {/* Non-gesture controls + position (swipe is an enhancement). */}

@@ -7,6 +7,7 @@ export { StatPill } from './StatPill';
 export { QuestCard } from './QuestCard';
 export { HeroAvatar } from './HeroAvatar';
 export { AnimatedHero } from './AnimatedHero';
+export { DragonSprite } from './DragonSprite';
 export { Wisp } from './Wisp';
 export { CompanionAvatar } from './CompanionAvatar';
 export { TextField } from './TextField';
