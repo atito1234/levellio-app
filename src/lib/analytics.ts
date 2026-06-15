@@ -22,6 +22,11 @@ export function sessionsForDay(sessions: readonly ActivitySessionEvent[], key: s
   return sessions.filter((s) => sessionDay(s) === key);
 }
 
+/** The set of activity ids that have at least one session in the given list. */
+export function completedActivityIds(sessions: readonly ActivitySessionEvent[]): Set<string> {
+  return new Set(sessions.map((s) => s.activityId));
+}
+
 export interface Summary {
   count: number;
   totalMin: number;
