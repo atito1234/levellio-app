@@ -28,6 +28,23 @@ export interface SuggestedQuest {
   difficulty: QuestDifficulty;
 }
 
+/** Input for premium, personalized blocker coaching. */
+export interface CoachSuggestionInput {
+  dragonLabel: string;
+  blockerLabel: string;
+  habitTitle?: string;
+  goalTitle?: string;
+  recentMood?: string;
+  minutesAvailable?: number;
+}
+
+/** AI-personalized coaching content (text only — evidence stays curated/honest). */
+export interface CoachSuggestion {
+  /** 3–5 Socratic prompts. */
+  questions: string[];
+  tactic: { name: string; how: string };
+}
+
 export interface AIHttpResponse {
   ok: boolean;
   status: number;
@@ -62,4 +79,11 @@ export interface AIEngine {
 
   /** A short motivational line. Low-stakes; should not block gameplay. */
   motivate(context: { streakDays: number; level: number }): Promise<string>;
+
+  /**
+   * Optional premium capability: personalized blocker coaching. Engines without
+   * it (e.g. on-device) leave it undefined, forcing the curated fallback. May
+   * throw when unavailable.
+   */
+  coach?(input: CoachSuggestionInput): Promise<CoachSuggestion>;
 }

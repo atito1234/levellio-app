@@ -42,7 +42,8 @@ export interface CoachingPlan {
   evidence: { principle: string; source: string };
   /** Habit/goal context when a quest is present (reuses habitContext). */
   context?: HabitContext;
-  source: 'curated';
+  /** Provenance — buildCoaching always sets 'curated'; the LLM wrapper may set 'ai'. */
+  source: 'curated' | 'ai';
 }
 
 /** Rotate an array left by n (deterministic, pure). */

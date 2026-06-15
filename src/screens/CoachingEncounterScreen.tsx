@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, DragonSprite } from '@/components';
@@ -6,9 +6,13 @@ import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals } from '@/state/GoalContext';
 import { useJournal } from '@/state/JournalContext';
-import { buildCoaching } from '@/lib/coaching';
+import { useSettings } from '@/state/SettingsContext';
+import { buildCoaching, type CoachingContext } from '@/lib/coaching';
 import { getFramework } from '@/data/coaching/frameworks';
 import { getDragon } from '@/data/dragons';
+import { buildEngine, generateCoaching } from '@/services/ai';
+import { getByoApiKey } from '@/services/security/secureKeyStore';
+import { canUse } from '@/services/monetization/entitlements';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CoachingEncounter'>;
@@ -35,23 +39,42 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
   const { quests } = useGame();
   const { goals } = useGoals();
   const { entriesForDragon } = useJournal();
+  const { settings } = useSettings();
 
   const dragon = getDragon(dragonId, dragonName);
   const quest = questId ? quests.find((q) => q.id === questId) : undefined;
   const recentMood = entriesForDragon(dragonId)[0]?.mood;
 
-  const plan = useMemo(
-    () =>
-      buildCoaching({
-        dragonId,
-        ...(blockerId ? { blockerId } : {}),
-        ...(quest ? { quest } : {}),
-        goals,
-        ...(recentMood ? { recentMood } : {}),
-        ...(minutesAvailable != null ? { minutesAvailable } : {}),
-      }),
+  const coachCtx = useMemo<CoachingContext>(
+    () => ({
+      dragonId,
+      ...(blockerId ? { blockerId } : {}),
+      ...(quest ? { quest } : {}),
+      goals,
+      ...(recentMood ? { recentMood } : {}),
+      ...(minutesAvailable != null ? { minutesAvailable } : {}),
+    }),
     [dragonId, blockerId, quest, goals, recentMood, minutesAvailable],
   );
+
+  // Curated by default + offline. When the user is entitled to AI (premium +
+  // cloud), enrich it; it always falls back to curated, so the UI never waits.
+  const curated = useMemo(() => buildCoaching(coachCtx), [coachCtx]);
+  const [plan, setPlan] = useState(curated);
+  const entitled = canUse('cloud-ai-managed', { isPremium: settings.isPremium }) && settings.aiMode === 'cloud';
+
+  useEffect(() => {
+    setPlan(curated);
+    if (!entitled) return;
+    let active = true;
+    const engine = buildEngine(settings, { getApiKey: () => getByoApiKey() });
+    generateCoaching(engine, coachCtx, entitled).then((r) => {
+      if (active) setPlan(r.plan);
+    });
+    return () => {
+      active = false;
+    };
+  }, [curated, coachCtx, entitled, settings]);
 
   // Question-at-a-time flow, then reveal the tactic.
   const [qIndex, setQIndex] = useState(0);
