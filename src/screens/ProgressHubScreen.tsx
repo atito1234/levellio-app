@@ -231,6 +231,7 @@ export function ProgressHubScreen({ route, navigation }: Props) {
             days={days}
             activityPoints={activityPoints}
             onReviewDay={reviewDay}
+            onReflect={() => navigation.navigate('Analytics')}
             onRun={run}
           />
         ) : tab === 'goals' ? (
@@ -288,6 +289,7 @@ function Overview({
   days,
   activityPoints,
   onReviewDay,
+  onReflect,
   onRun,
 }: {
   focus: FocusRec[];
@@ -297,6 +299,7 @@ function Overview({
   days: number;
   activityPoints: { dayKey: string; value: number }[];
   onReviewDay: (day: string) => void;
+  onReflect: () => void;
   onRun: (a: InsightAction) => void;
 }) {
   const radarAxes = CAPACITIES.map((c) => ({ label: c.name, value: levels[c.id] ?? 0, id: c.id }));
@@ -355,6 +358,10 @@ function Overview({
           <Text style={styles.provenance}>Each cell is a day · tap one to review it</Text>
         </View>
       </Section>
+
+      <Pressable onPress={onReflect} accessibilityRole="button" style={styles.reflect}>
+        <Text style={styles.cta}>🧭 Reflect on your direction ›</Text>
+      </Pressable>
     </>
   );
 }
@@ -575,6 +582,7 @@ const styles = StyleSheet.create({
 
   focusCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: '#EDE9FE', borderRadius: 18, padding: spacing.md },
   cta: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  reflect: { alignSelf: 'center', backgroundColor: '#EDE9FE', borderRadius: 999, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   cardCta: { alignSelf: 'flex-start' },
   provenance: { ...typography.caption, color: MUTED, textAlign: 'center' },
 

@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CapacityRing, ScreenContainer } from '@/components';
-import { HBarChart, HourBars, type BarDatum } from '@/components/charts';
+import { HBarChart, HourBars, BarHistogram, type BarDatum, type HistogramBar } from '@/components/charts';
 import { spacing, typography } from '@/theme';
 import { useActivityLog } from '@/state/useActivityLog';
 import { usePlan } from '@/state/PlanContext';
@@ -20,9 +20,12 @@ import {
   weekdayLabel,
   type Summary,
 } from '@/lib/analytics';
-import { planProgressOn } from '@/lib/plan';
+import { gapsFor, planProgressOn } from '@/lib/plan';
 import { CATEGORY_META, resolveCategory } from '@/lib/categories';
 import { dayKey, shiftDayKey } from '@/lib/dates';
+import { rollupForDay } from '@/lib/metrics/rollup';
+import { getCapacity, type CapacityId } from '@/lib/compounding';
+import { useGame } from '@/state/GameContext';
 import type { ActivitySessionEvent } from '@/lib/metadata';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -47,6 +50,15 @@ function categoryLabel(category: string): string {
 }
 function categoryIcon(category: string): string {
   return CATEGORY_META[resolveCategory(category)]?.icon ?? '•';
+}
+
+/** Top capacities a day's rollup moved (strongest first). */
+function topCapacities(rollup: { capacityPoints: Partial<Record<CapacityId, number>> }): { id: CapacityId; name: string; value: number }[] {
+  return (Object.entries(rollup.capacityPoints) as [CapacityId, number][])
+    .filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([id, value]) => ({ id, name: getCapacity(id).name, value: Math.round(value) }));
 }
 
 /** Pretty label for a YYYY-MM-DD key, e.g. "Sun, Jun 14". */
@@ -84,6 +96,16 @@ export function InsightsScreen({ route, navigation }: Props) {
   const dayPlan = day ? getPlan(day) : undefined;
   const doneIds = useMemo(() => completedActivityIds(scoped), [scoped]);
   const planRing = day && dayPlan ? planProgressOn(dayPlan, doneIds) : null;
+  const { quests } = useGame();
+  const [showSessions, setShowSessions] = useState(false);
+
+  // Day-review graphics: what moved your capacities, and the gaps to carry over.
+  const dayCaps = useMemo(() => (day ? topCapacities(rollupForDay(scoped, day)) : []), [day, scoped]);
+  const dayGaps = useMemo(
+    () => (day && dayPlan ? gapsFor(quests, dayPlan, doneIds) : []),
+    [day, dayPlan, quests, doneIds],
+  );
+
   const catBars = useMemo<BarDatum[]>(
     () =>
       byCategory(scoped)
@@ -155,12 +177,60 @@ export function InsightsScreen({ route, navigation }: Props) {
             )}
             {day && catBars.length > 0 && (
               <Section label="MINUTES BY CATEGORY">
-                <HBarChart data={catBars} />
+                <View style={styles.chartCard}>
+                  <BarHistogram
+                    bars={catBars.map((b) => ({ label: b.label, value: b.value }))}
+                    onPressBar={(_, i) => {
+                      const cat = catBars[i]?.key;
+                      if (cat) navigation.push('Insights', { category: cat });
+                    }}
+                  />
+                </View>
+              </Section>
+            )}
+            {day && dayCaps.length > 0 && (
+              <Section label="WHAT MOVED YOUR CAPACITIES">
+                <View style={styles.chipWrap}>
+                  {dayCaps.map((c) => (
+                    <Pressable
+                      key={c.id}
+                      style={styles.capChip}
+                      onPress={() => navigation.navigate('CapacityFocus', { capacityId: c.id })}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${c.name} gained ${c.value} points today. See what feeds it`}
+                    >
+                      <Text style={styles.capChipText}>
+                        {c.name} +{c.value} ›
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
               </Section>
             )}
             {day && (
               <Section label="TIME OF DAY">
-                <HourBars counts={summary.byHour} />
+                <View style={styles.chartCard}>
+                  <HourBars counts={summary.byHour} />
+                </View>
+              </Section>
+            )}
+            {day && dayGaps.length > 0 && (
+              <Section label="GAPS TO CARRY FORWARD">
+                {dayGaps.slice(0, 6).map((q) => (
+                  <Pressable
+                    key={q.id}
+                    style={styles.row}
+                    onPress={() => navigation.navigate('Plan', { day: shiftDayKey(dayKey(new Date()), 1) })}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${q.title} wasn't done. Plan it for tomorrow`}
+                  >
+                    <View style={styles.rowMain}>
+                      <Text style={styles.rowTitle}>{q.title}</Text>
+                      <Text style={styles.rowSub}>Not done · tap to plan for tomorrow</Text>
+                    </View>
+                    <Text style={styles.rowChevron}>›</Text>
+                  </Pressable>
+                ))}
               </Section>
             )}
 
@@ -213,15 +283,37 @@ export function InsightsScreen({ route, navigation }: Props) {
               </Section>
             )}
 
-            {/* Recent sessions list (newest first). */}
-            <Section label={activityId || day ? 'SESSIONS' : 'RECENT'}>
-              {[...scoped]
-                .sort((a, b) => b.createdAt - a.createdAt)
-                .slice(0, activityId || day ? 60 : 12)
-                .map((s) => (
-                  <SessionRow key={s.id} session={s} showDay={!day} />
-                ))}
-            </Section>
+            {/* Recent sessions — graphics lead; for a day the raw list is demoted
+                behind a toggle (it "brought no value" up front). */}
+            {day ? (
+              <View style={styles.section}>
+                <Pressable
+                  onPress={() => setShowSessions((v) => !v)}
+                  accessibilityRole="button"
+                  accessibilityLabel={showSessions ? 'Hide session details' : 'Show session details'}
+                >
+                  <Text style={styles.sectionLabel}>{showSessions ? 'HIDE DETAILS ▲' : `DETAILS · ${scoped.length} ${scoped.length === 1 ? 'SESSION' : 'SESSIONS'} ▾`}</Text>
+                </Pressable>
+                {showSessions && (
+                  <View style={styles.sectionBody}>
+                    {[...scoped]
+                      .sort((a, b) => b.createdAt - a.createdAt)
+                      .map((s) => (
+                        <SessionRow key={s.id} session={s} showDay={false} />
+                      ))}
+                  </View>
+                )}
+              </View>
+            ) : (
+              <Section label={activityId ? 'SESSIONS' : 'RECENT'}>
+                {[...scoped]
+                  .sort((a, b) => b.createdAt - a.createdAt)
+                  .slice(0, activityId ? 60 : 12)
+                  .map((s) => (
+                    <SessionRow key={s.id} session={s} showDay={!day} />
+                  ))}
+              </Section>
+            )}
 
             {/* Close the loop: review a day → plan tomorrow. */}
             {day && (
@@ -372,6 +464,11 @@ const styles = StyleSheet.create({
   section: { gap: spacing.sm },
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
   sectionBody: { gap: spacing.sm },
+
+  chartCard: { backgroundColor: CARD, borderRadius: 24, padding: spacing.lg },
+  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  capChip: { backgroundColor: '#D6F7EF', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 8 },
+  capChipText: { ...typography.caption, color: '#0A6E5C', fontWeight: '700' },
 
   row: {
     flexDirection: 'row',

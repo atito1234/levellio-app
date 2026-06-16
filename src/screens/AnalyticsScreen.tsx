@@ -14,15 +14,13 @@ import {
   daysAccomplished,
   directionVerdict,
   longestDayStreak,
-  nextLockedTier,
   ratingStats,
-  tierStatus,
-  unlockedCount,
   weekCells,
   INSIGHT_TIERS,
   type DirectionTone,
   type InsightTier,
 } from '@/lib/heroAnalytics';
+import { confidenceLabel } from '@/lib/metrics/confidence';
 import { activityDayCells, activityJourney, automaticityCurve, JOURNEY_MARKERS, type JourneyStatus } from '@/lib/journey';
 import { CATEGORY_META, resolveCategory } from '@/lib/categories';
 import { RING_SCIENCE } from '@/data/ringScience';
@@ -101,7 +99,6 @@ export function AnalyticsScreen({ navigation }: Props) {
   });
   const tone = TONE[direction.tone];
   const closedThisWeek = data.cells.filter((c) => c.done).length;
-  const next = nextLockedTier(data.daysDone);
 
   return (
     <ScreenContainer backgroundColor={BG}>
@@ -150,7 +147,7 @@ export function AnalyticsScreen({ navigation }: Props) {
               <View style={styles.counterRow}>
                 <Counter value={`${data.daysDone}`} label="days accomplished" />
                 <Counter value={`${data.streakDays}`} label="day streak" tint={TEAL} />
-                <Counter value={`${unlockedCount(data.daysDone)}/${INSIGHT_TIERS.length}`} label="insights unlocked" tint={VIOLET} />
+                <Counter value={`${data.activities.length}`} label="activities" tint={VIOLET} />
               </View>
             </View>
 
@@ -175,31 +172,22 @@ export function AnalyticsScreen({ navigation }: Props) {
               </View>
             )}
 
-            {/* Progress toward the next unlock. */}
-            {next ? (
-              <View style={styles.nextCard}>
-                <Text style={styles.nextText}>
-                  {next.icon} <Text style={styles.nextStrong}>{next.title}</Text> unlocks in{' '}
-                  {tierStatus(next, data.daysDone).daysToGo} more {tierStatus(next, data.daysDone).daysToGo === 1 ? 'day' : 'days'}
-                </Text>
-                <View style={styles.track}>
-                  <View style={[styles.trackFill, { width: `${Math.round((data.daysDone / next.unlockDays) * 100)}%` }]} />
-                </View>
-                <Text style={styles.nextSub}>Keep showing up — insights unlock as your days add up.</Text>
-              </View>
-            ) : (
-              <View style={styles.nextCard}>
-                <Text style={styles.nextText}>🎉 Every insight unlocked. You’ve built a real practice.</Text>
-              </View>
-            )}
+            {/* No more locks — every insight shows now; we just say how much to
+                trust it based on how many days of data back it. */}
+            <View style={styles.nextCard}>
+              <Text style={styles.nextText}>
+                📈 <Text style={styles.nextStrong}>{confidenceLabel(data.daysDone)}</Text>
+              </Text>
+              <Text style={styles.nextSub}>
+                Every insight is shown — confidence grows as your days add up ({data.daysDone} so far).
+              </Text>
+            </View>
 
-            {/* Milestone-gated insights. */}
+            {/* All insights, ungated (thin data is labelled "early"). */}
             <Text style={styles.sectionLabel}>WHAT YOUR DATA SAYS</Text>
-            {INSIGHT_TIERS.map((tier) => {
-              const st = tierStatus(tier, data.daysDone);
-              if (!st.unlocked) return <LockedCard key={tier.id} tier={tier} daysDone={data.daysDone} />;
-              return <InsightCard key={tier.id} tier={tier} data={data} goals={goals} />;
-            })}
+            {INSIGHT_TIERS.map((tier) => (
+              <InsightCard key={tier.id} tier={tier} data={data} goals={goals} />
+            ))}
 
             {/* From repetition to habit — real per-activity journeys. */}
             {data.activities.length > 0 && (
@@ -291,24 +279,6 @@ function Counter({ value, label, tint = INK }: { value: string; label: string; t
     <View style={styles.counter}>
       <Text style={[styles.counterValue, { color: tint }]}>{value}</Text>
       <Text style={styles.counterLabel}>{label}</Text>
-    </View>
-  );
-}
-
-function LockedCard({ tier, daysDone }: { tier: InsightTier; daysDone: number }) {
-  const toGo = tier.unlockDays - daysDone;
-  return (
-    <View style={[styles.insightCard, styles.lockedCard]} accessibilityLabel={`${tier.title}, locked. ${toGo} days to unlock.`}>
-      <View style={styles.insightHead}>
-        <Text style={styles.lockIcon}>🔒</Text>
-        <Text style={styles.lockedTitle}>{tier.title}</Text>
-        <Text style={styles.lockBadge}>{toGo}d to go</Text>
-      </View>
-      <Text style={styles.lockedTeaser}>{tier.teaser}</Text>
-      <View style={styles.track}>
-        <View style={[styles.trackFill, styles.trackFillLock, { width: `${Math.round((daysDone / tier.unlockDays) * 100)}%` }]} />
-      </View>
-      <Text style={styles.lockedHint}>Unlocks at {tier.unlockDays} days accomplished</Text>
     </View>
   );
 }
