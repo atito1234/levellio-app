@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { AddActivityFab, AddActivitySheet, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
@@ -75,6 +75,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
   const [adding, setAdding] = useState(false);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftCat, setDraftCat] = useState<QuestCategory>(addCats[0]!);
+  const [addOpen, setAddOpen] = useState(false);
 
   const addActivity = async () => {
     const title = draftTitle.trim();
@@ -241,6 +242,9 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
           <Text style={styles.newBtnText}>＋ New goal</Text>
         </Pressable>
       </ScrollView>
+
+      <AddActivityFab onPress={() => setAddOpen(true)} accent={accent} />
+      <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultGoalId={goal.id} />
     </ScreenContainer>
   );
 }

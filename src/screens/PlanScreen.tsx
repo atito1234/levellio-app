@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { AddActivityFab, AddActivitySheet, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBuckets } from '@/state/BucketsContext';
@@ -38,6 +38,7 @@ export function PlanScreen({ route, navigation }: Props) {
   const todayK = dayKey(new Date());
   const tomorrowK = shiftDayKey(todayK, 1);
   const [targetDay, setTargetDay] = useState(() => (route.params?.day === tomorrowK ? tomorrowK : todayK));
+  const [addOpen, setAddOpen] = useState(false);
 
   const allSessions = useMemo(() => sessionsOf(events), [events]);
   const planned = getPlan(targetDay);
@@ -179,6 +180,9 @@ export function PlanScreen({ route, navigation }: Props) {
           <Text style={styles.newBtnText}>＋ New habit</Text>
         </Pressable>
       </ScrollView>
+
+      <AddActivityFab onPress={() => setAddOpen(true)} />
+      <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} />
     </ScreenContainer>
   );
 }
