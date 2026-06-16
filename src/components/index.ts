@@ -15,3 +15,5 @@ export { ChipSelector, type ChipOption } from './ChipSelector';
 export { ConfettiBurst } from './ConfettiBurst';
 export { CapacityRing } from './CapacityRing';
 export { RatingPrompt } from './RatingPrompt';
+export { AddActivityFab } from './AddActivityFab';
+export { AddActivitySheet } from './AddActivitySheet';

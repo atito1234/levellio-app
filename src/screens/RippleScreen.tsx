@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -6,11 +6,16 @@ import { CapacityRing, ScreenContainer } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useGame } from '@/state/GameContext';
+import { useGoals } from '@/state/GoalContext';
+import { usePlan } from '@/state/PlanContext';
+import { useLinks } from '@/state/LinksContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { ACHIEVEMENT_GOLD, getAction, getCapacity, ripple } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { activityTiming } from '@/lib/activityTimer';
+import { nextActivity, type NextReason } from '@/lib/nextActivity';
 import { CATEGORY_META } from '@/lib/categories';
+import { dayKey } from '@/lib/dates';
 import type { QuestReward } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -35,6 +40,9 @@ const HC = 2 * Math.PI * HR;
 export function RippleScreen({ route, navigation }: Props) {
   const reduced = useReducedMotion();
   const { quests } = useGame();
+  const { goals } = useGoals();
+  const { getPlan } = usePlan();
+  const { links } = useLinks();
   const complete = useCompleteActivity();
 
   // The Ripple is the real habit detail when given a questId; otherwise it's the
@@ -154,6 +162,12 @@ export function RippleScreen({ route, navigation }: Props) {
 
   const summary = deltas.map((d) => `${getCapacity(d.capacityId).name} up ${d.delta} percent`).join(', ');
 
+  // Once done, suggest the next activity (chain → same goal → anywhere).
+  const suggestion = useMemo(
+    () => (quest && done ? nextActivity({ justCompletedId: quest.id, quests, plannedIds: getPlan(dayKey(new Date())), goals, links }) : null),
+    [quest, done, quests, goals, links, getPlan],
+  );
+
   return (
     <ScreenContainer backgroundColor={BG}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
@@ -270,6 +284,28 @@ export function RippleScreen({ route, navigation }: Props) {
             <Text style={styles.logBtnText}>Just log it now</Text>
           </Pressable>
         </View>
+      ) : done && quest && suggestion?.next ? (
+        <View style={styles.actions}>
+          <Text style={styles.nextKicker}>✓ Logged · {nextReasonLabel(suggestion.reason)}</Text>
+          <Pressable
+            onPress={() => navigation.replace('Ripple', { questId: suggestion.next!.id })}
+            accessibilityRole="button"
+            accessibilityLabel={`Next up: ${suggestion.next.title}. Do it now`}
+            style={styles.timerBtn}
+          >
+            <Text style={styles.timerBtnText} numberOfLines={1}>
+              Next up: {suggestion.next.title}  ›
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => navigation.navigate('Main', { screen: 'Dashboard' })}
+            accessibilityRole="button"
+            accessibilityLabel={suggestion.goalChoices.length > 1 ? 'Focus a different goal' : 'Back to Today'}
+            style={styles.logBtn}
+          >
+            <Text style={styles.logBtnText}>{suggestion.goalChoices.length > 1 ? 'Focus a different goal ›' : 'Back to Today ›'}</Text>
+          </Pressable>
+        </View>
       ) : (
         <Pressable
           onPress={handleDone}
@@ -284,6 +320,17 @@ export function RippleScreen({ route, navigation }: Props) {
       )}
     </ScreenContainer>
   );
+}
+
+function nextReasonLabel(reason: NextReason): string {
+  switch (reason) {
+    case 'chain':
+      return 'next in your chain';
+    case 'goal':
+      return 'keep this goal moving';
+    default:
+      return 'next up';
+  }
 }
 
 /** Simple tumbler-of-water glyph centered in the hero ring (decorative). */
@@ -359,6 +406,7 @@ const styles = StyleSheet.create({
   connLink: { alignSelf: 'center', paddingVertical: spacing.sm },
   connLinkText: { ...typography.label, color: VIOLET, fontWeight: '700' },
   actions: { gap: spacing.sm, marginBottom: spacing.md },
+  nextKicker: { ...typography.caption, color: MUTED, textAlign: 'center', fontWeight: '700' },
   timerBtn: {
     backgroundColor: VIOLET,
     borderRadius: radii.pill,

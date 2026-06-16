@@ -14,7 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
-import { CapacityRing, HeroAvatar, ScreenContainer } from '@/components';
+import { AddActivityFab, AddActivitySheet, CapacityRing, HeroAvatar, ScreenContainer } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
@@ -73,6 +73,7 @@ export function DashboardScreen() {
   const todayKey = dayKey(new Date());
   const plan = getPlan(todayKey);
   const [suggesting, setSuggesting] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   // Personalized, science-backed line from the user's real history + today.
   const motivation = useMotivation().text;
 
@@ -585,6 +586,9 @@ export function DashboardScreen() {
 
         <View style={{ height: spacing.xl }} />
       </ScrollView>
+
+      <AddActivityFab onPress={() => setAddOpen(true)} accent={focusAccent} />
+      <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultGoalId={selectedGoalId} />
     </ScreenContainer>
   );
 }
