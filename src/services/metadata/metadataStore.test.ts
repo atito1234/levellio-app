@@ -36,6 +36,16 @@ describe('MetadataStore', () => {
     expect(await store.load('u1')).toEqual([]);
   });
 
+  it('removes events for the given activity ids, keeping the rest', async () => {
+    const store = new MetadataStore(new InMemoryStore());
+    await store.append('u1', contrib('q1'));
+    await store.append('u1', contrib('q2'));
+    await store.append('u1', contrib('q3'));
+    await store.removeActivities('u1', ['q1', 'q3']);
+    const left = await store.load('u1');
+    expect(left.map((e) => (e.type === 'activity_contribution' ? e.activityId : ''))).toEqual(['q2']);
+  });
+
   it('caps stored events at the soft limit (trims oldest)', async () => {
     const store = new MetadataStore(new InMemoryStore());
     const mem = new InMemoryStore();

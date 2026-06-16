@@ -1,5 +1,6 @@
 export { PrimaryButton } from './PrimaryButton';
 export { ScreenContainer } from './ScreenContainer';
+export { DataDangerZone } from './DataDangerZone';
 export { ProgressBar } from './ProgressBar';
 export { XPBar } from './XPBar';
 export { DifficultyBadge } from './DifficultyBadge';
