@@ -2,7 +2,16 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CapacityRing, ScreenContainer } from '@/components';
-import { RadarChart, RankBars, Sparkline, TrendChart, type RankRow } from '@/components/charts';
+import {
+  CalendarHeatmap,
+  RadarChart,
+  RankBars,
+  RelationshipMap,
+  Sparkline,
+  TrendChart,
+  type MapNode,
+  type RankRow,
+} from '@/components/charts';
 import { spacing, typography } from '@/theme';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useAnalyticsRollup } from '@/state/useAnalyticsRollup';
@@ -12,7 +21,7 @@ import { useCapacities } from '@/state/CapacitiesContext';
 import { useGoals } from '@/state/GoalContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { useInsightAction } from '@/hooks/useInsightAction';
-import { sessionsOf, weekdayLabel } from '@/lib/analytics';
+import { sessionDay, sessionsOf, weekdayLabel } from '@/lib/analytics';
 import { goalHabits } from '@/lib/goal';
 import { habitsForCapacity } from '@/lib/plan';
 import { dayKey } from '@/lib/dates';
@@ -27,6 +36,7 @@ import {
   focusRecommendations,
   habitStat,
   rangeEndingOn,
+  rangeKeys,
   type DayRange,
   type GroupStat,
   type InsightAction,
@@ -173,6 +183,26 @@ export function ProgressHubScreen({ route, navigation }: Props) {
     [quests, sessions, getPlan, trendRange, done],
   );
 
+  // Daily activity (sessions per day) over the trend window → heatmap.
+  const activityPoints = useMemo(() => {
+    const perDay = new Map<string, number>();
+    for (const s of sessions) perDay.set(sessionDay(s), (perDay.get(sessionDay(s)) ?? 0) + 1);
+    return rangeKeys(trendRange).map((d) => ({ dayKey: d, value: perDay.get(d) ?? 0 }));
+  }, [sessions, trendRange]);
+
+  // Mind-map for the first goal: goal ↔ its contributing habits (sized by adherence).
+  const goalMap = useMemo(() => {
+    const g = goals[0];
+    if (!g) return null;
+    const adhById = new Map(habitStats.map((s) => [s.id, s.adherencePct]));
+    const nodes: MapNode[] = goalHabits(quests, g)
+      .slice(0, 8)
+      .map((q) => ({ id: q.id, label: q.title, colorId: g.colorId, weight: (adhById.get(q.id) ?? 0) / 100 }));
+    return { center: { id: g.id, label: g.title, colorId: g.colorId } as MapNode, nodes };
+  }, [goals, quests, habitStats]);
+
+  const reviewDay = (day: string) => navigation.navigate('Insights', { day });
+
   const hasData = sessions.length > 0 || quests.length > 0;
 
   return (
@@ -199,10 +229,22 @@ export function ProgressHubScreen({ route, navigation }: Props) {
             movers={[...goalStats, ...bucketStats]}
             trend={overallTrend}
             days={days}
+            activityPoints={activityPoints}
+            onReviewDay={reviewDay}
             onRun={run}
           />
         ) : tab === 'goals' ? (
-          <GroupList items={goalStats.map((s, i) => ({ stat: s, series: goalSeries[i]! }))} kind="goal" onRun={run} emptyMsg="No goals yet. Create one to ladder your habits up to a why." />
+          <>
+            {goalMap && goalMap.nodes.length > 0 && (
+              <Section label="HOW IT CONNECTS">
+                <View style={styles.cardCenter}>
+                  <RelationshipMap center={goalMap.center} nodes={goalMap.nodes} onPressNode={(n) => run({ label: 'Open', kind: 'focus', target: { questId: n.id } })} />
+                  <Text style={styles.provenance}>{goalMap.center.label} ← its habits · tap a habit to open it</Text>
+                </View>
+              </Section>
+            )}
+            <GroupList items={goalStats.map((s, i) => ({ stat: s, series: goalSeries[i]! }))} kind="goal" onRun={run} emptyMsg="No goals yet. Create one to ladder your habits up to a why." />
+          </>
         ) : tab === 'buckets' ? (
           <GroupList items={bucketStats.map((s, i) => ({ stat: s, series: bucketSeries[i]! }))} kind="bucket" onRun={run} emptyMsg="No buckets yet. Organize habits into buckets to track them here." />
         ) : tab === 'capacities' ? (
@@ -244,6 +286,8 @@ function Overview({
   movers,
   trend,
   days,
+  activityPoints,
+  onReviewDay,
   onRun,
 }: {
   focus: FocusRec[];
@@ -251,6 +295,8 @@ function Overview({
   movers: GroupStat[];
   trend: ReturnType<typeof adherenceTrendSeries>;
   days: number;
+  activityPoints: { dayKey: string; value: number }[];
+  onReviewDay: (day: string) => void;
   onRun: (a: InsightAction) => void;
 }) {
   const radarAxes = CAPACITIES.map((c) => ({ label: c.name, value: levels[c.id] ?? 0, id: c.id }));
@@ -300,6 +346,13 @@ function Overview({
       <Section label="ADHERENCE TREND">
         <View style={styles.card}>
           <TrendChart series={trend} daysOfData={days} />
+        </View>
+      </Section>
+
+      <Section label="WHEN YOU SHOW UP">
+        <View style={styles.card}>
+          <CalendarHeatmap points={activityPoints} colorId="violet" onPressDay={(p) => onReviewDay(p.dayKey)} />
+          <Text style={styles.provenance}>Each cell is a day · tap one to review it</Text>
         </View>
       </Section>
     </>
