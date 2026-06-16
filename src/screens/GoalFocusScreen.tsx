@@ -7,7 +7,7 @@ import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useActivityLog } from '@/state/useActivityLog';
-import { goalHabits, type Goal } from '@/lib/goal';
+import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { activityJourney } from '@/lib/journey';
 import { sessionsOf } from '@/lib/analytics';
 import { rippleForQuest } from '@/lib/habitCapacity';
@@ -57,7 +57,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
   const { events } = useActivityLog();
   const progress = useGoalProgress(goal);
 
-  const accent = goal.colorId === 'teal' ? TEAL : VIOLET;
+  const accent = goalColor(goal).accent;
   const todayK = dayKey(new Date());
   const sessions = useMemo(() => sessionsOf(events), [events]);
   const plannedSet = useMemo(() => new Set(getPlan(todayK) ?? []), [getPlan, todayK]);

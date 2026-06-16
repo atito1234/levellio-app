@@ -7,6 +7,7 @@ import { goalStore } from '@/services/goal';
 import { goalProgress, goalWeeklyDays, type Goal, type GoalProgress } from '@/lib/goal';
 import { sessionsOf } from '@/lib/analytics';
 import { dayKey, shiftDayKey } from '@/lib/dates';
+import type { BucketColorId } from '@/lib/buckets';
 import type { QuestCategory } from '@/types';
 
 let goalSeq = 0;
@@ -18,7 +19,7 @@ function genGoalId(): string {
 export interface NewGoalInput {
   title: string;
   emoji: string;
-  colorId: 'violet' | 'teal';
+  colorId: BucketColorId;
   categories: QuestCategory[];
 }
 

@@ -1,4 +1,4 @@
-import { capacitiesForCategories, goalHabits, goalProgress, goalWeeklyDays, type Goal } from './goal';
+import { capacitiesForCategories, goalColor, goalHabits, goalProgress, goalWeeklyDays, GOAL_COLOR_IDS, type Goal } from './goal';
 import { emptyLevels } from './compounding';
 import type { Quest } from '@/types';
 
@@ -11,6 +11,20 @@ const goal: Goal = {
   createdAt: 0,
   order: 0,
 };
+
+describe('goal colours', () => {
+  it('offers a palette that excludes gold (reserved for reward)', () => {
+    expect(GOAL_COLOR_IDS).not.toContain('gold');
+    expect(GOAL_COLOR_IDS).toContain('violet');
+    expect(GOAL_COLOR_IDS.length).toBeGreaterThan(2);
+  });
+
+  it('resolves accent + soft for a goal colour', () => {
+    const c = goalColor({ colorId: 'rose' });
+    expect(c.accent).toMatch(/^#/);
+    expect(c.soft).toMatch(/^#/);
+  });
+});
 
 const q = (id: string, category: Quest['category'], over: Partial<Quest> = {}): Quest => ({
   id,

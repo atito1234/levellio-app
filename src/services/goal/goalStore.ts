@@ -5,7 +5,7 @@
  */
 import type { KeyValueStore } from '@/services/storage';
 import { CATEGORY_ORDER } from '@/lib/categories';
-import type { Goal } from '@/lib/goal';
+import { GOAL_COLOR_IDS, type Goal } from '@/lib/goal';
 import type { QuestCategory } from '@/types';
 
 export const GOAL_SCHEMA_VERSION = 1;
@@ -14,6 +14,7 @@ export const MAX_GOALS = 20;
 const NS = 'levellio';
 const goalsKey = (uid: string) => `${NS}:goals:${uid}`;
 const VALID_CATEGORIES = new Set<string>(CATEGORY_ORDER);
+const VALID_COLORS = new Set<string>(GOAL_COLOR_IDS);
 
 function normalizeGoal(raw: unknown, index: number): Goal | null {
   const g = (raw ?? {}) as Partial<Goal>;
@@ -25,7 +26,7 @@ function normalizeGoal(raw: unknown, index: number): Goal | null {
     id: g.id,
     title: g.title.trim(),
     emoji: typeof g.emoji === 'string' && g.emoji.length > 0 ? g.emoji : '🎯',
-    colorId: g.colorId === 'teal' ? 'teal' : 'violet',
+    colorId: typeof g.colorId === 'string' && VALID_COLORS.has(g.colorId) ? g.colorId : 'violet',
     categories: [...new Set(categories)],
     createdAt: typeof g.createdAt === 'number' && Number.isFinite(g.createdAt) ? g.createdAt : 0,
     order: typeof g.order === 'number' && Number.isFinite(g.order) ? g.order : index,
