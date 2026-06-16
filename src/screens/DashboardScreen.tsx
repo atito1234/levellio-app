@@ -448,7 +448,7 @@ export function DashboardScreen() {
             <>
               <Text style={styles.focusName}>Add your first habit</Text>
               <Pressable
-                onPress={() => navigation.navigate('QuestEditor')}
+                onPress={() => setAddOpen(true)}
                 accessibilityRole="button"
                 accessibilityLabel="Add your first habit"
                 style={styles.primaryBtn}
@@ -547,11 +547,9 @@ export function DashboardScreen() {
           <Text style={styles.planCtaChevron}>›</Text>
         </Pressable>
 
-        {/* Quick actions — keeps every feature, low clutter (Hick's law). */}
+        {/* Quick actions — discovery/nav only; the 🎙️ button is the one way to add. */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
-          <QuickChip label="🎤 Quick add" onPress={() => navigation.navigate('QuickCapture')} />
           <QuickChip label="📓 Journal" onPress={() => navigation.navigate('Journal')} />
-          <QuickChip label="＋ New" onPress={() => navigation.navigate('QuestEditor')} />
           <QuickChip label="📚 Library" onPress={() => navigation.navigate('HabitLibrary')} />
           <QuickChip label="🗂 Buckets" onPress={() => navigation.navigate('Organize')} />
           <QuickChip label="🔗 Connections" onPress={() => navigation.navigate('Connections')} />

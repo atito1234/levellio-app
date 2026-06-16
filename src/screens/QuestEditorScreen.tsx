@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ChipSelector,
@@ -17,6 +17,8 @@ import { habitScience } from '@/data/habitScience';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { QUEST_XP } from '@/lib/leveling';
 import { isValidScheduleMinutes, minutesToParts, partsToMinutes, type TimeParts } from '@/lib/schedule';
+import { WEEKDAY_LABELS } from '@/lib/calendar';
+import { weekdaysLabel } from '@/lib/recurrence';
 import type { QuestCategory, QuestDifficulty } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -42,19 +44,21 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   const guardAbandon = useAbandonGuard();
   const editingId = route.params?.questId;
   const existing = editingId ? quests.find((q) => q.id === editingId) : undefined;
+  // When opened from the quick sheet's "Advanced options", seed from its prefill.
+  const prefill = existing ? undefined : route.params?.prefill;
+  const initialTime = existing?.scheduledTime ?? prefill?.scheduledTime;
 
-  const [title, setTitle] = useState(existing?.title ?? '');
-  const [description, setDescription] = useState(existing?.description ?? '');
-  const [difficulty, setDifficulty] = useState<QuestDifficulty>(existing?.difficulty ?? 'easy');
-  const [category, setCategory] = useState<QuestCategory>(existing?.category ?? 'health');
+  const [title, setTitle] = useState(existing?.title ?? prefill?.title ?? '');
+  const [description, setDescription] = useState(existing?.description ?? prefill?.description ?? '');
+  const [difficulty, setDifficulty] = useState<QuestDifficulty>(existing?.difficulty ?? prefill?.difficulty ?? 'easy');
+  const [category, setCategory] = useState<QuestCategory>(existing?.category ?? prefill?.category ?? 'health');
   const [titleError, setTitleError] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
-  const [scheduleOn, setScheduleOn] = useState(isValidScheduleMinutes(existing?.scheduledTime));
+  const [scheduleOn, setScheduleOn] = useState(isValidScheduleMinutes(initialTime));
   const [parts, setParts] = useState<TimeParts>(
-    isValidScheduleMinutes(existing?.scheduledTime)
-      ? minutesToParts(existing!.scheduledTime!)
-      : DEFAULT_SCHEDULE_PARTS,
+    isValidScheduleMinutes(initialTime) ? minutesToParts(initialTime!) : DEFAULT_SCHEDULE_PARTS,
   );
+  const [repeatDays, setRepeatDays] = useState<number[]>(existing?.scheduledDays ?? prefill?.scheduledDays ?? []);
   // Optional measurement: a quick 1–5 "how did it go?" at completion + the
   // user's own reason it matters (the personalization source for any habit).
   const [rateOn, setRateOn] = useState(existing?.metric === 'rating');
@@ -89,6 +93,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
       category,
       difficulty,
       scheduledTime,
+      ...(repeatDays.length ? { scheduledDays: repeatDays } : {}),
       ...(rateOn ? { metric: 'rating' as const } : {}),
       ...(why.trim() ? { why } : {}),
     };
@@ -195,6 +200,33 @@ export function QuestEditorScreen({ route, navigation }: Props) {
             )}
           </View>
 
+          {/* Optional weekly recurrence — repeat on chosen weekdays. */}
+          <View style={styles.scheduleBlock}>
+            <View style={styles.scheduleHeadText}>
+              <Text style={styles.scheduleLabel}>Repeat</Text>
+              <Text style={styles.scheduleHint}>
+                {repeatDays.length ? weekdaysLabel(repeatDays) : 'Pick the days this repeats (optional).'}
+              </Text>
+            </View>
+            <View style={styles.weekRow}>
+              {WEEKDAY_LABELS.map((d, i) => {
+                const on = repeatDays.includes(i);
+                return (
+                  <Pressable
+                    key={i}
+                    onPress={() => setRepeatDays((cur) => (cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i]))}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: on }}
+                    accessibilityLabel={`Repeat on ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i]}`}
+                    style={[styles.weekday, on && styles.weekdayOn]}
+                  >
+                    <Text style={[styles.weekdayText, on && styles.weekdayTextOn]}>{d}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
           {/* Optional: rate how it goes (1–5) + your own reason it matters. */}
           <View style={styles.scheduleBlock}>
             <View style={styles.scheduleHead}>
@@ -273,4 +305,18 @@ const styles = StyleSheet.create({
   scheduleHeadText: { flex: 1, gap: 2 },
   scheduleLabel: { ...typography.label, color: colors.textPrimary, fontWeight: '700' },
   scheduleHint: { ...typography.caption, color: colors.textSecondary },
+  weekRow: { flexDirection: 'row', gap: 6 },
+  weekday: {
+    flex: 1,
+    aspectRatio: 1,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  weekdayOn: { backgroundColor: colors.identity, borderColor: colors.identity },
+  weekdayText: { ...typography.label, color: colors.textPrimary, fontWeight: '700' },
+  weekdayTextOn: { color: '#FFFFFF' },
 });
