@@ -4,3 +4,4 @@ export * from './confidence';
 export * from './adherence';
 export * from './series';
 export * from './focus';
+export * from './actions';
