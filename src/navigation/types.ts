@@ -1,5 +1,6 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { QuestReward } from '@/types';
+import type { QuestDraft } from '@/lib/questForm';
 import type { LegalDocKey } from '@/content/aboutInfo';
 
 /** Main app tabs (shown after onboarding). */
@@ -14,8 +15,8 @@ export type RootStackParamList = {
   Onboarding: undefined;
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
   QuestComplete: { reward: QuestReward } | undefined;
-  /** Create (no param) or edit (questId) a quest. */
-  QuestEditor: { questId?: string } | undefined;
+  /** Create (no param), edit (questId), or create pre-filled from the quick sheet (prefill). */
+  QuestEditor: { questId?: string; prefill?: Partial<QuestDraft> } | undefined;
   HabitLibrary: undefined;
   Paywall: undefined;
   /** In-app legal viewer: Privacy Policy or Terms of Service. */
