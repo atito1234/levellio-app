@@ -3,7 +3,7 @@
  * create / edit / delete behavior unit-testable and reusable.
  */
 import type { Quest } from '@/types';
-import { questKey } from './questForm';
+import { questKey, sanitizeDays } from './questForm';
 
 export function addQuestToList(list: readonly Quest[], quest: Quest): Quest[] {
   return [...list, quest];
@@ -34,12 +34,14 @@ export function upsertQuestByCanonical(
     .pop();
   const scheduledTime = existing.scheduledTime ?? incoming.scheduledTime;
   const description = existing.description ?? incoming.description;
+  const scheduledDays = sanitizeDays([...(existing.scheduledDays ?? []), ...(incoming.scheduledDays ?? [])]);
   const merged: Quest = {
     ...existing,
     completed: existing.completed || incoming.completed,
     canonicalKey: key,
     ...(lastCompletedDate ? { lastCompletedDate } : {}),
     ...(scheduledTime !== undefined ? { scheduledTime } : {}),
+    ...(scheduledDays.length ? { scheduledDays } : {}),
     ...(description ? { description } : {}),
   };
   return { quests: list.map((q) => (q.id === existing.id ? merged : q)), quest: merged, merged: true };

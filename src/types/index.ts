@@ -45,6 +45,12 @@ export interface Quest {
    */
   scheduledTime?: number;
   /**
+   * Optional weekly recurrence: weekday indices the habit repeats on
+   * (0=Sun … 6=Sat). Absent or empty = not a recurring habit. Recurring habits
+   * are materialized into each matching day's plan (see PlanContext).
+   */
+  scheduledDays?: number[];
+  /**
    * Canonical dedup key (= normalizeTitle(title)). Two quests with the same key
    * are the *same activity*; the list holds at most one per key. Optional so
    * legacy data and migrations stay backward-compatible (backfilled on load).

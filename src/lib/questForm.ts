@@ -13,6 +13,8 @@ export interface QuestDraft {
   difficulty: QuestDifficulty;
   /** Optional pinned time of day (minutes since local midnight, 0..1439). */
   scheduledTime?: number;
+  /** Optional weekly recurrence — weekday indices (0=Sun … 6=Sat). */
+  scheduledDays?: number[];
   /** Optional measurement (e.g. 'rating' for a 1–5 check-in at completion). */
   metric?: HabitMetric;
   /** The user's own reason this habit matters. */
@@ -56,6 +58,12 @@ export function validateQuestDraft(draft: QuestDraft): ValidationResult {
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
+/** Sanitize weekday indices to a sorted, unique list of valid days (0..6). */
+export function sanitizeDays(days: readonly number[] | undefined): number[] {
+  if (!days) return [];
+  return [...new Set(days.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))].sort((a, b) => a - b);
+}
+
 /** Normalize a title for duplicate comparison (trim + lowercase + collapse spaces). */
 export function normalizeTitle(title: string): string {
   return title.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -89,6 +97,7 @@ export function draftToQuest(draft: QuestDraft, id: string, completed = false): 
     baseXp: QUEST_XP[draft.difficulty],
     completed,
     ...(isValidScheduleMinutes(draft.scheduledTime) ? { scheduledTime: draft.scheduledTime } : {}),
+    ...(sanitizeDays(draft.scheduledDays).length ? { scheduledDays: sanitizeDays(draft.scheduledDays) } : {}),
     ...(draft.metric ? { metric: draft.metric } : {}),
     ...(why ? { why } : {}),
     canonicalKey: normalizeTitle(title),
@@ -130,11 +139,13 @@ export function mergeDuplicateGroup(dupes: readonly Quest[]): Quest {
     .pop();
   const scheduledTime = survivor.scheduledTime ?? dupes.find((q) => q.scheduledTime !== undefined)?.scheduledTime;
   const description = survivor.description ?? dupes.find((q) => q.description)?.description;
+  const scheduledDays = sanitizeDays(dupes.flatMap((q) => q.scheduledDays ?? []));
   return {
     ...survivor,
     completed,
     ...(lastCompletedDate ? { lastCompletedDate } : {}),
     ...(scheduledTime !== undefined ? { scheduledTime } : {}),
+    ...(scheduledDays.length ? { scheduledDays } : {}),
     ...(description ? { description } : {}),
     canonicalKey: questKey(survivor),
   };

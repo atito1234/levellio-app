@@ -241,6 +241,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         difficulty: draft.difficulty,
         baseXp: draftToQuest(draft, questId).baseXp,
         scheduledTime: draftToQuest(draft, questId).scheduledTime,
+        scheduledDays: draftToQuest(draft, questId).scheduledDays,
         metric: draft.metric,
         why: draft.why?.trim() || undefined,
       });
