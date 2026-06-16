@@ -22,9 +22,10 @@ import { useGoals } from '@/state/GoalContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { useInsightAction } from '@/hooks/useInsightAction';
 import { sessionDay, sessionsOf, weekdayLabel } from '@/lib/analytics';
+import { activeDaysInWindow, daysAccomplished, directionVerdict, type Direction } from '@/lib/heroAnalytics';
 import { goalHabits } from '@/lib/goal';
 import { habitsForCapacity } from '@/lib/plan';
-import { dayKey } from '@/lib/dates';
+import { dayKey, shiftDayKey } from '@/lib/dates';
 import { CATEGORY_META } from '@/lib/categories';
 import { CAPACITIES } from '@/lib/compounding';
 import {
@@ -67,11 +68,19 @@ const TABS: { key: Tab; label: string }[] = [
 const RANGE_DAYS = 28;
 const TREND_DAYS = 56;
 
+// Soft tone backgrounds for the momentum verdict (palette-safe, gold reserved).
+const VERDICT_BG: Record<Direction['tone'], string> = {
+  onTrack: '#D6F7EF',
+  building: '#EDE9FE',
+  drifting: '#FCE3EE',
+  start: '#ECECF2',
+};
+
 export function ProgressHubScreen({ route, navigation }: Props) {
   const [tab, setTab] = useState<Tab>(route.params?.tab ?? 'overview');
   const { events, ready } = useActivityLog();
   useAnalyticsRollup(events); // keep durable history fresh while viewing
-  const { quests } = useGame();
+  const { quests, character } = useGame();
   const { getPlan } = usePlan();
   const { levels } = useCapacities();
   const { goals } = useGoals();
@@ -84,6 +93,18 @@ export function ProgressHubScreen({ route, navigation }: Props) {
   const trendRange: DayRange = useMemo(() => rangeEndingOn(todayKey, TREND_DAYS), [todayKey]);
   const done = useMemo(() => doneDaysByActivity(sessions), [sessions]);
   const days = distinctSessionDays(sessions);
+
+  // Honest momentum headline (folded in from the old reflective screen).
+  const verdict = useMemo(
+    () =>
+      directionVerdict({
+        daysDone: daysAccomplished(sessions),
+        streakDays: character?.streakDays ?? 0,
+        activeThisWeek: activeDaysInWindow(sessions, todayKey, 7),
+        activePrevWeek: activeDaysInWindow(sessions, shiftDayKey(todayKey, -7), 7),
+      }),
+    [sessions, character?.streakDays, todayKey],
+  );
 
   const habitStats = useMemo(
     () =>
@@ -224,6 +245,7 @@ export function ProgressHubScreen({ route, navigation }: Props) {
           <EmptyState />
         ) : tab === 'overview' ? (
           <Overview
+            verdict={verdict}
             focus={focus}
             levels={levels}
             movers={[...goalStats, ...bucketStats]}
@@ -231,7 +253,7 @@ export function ProgressHubScreen({ route, navigation }: Props) {
             days={days}
             activityPoints={activityPoints}
             onReviewDay={reviewDay}
-            onReflect={() => navigation.navigate('Analytics')}
+            onMore={() => navigation.navigate('Analytics')}
             onRun={run}
           />
         ) : tab === 'goals' ? (
@@ -282,6 +304,7 @@ function Segmented({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) 
 // --- Overview ---------------------------------------------------------------
 
 function Overview({
+  verdict,
   focus,
   levels,
   movers,
@@ -289,9 +312,10 @@ function Overview({
   days,
   activityPoints,
   onReviewDay,
-  onReflect,
+  onMore,
   onRun,
 }: {
+  verdict: Direction;
   focus: FocusRec[];
   levels: Record<string, number>;
   movers: GroupStat[];
@@ -299,7 +323,7 @@ function Overview({
   days: number;
   activityPoints: { dayKey: string; value: number }[];
   onReviewDay: (day: string) => void;
-  onReflect: () => void;
+  onMore: () => void;
   onRun: (a: InsightAction) => void;
 }) {
   const radarAxes = CAPACITIES.map((c) => ({ label: c.name, value: levels[c.id] ?? 0, id: c.id }));
@@ -311,6 +335,11 @@ function Overview({
 
   return (
     <>
+      <View style={[styles.verdictCard, { backgroundColor: VERDICT_BG[verdict.tone] }]} accessibilityRole="header" accessibilityLabel={`${verdict.label}. ${verdict.reason}`}>
+        <Text style={styles.verdictLabel}>{verdict.label}</Text>
+        <Text style={styles.verdictReason}>{verdict.reason}</Text>
+      </View>
+
       {focus.length > 0 && (
         <Section label="FOCUS NEXT">
           {focus.map((rec) => (
@@ -359,8 +388,8 @@ function Overview({
         </View>
       </Section>
 
-      <Pressable onPress={onReflect} accessibilityRole="button" style={styles.reflect}>
-        <Text style={styles.cta}>🧭 Reflect on your direction ›</Text>
+      <Pressable onPress={onMore} accessibilityRole="button" style={styles.reflect}>
+        <Text style={styles.cta}>🧭 More insights · ratings, rhythm & science ›</Text>
       </Pressable>
     </>
   );
@@ -582,6 +611,10 @@ const styles = StyleSheet.create({
 
   focusCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: '#EDE9FE', borderRadius: 18, padding: spacing.md },
   cta: { ...typography.label, color: VIOLET, fontWeight: '800' },
+
+  verdictCard: { borderRadius: 24, padding: spacing.lg, gap: 4 },
+  verdictLabel: { ...typography.title, color: INK },
+  verdictReason: { ...typography.caption, color: MUTED },
   reflect: { alignSelf: 'center', backgroundColor: '#EDE9FE', borderRadius: 999, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   cardCta: { alignSelf: 'flex-start' },
   provenance: { ...typography.caption, color: MUTED, textAlign: 'center' },
