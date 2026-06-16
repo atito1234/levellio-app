@@ -42,11 +42,14 @@ export function AddActivitySheet({
   onClose,
   defaultGoalId = null,
   defaultBucketId = null,
+  defaultDates = null,
 }: {
   visible: boolean;
   onClose: () => void;
   defaultGoalId?: string | null;
   defaultBucketId?: string | null;
+  /** Pre-target specific calendar days (opens in "Pick date" mode with these selected). */
+  defaultDates?: readonly string[] | null;
 }) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { quests, addQuest } = useGame();
@@ -71,14 +74,16 @@ export function AddActivitySheet({
       setGoalId(defaultGoalId);
       setBucketId(defaultBucketId);
       setTitle('');
-      setWhenMode('today');
-      setPickedDates([]);
+      // Opened from a chosen calendar day → start in date mode on that day.
+      const dates = defaultDates ?? [];
+      setWhenMode(dates.length > 0 ? 'date' : 'today');
+      setPickedDates([...dates]);
       setWeekdays([]);
       setTimeOn(false);
       setTimeMinutes(DEFAULT_TIME);
       setAdded(null);
     }
-  }, [visible, defaultGoalId, defaultBucketId]);
+  }, [visible, defaultGoalId, defaultBucketId, defaultDates]);
 
   // Best category for a bucket = the most common category among its activities.
   const bucketCategory = useMemo(() => {
