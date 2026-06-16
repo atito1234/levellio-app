@@ -70,6 +70,8 @@ export type RootStackParamList = {
   CoachingEncounter: { dragonId: string; dragonName?: string; questId?: string; minutesAvailable?: number; blockerId?: string } | undefined;
   /** One activity's "from repetition to habit" journey (curve, past days, status). */
   ActivityJourney: { activityId: string };
+  /** Unified Progress hub: Overview / Goals / Buckets / Capacities / Habits. */
+  Progress: { tab?: 'overview' | 'goals' | 'buckets' | 'capacities' | 'habits' } | undefined;
 };
 
 declare global {
