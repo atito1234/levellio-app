@@ -23,9 +23,9 @@ import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useBattles } from '@/state/BattlesContext';
 import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import type { Goal } from '@/lib/goal';
+import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
-import { effectivePlan, plannedOpen, planProgress } from '@/lib/plan';
+import { effectivePlan, goalDayProgress, goalFocusPool, plannedOpen, planProgress } from '@/lib/plan';
 import { CAPACITIES, getCapacity } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { isValidScheduleMinutes, minutesToLabel } from '@/lib/schedule';
@@ -76,10 +76,24 @@ export function DashboardScreen() {
   // Personalized, science-backed line from the user's real history + today.
   const motivation = useMotivation().text;
 
-  const progress = useMemo(() => planProgress(quests, plan), [quests, plan]);
+  // Guided flow: a SELECTED goal governs the central focus. Default null so each
+  // open starts at Step 1 ("pick a goal"). Gating only applies once goals exist.
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const selectedGoal = goals.find((g) => g.id === selectedGoalId) ?? null;
+  const gated = goals.length > 0 && !selectedGoal;
+  const focusAccent = selectedGoal ? goalColor(selectedGoal).accent : TEAL;
 
-  // The planned, still-open habits (timed first) — the Now card + up-next strip.
-  const openHabits = useMemo(() => plannedOpen(quests, plan), [quests, plan]);
+  const progress = useMemo(
+    () => (selectedGoal ? goalDayProgress(quests, plan, selectedGoal) : planProgress(quests, plan)),
+    [quests, plan, selectedGoal],
+  );
+
+  // The planned, still-open habits (timed first) — filtered to the selected goal.
+  const openHabits = useMemo(
+    () => (selectedGoal ? goalFocusPool(quests, plan, selectedGoal) : plannedOpen(quests, plan)),
+    [quests, plan, selectedGoal],
+  );
+  const goalHasActivities = selectedGoal ? goalHabits(quests, selectedGoal).length > 0 : true;
   const [focusIndex, setFocusIndex] = useState(0);
   const safeIndex = openHabits.length ? Math.min(focusIndex, openHabits.length - 1) : 0;
   const focus = openHabits[safeIndex] ?? null;
@@ -174,6 +188,9 @@ export function DashboardScreen() {
       onPanResponderTerminate: () => settleRef.current(),
     }),
   ).current;
+
+  // Switching the selected goal resets the focus to its first activity.
+  useEffect(() => setFocusIndex(0), [selectedGoalId]);
 
   // Hero ring fill — goal-gradient: eases toward 100% as today's habits close.
   const fill = useRef(new Animated.Value(0)).current;
@@ -272,16 +289,23 @@ export function DashboardScreen() {
           </View>
         </View>
 
-        {/* Life goals — the "why" habits ladder up to. Tap to focus a goal. */}
+        {/* STEP 1 — pick a goal. It governs the focus below and tints it. */}
+        {goals.length > 0 && (
+          <Text style={styles.stepHint}>{gated ? 'STEP 1 · Pick a goal to begin' : 'STEP 1 · Your goal'}</Text>
+        )}
         <GoalsStrip
           goals={goals}
-          onOpen={(id) => navigation.navigate('GoalFocus', { goalId: id })}
+          selectedId={selectedGoalId}
+          onSelect={(id) => setSelectedGoalId((prev) => (prev === id ? null : id))}
+          onManage={(id) => navigation.navigate('GoalFocus', { goalId: id })}
           onNew={() => navigation.navigate('GoalEditor')}
         />
 
+        {/* Everything below is governed by the chosen goal — faded until picked. */}
+        <View style={[styles.gatedWrap, gated && styles.gatedOff]} pointerEvents={gated ? 'none' : 'auto'}>
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}
-        <View style={styles.billboard} {...(canBrowse ? pan.panHandlers : {})}>
+        <View style={styles.billboard} {...(canBrowse && !gated ? pan.panHandlers : {})}>
          <View style={styles.billboardClip}>
           <Animated.View
             style={[
@@ -289,10 +313,10 @@ export function DashboardScreen() {
               canBrowse && { transform: [{ translateX: cardX }, { rotate: cardRotate }], opacity: cardOpacity },
             ]}
           >
-          <Text style={styles.billboardKicker}>YOUR FOCUS RIGHT NOW</Text>
+          <Text style={styles.billboardKicker}>{selectedGoal ? `STEP 2 · ${selectedGoal.title.toUpperCase()}` : 'YOUR FOCUS RIGHT NOW'}</Text>
           <View style={styles.ringStage}>
             {/* subtle glassmorphism glow behind the ring */}
-            <View style={[styles.glow, { backgroundColor: heroDone ? GOLD : VIOLET }]} pointerEvents="none" />
+            <View style={[styles.glow, { backgroundColor: heroDone ? GOLD : focusAccent }]} pointerEvents="none" />
             <Svg width={HRING} height={HRING} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
               <Circle cx={HRING / 2} cy={HRING / 2} r={HR} stroke="#E8E6E0" strokeWidth={HSTROKE} fill="none" />
               <G transform={`rotate(-90, ${HRING / 2}, ${HRING / 2})`}>
@@ -300,7 +324,7 @@ export function DashboardScreen() {
                   cx={HRING / 2}
                   cy={HRING / 2}
                   r={HR}
-                  stroke={heroDone ? GOLD : TEAL}
+                  stroke={heroDone ? GOLD : focusAccent}
                   strokeWidth={HSTROKE}
                   strokeLinecap="round"
                   fill="none"
@@ -366,15 +390,17 @@ export function DashboardScreen() {
               >
                 <Text style={styles.primaryBtnText}>Do it now</Text>
               </Pressable>
-              <Pressable
-                onPress={() => navigation.navigate('BattleSetup', { questId: focus.id })}
-                accessibilityRole="button"
-                accessibilityLabel={`Start a focus battle: ${focus.title}`}
-                style={styles.focusBtn}
-                hitSlop={8}
-              >
-                <Text style={styles.focusBtnText}>⚔️ Start a battle</Text>
-              </Pressable>
+              {selectedGoal && (
+                <Pressable
+                  onPress={() => navigation.navigate('BattleSetup', { goalId: selectedGoal.id })}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Prepare your war strategy for ${selectedGoal.title}`}
+                  style={styles.focusBtn}
+                  hitSlop={8}
+                >
+                  <Text style={[styles.focusBtnText, { color: focusAccent }]}>⚔️ Prepare your war strategy</Text>
+                </Pressable>
+              )}
 
               {/* Non-gesture controls + position (swipe is an enhancement). */}
               {canBrowse && (
@@ -398,6 +424,18 @@ export function DashboardScreen() {
                 </View>
               )}
             </View>
+          ) : selectedGoal && !goalHasActivities ? (
+            <>
+              <Text style={styles.focusName}>No activities yet</Text>
+              <Pressable
+                onPress={() => navigation.navigate('GoalFocus', { goalId: selectedGoal.id })}
+                accessibilityRole="button"
+                accessibilityLabel="Add activities to this goal"
+                style={styles.primaryBtn}
+              >
+                <Text style={styles.primaryBtnText}>＋ Add activities</Text>
+              </Pressable>
+            </>
           ) : quests.length === 0 ? (
             <>
               <Text style={styles.focusName}>Add your first habit</Text>
@@ -411,7 +449,19 @@ export function DashboardScreen() {
               </Pressable>
             </>
           ) : progress.total > 0 ? (
-            <Text style={styles.allDone}>All planned done 🎉</Text>
+            <Text style={styles.allDone}>{selectedGoal ? 'This goal is done for today 🎉' : 'All planned done 🎉'}</Text>
+          ) : selectedGoal ? (
+            <>
+              <Text style={styles.focusName}>Nothing planned for this goal yet</Text>
+              <Pressable
+                onPress={() => navigation.navigate('GoalFocus', { goalId: selectedGoal.id })}
+                accessibilityRole="button"
+                accessibilityLabel="Edit this goal's activities"
+                style={styles.primaryBtn}
+              >
+                <Text style={styles.primaryBtnText}>✎ Edit activities</Text>
+              </Pressable>
+            </>
           ) : (
             <>
               <Text style={styles.focusName}>Nothing planned yet</Text>
@@ -531,6 +581,7 @@ export function DashboardScreen() {
             );
           })}
         </ScrollView>
+        </View>
 
         <View style={{ height: spacing.xl }} />
       </ScrollView>
@@ -546,14 +597,18 @@ function QuickChip({ label, onPress }: { label: string; onPress: () => void }) {
   );
 }
 
-/** The horizontal strip of life goals (the "why"), plus a New-goal card. */
+/** The horizontal strip of life goals — selecting one governs the focus below. */
 function GoalsStrip({
   goals,
-  onOpen,
+  selectedId,
+  onSelect,
+  onManage,
   onNew,
 }: {
   goals: Goal[];
-  onOpen: (id: string) => void;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  onManage: (id: string) => void;
   onNew: () => void;
 }) {
   if (goals.length === 0) {
@@ -576,36 +631,42 @@ function GoalsStrip({
   }
   return (
     <View style={styles.goalsWrap}>
-      <Text style={styles.railLabel}>Your goals</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalsRow}>
         {goals.map((g) => (
-          <GoalCard key={g.id} goal={g} onPress={() => onOpen(g.id)} />
+          <GoalCard key={g.id} goal={g} selected={g.id === selectedId} onPress={() => onSelect(g.id)} />
         ))}
         <Pressable onPress={onNew} accessibilityRole="button" accessibilityLabel="New goal" style={styles.goalNew}>
           <Text style={styles.goalNewPlus}>＋</Text>
           <Text style={styles.goalNewText}>New goal</Text>
         </Pressable>
       </ScrollView>
+      {selectedId && (
+        <Pressable onPress={() => onManage(selectedId)} accessibilityRole="button" accessibilityLabel="Edit this goal's activities" style={styles.manageRow} hitSlop={8}>
+          <Text style={styles.manageText}>✎ Edit activities</Text>
+          <Text style={styles.manageHint}>· tap the goal again to switch</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
 
-function GoalCard({ goal, onPress }: { goal: Goal; onPress: () => void }) {
+function GoalCard({ goal, selected, onPress }: { goal: Goal; selected: boolean; onPress: () => void }) {
   const progress = useGoalProgress(goal);
-  const accent = goal.colorId === 'teal' ? TEAL : VIOLET;
+  const c = goalColor(goal);
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${goal.title}. ${progress.doneTodayInGoal} of ${progress.plannedTodayInGoal} done today, ${progress.weeklyConsistencyPct} percent this week.`}
-      style={styles.goalCard}
+      accessibilityState={{ selected }}
+      accessibilityLabel={`${goal.title}. ${progress.doneTodayInGoal} of ${progress.plannedTodayInGoal} done today, ${progress.weeklyConsistencyPct} percent this week.${selected ? ' Selected.' : ''}`}
+      style={[styles.goalCard, selected && { borderColor: c.accent, backgroundColor: c.soft, borderWidth: 2 }]}
     >
       <Text style={styles.goalEmoji}>{goal.emoji}</Text>
       <Text style={styles.goalTitle} numberOfLines={2}>
         {goal.title}
       </Text>
       <View style={styles.goalBar}>
-        <View style={[styles.goalBarFill, { backgroundColor: accent, width: `${Math.max(3, progress.weeklyConsistencyPct)}%` }]} />
+        <View style={[styles.goalBarFill, { backgroundColor: c.accent, width: `${Math.max(3, progress.weeklyConsistencyPct)}%` }]} />
       </View>
       <Text style={styles.goalMeta}>
         {progress.doneTodayInGoal}/{progress.plannedTodayInGoal} today
@@ -727,8 +788,15 @@ const styles = StyleSheet.create({
   planCtaSub: { ...typography.caption, color: MUTED },
   planCtaChevron: { fontSize: 26, color: VIOLET, fontWeight: '800' },
 
+  stepHint: { ...typography.label, color: VIOLET, fontWeight: '800', letterSpacing: 1, paddingHorizontal: PAD },
+  gatedWrap: { gap: spacing.lg },
+  gatedOff: { opacity: 0.35 },
+
   goalsWrap: { gap: spacing.xs },
-  goalsRow: { gap: spacing.sm, paddingHorizontal: PAD },
+  goalsRow: { gap: spacing.sm, paddingHorizontal: PAD, paddingVertical: 2 },
+  manageRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingHorizontal: PAD, paddingTop: 2 },
+  manageText: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  manageHint: { ...typography.caption, color: MUTED },
   goalCard: { width: 150, backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, gap: 6, borderWidth: 1, borderColor: '#ECEAE4' },
   goalEmoji: { fontSize: 24 },
   goalTitle: { ...typography.label, color: INK, fontWeight: '700', minHeight: 34 },
