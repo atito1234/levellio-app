@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals } from '@/state/GoalContext';
@@ -8,20 +10,32 @@ import { usePlan } from '@/state/PlanContext';
 import { goalColor } from '@/lib/goal';
 import { getBucketColor } from '@/lib/buckets';
 import { dayKey } from '@/lib/dates';
+import { WEEKDAY_LABELS } from '@/lib/calendar';
+import { weekdayOfKey, weekdaysLabel } from '@/lib/recurrence';
+import { minutesToLabel } from '@/lib/schedule';
+import { MiniCalendar } from './MiniCalendar';
+import { TimePicker } from './TimePicker';
 import type { QuestCategory } from '@/types';
+import type { QuestDraft } from '@/lib/questForm';
+import type { RootStackParamList } from '@/navigation/types';
 
 const INK = '#1F2937';
 const BG = '#F7F6F2';
 const CARD = '#FFFFFF';
 const VIOLET = '#6C4CF1';
+const VIOLET_SOFT = '#EDE9FE';
 const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
+type WhenMode = 'today' | 'date' | 'weekly';
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
+const DEFAULT_TIME = 9 * 60; // 9:00 AM
+
 /**
- * Dead-simple "add an activity" sheet: type or speak the name, optionally tap a
- * GOAL and/or a BUCKET to file it, and add. Stays open for rapid multi-add. Files
- * by setting the quest's category (goal) and/or assigning it to a bucket, and
- * drops it onto today's plan so it shows up immediately.
+ * "Add an activity" sheet: type or speak the name, choose WHEN (today, specific
+ * calendar dates, or repeat on weekdays) + an optional time, optionally file it
+ * under a goal and/or bucket, and add. Stays open for rapid multi-add. The full
+ * editor (Advanced) and bulk capture stay reachable as secondary links.
  */
 export function AddActivitySheet({
   visible,
@@ -34,22 +48,34 @@ export function AddActivitySheet({
   defaultGoalId?: string | null;
   defaultBucketId?: string | null;
 }) {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { quests, addQuest } = useGame();
   const { goals } = useGoals();
   const { buckets, assignments, assignActivity } = useBuckets();
-  const { togglePlanned } = usePlan();
+  const { getPlan, togglePlanned } = usePlan();
+  const todayK = dayKey(new Date());
 
   const [title, setTitle] = useState('');
   const [goalId, setGoalId] = useState<string | null>(defaultGoalId);
   const [bucketId, setBucketId] = useState<string | null>(defaultBucketId);
+  const [whenMode, setWhenMode] = useState<WhenMode>('today');
+  const [pickedDates, setPickedDates] = useState<string[]>([]);
+  const [weekdays, setWeekdays] = useState<number[]>([]);
+  const [timeOn, setTimeOn] = useState(false);
+  const [timeMinutes, setTimeMinutes] = useState(DEFAULT_TIME);
   const [added, setAdded] = useState<string | null>(null);
 
-  // Re-sync defaults whenever the sheet (re)opens for a specific context.
+  // Re-sync to the opening context each time the sheet appears.
   React.useEffect(() => {
     if (visible) {
       setGoalId(defaultGoalId);
       setBucketId(defaultBucketId);
       setTitle('');
+      setWhenMode('today');
+      setPickedDates([]);
+      setWeekdays([]);
+      setTimeOn(false);
+      setTimeMinutes(DEFAULT_TIME);
       setAdded(null);
     }
   }, [visible, defaultGoalId, defaultBucketId]);
@@ -69,27 +95,77 @@ export function AddActivitySheet({
   }, [quests, assignments]);
 
   const selectedGoal = goals.find((g) => g.id === goalId) ?? null;
+  const category: QuestCategory = selectedGoal
+    ? selectedGoal.categories[0] ?? 'health'
+    : bucketId
+      ? bucketCategory(bucketId)
+      : 'health';
+
+  // Can we add? Need a title, and for date/weekly modes a non-empty selection.
+  const canAdd =
+    title.trim().length > 0 &&
+    (whenMode === 'today' || (whenMode === 'date' && pickedDates.length > 0) || (whenMode === 'weekly' && weekdays.length > 0));
+
+  const toggleWeekday = (d: number) => setWeekdays((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d]));
+  const toggleDate = (key: string) => setPickedDates((cur) => (cur.includes(key) ? cur.filter((x) => x !== key) : [...cur, key]));
 
   const add = async () => {
     const name = title.trim();
-    if (name.length === 0) return;
-    const category: QuestCategory = selectedGoal
-      ? selectedGoal.categories[0] ?? 'health'
-      : bucketId
-        ? bucketCategory(bucketId)
-        : 'health';
-    const quest = await addQuest({ title: name, category, difficulty: 'easy' });
+    if (!canAdd) return;
+    const draft: QuestDraft = {
+      title: name,
+      category,
+      difficulty: 'easy',
+      ...(timeOn ? { scheduledTime: timeMinutes } : {}),
+      ...(whenMode === 'weekly' ? { scheduledDays: weekdays } : {}),
+    };
+    const quest = await addQuest(draft);
     if (quest) {
       if (bucketId) await assignActivity(quest.id, bucketId);
-      await togglePlanned(dayKey(new Date()), quest.id); // show it today right away
+      if (whenMode === 'today') {
+        await togglePlanned(todayK, quest.id);
+      } else if (whenMode === 'date') {
+        for (const d of pickedDates) await togglePlanned(d, quest.id);
+      } else if (whenMode === 'weekly' && weekdays.includes(weekdayOfKey(todayK))) {
+        // Show it today too if today is one of the repeat days.
+        await togglePlanned(todayK, quest.id);
+      }
       setAdded(name);
     }
     setTitle('');
   };
 
+  const openAdvanced = () => {
+    const prefill: Partial<QuestDraft> = {
+      ...(title.trim() ? { title: title.trim() } : {}),
+      category,
+      ...(timeOn ? { scheduledTime: timeMinutes } : {}),
+      ...(whenMode === 'weekly' && weekdays.length ? { scheduledDays: weekdays } : {}),
+    };
+    onClose();
+    navigation.navigate('QuestEditor', { prefill });
+  };
+
+  const modeChip = (mode: WhenMode, label: string) => {
+    const on = whenMode === mode;
+    return (
+      <Pressable
+        key={mode}
+        onPress={() => setWhenMode(mode)}
+        accessibilityRole="button"
+        accessibilityState={{ selected: on }}
+        style={[styles.chip, on && styles.chipOn]}
+      >
+        <Text style={[styles.chipText, on && styles.chipTextOn]}>{label}</Text>
+      </Pressable>
+    );
+  };
+
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {/* Tap the dimmed area above the sheet to dismiss. */}
+        <Pressable style={styles.backdropTap} onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" />
         <View style={styles.sheet}>
           <View style={styles.head}>
             <Text style={styles.title}>Add an activity</Text>
@@ -98,91 +174,181 @@ export function AddActivitySheet({
             </Pressable>
           </View>
 
-          <TextInput
-            value={title}
-            onChangeText={(t) => {
-              setTitle(t);
-              if (added) setAdded(null);
-            }}
-            placeholder="Type or 🎙️ speak it (e.g. 10 push-ups)"
-            placeholderTextColor={MUTED}
-            style={styles.input}
-            autoFocus
-            maxLength={60}
-            onSubmitEditing={() => void add()}
-            returnKeyType="done"
-            blurOnSubmit={false}
-            accessibilityLabel="New activity name"
-          />
+          {/* Everything between the title and the Add button scrolls, so all the
+              options are reachable above the keyboard. */}
+          <ScrollView
+            style={styles.scrollArea}
+            contentContainerStyle={styles.scrollBody}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <TextInput
+              value={title}
+              onChangeText={(t) => {
+                setTitle(t);
+                if (added) setAdded(null);
+              }}
+              placeholder="Type or 🎙️ speak it (e.g. 10 push-ups)"
+              placeholderTextColor={MUTED}
+              style={styles.input}
+              autoFocus
+              maxLength={60}
+              onSubmitEditing={() => void add()}
+              returnKeyType="done"
+              blurOnSubmit={false}
+              accessibilityLabel="New activity name"
+            />
 
-          {goals.length > 0 && (
-            <>
-              <Text style={styles.label}>Goal (optional)</Text>
-              <View style={styles.chips}>
-                {goals.map((g) => {
-                  const on = goalId === g.id;
-                  const c = goalColor(g);
-                  return (
-                    <Pressable
-                      key={g.id}
-                      onPress={() => setGoalId(on ? null : g.id)}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: on }}
-                      style={[styles.chip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
-                    >
-                      <Text style={[styles.chipText, on && { color: c.accent }]}>
-                        {g.emoji} {g.title}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </>
-          )}
+            {/* WHEN — today / a specific date / repeat weekly. */}
+            <Text style={styles.label}>When</Text>
+            <View style={styles.chips}>
+              {modeChip('today', 'Today')}
+              {modeChip('date', '📅 Pick date')}
+              {modeChip('weekly', '↻ Repeat')}
+            </View>
 
-          {buckets.length > 0 && (
-            <>
-              <Text style={styles.label}>Group (optional)</Text>
-              <View style={styles.chips}>
-                {buckets.map((b) => {
-                  const on = bucketId === b.id;
-                  const c = getBucketColor(b.colorId);
-                  return (
-                    <Pressable
-                      key={b.id}
-                      onPress={() => setBucketId(on ? null : b.id)}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: on }}
-                      style={[styles.chip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
-                    >
-                      <Text style={[styles.chipText, on && { color: c.accent }]}>{b.name}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </>
-          )}
+            {whenMode === 'date' && (
+              <MiniCalendar selected={pickedDates} onToggle={toggleDate} min={todayK} todayKey={todayK} />
+            )}
 
-          {added && <Text style={styles.added}>✓ Added “{added}” — add another, or tap Done.</Text>}
+            {whenMode === 'weekly' && (
+              <>
+                <View style={styles.weekRow}>
+                  {WEEKDAY_LABELS.map((d, i) => {
+                    const on = weekdays.includes(i);
+                    return (
+                      <Pressable
+                        key={i}
+                        onPress={() => toggleWeekday(i)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: on }}
+                        accessibilityLabel={`Repeat on ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i]}`}
+                        style={[styles.weekday, on && styles.weekdayOn]}
+                      >
+                        <Text style={[styles.weekdayText, on && styles.weekdayTextOn]}>{d}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <View style={styles.weekFoot}>
+                  <Text style={styles.weekSummary}>{weekdays.length ? weekdaysLabel(weekdays) : 'Pick the days it repeats'}</Text>
+                  <Pressable onPress={() => setWeekdays(weekdays.length === 7 ? [] : ALL_DAYS)} accessibilityRole="button" hitSlop={8}>
+                    <Text style={styles.everyDay}>{weekdays.length === 7 ? 'Clear' : 'Every day'}</Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
 
+            {/* Optional time of day (all modes). */}
+            <Pressable
+              onPress={() => setTimeOn((v) => !v)}
+              accessibilityRole="switch"
+              accessibilityState={{ checked: timeOn }}
+              style={styles.timeToggle}
+            >
+              <Text style={styles.timeToggleText}>⏰ {timeOn ? minutesToLabel(timeMinutes) : 'Set a time (optional)'}</Text>
+              <Text style={styles.timeToggleHint}>{timeOn ? 'Tap to remove' : 'Any time'}</Text>
+            </Pressable>
+            {timeOn && <TimePicker minutes={timeMinutes} onChange={setTimeMinutes} />}
+
+            {goals.length > 0 && (
+              <>
+                <Text style={styles.label}>Goal (optional)</Text>
+                <View style={styles.chips}>
+                  {goals.map((g) => {
+                    const on = goalId === g.id;
+                    const c = goalColor(g);
+                    return (
+                      <Pressable
+                        key={g.id}
+                        onPress={() => setGoalId(on ? null : g.id)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: on }}
+                        style={[styles.chip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
+                      >
+                        <Text style={[styles.chipText, on && { color: c.accent }]}>
+                          {g.emoji} {g.title}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </>
+            )}
+
+            {buckets.length > 0 && (
+              <>
+                <Text style={styles.label}>Group (optional)</Text>
+                <View style={styles.chips}>
+                  {buckets.map((b) => {
+                    const on = bucketId === b.id;
+                    const c = getBucketColor(b.colorId);
+                    return (
+                      <Pressable
+                        key={b.id}
+                        onPress={() => setBucketId(on ? null : b.id)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: on }}
+                        style={[styles.chip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
+                      >
+                        <Text style={[styles.chipText, on && { color: c.accent }]}>{b.name}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </>
+            )}
+
+            {added && <Text style={styles.added}>✓ Added “{added}” — add another, or tap Done.</Text>}
+
+            <View style={styles.links}>
+              <Pressable onPress={openAdvanced} accessibilityRole="button" hitSlop={8}>
+                <Text style={styles.link}>⚙️ Advanced options ›</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  onClose();
+                  navigation.navigate('QuickCapture');
+                }}
+                accessibilityRole="button"
+                hitSlop={8}
+              >
+                <Text style={styles.link}>🪄 Add several at once ›</Text>
+              </Pressable>
+            </View>
+          </ScrollView>
+
+          {/* Pinned below the scroll area — always visible above the keyboard. */}
           <Pressable
             onPress={() => void add()}
-            disabled={title.trim().length === 0}
+            disabled={!canAdd}
             accessibilityRole="button"
             accessibilityLabel="Add activity"
-            style={[styles.addBtn, title.trim().length === 0 && styles.addBtnOff]}
+            style={[styles.addBtn, !canAdd && styles.addBtnOff]}
           >
             <Text style={styles.addBtnText}>＋ Add activity</Text>
           </Pressable>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(31,41,55,0.45)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: BG, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, gap: spacing.sm, maxHeight: '85%' },
+  backdropTap: { flex: 1 },
+  sheet: {
+    backgroundColor: BG,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
+    maxHeight: '90%',
+  },
+  scrollArea: { flexShrink: 1 },
+  scrollBody: { gap: spacing.sm, paddingBottom: spacing.sm },
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { ...typography.heading, color: INK },
   done: { ...typography.label, color: VIOLET, fontWeight: '800' },
@@ -190,8 +356,33 @@ const styles = StyleSheet.create({
   label: { ...typography.label, color: MUTED, letterSpacing: 1, marginTop: spacing.xs },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: { backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
+  chipOn: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET },
   chipText: { ...typography.label, color: INK, fontWeight: '600' },
+  chipTextOn: { color: VIOLET, fontWeight: '800' },
+  weekRow: { flexDirection: 'row', gap: 6 },
+  weekday: { flex: 1, aspectRatio: 1, borderRadius: 12, backgroundColor: CARD, borderWidth: 1, borderColor: TRACK, alignItems: 'center', justifyContent: 'center' },
+  weekdayOn: { backgroundColor: VIOLET, borderColor: VIOLET },
+  weekdayText: { ...typography.label, color: INK, fontWeight: '700' },
+  weekdayTextOn: { color: '#FFFFFF' },
+  weekFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  weekSummary: { ...typography.caption, color: MUTED, fontWeight: '700' },
+  everyDay: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  timeToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: CARD,
+    borderRadius: 16,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderWidth: 1,
+    borderColor: TRACK,
+  },
+  timeToggleText: { ...typography.label, color: INK, fontWeight: '700' },
+  timeToggleHint: { ...typography.caption, color: MUTED },
   added: { ...typography.caption, color: '#0A6E5C', fontWeight: '700' },
+  links: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.xs, gap: spacing.sm },
+  link: { ...typography.label, color: VIOLET, fontWeight: '700' },
   addBtn: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.lg, alignItems: 'center', marginTop: spacing.sm },
   addBtnOff: { opacity: 0.4 },
   addBtnText: { ...typography.title, color: '#FFFFFF', fontWeight: '800' },

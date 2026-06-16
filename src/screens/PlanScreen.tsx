@@ -8,12 +8,14 @@ import { useBuckets } from '@/state/BucketsContext';
 import { usePlan } from '@/state/PlanContext';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
+import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { groupHabitsIntoRails } from '@/lib/dashboard';
 import { gapsFor } from '@/lib/plan';
 import { completedActivityIds, sessionsForDay, sessionsOf } from '@/lib/analytics';
 import { CATEGORY_META } from '@/lib/categories';
 import { dayKey, relativeDayLabel, shiftDayKey } from '@/lib/dates';
 import { minutesToLabel } from '@/lib/schedule';
+import { weekdaysLabel } from '@/lib/recurrence';
 import type { Quest } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -37,6 +39,7 @@ export function PlanScreen({ route, navigation }: Props) {
 
   const todayK = dayKey(new Date());
   const tomorrowK = shiftDayKey(todayK, 1);
+  useMaterializeRecurring([todayK, tomorrowK]); // recurring habits fill today + tomorrow
   const [targetDay, setTargetDay] = useState(() => (route.params?.day === tomorrowK ? tomorrowK : todayK));
   const [addOpen, setAddOpen] = useState(false);
 
@@ -102,8 +105,12 @@ export function PlanScreen({ route, navigation }: Props) {
           <Text style={styles.rowTitle} numberOfLines={1}>
             {quest.title}
           </Text>
-          {quest.scheduledTime !== undefined && (
-            <Text style={styles.rowTime}>⏰ {minutesToLabel(quest.scheduledTime)}</Text>
+          {(quest.scheduledTime !== undefined || quest.scheduledDays?.length) && (
+            <Text style={styles.rowTime}>
+              {quest.scheduledTime !== undefined ? `⏰ ${minutesToLabel(quest.scheduledTime)}` : ''}
+              {quest.scheduledTime !== undefined && quest.scheduledDays?.length ? ' · ' : ''}
+              {quest.scheduledDays?.length ? `↻ ${weekdaysLabel(quest.scheduledDays)}` : ''}
+            </Text>
           )}
         </View>
       </Pressable>
@@ -170,15 +177,6 @@ export function PlanScreen({ route, navigation }: Props) {
             </View>
           ))
         )}
-
-        <Pressable
-          onPress={() => navigation.navigate('QuestEditor')}
-          accessibilityRole="button"
-          accessibilityLabel="Create a new habit"
-          style={styles.newBtn}
-        >
-          <Text style={styles.newBtnText}>＋ New habit</Text>
-        </Pressable>
       </ScrollView>
 
       <AddActivityFab onPress={() => setAddOpen(true)} />
@@ -223,6 +221,4 @@ const styles = StyleSheet.create({
   emptyEmoji: { fontSize: 36 },
   emptyText: { ...typography.body, color: MUTED, textAlign: 'center' },
 
-  newBtn: { alignSelf: 'center', paddingVertical: spacing.md },
-  newBtnText: { ...typography.label, color: VIOLET, fontWeight: '700' },
 });

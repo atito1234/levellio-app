@@ -23,6 +23,7 @@ import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useBattles } from '@/state/BattlesContext';
 import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
 import { effectivePlan, goalDayProgress, goalFocusPool, plannedOpen, planProgress } from '@/lib/plan';
@@ -71,6 +72,7 @@ export function DashboardScreen() {
   // The home reflects only TODAY'S PLAN (so it stays glanceable). No plan yet →
   // effectivePlan falls back to all habits, and we nudge the user to curate.
   const todayKey = dayKey(new Date());
+  useMaterializeRecurring([todayKey]); // recurring habits auto-appear on their days
   const plan = getPlan(todayKey);
   const [suggesting, setSuggesting] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -95,6 +97,9 @@ export function DashboardScreen() {
     [quests, plan, selectedGoal],
   );
   const goalHasActivities = selectedGoal ? goalHabits(quests, selectedGoal).length > 0 : true;
+  // Guided first-run: 1 pick a goal → 2 add activities → 3 plan your day (0 = done).
+  const onboardStep: 0 | 1 | 2 | 3 =
+    goals.length === 0 || gated ? 1 : !goalHasActivities ? 2 : plan === undefined ? 3 : 0;
   const [focusIndex, setFocusIndex] = useState(0);
   const safeIndex = openHabits.length ? Math.min(focusIndex, openHabits.length - 1) : 0;
   const focus = openHabits[safeIndex] ?? null;
@@ -304,6 +309,8 @@ export function DashboardScreen() {
 
         {/* Everything below is governed by the chosen goal — faded until picked. */}
         <View style={[styles.gatedWrap, gated && styles.gatedOff]} pointerEvents={gated ? 'none' : 'auto'}>
+        {/* STEP 2 — once a goal is chosen but empty, point to the mic Add button. */}
+        {onboardStep === 2 && <Text style={styles.stepHint}>STEP 2 · Tap 🎙️ to add your activities</Text>}
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}
         <View style={styles.billboard} {...(canBrowse && !gated ? pan.panHandlers : {})}>
@@ -429,7 +436,7 @@ export function DashboardScreen() {
             <>
               <Text style={styles.focusName}>No activities yet</Text>
               <Pressable
-                onPress={() => navigation.navigate('GoalFocus', { goalId: selectedGoal.id })}
+                onPress={() => setAddOpen(true)}
                 accessibilityRole="button"
                 accessibilityLabel="Add activities to this goal"
                 style={styles.primaryBtn}
@@ -441,7 +448,7 @@ export function DashboardScreen() {
             <>
               <Text style={styles.focusName}>Add your first habit</Text>
               <Pressable
-                onPress={() => navigation.navigate('QuestEditor')}
+                onPress={() => setAddOpen(true)}
                 accessibilityRole="button"
                 accessibilityLabel="Add your first habit"
                 style={styles.primaryBtn}
@@ -521,13 +528,15 @@ export function DashboardScreen() {
           </View>
         )}
 
+        {/* STEP 3 — activities exist; guide the user to curate today's plan. */}
+        {onboardStep === 3 && <Text style={styles.stepHint}>STEP 3 · Plan your day</Text>}
         {/* Plan CTA — the one place to curate today/tomorrow (declutters home). */}
         <Pressable
           onPress={() => navigation.navigate('Plan')}
           accessibilityRole="button"
           accessibilityLabel="Plan your day"
           accessibilityHint="Choose which habits to work on today or tomorrow"
-          style={styles.planCta}
+          style={[styles.planCta, onboardStep === 3 && styles.planCtaHi]}
         >
           <View style={styles.planCtaMain}>
             <Text style={styles.planCtaTitle}>🗓 Plan your day</Text>
@@ -538,11 +547,9 @@ export function DashboardScreen() {
           <Text style={styles.planCtaChevron}>›</Text>
         </Pressable>
 
-        {/* Quick actions — keeps every feature, low clutter (Hick's law). */}
+        {/* Quick actions — discovery/nav only; the 🎙️ button is the one way to add. */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
-          <QuickChip label="🎤 Quick add" onPress={() => navigation.navigate('QuickCapture')} />
           <QuickChip label="📓 Journal" onPress={() => navigation.navigate('Journal')} />
-          <QuickChip label="＋ New" onPress={() => navigation.navigate('QuestEditor')} />
           <QuickChip label="📚 Library" onPress={() => navigation.navigate('HabitLibrary')} />
           <QuickChip label="🗂 Buckets" onPress={() => navigation.navigate('Organize')} />
           <QuickChip label="🔗 Connections" onPress={() => navigation.navigate('Connections')} />
@@ -587,7 +594,7 @@ export function DashboardScreen() {
         <View style={{ height: spacing.xl }} />
       </ScrollView>
 
-      <AddActivityFab onPress={() => setAddOpen(true)} accent={focusAccent} />
+      <AddActivityFab onPress={() => setAddOpen(true)} accent={focusAccent} highlight={onboardStep === 2} />
       <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultGoalId={selectedGoalId} />
     </ScreenContainer>
   );
@@ -787,6 +794,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2DBFB',
   },
+  planCtaHi: { borderColor: VIOLET, borderWidth: 2, shadowColor: VIOLET, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 14, elevation: 6 },
   planCtaMain: { flex: 1, gap: 2 },
   planCtaTitle: { ...typography.title, color: INK, fontWeight: '800' },
   planCtaSub: { ...typography.caption, color: MUTED },

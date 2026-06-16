@@ -6,6 +6,7 @@ import {
   PrimaryButton,
   ScreenContainer,
   TextField,
+  TimePicker,
   type ChipOption,
 } from '@/components';
 import { colors, spacing, typography } from '@/theme';
@@ -15,14 +16,9 @@ import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import { habitScience } from '@/data/habitScience';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { QUEST_XP } from '@/lib/leveling';
-import {
-  isValidScheduleMinutes,
-  minutesToLabel,
-  minutesToParts,
-  partsToMinutes,
-  type Meridiem,
-  type TimeParts,
-} from '@/lib/schedule';
+import { isValidScheduleMinutes, minutesToParts, partsToMinutes, type TimeParts } from '@/lib/schedule';
+import { WEEKDAY_LABELS } from '@/lib/calendar';
+import { weekdaysLabel } from '@/lib/recurrence';
 import type { QuestCategory, QuestDifficulty } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -48,19 +44,21 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   const guardAbandon = useAbandonGuard();
   const editingId = route.params?.questId;
   const existing = editingId ? quests.find((q) => q.id === editingId) : undefined;
+  // When opened from the quick sheet's "Advanced options", seed from its prefill.
+  const prefill = existing ? undefined : route.params?.prefill;
+  const initialTime = existing?.scheduledTime ?? prefill?.scheduledTime;
 
-  const [title, setTitle] = useState(existing?.title ?? '');
-  const [description, setDescription] = useState(existing?.description ?? '');
-  const [difficulty, setDifficulty] = useState<QuestDifficulty>(existing?.difficulty ?? 'easy');
-  const [category, setCategory] = useState<QuestCategory>(existing?.category ?? 'health');
+  const [title, setTitle] = useState(existing?.title ?? prefill?.title ?? '');
+  const [description, setDescription] = useState(existing?.description ?? prefill?.description ?? '');
+  const [difficulty, setDifficulty] = useState<QuestDifficulty>(existing?.difficulty ?? prefill?.difficulty ?? 'easy');
+  const [category, setCategory] = useState<QuestCategory>(existing?.category ?? prefill?.category ?? 'health');
   const [titleError, setTitleError] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
-  const [scheduleOn, setScheduleOn] = useState(isValidScheduleMinutes(existing?.scheduledTime));
+  const [scheduleOn, setScheduleOn] = useState(isValidScheduleMinutes(initialTime));
   const [parts, setParts] = useState<TimeParts>(
-    isValidScheduleMinutes(existing?.scheduledTime)
-      ? minutesToParts(existing!.scheduledTime!)
-      : DEFAULT_SCHEDULE_PARTS,
+    isValidScheduleMinutes(initialTime) ? minutesToParts(initialTime!) : DEFAULT_SCHEDULE_PARTS,
   );
+  const [repeatDays, setRepeatDays] = useState<number[]>(existing?.scheduledDays ?? prefill?.scheduledDays ?? []);
   // Optional measurement: a quick 1–5 "how did it go?" at completion + the
   // user's own reason it matters (the personalization source for any habit).
   const [rateOn, setRateOn] = useState(existing?.metric === 'rating');
@@ -73,12 +71,6 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   const whyPlaceholder = title.trim()
     ? habitScience({ title, category }).why.replace(/^a /, '').concat(' …')
     : 'e.g. so I feel calmer and more focused';
-
-  const bumpHour = (dir: 1 | -1) =>
-    setParts((p) => ({ ...p, hour12: ((p.hour12 - 1 + dir + 12) % 12) + 1 }));
-  const bumpMinute = (dir: 1 | -1) =>
-    setParts((p) => ({ ...p, minute: (p.minute + dir * 5 + 60) % 60 }));
-  const setMeridiem = (meridiem: Meridiem) => setParts((p) => ({ ...p, meridiem }));
 
   const persist = async (draft: QuestDraft) => {
     setSaving(true);
@@ -101,6 +93,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
       category,
       difficulty,
       scheduledTime,
+      ...(repeatDays.length ? { scheduledDays: repeatDays } : {}),
       ...(rateOn ? { metric: 'rating' as const } : {}),
       ...(why.trim() ? { why } : {}),
     };
@@ -203,47 +196,35 @@ export function QuestEditorScreen({ route, navigation }: Props) {
             </View>
 
             {scheduleOn && (
-              <View style={styles.picker}>
-                <Stepper
-                  label="Hour"
-                  value={`${parts.hour12}`}
-                  onDown={() => bumpHour(-1)}
-                  onUp={() => bumpHour(1)}
-                  unit="hour"
-                />
-                <Text style={styles.colon}>:</Text>
-                <Stepper
-                  label="Minute"
-                  value={`${parts.minute}`.padStart(2, '0')}
-                  onDown={() => bumpMinute(-1)}
-                  onUp={() => bumpMinute(1)}
-                  unit="minute"
-                />
-                <View style={styles.meridiemCol}>
-                  {(['AM', 'PM'] as const).map((m) => {
-                    const active = parts.meridiem === m;
-                    return (
-                      <Pressable
-                        key={m}
-                        onPress={() => setMeridiem(m)}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: active }}
-                        accessibilityLabel={m === 'AM' ? 'Morning' : 'Afternoon or evening'}
-                        style={[styles.meridiemBtn, active && styles.meridiemBtnOn]}
-                      >
-                        <Text style={[styles.meridiemText, active && styles.meridiemTextOn]}>{m}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
+              <TimePicker minutes={partsToMinutes(parts)} onChange={(m) => setParts(minutesToParts(m))} />
             )}
+          </View>
 
-            {scheduleOn && (
-              <Text style={styles.scheduledFor} accessibilityLiveRegion="polite">
-                Scheduled for {minutesToLabel(partsToMinutes(parts))}
+          {/* Optional weekly recurrence — repeat on chosen weekdays. */}
+          <View style={styles.scheduleBlock}>
+            <View style={styles.scheduleHeadText}>
+              <Text style={styles.scheduleLabel}>Repeat</Text>
+              <Text style={styles.scheduleHint}>
+                {repeatDays.length ? weekdaysLabel(repeatDays) : 'Pick the days this repeats (optional).'}
               </Text>
-            )}
+            </View>
+            <View style={styles.weekRow}>
+              {WEEKDAY_LABELS.map((d, i) => {
+                const on = repeatDays.includes(i);
+                return (
+                  <Pressable
+                    key={i}
+                    onPress={() => setRepeatDays((cur) => (cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i]))}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: on }}
+                    accessibilityLabel={`Repeat on ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i]}`}
+                    style={[styles.weekday, on && styles.weekdayOn]}
+                  >
+                    <Text style={[styles.weekdayText, on && styles.weekdayTextOn]}>{d}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
 
           {/* Optional: rate how it goes (1–5) + your own reason it matters. */}
@@ -296,47 +277,6 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   );
 }
 
-/** Compact −/+ stepper for one time field (built on plain Pressables, no native dep). */
-function Stepper({
-  label,
-  value,
-  unit,
-  onDown,
-  onUp,
-}: {
-  label: string;
-  value: string;
-  unit: string;
-  onDown: () => void;
-  onUp: () => void;
-}) {
-  return (
-    <View style={styles.stepper}>
-      <Pressable
-        onPress={onUp}
-        accessibilityRole="button"
-        accessibilityLabel={`Increase ${unit}`}
-        hitSlop={8}
-        style={styles.stepBtn}
-      >
-        <Text style={styles.stepBtnText}>＋</Text>
-      </Pressable>
-      <Text style={styles.stepValue} accessibilityLabel={`${label} ${value}`}>
-        {value}
-      </Text>
-      <Pressable
-        onPress={onDown}
-        accessibilityRole="button"
-        accessibilityLabel={`Decrease ${unit}`}
-        hitSlop={8}
-        style={styles.stepBtn}
-      >
-        <Text style={styles.stepBtnText}>－</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: {
@@ -365,12 +305,10 @@ const styles = StyleSheet.create({
   scheduleHeadText: { flex: 1, gap: 2 },
   scheduleLabel: { ...typography.label, color: colors.textPrimary, fontWeight: '700' },
   scheduleHint: { ...typography.caption, color: colors.textSecondary },
-  picker: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
-  colon: { ...typography.heading, color: colors.textPrimary, marginHorizontal: spacing.xs },
-  stepper: { alignItems: 'center', gap: spacing.xs },
-  stepBtn: {
-    width: 44,
-    height: 36,
+  weekRow: { flexDirection: 'row', gap: 6 },
+  weekday: {
+    flex: 1,
+    aspectRatio: 1,
     borderRadius: 12,
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -378,19 +316,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepBtnText: { ...typography.title, color: colors.identity, fontWeight: '800' },
-  stepValue: { ...typography.heading, color: colors.textPrimary, minWidth: 52, textAlign: 'center' },
-  meridiemCol: { gap: spacing.xs, marginLeft: spacing.sm },
-  meridiemBtn: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-  meridiemBtnOn: { backgroundColor: colors.identity, borderColor: colors.identity },
-  meridiemText: { ...typography.label, color: colors.textSecondary, fontWeight: '700' },
-  meridiemTextOn: { color: '#FFFFFF' },
-  scheduledFor: { ...typography.body, color: colors.identity, fontWeight: '700', textAlign: 'center' },
+  weekdayOn: { backgroundColor: colors.identity, borderColor: colors.identity },
+  weekdayText: { ...typography.label, color: colors.textPrimary, fontWeight: '700' },
+  weekdayTextOn: { color: '#FFFFFF' },
 });

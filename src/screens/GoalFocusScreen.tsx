@@ -1,10 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AddActivityFab, AddActivitySheet, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
-import { usePlan } from '@/state/PlanContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useActivityLog } from '@/state/useActivityLog';
 import { goalColor, goalHabits, type Goal } from '@/lib/goal';
@@ -15,7 +14,7 @@ import { getCapacity, type CapacityId } from '@/lib/compounding';
 import { CATEGORY_META } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
 import { minutesToLabel } from '@/lib/schedule';
-import type { Quest, QuestCategory } from '@/types';
+import type { Quest } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GoalFocus'>;
@@ -52,8 +51,7 @@ export function GoalFocusScreen({ route, navigation }: Props) {
 }
 
 function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['navigation'] }) {
-  const { quests, addQuest, deleteQuest } = useGame();
-  const { togglePlanned } = usePlan();
+  const { quests, deleteQuest } = useGame();
   const { events } = useActivityLog();
   const progress = useGoalProgress(goal);
 
@@ -70,21 +68,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
     return [...set].sort((a, b) => getCapacity(a).order - getCapacity(b).order);
   }, [habits]);
 
-  // Inline "add any activity to this journey".
-  const addCats: QuestCategory[] = goal.categories.length > 0 ? goal.categories : ['health'];
-  const [adding, setAdding] = useState(false);
-  const [draftTitle, setDraftTitle] = useState('');
-  const [draftCat, setDraftCat] = useState<QuestCategory>(addCats[0]!);
   const [addOpen, setAddOpen] = useState(false);
-
-  const addActivity = async () => {
-    const title = draftTitle.trim();
-    if (title.length === 0) return;
-    const quest = await addQuest({ title, category: draftCat, difficulty: 'easy' });
-    if (quest) await togglePlanned(todayK, quest.id); // straight onto the path
-    setDraftTitle('');
-    setAdding(false);
-  };
 
   const deleteActivity = (quest: Quest) =>
     Alert.alert('Remove activity?', `Remove “${quest.title}” from your activities?`, [
@@ -182,7 +166,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         )}
 
         {habits.length === 0 ? (
-          <Text style={styles.empty}>No activities on this journey yet. Add your first one below.</Text>
+          <Text style={styles.empty}>No activities on this journey yet. Tap the 🎙️ button to add your first.</Text>
         ) : (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>ACTIVITIES ({habits.length})</Text>
@@ -194,56 +178,12 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
           </View>
         )}
 
-        {/* Add ANY new activity, tied to this journey (so it powers the ripple). */}
-        {adding ? (
-          <View style={styles.addCard}>
-            <TextInput
-              value={draftTitle}
-              onChangeText={setDraftTitle}
-              placeholder="New activity (e.g. 10 push-ups)"
-              placeholderTextColor={MUTED}
-              style={styles.addInput}
-              autoFocus
-              maxLength={60}
-              onSubmitEditing={() => void addActivity()}
-              returnKeyType="done"
-              accessibilityLabel="New activity title"
-            />
-            {addCats.length > 1 && (
-              <View style={styles.catChips}>
-                {addCats.map((c) => {
-                  const on = draftCat === c;
-                  return (
-                    <Pressable key={c} onPress={() => setDraftCat(c)} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.catChip, on && styles.catChipOn]}>
-                      <Text style={[styles.catChipText, on && styles.catChipTextOn]}>
-                        {CATEGORY_META[c].icon} {CATEGORY_META[c].label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            )}
-            <View style={styles.addActions}>
-              <Pressable onPress={() => { setAdding(false); setDraftTitle(''); }} accessibilityRole="button" style={styles.addCancel}>
-                <Text style={styles.addCancelText}>Cancel</Text>
-              </Pressable>
-              <Pressable onPress={() => void addActivity()} disabled={draftTitle.trim().length === 0} accessibilityRole="button" style={[styles.addConfirm, draftTitle.trim().length === 0 && styles.addConfirmOff]}>
-                <Text style={styles.addConfirmText}>Add to journey</Text>
-              </Pressable>
-            </View>
-          </View>
-        ) : (
-          <Pressable onPress={() => setAdding(true)} accessibilityRole="button" accessibilityLabel="Add an activity to this journey" style={styles.addOpen}>
-            <Text style={styles.addOpenText}>＋ Add an activity to this journey</Text>
-          </Pressable>
-        )}
-
         <Pressable onPress={() => navigation.navigate('GoalEditor')} accessibilityRole="button" accessibilityLabel="Create another goal" style={styles.newBtn}>
           <Text style={styles.newBtnText}>＋ New goal</Text>
         </Pressable>
       </ScrollView>
 
-      <AddActivityFab onPress={() => setAddOpen(true)} accent={accent} />
+      <AddActivityFab onPress={() => setAddOpen(true)} accent={accent} highlight={habits.length === 0} />
       <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultGoalId={goal.id} />
     </ScreenContainer>
   );
@@ -288,21 +228,6 @@ const styles = StyleSheet.create({
   rowDeleteText: { ...typography.label, color: '#C0202C', fontWeight: '800' },
   editGoal: { ...typography.label, fontWeight: '800' },
 
-  addOpen: { alignItems: 'center', backgroundColor: CARD, borderRadius: 18, padding: spacing.md, borderWidth: 1, borderColor: TRACK, borderStyle: 'dashed' },
-  addOpenText: { ...typography.label, color: VIOLET, fontWeight: '800' },
-  addCard: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.sm },
-  addInput: { ...typography.body, color: INK, backgroundColor: BG, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
-  catChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  catChip: { backgroundColor: BG, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 6, borderWidth: 1, borderColor: TRACK },
-  catChipOn: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET },
-  catChipText: { ...typography.caption, color: MUTED, fontWeight: '700' },
-  catChipTextOn: { color: VIOLET },
-  addActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: spacing.sm },
-  addCancel: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
-  addCancelText: { ...typography.label, color: MUTED, fontWeight: '700' },
-  addConfirm: { backgroundColor: VIOLET, borderRadius: 999, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
-  addConfirmOff: { opacity: 0.4 },
-  addConfirmText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
 
   newBtn: { alignSelf: 'center', paddingVertical: spacing.md },
   newBtnText: { ...typography.label, color: VIOLET, fontWeight: '700' },

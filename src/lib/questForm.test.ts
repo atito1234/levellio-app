@@ -7,6 +7,7 @@ import {
   mergeDuplicateGroup,
   dedupeQuests,
   withCanonicalKeys,
+  sanitizeDays,
   TITLE_MAX,
   DESCRIPTION_MAX,
 } from './questForm';
@@ -24,6 +25,27 @@ const q = (id: string, over: Partial<Quest> = {}): Quest => ({
 });
 
 const base: QuestDraft = { title: 'Read a book', category: 'learning', difficulty: 'medium' };
+
+describe('sanitizeDays + scheduledDays', () => {
+  it('dedupes, sorts, and drops invalid weekday indices', () => {
+    expect(sanitizeDays([3, 1, 1, 7, -1, 5.5, 6])).toEqual([1, 3, 6]);
+    expect(sanitizeDays(undefined)).toEqual([]);
+  });
+
+  it('draftToQuest carries sanitized scheduledDays, omitting when empty', () => {
+    expect(draftToQuest({ ...base, scheduledDays: [5, 1, 1] }, 'q1').scheduledDays).toEqual([1, 5]);
+    expect(draftToQuest({ ...base, scheduledDays: [] }, 'q2').scheduledDays).toBeUndefined();
+    expect(draftToQuest({ ...base, scheduledDays: [9, -2] }, 'q3').scheduledDays).toBeUndefined();
+  });
+
+  it('mergeDuplicateGroup unions scheduledDays across duplicates', () => {
+    const merged = mergeDuplicateGroup([
+      q('a', { scheduledDays: [1, 3] }),
+      q('b', { scheduledDays: [3, 5] }),
+    ]);
+    expect(merged.scheduledDays).toEqual([1, 3, 5]);
+  });
+});
 
 describe('validateQuestDraft', () => {
   it('accepts a well-formed draft', () => {
