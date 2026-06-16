@@ -85,6 +85,29 @@ export function activityJourney(
 }
 
 /**
+ * REAL per-activity consistency: for each of the last `weeks` weeks (oldest
+ * first), the fraction of days (0–1) the activity was done. This is the user's
+ * own trajectory — rising as the habit takes hold — for the journey chart.
+ */
+export function activityWeeklyAdherence(
+  sessions: readonly ActivitySessionEvent[],
+  activityId: string,
+  todayKey: string,
+  weeks = 8,
+): number[] {
+  const done = new Set(sessions.filter((s) => s.activityId === activityId).map(sessionDay));
+  const out: number[] = [];
+  for (let w = weeks - 1; w >= 0; w -= 1) {
+    let count = 0;
+    for (let d = 0; d < 7; d += 1) {
+      if (done.has(shiftDayKey(todayKey, -(w * 7 + d)))) count += 1;
+    }
+    out.push(count / 7);
+  }
+  return out;
+}
+
+/**
  * Illustrative habit-formation curve: automaticity rising from ~0 to ~1 as the
  * effort to act falls. Deterministic exponential approach — used ONLY for the
  * science explainer, clearly labelled, never as the user's own data.

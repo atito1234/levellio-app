@@ -1,4 +1,4 @@
-import { activityDayCells, activityJourney, automaticityCurve, HABIT_DAYS } from './journey';
+import { activityDayCells, activityJourney, activityWeeklyAdherence, automaticityCurve, HABIT_DAYS } from './journey';
 import { SOLIDIFY_DAYS } from './activityStreak';
 import { shiftDayKey } from './dates';
 import type { ActivitySessionEvent } from './metadata';
@@ -69,6 +69,19 @@ describe('activityJourney', () => {
     const j = activityJourney([sess(shiftDayKey(TODAY, -9)), sess(TODAY)], 'a', 'Walk', TODAY);
     expect(j.totalDays).toBe(2);
     expect(j.daysSinceStart).toBe(10);
+  });
+});
+
+describe('activityWeeklyAdherence', () => {
+  it('returns one value per week, oldest first', () => {
+    expect(activityWeeklyAdherence([], 'a', TODAY, 8)).toHaveLength(8);
+  });
+
+  it('reflects a recent streak in the most recent weeks', () => {
+    const series = activityWeeklyAdherence(streak(14), 'a', TODAY, 8);
+    expect(series[7]).toBeCloseTo(1, 5); // this week fully done
+    expect(series[6]).toBeCloseTo(1, 5); // last week fully done
+    expect(series[0]).toBeCloseTo(0, 5); // 8 weeks ago: nothing
   });
 });
 

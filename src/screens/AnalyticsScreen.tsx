@@ -206,7 +206,14 @@ export function AnalyticsScreen({ navigation }: Props) {
               <>
                 <Text style={styles.sectionLabel}>FROM REPETITION TO HABIT</Text>
                 {data.activities.slice(0, 5).map((a) => (
-                  <JourneyRow key={a.activityId} sessions={data.sessions} today={data.today} activityId={a.activityId} title={a.title} />
+                  <JourneyRow
+                    key={a.activityId}
+                    sessions={data.sessions}
+                    today={data.today}
+                    activityId={a.activityId}
+                    title={a.title}
+                    onPress={() => navigation.navigate('ActivityJourney', { activityId: a.activityId })}
+                  />
                 ))}
               </>
             )}
@@ -251,12 +258,12 @@ const STATUS_META: Record<JourneyStatus, { label: string; color: string }> = {
   new: { label: 'Just started', color: MUTED },
 };
 
-function JourneyRow({ sessions, today, activityId, title }: { sessions: readonly ActivitySessionEvent[]; today: string; activityId: string; title: string }) {
+function JourneyRow({ sessions, today, activityId, title, onPress }: { sessions: readonly ActivitySessionEvent[]; today: string; activityId: string; title: string; onPress: () => void }) {
   const j = activityJourney(sessions, activityId, title, today);
   const cells = activityDayCells(sessions, activityId, today, 28);
   const status = STATUS_META[j.status];
   return (
-    <View style={styles.journeyCard}>
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`${title} journey. ${status.label}. See details`} style={styles.journeyCard}>
       <View style={styles.journeyHead}>
         <Text style={styles.journeyTitle} numberOfLines={1}>
           {title}
@@ -266,9 +273,9 @@ function JourneyRow({ sessions, today, activityId, title }: { sessions: readonly
       <DotGrid cells={cells} />
       <Text style={styles.journeySub}>
         {j.currentStreak > 0 ? `Day ${j.currentStreak} in a row` : 'Start again today'} ·{' '}
-        {j.graduated ? 'runs on its own' : `${j.progressPct}% toward automatic`}
+        {j.graduated ? 'runs on its own' : `${j.progressPct}% toward automatic`} · view ›
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
