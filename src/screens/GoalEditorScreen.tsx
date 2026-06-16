@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -7,6 +7,8 @@ import { useGoals } from '@/state/GoalContext';
 import { useGame } from '@/state/GameContext';
 import { GOAL_TEMPLATES, type GoalTemplate } from '@/data/goalTemplates';
 import { HABIT_LIBRARY } from '@/data/habitLibrary';
+import { GOAL_COLOR_IDS } from '@/lib/goal';
+import { getBucketColor, type BucketColorId } from '@/lib/buckets';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import type { QuestCategory } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
@@ -24,14 +26,18 @@ const TRACK = '#ECEAE4';
 
 const EMOJI_CHOICES = ['🎯', '💪', '🥗', '❤️', '🧘', '💰', '📚', '🌱', '🏆', '✨', '😴', '🧠'];
 
-export function GoalEditorScreen({ navigation }: Props) {
-  const { addGoal } = useGoals();
+export function GoalEditorScreen({ route, navigation }: Props) {
+  const { goals, addGoal, updateGoal, removeGoal } = useGoals();
   const { addLibraryHabit } = useGame();
 
-  const [title, setTitle] = useState('');
-  const [emoji, setEmoji] = useState('🎯');
-  const [colorId, setColorId] = useState<'violet' | 'teal'>('violet');
-  const [categories, setCategories] = useState<QuestCategory[]>([]);
+  const editingId = route.params?.goalId;
+  const existing = editingId ? goals.find((g) => g.id === editingId) : undefined;
+  const isEditing = Boolean(existing);
+
+  const [title, setTitle] = useState(existing?.title ?? '');
+  const [emoji, setEmoji] = useState(existing?.emoji ?? '🎯');
+  const [colorId, setColorId] = useState<BucketColorId>(existing?.colorId ?? 'violet');
+  const [categories, setCategories] = useState<QuestCategory[]>(existing?.categories ?? []);
   const [saving, setSaving] = useState(false);
 
   const canSave = title.trim().length > 0 && categories.length > 0 && !saving;
@@ -54,8 +60,27 @@ export function GoalEditorScreen({ navigation }: Props) {
   const saveCustom = async () => {
     if (!canSave) return;
     setSaving(true);
-    await addGoal({ title, emoji, colorId, categories });
+    if (isEditing && editingId) {
+      await updateGoal(editingId, { title: title.trim(), emoji, colorId, categories });
+    } else {
+      await addGoal({ title, emoji, colorId, categories });
+    }
     navigation.goBack();
+  };
+
+  const confirmDelete = () => {
+    if (!editingId) return;
+    Alert.alert('Delete goal?', 'Your activities stay — only this goal is removed.', [
+      { text: 'Keep', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          await removeGoal(editingId);
+          navigation.goBack();
+        },
+      },
+    ]);
   };
 
   return (
@@ -65,34 +90,38 @@ export function GoalEditorScreen({ navigation }: Props) {
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          New goal
+          {isEditing ? 'Edit goal' : 'New goal'}
         </Text>
         <View style={styles.chevronSpacer} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Text style={styles.lead}>What do you want to build toward? Pick one — habits do the rest.</Text>
+        {!isEditing && (
+          <>
+            <Text style={styles.lead}>What do you want to build toward? Pick one — habits do the rest.</Text>
 
-        <Text style={styles.sectionLabel}>PICK A GOAL</Text>
-        <View style={styles.templates}>
-          {GOAL_TEMPLATES.map((t) => (
-            <Pressable
-              key={t.key}
-              onPress={() => void createFromTemplate(t)}
-              accessibilityRole="button"
-              accessibilityLabel={`Create goal: ${t.title}`}
-              style={styles.templateCard}
-            >
-              <Text style={styles.templateEmoji}>{t.emoji}</Text>
-              <Text style={styles.templateTitle}>{t.title}</Text>
-              <Text style={styles.templateAreas} numberOfLines={1}>
-                {t.categories.map((c) => CATEGORY_META[c].label).join(' · ')}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+            <Text style={styles.sectionLabel}>PICK A GOAL</Text>
+            <View style={styles.templates}>
+              {GOAL_TEMPLATES.map((t) => (
+                <Pressable
+                  key={t.key}
+                  onPress={() => void createFromTemplate(t)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Create goal: ${t.title}`}
+                  style={styles.templateCard}
+                >
+                  <Text style={styles.templateEmoji}>{t.emoji}</Text>
+                  <Text style={styles.templateTitle}>{t.title}</Text>
+                  <Text style={styles.templateAreas} numberOfLines={1}>
+                    {t.categories.map((c) => CATEGORY_META[c].label).join(' · ')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
 
-        <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>OR MAKE YOUR OWN</Text>
+            <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>OR MAKE YOUR OWN</Text>
+          </>
+        )}
         <View style={styles.form}>
           <TextInput
             value={title}
@@ -143,14 +172,14 @@ export function GoalEditorScreen({ navigation }: Props) {
 
           <Text style={styles.fieldLabel}>Color</Text>
           <View style={styles.colorRow}>
-            {(['violet', 'teal'] as const).map((c) => (
+            {GOAL_COLOR_IDS.map((c) => (
               <Pressable
                 key={c}
                 onPress={() => setColorId(c)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: colorId === c }}
                 accessibilityLabel={`${c} color`}
-                style={[styles.swatch, { backgroundColor: c === 'violet' ? VIOLET : TEAL }, colorId === c && styles.swatchOn]}
+                style={[styles.swatch, { backgroundColor: getBucketColor(c).accent }, colorId === c && styles.swatchOn]}
               />
             ))}
           </View>
@@ -159,11 +188,17 @@ export function GoalEditorScreen({ navigation }: Props) {
             onPress={() => void saveCustom()}
             disabled={!canSave}
             accessibilityRole="button"
-            accessibilityLabel="Create goal"
+            accessibilityLabel={isEditing ? 'Save changes' : 'Create goal'}
             style={[styles.save, !canSave && styles.saveOff]}
           >
-            <Text style={styles.saveText}>Create goal</Text>
+            <Text style={styles.saveText}>{isEditing ? 'Save changes' : 'Create goal'}</Text>
           </Pressable>
+
+          {isEditing && (
+            <Pressable onPress={confirmDelete} accessibilityRole="button" accessibilityLabel="Delete goal" style={styles.delete}>
+              <Text style={styles.deleteText}>Delete goal</Text>
+            </Pressable>
+          )}
         </View>
       </ScrollView>
     </ScreenContainer>
@@ -198,11 +233,13 @@ const styles = StyleSheet.create({
   chipOn: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET },
   chipText: { ...typography.label, color: MUTED, fontWeight: '600' },
   chipTextOn: { color: VIOLET, fontWeight: '700' },
-  colorRow: { flexDirection: 'row', gap: spacing.md },
+  colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   swatch: { width: 36, height: 36, borderRadius: 999, borderWidth: 3, borderColor: 'transparent' },
   swatchOn: { borderColor: INK },
 
   save: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.md },
   saveOff: { opacity: 0.4 },
   saveText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
+  delete: { alignItems: 'center', paddingVertical: spacing.md },
+  deleteText: { ...typography.label, color: '#C0202C', fontWeight: '700' },
 });
