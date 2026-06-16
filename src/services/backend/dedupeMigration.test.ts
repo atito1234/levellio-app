@@ -40,7 +40,7 @@ function setup() {
 describe('runDedupeMigration', () => {
   it('merges duplicates and repoints plan + bucket assignments to survivors', async () => {
     const { deps, planStore, bucketStore } = setup();
-    await planStore.save('u1', { days: { '2026-06-15': ['a', 'b', 'c'] } });
+    await planStore.save('u1', { days: { '2026-06-15': ['a', 'b', 'c'] }, materializedDays: [] });
     await bucketStore.save('u1', {
       buckets: [{ id: 'bk', name: 'Fitness', iconId: 'target', colorId: 'violet', createdAt: 0, order: 0 }],
       assignments: { a: 'bk', c: 'bk' },

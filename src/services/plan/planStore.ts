@@ -7,7 +7,7 @@
  */
 import type { KeyValueStore } from '@/services/storage';
 
-export const PLAN_SCHEMA_VERSION = 1;
+export const PLAN_SCHEMA_VERSION = 2;
 /** Keep at most this many day-keys (older plans are dropped on save). */
 export const MAX_PLAN_DAYS = 60;
 
@@ -20,6 +20,19 @@ export type PlanDays = Record<string, string[]>;
 
 export interface PlanData {
   days: PlanDays;
+  /**
+   * Day-keys whose recurring habits have already been materialized into `days`.
+   * Lets us auto-populate recurring habits exactly once per day so a habit the
+   * user later unchecks for that day isn't re-added on reload.
+   */
+  materializedDays: string[];
+}
+
+/** Coerce stored data into a clean list of materialized YYYY-MM-DD keys. */
+export function normalizeMaterialized(raw: unknown): string[] {
+  const v = (raw as { materializedDays?: unknown })?.materializedDays;
+  if (!Array.isArray(v)) return [];
+  return [...new Set(v.filter((x): x is string => typeof x === 'string' && DAY_RE.test(x)))];
 }
 
 /** Coerce arbitrary stored data into a clean { YYYY-MM-DD: string[] } map. */
@@ -48,18 +61,24 @@ export class PlanStore {
 
   async load(uid: string): Promise<PlanData> {
     const raw = await this.store.getItem(planKey(uid));
-    if (!raw) return { days: {} };
+    if (!raw) return { days: {}, materializedDays: [] };
     try {
-      return { days: normalizeDays(JSON.parse(raw)) };
+      const parsed = JSON.parse(raw);
+      // v1 data has no materializedDays → defaults to [] (no-op, fully compatible).
+      return { days: normalizeDays(parsed), materializedDays: normalizeMaterialized(parsed) };
     } catch {
-      return { days: {} };
+      return { days: {}, materializedDays: [] };
     }
   }
 
   async save(uid: string, data: PlanData): Promise<void> {
+    const days = trimDays(data.days);
+    // Only retain markers for days we still keep — drop the rest alongside `days`.
+    const kept = new Set(Object.keys(days));
+    const materializedDays = data.materializedDays.filter((k) => kept.has(k)).slice(-MAX_PLAN_DAYS);
     await this.store.setItem(
       planKey(uid),
-      JSON.stringify({ schema: PLAN_SCHEMA_VERSION, days: trimDays(data.days) }),
+      JSON.stringify({ schema: PLAN_SCHEMA_VERSION, days, materializedDays }),
     );
   }
 }

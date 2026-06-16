@@ -45,7 +45,10 @@ export async function runDedupeMigration(deps: DedupeDeps): Promise<DedupeResult
   if (merged > 0) {
     await deps.saveQuests(deduped);
     const plan = await deps.planStore.load(deps.uid);
-    await deps.planStore.save(deps.uid, { days: repointPlanDays(plan.days, remap) });
+    await deps.planStore.save(deps.uid, {
+      days: repointPlanDays(plan.days, remap),
+      materializedDays: plan.materializedDays,
+    });
     const buckets = await deps.bucketStore.load(deps.uid);
     await deps.bucketStore.save(deps.uid, {
       buckets: buckets.buckets,

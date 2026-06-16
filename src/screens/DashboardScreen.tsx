@@ -23,6 +23,7 @@ import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useBattles } from '@/state/BattlesContext';
 import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
 import { effectivePlan, goalDayProgress, goalFocusPool, plannedOpen, planProgress } from '@/lib/plan';
@@ -71,6 +72,7 @@ export function DashboardScreen() {
   // The home reflects only TODAY'S PLAN (so it stays glanceable). No plan yet →
   // effectivePlan falls back to all habits, and we nudge the user to curate.
   const todayKey = dayKey(new Date());
+  useMaterializeRecurring([todayKey]); // recurring habits auto-appear on their days
   const plan = getPlan(todayKey);
   const [suggesting, setSuggesting] = useState(false);
   const [addOpen, setAddOpen] = useState(false);

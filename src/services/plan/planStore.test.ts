@@ -1,4 +1,4 @@
-import { PlanStore, normalizeDays, trimDays, MAX_PLAN_DAYS } from './planStore';
+import { PlanStore, normalizeDays, normalizeMaterialized, trimDays, MAX_PLAN_DAYS } from './planStore';
 import { InMemoryStore } from '@/services/storage/InMemoryStore';
 
 describe('normalizeDays', () => {
@@ -34,16 +34,40 @@ describe('trimDays', () => {
   });
 });
 
+describe('normalizeMaterialized', () => {
+  it('keeps unique valid day-keys and drops junk', () => {
+    expect(normalizeMaterialized({ materializedDays: ['2026-06-14', '2026-06-14', 'x', 5] })).toEqual(['2026-06-14']);
+    expect(normalizeMaterialized({})).toEqual([]);
+    expect(normalizeMaterialized(null)).toEqual([]);
+  });
+});
+
 describe('PlanStore', () => {
-  it('round-trips a plan and bounds day growth on save', async () => {
+  it('round-trips a plan + materialized markers and bounds growth on save', async () => {
     const store = new PlanStore(new InMemoryStore());
-    await store.save('u1', { days: { '2026-06-14': ['q1', 'q3'] } });
+    await store.save('u1', { days: { '2026-06-14': ['q1', 'q3'] }, materializedDays: ['2026-06-14'] });
     const data = await store.load('u1');
     expect(data.days['2026-06-14']).toEqual(['q1', 'q3']);
+    expect(data.materializedDays).toEqual(['2026-06-14']);
+  });
+
+  it('drops materialized markers for days no longer kept', async () => {
+    const store = new PlanStore(new InMemoryStore());
+    await store.save('u1', { days: { '2026-06-14': ['q1'] }, materializedDays: ['2026-06-14', '2026-06-01'] });
+    const data = await store.load('u1');
+    expect(data.materializedDays).toEqual(['2026-06-14']); // 2026-06-01 has no plan day
+  });
+
+  it('loads legacy v1 data (no materializedDays) as empty markers', async () => {
+    const inner = new InMemoryStore();
+    await inner.setItem('levellio:plan:old', JSON.stringify({ schema: 1, days: { '2026-06-14': ['q1'] } }));
+    const data = await new PlanStore(inner).load('old');
+    expect(data.days['2026-06-14']).toEqual(['q1']);
+    expect(data.materializedDays).toEqual([]);
   });
 
   it('returns an empty plan for unknown users', async () => {
     const store = new PlanStore(new InMemoryStore());
-    expect(await store.load('nobody')).toEqual({ days: {} });
+    expect(await store.load('nobody')).toEqual({ days: {}, materializedDays: [] });
   });
 });

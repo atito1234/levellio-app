@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useGame } from '@/state/GameContext';
 import { planStore, type PlanDays } from '@/services/plan';
+import { materializeInto } from '@/lib/recurrence';
 
 interface PlanContextValue {
   ready: boolean;
@@ -16,6 +17,12 @@ interface PlanContextValue {
   reorderPlan: (dayKey: string, ids: string[]) => Promise<void>;
   /** Merge ids into a target day's plan (de-duped) — used to carry gaps forward. */
   carryOver: (toDayKey: string, ids: string[]) => Promise<void>;
+  /**
+   * Materialize recurring habits into one or more days' plans exactly once, in a
+   * single write. Per day: no-op if there are no ids, or the day was already
+   * materialized (so a habit the user removes for that day stays removed).
+   */
+  ensureMaterialized: (entries: { dayKey: string; ids: string[] }[]) => Promise<void>;
 }
 
 const PlanContext = createContext<PlanContextValue | null>(null);
@@ -30,18 +37,21 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
   const uid = user?.uid ?? null;
 
   const [plans, setPlans] = useState<PlanDays>({});
+  const [materialized, setMaterialized] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let active = true;
     if (!uid) {
       setPlans({});
+      setMaterialized([]);
       setReady(false);
       return;
     }
     planStore.load(uid).then((data) => {
       if (active) {
         setPlans(data.days);
+        setMaterialized(data.materializedDays);
         setReady(true);
       }
     });
@@ -51,11 +61,13 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
   }, [uid]);
 
   const commit = useCallback(
-    async (next: PlanDays) => {
+    async (next: PlanDays, nextMaterialized?: string[]) => {
       setPlans(next);
-      if (uid) await planStore.save(uid, { days: next });
+      const marks = nextMaterialized ?? materialized;
+      if (nextMaterialized) setMaterialized(nextMaterialized);
+      if (uid) await planStore.save(uid, { days: next, materializedDays: marks });
     },
-    [uid],
+    [uid, materialized],
   );
 
   const getPlan = useCallback((dayKey: string) => plans[dayKey], [plans]);
@@ -87,9 +99,18 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     [plans, commit],
   );
 
+  const ensureMaterialized = useCallback(
+    (entries: { dayKey: string; ids: string[] }[]) => {
+      const next = materializeInto(plans, materialized, entries);
+      if (!next) return Promise.resolve();
+      return commit(next.days, next.materialized);
+    },
+    [plans, materialized, commit],
+  );
+
   const value = useMemo<PlanContextValue>(
-    () => ({ ready, plans, getPlan, setPlan, togglePlanned, reorderPlan, carryOver }),
-    [ready, plans, getPlan, setPlan, togglePlanned, reorderPlan, carryOver],
+    () => ({ ready, plans, getPlan, setPlan, togglePlanned, reorderPlan, carryOver, ensureMaterialized }),
+    [ready, plans, getPlan, setPlan, togglePlanned, reorderPlan, carryOver, ensureMaterialized],
   );
 
   return <PlanContext.Provider value={value}>{children}</PlanContext.Provider>;

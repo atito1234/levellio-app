@@ -8,6 +8,7 @@ import { useBuckets } from '@/state/BucketsContext';
 import { usePlan } from '@/state/PlanContext';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
+import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { groupHabitsIntoRails } from '@/lib/dashboard';
 import { gapsFor } from '@/lib/plan';
 import { completedActivityIds, sessionsForDay, sessionsOf } from '@/lib/analytics';
@@ -37,6 +38,7 @@ export function PlanScreen({ route, navigation }: Props) {
 
   const todayK = dayKey(new Date());
   const tomorrowK = shiftDayKey(todayK, 1);
+  useMaterializeRecurring([todayK, tomorrowK]); // recurring habits fill today + tomorrow
   const [targetDay, setTargetDay] = useState(() => (route.params?.day === tomorrowK ? tomorrowK : todayK));
   const [addOpen, setAddOpen] = useState(false);
 
