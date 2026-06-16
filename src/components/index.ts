@@ -17,3 +17,5 @@ export { CapacityRing } from './CapacityRing';
 export { RatingPrompt } from './RatingPrompt';
 export { AddActivityFab } from './AddActivityFab';
 export { AddActivitySheet } from './AddActivitySheet';
+export { TimePicker } from './TimePicker';
+export { MiniCalendar } from './MiniCalendar';

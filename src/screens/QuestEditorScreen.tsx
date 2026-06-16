@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ChipSelector,
   PrimaryButton,
   ScreenContainer,
   TextField,
+  TimePicker,
   type ChipOption,
 } from '@/components';
 import { colors, spacing, typography } from '@/theme';
@@ -15,14 +16,7 @@ import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import { habitScience } from '@/data/habitScience';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { QUEST_XP } from '@/lib/leveling';
-import {
-  isValidScheduleMinutes,
-  minutesToLabel,
-  minutesToParts,
-  partsToMinutes,
-  type Meridiem,
-  type TimeParts,
-} from '@/lib/schedule';
+import { isValidScheduleMinutes, minutesToParts, partsToMinutes, type TimeParts } from '@/lib/schedule';
 import type { QuestCategory, QuestDifficulty } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -73,12 +67,6 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   const whyPlaceholder = title.trim()
     ? habitScience({ title, category }).why.replace(/^a /, '').concat(' …')
     : 'e.g. so I feel calmer and more focused';
-
-  const bumpHour = (dir: 1 | -1) =>
-    setParts((p) => ({ ...p, hour12: ((p.hour12 - 1 + dir + 12) % 12) + 1 }));
-  const bumpMinute = (dir: 1 | -1) =>
-    setParts((p) => ({ ...p, minute: (p.minute + dir * 5 + 60) % 60 }));
-  const setMeridiem = (meridiem: Meridiem) => setParts((p) => ({ ...p, meridiem }));
 
   const persist = async (draft: QuestDraft) => {
     setSaving(true);
@@ -203,46 +191,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
             </View>
 
             {scheduleOn && (
-              <View style={styles.picker}>
-                <Stepper
-                  label="Hour"
-                  value={`${parts.hour12}`}
-                  onDown={() => bumpHour(-1)}
-                  onUp={() => bumpHour(1)}
-                  unit="hour"
-                />
-                <Text style={styles.colon}>:</Text>
-                <Stepper
-                  label="Minute"
-                  value={`${parts.minute}`.padStart(2, '0')}
-                  onDown={() => bumpMinute(-1)}
-                  onUp={() => bumpMinute(1)}
-                  unit="minute"
-                />
-                <View style={styles.meridiemCol}>
-                  {(['AM', 'PM'] as const).map((m) => {
-                    const active = parts.meridiem === m;
-                    return (
-                      <Pressable
-                        key={m}
-                        onPress={() => setMeridiem(m)}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: active }}
-                        accessibilityLabel={m === 'AM' ? 'Morning' : 'Afternoon or evening'}
-                        style={[styles.meridiemBtn, active && styles.meridiemBtnOn]}
-                      >
-                        <Text style={[styles.meridiemText, active && styles.meridiemTextOn]}>{m}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-            )}
-
-            {scheduleOn && (
-              <Text style={styles.scheduledFor} accessibilityLiveRegion="polite">
-                Scheduled for {minutesToLabel(partsToMinutes(parts))}
-              </Text>
+              <TimePicker minutes={partsToMinutes(parts)} onChange={(m) => setParts(minutesToParts(m))} />
             )}
           </View>
 
@@ -296,47 +245,6 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   );
 }
 
-/** Compact −/+ stepper for one time field (built on plain Pressables, no native dep). */
-function Stepper({
-  label,
-  value,
-  unit,
-  onDown,
-  onUp,
-}: {
-  label: string;
-  value: string;
-  unit: string;
-  onDown: () => void;
-  onUp: () => void;
-}) {
-  return (
-    <View style={styles.stepper}>
-      <Pressable
-        onPress={onUp}
-        accessibilityRole="button"
-        accessibilityLabel={`Increase ${unit}`}
-        hitSlop={8}
-        style={styles.stepBtn}
-      >
-        <Text style={styles.stepBtnText}>＋</Text>
-      </Pressable>
-      <Text style={styles.stepValue} accessibilityLabel={`${label} ${value}`}>
-        {value}
-      </Text>
-      <Pressable
-        onPress={onDown}
-        accessibilityRole="button"
-        accessibilityLabel={`Decrease ${unit}`}
-        hitSlop={8}
-        style={styles.stepBtn}
-      >
-        <Text style={styles.stepBtnText}>－</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: {
@@ -365,32 +273,4 @@ const styles = StyleSheet.create({
   scheduleHeadText: { flex: 1, gap: 2 },
   scheduleLabel: { ...typography.label, color: colors.textPrimary, fontWeight: '700' },
   scheduleHint: { ...typography.caption, color: colors.textSecondary },
-  picker: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
-  colon: { ...typography.heading, color: colors.textPrimary, marginHorizontal: spacing.xs },
-  stepper: { alignItems: 'center', gap: spacing.xs },
-  stepBtn: {
-    width: 44,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepBtnText: { ...typography.title, color: colors.identity, fontWeight: '800' },
-  stepValue: { ...typography.heading, color: colors.textPrimary, minWidth: 52, textAlign: 'center' },
-  meridiemCol: { gap: spacing.xs, marginLeft: spacing.sm },
-  meridiemBtn: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-  meridiemBtnOn: { backgroundColor: colors.identity, borderColor: colors.identity },
-  meridiemText: { ...typography.label, color: colors.textSecondary, fontWeight: '700' },
-  meridiemTextOn: { color: '#FFFFFF' },
-  scheduledFor: { ...typography.body, color: colors.identity, fontWeight: '700', textAlign: 'center' },
 });
