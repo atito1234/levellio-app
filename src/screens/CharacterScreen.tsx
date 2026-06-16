@@ -108,9 +108,9 @@ export function CharacterScreen() {
             days accomplished add up.
           </Text>
           <PrimaryButton
-            label="Reflect on your progress"
+            label="See your progress"
             variant="primary"
-            onPress={() => navigation.navigate('Analytics')}
+            onPress={() => navigation.navigate('Progress')}
           />
         </View>
 

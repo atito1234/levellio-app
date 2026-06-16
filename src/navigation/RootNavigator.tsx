@@ -29,6 +29,7 @@ import { JournalScreen } from '@/screens/JournalScreen';
 import { AnalyticsScreen } from '@/screens/AnalyticsScreen';
 import { CoachingEncounterScreen } from '@/screens/CoachingEncounterScreen';
 import { ActivityJourneyScreen } from '@/screens/ActivityJourneyScreen';
+import { ProgressHubScreen } from '@/screens/ProgressHubScreen';
 import { MilestoneCelebration } from '@/components/MilestoneCelebration';
 import { InterventionOverlay } from '@/components/InterventionOverlay';
 import { MainTabs } from './MainTabs';
@@ -106,6 +107,7 @@ export function RootNavigator() {
         <Stack.Screen name="Analytics" component={AnalyticsScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="CoachingEncounter" component={CoachingEncounterScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="ActivityJourney" component={ActivityJourneyScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Progress" component={ProgressHubScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
       {/* Overlays any screen to celebrate earned milestones (queue-driven). */}
       <MilestoneCelebration />

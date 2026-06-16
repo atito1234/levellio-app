@@ -3,13 +3,15 @@
  * (KeyValueStore seam); Firebase stays stubbed. The persisted shape maps to a
  * future Firebase subcollection users/{uid}/metadataEvents/{event.id}.
  *
- * A soft cap keeps storage bounded — oldest events are trimmed first.
+ * A soft cap keeps storage bounded — oldest events are trimmed first. Long-term
+ * analytics no longer depend on this raw log: daily roll-ups (rollupStore)
+ * durably snapshot trends, so this cap only bounds the recent, detailed history.
  */
 import type { KeyValueStore } from '@/services/storage';
 import type { MetadataEvent } from '@/lib/metadata';
 
 export const METADATA_SCHEMA_VERSION = 1;
-export const MAX_METADATA_EVENTS = 1000;
+export const MAX_METADATA_EVENTS = 4000;
 
 const NS = 'levellio';
 const metadataKey = (uid: string) => `${NS}:metadata:${uid}`;

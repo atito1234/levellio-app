@@ -560,11 +560,11 @@ export function DashboardScreen() {
         <View style={styles.capHead}>
           <Text style={styles.railLabel}>Your capacities · last 7 days</Text>
           <Pressable
-            onPress={() => navigation.navigate('MonthlyProgress')}
+            onPress={() => navigation.navigate('Progress')}
             accessibilityRole="button"
-            accessibilityLabel="See your monthly progress"
+            accessibilityLabel="See your progress"
           >
-            <Text style={styles.capLink}>Trends ›</Text>
+            <Text style={styles.capLink}>Progress ›</Text>
           </Pressable>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
