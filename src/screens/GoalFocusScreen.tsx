@@ -243,7 +243,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         </Pressable>
       </ScrollView>
 
-      <AddActivityFab onPress={() => setAddOpen(true)} accent={accent} />
+      <AddActivityFab onPress={() => setAddOpen(true)} accent={accent} highlight={habits.length === 0} />
       <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultGoalId={goal.id} />
     </ScreenContainer>
   );

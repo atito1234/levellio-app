@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals } from '@/state/GoalContext';
@@ -37,7 +37,7 @@ export function AddActivitySheet({
   const { quests, addQuest } = useGame();
   const { goals } = useGoals();
   const { buckets, assignments, assignActivity } = useBuckets();
-  const { togglePlanned } = usePlan();
+  const { getPlan, togglePlanned } = usePlan();
 
   const [title, setTitle] = useState('');
   const [goalId, setGoalId] = useState<string | null>(defaultGoalId);
@@ -81,7 +81,11 @@ export function AddActivitySheet({
     const quest = await addQuest({ title: name, category, difficulty: 'easy' });
     if (quest) {
       if (bucketId) await assignActivity(quest.id, bucketId);
-      await togglePlanned(dayKey(new Date()), quest.id); // show it today right away
+      // If a plan already exists for today, keep it in sync so the activity shows
+      // right away. New users with no plan yet see it via the no-plan fallback and
+      // get nudged into "Step 3 · Plan your day" instead.
+      const todayK = dayKey(new Date());
+      if (getPlan(todayK) !== undefined) await togglePlanned(todayK, quest.id);
       setAdded(name);
     }
     setTitle('');
@@ -89,7 +93,9 @@ export function AddActivitySheet({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {/* Tap the dimmed area above the sheet to dismiss. */}
+        <Pressable style={styles.backdropTap} onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" />
         <View style={styles.sheet}>
           <View style={styles.head}>
             <Text style={styles.title}>Add an activity</Text>
@@ -98,73 +104,83 @@ export function AddActivitySheet({
             </Pressable>
           </View>
 
-          <TextInput
-            value={title}
-            onChangeText={(t) => {
-              setTitle(t);
-              if (added) setAdded(null);
-            }}
-            placeholder="Type or 🎙️ speak it (e.g. 10 push-ups)"
-            placeholderTextColor={MUTED}
-            style={styles.input}
-            autoFocus
-            maxLength={60}
-            onSubmitEditing={() => void add()}
-            returnKeyType="done"
-            blurOnSubmit={false}
-            accessibilityLabel="New activity name"
-          />
+          {/* Everything between the title and the Add button scrolls, so the goal
+              and group chips are always reachable above the keyboard. */}
+          <ScrollView
+            style={styles.scrollArea}
+            contentContainerStyle={styles.scrollBody}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <TextInput
+              value={title}
+              onChangeText={(t) => {
+                setTitle(t);
+                if (added) setAdded(null);
+              }}
+              placeholder="Type or 🎙️ speak it (e.g. 10 push-ups)"
+              placeholderTextColor={MUTED}
+              style={styles.input}
+              autoFocus
+              maxLength={60}
+              onSubmitEditing={() => void add()}
+              returnKeyType="done"
+              blurOnSubmit={false}
+              accessibilityLabel="New activity name"
+            />
 
-          {goals.length > 0 && (
-            <>
-              <Text style={styles.label}>Goal (optional)</Text>
-              <View style={styles.chips}>
-                {goals.map((g) => {
-                  const on = goalId === g.id;
-                  const c = goalColor(g);
-                  return (
-                    <Pressable
-                      key={g.id}
-                      onPress={() => setGoalId(on ? null : g.id)}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: on }}
-                      style={[styles.chip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
-                    >
-                      <Text style={[styles.chipText, on && { color: c.accent }]}>
-                        {g.emoji} {g.title}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </>
-          )}
+            {goals.length > 0 && (
+              <>
+                <Text style={styles.label}>Goal (optional)</Text>
+                <View style={styles.chips}>
+                  {goals.map((g) => {
+                    const on = goalId === g.id;
+                    const c = goalColor(g);
+                    return (
+                      <Pressable
+                        key={g.id}
+                        onPress={() => setGoalId(on ? null : g.id)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: on }}
+                        style={[styles.chip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
+                      >
+                        <Text style={[styles.chipText, on && { color: c.accent }]}>
+                          {g.emoji} {g.title}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </>
+            )}
 
-          {buckets.length > 0 && (
-            <>
-              <Text style={styles.label}>Group (optional)</Text>
-              <View style={styles.chips}>
-                {buckets.map((b) => {
-                  const on = bucketId === b.id;
-                  const c = getBucketColor(b.colorId);
-                  return (
-                    <Pressable
-                      key={b.id}
-                      onPress={() => setBucketId(on ? null : b.id)}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: on }}
-                      style={[styles.chip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
-                    >
-                      <Text style={[styles.chipText, on && { color: c.accent }]}>{b.name}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </>
-          )}
+            {buckets.length > 0 && (
+              <>
+                <Text style={styles.label}>Group (optional)</Text>
+                <View style={styles.chips}>
+                  {buckets.map((b) => {
+                    const on = bucketId === b.id;
+                    const c = getBucketColor(b.colorId);
+                    return (
+                      <Pressable
+                        key={b.id}
+                        onPress={() => setBucketId(on ? null : b.id)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: on }}
+                        style={[styles.chip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
+                      >
+                        <Text style={[styles.chipText, on && { color: c.accent }]}>{b.name}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </>
+            )}
 
-          {added && <Text style={styles.added}>✓ Added “{added}” — add another, or tap Done.</Text>}
+            {added && <Text style={styles.added}>✓ Added “{added}” — add another, or tap Done.</Text>}
+          </ScrollView>
 
+          {/* Pinned below the scroll area — always visible above the keyboard. */}
           <Pressable
             onPress={() => void add()}
             disabled={title.trim().length === 0}
@@ -175,14 +191,26 @@ export function AddActivitySheet({
             <Text style={styles.addBtnText}>＋ Add activity</Text>
           </Pressable>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(31,41,55,0.45)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: BG, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, gap: spacing.sm, maxHeight: '85%' },
+  backdropTap: { flex: 1 },
+  sheet: {
+    backgroundColor: BG,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
+    maxHeight: '88%',
+  },
+  scrollArea: { flexShrink: 1 },
+  scrollBody: { gap: spacing.sm, paddingBottom: spacing.sm },
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { ...typography.heading, color: INK },
   done: { ...typography.label, color: VIOLET, fontWeight: '800' },
