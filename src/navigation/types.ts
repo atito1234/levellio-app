@@ -67,6 +67,8 @@ export type RootStackParamList = {
   Analytics: undefined;
   /** "Confront your dragon" — Socratic questions + a matched tactic for a blocker. */
   CoachingEncounter: { dragonId: string; dragonName?: string; questId?: string; minutesAvailable?: number; blockerId?: string } | undefined;
+  /** One activity's "from repetition to habit" journey (curve, past days, status). */
+  ActivityJourney: { activityId: string };
 };
 
 declare global {
