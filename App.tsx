@@ -11,6 +11,7 @@ import { GoalProvider } from '@/state/GoalContext';
 import { MilestonesProvider } from '@/state/MilestonesContext';
 import { BattlesProvider } from '@/state/BattlesContext';
 import { JournalProvider } from '@/state/JournalContext';
+import { LinksProvider } from '@/state/LinksContext';
 import { InterventionProvider } from '@/state/InterventionContext';
 
 /** App entry point. Wraps the nav shell in settings + game + buckets + capacities + plan + goals + milestones + battles + journal + interventions. */
@@ -27,9 +28,11 @@ export default function App() {
                   <MilestonesProvider>
                     <BattlesProvider>
                       <JournalProvider>
-                        <InterventionProvider>
-                          <RootNavigator />
-                        </InterventionProvider>
+                        <LinksProvider>
+                          <InterventionProvider>
+                            <RootNavigator />
+                          </InterventionProvider>
+                        </LinksProvider>
                       </JournalProvider>
                     </BattlesProvider>
                   </MilestonesProvider>
