@@ -1,11 +1,14 @@
 import {
   effectivePlan,
   gapsFor,
+  goalDayProgress,
+  goalFocusPool,
   habitsForCapacity,
   plannedOpen,
   planProgress,
   planProgressOn,
 } from './plan';
+import type { Goal } from './goal';
 import type { Quest } from '@/types';
 
 function quest(p: Partial<Quest>): Quest {
@@ -25,6 +28,25 @@ const q1 = quest({ id: 'q1', title: 'Workout', category: 'fitness' });
 const q2 = quest({ id: 'q2', title: 'Read', category: 'learning' });
 const q3 = quest({ id: 'q3', title: 'Meditate', category: 'mind' });
 const all = [q1, q2, q3];
+
+const fitGoal: Pick<Goal, 'categories'> = { categories: ['fitness', 'mind'] };
+
+describe('goalFocusPool / goalDayProgress', () => {
+  it('restricts the open focus pool to the goal’s categories, keeping order', () => {
+    const pool = goalFocusPool(all, ['q2', 'q1', 'q3'], fitGoal);
+    expect(pool.map((q) => q.id)).toEqual(['q1', 'q3']); // q2 (learning) excluded
+  });
+
+  it('counts done/total only within the goal', () => {
+    const done = quest({ id: 'q1', category: 'fitness', completed: true });
+    const p = goalDayProgress([done, q2, q3], ['q1', 'q2', 'q3'], fitGoal);
+    expect(p).toEqual({ done: 1, total: 2, pct: 50 }); // fitness done, mind open, learning excluded
+  });
+
+  it('falls back to all quests when no plan is set', () => {
+    expect(goalFocusPool(all, undefined, fitGoal).map((q) => q.id)).toEqual(['q1', 'q3']);
+  });
+});
 
 describe('effectivePlan', () => {
   it('falls back to all habits when no plan is set', () => {

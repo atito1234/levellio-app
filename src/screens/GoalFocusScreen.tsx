@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -7,7 +7,7 @@ import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useActivityLog } from '@/state/useActivityLog';
-import { goalHabits, type Goal } from '@/lib/goal';
+import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { activityJourney } from '@/lib/journey';
 import { sessionsOf } from '@/lib/analytics';
 import { rippleForQuest } from '@/lib/habitCapacity';
@@ -52,18 +52,15 @@ export function GoalFocusScreen({ route, navigation }: Props) {
 }
 
 function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['navigation'] }) {
-  const { quests, addQuest } = useGame();
-  const { getPlan, togglePlanned } = usePlan();
+  const { quests, addQuest, deleteQuest } = useGame();
+  const { togglePlanned } = usePlan();
   const { events } = useActivityLog();
   const progress = useGoalProgress(goal);
 
-  const accent = goal.colorId === 'teal' ? TEAL : VIOLET;
+  const accent = goalColor(goal).accent;
   const todayK = dayKey(new Date());
   const sessions = useMemo(() => sessionsOf(events), [events]);
-  const plannedSet = useMemo(() => new Set(getPlan(todayK) ?? []), [getPlan, todayK]);
   const habits = useMemo(() => goalHabits(quests, goal), [quests, goal]);
-  const inPlan = habits.filter((h) => plannedSet.has(h.id));
-  const notPlanned = habits.filter((h) => !plannedSet.has(h.id));
 
   // The capacities these activities collectively power — the ripple that ties
   // them together (shared capacities = connected).
@@ -88,49 +85,41 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
     setAdding(false);
   };
 
-  const PlanRow = ({ quest }: { quest: Quest }) => {
-    const j = activityJourney(sessions, quest.id, quest.title, todayK);
-    return (
-      <Pressable
-        onPress={() => navigation.navigate('Ripple', { questId: quest.id })}
-        accessibilityRole="button"
-        accessibilityLabel={`${quest.title}${quest.completed ? ', done today' : ', do it now'}${j.currentStreak > 0 ? `, ${j.currentStreak} day streak` : ''}`}
-        style={styles.row}
-      >
-        <Text style={styles.rowIcon}>{CATEGORY_META[quest.category].icon}</Text>
-        <View style={styles.rowMain}>
-          <Text style={styles.rowTitle} numberOfLines={1}>
-            {quest.title}
-          </Text>
-          {j.currentStreak > 0 ? (
-            <Text style={styles.rowStreak}>🔥 Day {j.currentStreak}{j.graduated ? ' · runs on its own' : j.solidified ? ' · locked in' : ''}</Text>
-          ) : quest.scheduledTime !== undefined ? (
-            <Text style={styles.rowTime}>⏰ {minutesToLabel(quest.scheduledTime)}</Text>
-          ) : null}
-        </View>
-        <Text style={[styles.action, quest.completed && styles.actionDone]}>{quest.completed ? '✓ Done' : 'Do it ›'}</Text>
-      </Pressable>
-    );
-  };
+  const deleteActivity = (quest: Quest) =>
+    Alert.alert('Remove activity?', `Remove “${quest.title}” from your activities?`, [
+      { text: 'Keep', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: () => void deleteQuest(quest.id) },
+    ]);
 
-  const AddRow = ({ quest }: { quest: Quest }) => {
+  // Management row: tap to EDIT (never opens/does the activity); ✕ to remove.
+  const ManageRow = ({ quest }: { quest: Quest }) => {
     const j = activityJourney(sessions, quest.id, quest.title, todayK);
     return (
-      <Pressable
-        onPress={() => void togglePlanned(todayK, quest.id)}
-        accessibilityRole="button"
-        accessibilityLabel={`Add ${quest.title} to today's path`}
-        style={styles.row}
-      >
-        <Text style={styles.rowIcon}>{CATEGORY_META[quest.category].icon}</Text>
-        <View style={styles.rowMain}>
-          <Text style={styles.rowTitle} numberOfLines={1}>
-            {quest.title}
-          </Text>
-          {j.currentStreak > 0 && <Text style={styles.rowStreak}>🔥 Day {j.currentStreak}</Text>}
-        </View>
-        <Text style={styles.addAction}>+ Add</Text>
-      </Pressable>
+      <View style={styles.row}>
+        <Pressable
+          onPress={() => navigation.navigate('QuestEditor', { questId: quest.id })}
+          accessibilityRole="button"
+          accessibilityLabel={`Edit ${quest.title}`}
+          style={styles.rowMainPress}
+        >
+          <Text style={styles.rowIcon}>{CATEGORY_META[quest.category].icon}</Text>
+          <View style={styles.rowMain}>
+            <Text style={styles.rowTitle} numberOfLines={1}>
+              {quest.title}
+            </Text>
+            {j.currentStreak > 0 ? (
+              <Text style={styles.rowStreak}>🔥 Day {j.currentStreak}{j.graduated ? ' · runs on its own' : j.solidified ? ' · locked in' : ''}</Text>
+            ) : quest.scheduledTime !== undefined ? (
+              <Text style={styles.rowTime}>⏰ {minutesToLabel(quest.scheduledTime)}</Text>
+            ) : (
+              <Text style={styles.rowEdit}>Tap to edit</Text>
+            )}
+          </View>
+        </Pressable>
+        <Pressable onPress={() => deleteActivity(quest)} accessibilityRole="button" accessibilityLabel={`Remove ${quest.title}`} hitSlop={10} style={styles.rowDelete}>
+          <Text style={styles.rowDeleteText}>✕</Text>
+        </Pressable>
+      </View>
     );
   };
 
@@ -141,7 +130,9 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.kicker}>YOUR JOURNEY</Text>
-        <View style={styles.chevronSpacer} />
+        <Pressable onPress={() => navigation.navigate('GoalEditor', { goalId: goal.id })} accessibilityRole="button" accessibilityLabel="Edit goal" hitSlop={12}>
+          <Text style={[styles.editGoal, { color: accent }]}>✎ Edit</Text>
+        </Pressable>
       </View>
 
       <View style={styles.header}>
@@ -161,15 +152,15 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        {/* Slay-the-dragon CTA: the journey IS the battle. */}
+        {/* War strategy: prepare for battle (goal-level). Activity battles come later. */}
         <Pressable
           onPress={() => navigation.navigate('BattleSetup', { goalId: goal.id })}
           accessibilityRole="button"
-          accessibilityLabel="Begin a battle for this goal"
+          accessibilityLabel="Prepare your war strategy for this goal"
           style={[styles.battleCta, { backgroundColor: accent }]}
           disabled={habits.length === 0}
         >
-          <Text style={styles.battleText}>⚔️ Begin a battle — slay what blocks this</Text>
+          <Text style={styles.battleText}>⚔️ Prepare your war strategy</Text>
         </Pressable>
 
         {/* The ripple: capacities these activities power together. */}
@@ -189,27 +180,14 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
           </View>
         )}
 
-        {habits.length === 0 && (
+        {habits.length === 0 ? (
           <Text style={styles.empty}>No activities on this journey yet. Add your first one below.</Text>
-        )}
-
-        {inPlan.length > 0 && (
+        ) : (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>ON THE PATH TODAY</Text>
+            <Text style={styles.sectionLabel}>ACTIVITIES ({habits.length})</Text>
             <View style={styles.rows}>
-              {inPlan.map((q) => (
-                <PlanRow key={q.id} quest={q} />
-              ))}
-            </View>
-          </View>
-        )}
-
-        {notPlanned.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>READY TO ADD</Text>
-            <View style={styles.rows}>
-              {notPlanned.map((q) => (
-                <AddRow key={q.id} quest={q} />
+              {habits.map((q) => (
+                <ManageRow key={q.id} quest={q} />
               ))}
             </View>
           </View>
@@ -294,15 +272,17 @@ const styles = StyleSheet.create({
   section: { gap: spacing.sm },
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
   rows: { gap: spacing.sm },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 18, padding: spacing.md },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: CARD, borderRadius: 18, paddingRight: spacing.md },
+  rowMainPress: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md },
   rowIcon: { fontSize: 20 },
   rowMain: { flex: 1, gap: 2 },
   rowTitle: { ...typography.body, color: INK, fontWeight: '600' },
   rowTime: { ...typography.caption, color: VIOLET, fontWeight: '700' },
   rowStreak: { ...typography.caption, color: TEAL, fontWeight: '800' },
-  action: { ...typography.label, color: VIOLET, fontWeight: '700' },
-  actionDone: { color: MUTED },
-  addAction: { ...typography.label, color: VIOLET, fontWeight: '700', backgroundColor: VIOLET_SOFT, paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: 999, overflow: 'hidden' },
+  rowEdit: { ...typography.caption, color: MUTED },
+  rowDelete: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
+  rowDeleteText: { ...typography.label, color: '#C0202C', fontWeight: '800' },
+  editGoal: { ...typography.label, fontWeight: '800' },
 
   addOpen: { alignItems: 'center', backgroundColor: CARD, borderRadius: 18, padding: spacing.md, borderWidth: 1, borderColor: TRACK, borderStyle: 'dashed' },
   addOpenText: { ...typography.label, color: VIOLET, fontWeight: '800' },

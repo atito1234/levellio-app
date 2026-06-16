@@ -33,6 +33,18 @@ describe('normalizeGoals', () => {
     expect(normalizeGoals(null)).toEqual([]);
     expect(normalizeGoals({ goals: 7 })).toEqual([]);
   });
+
+  it('accepts palette colours, falls back for gold/unknown, keeps legacy violet/teal', () => {
+    const goals = normalizeGoals({
+      goals: [
+        { id: 'a', title: 'Rose', categories: ['fitness'], colorId: 'rose' },
+        { id: 'b', title: 'Gold', categories: ['fitness'], colorId: 'gold' }, // reserved → fallback
+        { id: 'c', title: 'Bad', categories: ['fitness'], colorId: 'mauve' }, // unknown → fallback
+        { id: 'd', title: 'Teal', categories: ['fitness'], colorId: 'teal' },
+      ],
+    });
+    expect(goals.map((g) => g.colorId)).toEqual(['rose', 'violet', 'violet', 'teal']);
+  });
 });
 
 describe('GoalStore', () => {

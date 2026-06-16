@@ -9,6 +9,7 @@
  */
 import { dayProgress, type DayProgress } from './dashboard';
 import { rippleForQuest } from './habitCapacity';
+import { goalHabits, type Goal } from './goal';
 import type { CapacityId } from './compounding';
 import type { Quest } from '@/types';
 
@@ -39,6 +40,30 @@ export function plannedOpen(quests: readonly Quest[], plannedIds?: readonly stri
 /** Today's plan completion (live, from the derived `completed` flag) for the hero ring. */
 export function planProgress(quests: readonly Quest[], plannedIds?: readonly string[]): DayProgress {
   return dayProgress(effectivePlan(quests, plannedIds));
+}
+
+/**
+ * The focus pool governed by a goal: planned & still-open habits (same ordering
+ * as `plannedOpen`) restricted to the goal's contributing activities. This is how
+ * a selected goal drives the Dashboard's central focus.
+ */
+export function goalFocusPool(
+  quests: readonly Quest[],
+  plannedIds: readonly string[] | undefined,
+  goal: Pick<Goal, 'categories'>,
+): Quest[] {
+  const inGoal = new Set(goalHabits(quests, goal).map((q) => q.id));
+  return plannedOpen(quests, plannedIds).filter((q) => inGoal.has(q.id));
+}
+
+/** Today's completion within a goal's planned habits — the goal-scoped hero ring. */
+export function goalDayProgress(
+  quests: readonly Quest[],
+  plannedIds: readonly string[] | undefined,
+  goal: Pick<Goal, 'categories'>,
+): DayProgress {
+  const inGoal = new Set(goalHabits(quests, goal).map((q) => q.id));
+  return dayProgress(effectivePlan(quests, plannedIds).filter((q) => inGoal.has(q.id)));
 }
 
 /**

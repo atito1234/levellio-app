@@ -6,6 +6,7 @@
  * numbers. Pure, no I/O.
  */
 import { CATEGORY_CAPACITY_WEIGHTS } from './habitCapacity';
+import { getBucketColor, type BucketColor, type BucketColorId } from './buckets';
 import { resolveCategory } from './categories';
 import { dayKey } from './dates';
 import type { CapacityId, CapacityLevels } from './compounding';
@@ -15,11 +16,20 @@ export interface Goal {
   id: string;
   title: string;
   emoji: string;
-  colorId: 'violet' | 'teal';
+  /** One of the shared on-brand palette colours (gold reserved for rewards). */
+  colorId: BucketColorId;
   /** The life areas this goal draws on; habits in these categories contribute. */
   categories: QuestCategory[];
   createdAt: number;
   order: number;
+}
+
+/** Colours a goal may use — the shared palette minus gold (kept for 100%/reward). */
+export const GOAL_COLOR_IDS: readonly BucketColorId[] = ['violet', 'teal', 'rose', 'sky', 'lime', 'slate'];
+
+/** Resolve a goal's accent/soft colours from its colorId (palette-safe). */
+export function goalColor(goal: Pick<Goal, 'colorId'>): BucketColor {
+  return getBucketColor(goal.colorId);
 }
 
 export interface GoalProgress {

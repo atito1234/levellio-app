@@ -43,8 +43,8 @@ export type RootStackParamList = {
   Plan: { day?: string } | undefined;
   /** "What strengthens this capacity" — the planned/unplanned habits feeding it. */
   CapacityFocus: { capacityId: string };
-  /** Create a life goal (from a template or custom). */
-  GoalEditor: undefined;
+  /** Create a life goal (from a template or custom), or edit one (goalId). */
+  GoalEditor: { goalId?: string } | undefined;
   /** A goal's contributing habits + progress. */
   GoalFocus: { goalId: string };
   /** Frictionless typed/dictated capture of one or more habits. */

@@ -1,14 +1,18 @@
-import React, { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { DotGrid, Sparkline } from '@/components/charts';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useActivityLog } from '@/state/useActivityLog';
+import { useLinks } from '@/state/LinksContext';
 import { sessionsOf } from '@/lib/analytics';
 import { activityDayCells, activityJourney, activityWeeklyAdherence, HABIT_DAYS, type JourneyStatus } from '@/lib/journey';
 import { SOLIDIFY_DAYS } from '@/lib/activityStreak';
+import { rippleForQuest } from '@/lib/habitCapacity';
+import { getCapacity, type CapacityId } from '@/lib/compounding';
+import { CATEGORY_META } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -41,6 +45,20 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
   const { activityId } = route.params;
   const { quests } = useGame();
   const { events, ready } = useActivityLog();
+  const { neighborsOf, chainOf, addLink, removeLink } = useLinks();
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const linkedIds = neighborsOf(activityId).filter((id) => quests.some((q) => q.id === id));
+  const chainCaps = useMemo(() => {
+    const set = new Set<CapacityId>();
+    for (const qid of chainOf(activityId)) {
+      const q = quests.find((x) => x.id === qid);
+      if (q) rippleForQuest(q).forEach((d) => set.add(d.capacityId));
+    }
+    return [...set].sort((a, b) => getCapacity(a).order - getCapacity(b).order);
+  }, [chainOf, activityId, quests]);
+  const linkable = quests.filter((q) => q.id !== activityId && !linkedIds.includes(q.id));
+  const titleFor = (id: string) => quests.find((q) => q.id === id)?.title ?? 'Activity';
 
   const data = useMemo(() => {
     const sessions = sessionsOf(events);
@@ -134,6 +152,34 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
               <Stat value={`${j.daysSinceStart}`} label="days on the path" tint={VIOLET} />
             </View>
 
+            {/* Your chain — explicit links that power the same ripple. */}
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Your chain</Text>
+              <Text style={styles.cardSub}>Link activities you do together — they power the same ripple.</Text>
+              {linkedIds.length === 0 ? (
+                <Text style={styles.chainEmpty}>Nothing linked yet.</Text>
+              ) : (
+                <View style={styles.chainList}>
+                  {linkedIds.map((id) => (
+                    <View key={id} style={styles.chainRow}>
+                      <Pressable onPress={() => navigation.push('ActivityJourney', { activityId: id })} accessibilityRole="button" accessibilityLabel={`Open ${titleFor(id)} journey`} style={styles.chainMain}>
+                        <Text style={styles.chainTitle} numberOfLines={1}>🔗 {titleFor(id)}</Text>
+                      </Pressable>
+                      <Pressable onPress={() => void removeLink(activityId, id)} accessibilityRole="button" accessibilityLabel={`Unlink ${titleFor(id)}`} hitSlop={8}>
+                        <Text style={styles.chainRemove}>✕</Text>
+                      </Pressable>
+                    </View>
+                  ))}
+                </View>
+              )}
+              {chainCaps.length > 0 && linkedIds.length > 0 && (
+                <Text style={styles.chainCaps}>Together you power: {chainCaps.map((c) => getCapacity(c).name).join(' · ')}</Text>
+              )}
+              <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" accessibilityLabel="Link another activity" disabled={linkable.length === 0} style={[styles.linkBtn, linkable.length === 0 && styles.linkBtnOff]}>
+                <Text style={styles.linkBtnText}>＋ Link an activity</Text>
+              </Pressable>
+            </View>
+
             <View style={styles.actions}>
               <Pressable onPress={() => navigation.navigate('Ripple', { questId: activityId })} accessibilityRole="button" accessibilityLabel="Do it now" style={styles.cta}>
                 <Text style={styles.ctaText}>Do it now ›</Text>
@@ -145,6 +191,41 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
           </>
         )}
       </ScrollView>
+
+      <Modal visible={pickerOpen} animationType="slide" transparent onRequestClose={() => setPickerOpen(false)}>
+        <View style={styles.sheetBackdrop}>
+          <View style={styles.sheet}>
+            <View style={styles.sheetHead}>
+              <Text style={styles.sheetTitle}>Link an activity</Text>
+              <Pressable onPress={() => setPickerOpen(false)} accessibilityRole="button" accessibilityLabel="Done" hitSlop={12}>
+                <Text style={styles.sheetDone}>Done</Text>
+              </Pressable>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.sheetListContent}>
+              {linkable.length === 0 ? (
+                <Text style={styles.empty}>No other activities to link yet.</Text>
+              ) : (
+                linkable.map((q) => (
+                  <Pressable
+                    key={q.id}
+                    onPress={() => {
+                      void addLink(activityId, q.id);
+                      setPickerOpen(false);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Link ${q.title}`}
+                    style={styles.sheetRow}
+                  >
+                    <Text style={styles.sheetRowIcon}>{CATEGORY_META[q.category].icon}</Text>
+                    <Text style={styles.sheetRowTitle} numberOfLines={1}>{q.title}</Text>
+                    <Text style={styles.sheetRowAdd}>＋</Text>
+                  </Pressable>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }
@@ -193,6 +274,28 @@ const styles = StyleSheet.create({
   ctaText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
   secondary: { alignItems: 'center', paddingVertical: spacing.sm },
   secondaryText: { ...typography.label, color: VIOLET, fontWeight: '700' },
+
+  chainEmpty: { ...typography.body, color: MUTED },
+  chainList: { gap: spacing.sm },
+  chainRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: BG, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  chainMain: { flex: 1 },
+  chainTitle: { ...typography.body, color: INK, fontWeight: '600' },
+  chainRemove: { ...typography.label, color: MUTED, fontWeight: '800' },
+  chainCaps: { ...typography.caption, color: TEAL, fontWeight: '700' },
+  linkBtn: { alignSelf: 'flex-start', backgroundColor: '#EDE9FE', borderRadius: 999, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, marginTop: spacing.xs },
+  linkBtnOff: { opacity: 0.4 },
+  linkBtnText: { ...typography.label, color: VIOLET, fontWeight: '800' },
+
+  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(31,41,55,0.45)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: BG, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, maxHeight: '80%', gap: spacing.md },
+  sheetHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  sheetTitle: { ...typography.heading, color: INK },
+  sheetDone: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  sheetListContent: { gap: spacing.sm, paddingBottom: spacing.md },
+  sheetRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: TRACK },
+  sheetRowIcon: { fontSize: 18 },
+  sheetRowTitle: { ...typography.body, color: INK, flex: 1, fontWeight: '600' },
+  sheetRowAdd: { fontSize: 20, color: VIOLET, fontWeight: '800' },
 
   empty: { ...typography.body, color: MUTED, textAlign: 'center' },
 });
