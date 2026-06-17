@@ -1,0 +1,79 @@
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { accountService, describeAuthError, type Account } from '@/services/account';
+
+interface AuthContextValue {
+  /** False until the first auth-state resolution. */
+  ready: boolean;
+  account: Account | null;
+  /** True when backed by real, cross-device Firebase Auth. */
+  isReal: boolean;
+  signUp: (email: string, password: string, displayName: string) => Promise<{ ok: boolean; error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+function errorOf(e: unknown): string {
+  const code = (e as { code?: string })?.code;
+  return describeAuthError(code ?? '');
+}
+
+/** Owns the signed-in account for the collaborative (Projects) layer. */
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [account, setAccount] = useState<Account | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const unsub = accountService.onChange((next) => {
+      setAccount(next);
+      setReady(true);
+    });
+    return unsub;
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string, displayName: string) => {
+    try {
+      await accountService.signUp(email, password, displayName);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: errorOf(e) };
+    }
+  }, []);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    try {
+      await accountService.signIn(email, password);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: errorOf(e) };
+    }
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await accountService.signOut();
+  }, []);
+
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      await accountService.resetPassword(email);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: errorOf(e) };
+    }
+  }, []);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({ ready, account, isReal: accountService.isReal, signUp, signIn, signOut, resetPassword }),
+    [ready, account, signUp, signIn, signOut, resetPassword],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth(): AuthContextValue {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
+  return ctx;
+}
