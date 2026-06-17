@@ -6,14 +6,16 @@
  *   EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=... \
  *   EXPO_PUBLIC_FIREBASE_PROJECT_ID=... \
  *   EXPO_PUBLIC_FIREBASE_APP_ID=... \
- *   node --import tsx scripts/seedProjects.ts
+ *   npm run seed:projects
+ *
+ * Runs on Node's built-in TypeScript support (Node >= 22), no extra dependency.
  *
  * Idempotent: writes each featured project by its stable id, so re-running just
  * refreshes the content. Members/contributions are NOT touched.
  */
 import { initializeApp } from 'firebase/app';
 import { doc, getFirestore, setDoc } from 'firebase/firestore';
-import { FEATURED_PROJECTS } from '../src/services/projects/featuredProjects';
+import { FEATURED_PROJECTS } from '../src/services/projects/featuredProjects.ts';
 
 const config = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
