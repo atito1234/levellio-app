@@ -3,6 +3,7 @@ import { useGame } from '@/state/GameContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { useGoals } from '@/state/GoalContext';
+import { useProjects } from '@/state/ProjectsContext';
 import { useMilestones } from '@/state/MilestonesContext';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useSettings } from '@/state/SettingsContext';
@@ -35,6 +36,7 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
   const { recordContribution, recordSession } = useBuckets();
   const { recordCompletion, levels } = useCapacities();
   const { goals } = useGoals();
+  const { recordCompletion: recordProjectContribution } = useProjects();
   const { earnedIds, recordMilestones } = useMilestones();
   const { events } = useActivityLog();
   const { settings } = useSettings();
@@ -56,6 +58,9 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
         ...(location ? { location } : {}),
         ...(opts.rating ? { rating: opts.rating } : {}),
       });
+
+      // Share this completion with any community projects the habit feeds.
+      await recordProjectContribution({ activityId: quest.id, title: quest.title, category: quest.category });
 
       // Detect & celebrate milestones from this completion. prevLevels is the
       // pre-ripple snapshot; postLevels mirrors what recordCompletion applied.
@@ -79,6 +84,6 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
 
       return reward;
     },
-    [completeQuest, recordContribution, recordCompletion, recordSession, includeLocation, levels, events, goals, earnedIds, recordMilestones],
+    [completeQuest, recordContribution, recordCompletion, recordSession, recordProjectContribution, includeLocation, levels, events, goals, earnedIds, recordMilestones],
   );
 }

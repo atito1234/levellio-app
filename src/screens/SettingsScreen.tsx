@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   ChipSelector,
+  DataDangerZone,
   PrimaryButton,
   ScreenContainer,
   TextField,
@@ -233,6 +234,9 @@ export function SettingsScreen() {
             update={update}
           />
         </View>
+
+        {/* Danger zone — scoped, permanent data deletion. */}
+        <DataDangerZone />
 
         {/* About & Legal */}
         <View style={styles.card}>

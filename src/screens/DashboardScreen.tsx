@@ -97,7 +97,7 @@ export function DashboardScreen() {
     [quests, plan, selectedGoal],
   );
   const goalHasActivities = selectedGoal ? goalHabits(quests, selectedGoal).length > 0 : true;
-  // Guided first-run: 1 pick a goal → 2 add activities → 3 plan your day (0 = done).
+  // Guided first-run: 1 pick a goal → 2 add activities → 3 schedule habits (0 = done).
   const onboardStep: 0 | 1 | 2 | 3 =
     goals.length === 0 || gated ? 1 : !goalHasActivities ? 2 : plan === undefined ? 3 : 0;
   const [focusIndex, setFocusIndex] = useState(0);
@@ -476,10 +476,10 @@ export function DashboardScreen() {
               <Pressable
                 onPress={() => navigation.navigate('Plan')}
                 accessibilityRole="button"
-                accessibilityLabel="Plan your day"
+                accessibilityLabel="Schedule your habits"
                 style={styles.primaryBtn}
               >
-                <Text style={styles.primaryBtnText}>🗓 Plan your day</Text>
+                <Text style={styles.primaryBtnText}>🗓 Schedule your habits</Text>
               </Pressable>
             </>
           )}
@@ -529,19 +529,19 @@ export function DashboardScreen() {
         )}
 
         {/* STEP 3 — activities exist; guide the user to curate today's plan. */}
-        {onboardStep === 3 && <Text style={styles.stepHint}>STEP 3 · Plan your day</Text>}
+        {onboardStep === 3 && <Text style={styles.stepHint}>STEP 3 · Schedule your habits</Text>}
         {/* Plan CTA — the one place to curate today/tomorrow (declutters home). */}
         <Pressable
           onPress={() => navigation.navigate('Plan')}
           accessibilityRole="button"
-          accessibilityLabel="Plan your day"
-          accessibilityHint="Choose which habits to work on today or tomorrow"
+          accessibilityLabel="Schedule your habits"
+          accessibilityHint="Open the calendar to schedule habits on any day"
           style={[styles.planCta, onboardStep === 3 && styles.planCtaHi]}
         >
           <View style={styles.planCtaMain}>
-            <Text style={styles.planCtaTitle}>🗓 Plan your day</Text>
+            <Text style={styles.planCtaTitle}>🗓 Schedule your habits</Text>
             <Text style={styles.planCtaSub}>
-              {plan === undefined ? 'Pick what to focus on — today or tomorrow' : `${progress.total} planned today`}
+              {plan === undefined ? 'Tap to schedule habits across your calendar' : `${progress.total} planned today`}
             </Text>
           </View>
           <Text style={styles.planCtaChevron}>›</Text>

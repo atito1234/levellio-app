@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, type LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './types';
 import { colors } from '@/theme';
@@ -30,6 +30,10 @@ import { AnalyticsScreen } from '@/screens/AnalyticsScreen';
 import { CoachingEncounterScreen } from '@/screens/CoachingEncounterScreen';
 import { ActivityJourneyScreen } from '@/screens/ActivityJourneyScreen';
 import { ProgressHubScreen } from '@/screens/ProgressHubScreen';
+import { ProjectDetailScreen } from '@/screens/ProjectDetailScreen';
+import { ProjectEditorScreen } from '@/screens/ProjectEditorScreen';
+import { JoinProjectScreen } from '@/screens/JoinProjectScreen';
+import { SignInScreen } from '@/screens/SignInScreen';
 import { MilestoneCelebration } from '@/components/MilestoneCelebration';
 import { InterventionOverlay } from '@/components/InterventionOverlay';
 import { MainTabs } from './MainTabs';
@@ -48,13 +52,23 @@ const navTheme = {
   },
 };
 
+/** Deep links, e.g. levellio://join/MALARIA → the Join-by-code screen, prefilled. */
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: ['levellio://'],
+  config: {
+    screens: {
+      JoinProject: 'join/:code',
+    },
+  },
+};
+
 /**
  * Root navigation shell wiring all 5 MVP screens:
  *   Onboarding -> Main (Dashboard / Character / Settings) + QuestComplete modal.
  */
 export function RootNavigator() {
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer theme={navTheme} linking={linking}>
       <Stack.Navigator initialRouteName="Onboarding" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
@@ -108,6 +122,10 @@ export function RootNavigator() {
         <Stack.Screen name="CoachingEncounter" component={CoachingEncounterScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="ActivityJourney" component={ActivityJourneyScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Progress" component={ProgressHubScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="ProjectEditor" component={ProjectEditorScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="JoinProject" component={JoinProjectScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="SignIn" component={SignInScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
       {/* Overlays any screen to celebrate earned milestones (queue-driven). */}
       <MilestoneCelebration />

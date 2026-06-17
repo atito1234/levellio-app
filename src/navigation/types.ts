@@ -7,6 +7,7 @@ import type { LegalDocKey } from '@/content/aboutInfo';
 export type MainTabParamList = {
   Dashboard: undefined;
   Character: undefined;
+  Projects: undefined;
   Settings: undefined;
 };
 
@@ -72,6 +73,14 @@ export type RootStackParamList = {
   ActivityJourney: { activityId: string };
   /** Unified Progress hub: Overview / Goals / Buckets / Capacities / Habits. */
   Progress: { tab?: 'overview' | 'goals' | 'buckets' | 'capacities' | 'habits' } | undefined;
+  /** A community project's shared progress, members, and live activity feed. */
+  ProjectDetail: { projectId: string };
+  /** Create a new community project. */
+  ProjectEditor: undefined;
+  /** Join a project by invite code (optionally pre-filled from a deep link). */
+  JoinProject: { code?: string } | undefined;
+  /** Sign in / create an account to unlock community projects. */
+  SignIn: undefined;
 };
 
 declare global {

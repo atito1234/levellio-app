@@ -3,6 +3,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from '@/navigation';
 import { GameProvider } from '@/state/GameContext';
+import { AuthProvider } from '@/state/AuthContext';
+import { ProjectsProvider } from '@/state/ProjectsContext';
 import { SettingsProvider } from '@/state/SettingsContext';
 import { BucketsProvider } from '@/state/BucketsContext';
 import { CapacitiesProvider } from '@/state/CapacitiesContext';
@@ -20,6 +22,7 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar style="dark" />
       <SettingsProvider>
+        <AuthProvider>
         <GameProvider>
           <BucketsProvider>
             <CapacitiesProvider>
@@ -30,7 +33,9 @@ export default function App() {
                       <JournalProvider>
                         <LinksProvider>
                           <InterventionProvider>
-                            <RootNavigator />
+                            <ProjectsProvider>
+                              <RootNavigator />
+                            </ProjectsProvider>
                           </InterventionProvider>
                         </LinksProvider>
                       </JournalProvider>
@@ -41,6 +46,7 @@ export default function App() {
             </CapacitiesProvider>
           </BucketsProvider>
         </GameProvider>
+        </AuthProvider>
       </SettingsProvider>
     </SafeAreaProvider>
   );

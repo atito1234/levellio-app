@@ -88,6 +88,10 @@ interface GameContextValue extends GameState {
   updateQuest: (questId: string, draft: QuestDraft) => Promise<boolean>;
   /** Delete a quest. */
   deleteQuest: (questId: string) => Promise<void>;
+  /** Delete many quests in one write (Settings danger zone). */
+  deleteQuests: (questIds: readonly string[]) => Promise<void>;
+  /** Apply recurrence (scheduledDays) edits to many quests in one write. */
+  setRecurrence: (edits: readonly { id: string; scheduledDays: number[] }[]) => Promise<void>;
   /** Add a curated library habit to active quests in one tap. */
   addLibraryHabit: (habit: LibraryHabit) => Promise<Quest | null>;
   /** Update the hero presentation (female / male / neutral) and persist. */
@@ -257,6 +261,27 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     [state.quests, persistQuests],
   );
 
+  const deleteQuests = useCallback(
+    async (questIds: readonly string[]): Promise<void> => {
+      if (questIds.length === 0) return;
+      const drop = new Set(questIds);
+      await persistQuests(state.quests.filter((q) => !drop.has(q.id)), true);
+    },
+    [state.quests, persistQuests],
+  );
+
+  const setRecurrence = useCallback(
+    async (edits: readonly { id: string; scheduledDays: number[] }[]): Promise<void> => {
+      if (edits.length === 0) return;
+      const byId = new Map(edits.map((e) => [e.id, e.scheduledDays]));
+      const next = state.quests.map((q) =>
+        byId.has(q.id) ? { ...q, scheduledDays: byId.get(q.id)! } : q,
+      );
+      await persistQuests(next, true);
+    },
+    [state.quests, persistQuests],
+  );
+
   const addLibraryHabit = useCallback(
     async (habit: LibraryHabit): Promise<Quest | null> => {
       const { quests, quest } = upsertQuestByCanonical(state.quests, libraryHabitToQuest(habit, genQuestId()));
@@ -302,6 +327,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       addQuest,
       updateQuest,
       deleteQuest,
+      deleteQuests,
+      setRecurrence,
       addLibraryHabit,
       setPresentation,
       setKit,
@@ -315,6 +342,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       addQuest,
       updateQuest,
       deleteQuest,
+      deleteQuests,
+      setRecurrence,
       addLibraryHabit,
       setPresentation,
       setKit,

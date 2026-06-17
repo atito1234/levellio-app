@@ -1,0 +1,65 @@
+rules_version = '2';
+
+// Security rules for Levellio community projects. Deploy with:
+//   firebase deploy --only firestore:rules
+// (or paste into Firebase console → Firestore → Rules).
+//
+// Model: featured projects are world-readable; project metadata is readable by
+// any signed-in user (so invite-code joins work); members/feed/cycle counters
+// are readable by members (and by anyone for featured projects). A user can only
+// write their own member doc and their own contributions.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // A user's own profile.
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /projects/{projectId} {
+      function isMember() {
+        return signedIn() &&
+          exists(/databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid));
+      }
+      function isOwner() {
+        return signedIn() && resource.data.ownerUid == request.auth.uid;
+      }
+      function isFeatured() {
+        return get(/databases/$(database)/documents/projects/$(projectId)).data.featured == true;
+      }
+
+      // Featured projects are public; other project docs are visible to any
+      // signed-in user so they can resolve an invite code and join.
+      allow read: if resource.data.featured == true || signedIn();
+      // Any signed-in user can create a project they own.
+      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid;
+      // Owners can edit; members may only bump the denormalized memberCount.
+      allow update: if isOwner() ||
+        (signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberCount']));
+      allow delete: if isOwner();
+
+      // Each member manages only their own membership doc.
+      match /members/{uid} {
+        allow read: if signedIn() && (isMember() || isFeatured() || resource.data.uid == request.auth.uid);
+        allow create, update, delete: if signedIn() && request.auth.uid == uid;
+      }
+
+      // The activity feed: a member may only create their own contributions.
+      match /contributions/{contribId} {
+        allow read: if signedIn() && (isMember() || isFeatured());
+        allow create: if isMember() && request.resource.data.uid == request.auth.uid;
+        allow update, delete: if false;
+      }
+
+      // Per-cycle counter docs: writable by members (increment-only in practice).
+      match /cycles/{cycleKey} {
+        allow read: if signedIn() && (isMember() || isFeatured());
+        allow write: if isMember();
+      }
+    }
+  }
+}

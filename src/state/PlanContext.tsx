@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useGame } from '@/state/GameContext';
 import { planStore, type PlanDays } from '@/services/plan';
 import { materializeInto } from '@/lib/recurrence';
+import { clearPlanDays, clearedPlanDayKeys } from '@/lib/dataReset';
 
 interface PlanContextValue {
   ready: boolean;
@@ -23,6 +24,12 @@ interface PlanContextValue {
    * materialized (so a habit the user removes for that day stays removed).
    */
   ensureMaterialized: (entries: { dayKey: string; ids: string[] }[]) => Promise<void>;
+  /**
+   * Destructively clear plans for a scope: `undefined` weekdays wipes ALL days,
+   * otherwise only days falling on those weekdays (0=Sun…6=Sat). Powers the
+   * Settings danger zone.
+   */
+  clearPlans: (weekdays?: readonly number[]) => Promise<void>;
 }
 
 const PlanContext = createContext<PlanContextValue | null>(null);
@@ -108,9 +115,19 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     [plans, materialized, commit],
   );
 
+  const clearPlans = useCallback(
+    (weekdays?: readonly number[]) => {
+      const nextDays = clearPlanDays(plans, weekdays);
+      const cleared = new Set(clearedPlanDayKeys(plans, weekdays));
+      const nextMaterialized = materialized.filter((d) => !cleared.has(d));
+      return commit(nextDays, nextMaterialized);
+    },
+    [plans, materialized, commit],
+  );
+
   const value = useMemo<PlanContextValue>(
-    () => ({ ready, plans, getPlan, setPlan, togglePlanned, reorderPlan, carryOver, ensureMaterialized }),
-    [ready, plans, getPlan, setPlan, togglePlanned, reorderPlan, carryOver, ensureMaterialized],
+    () => ({ ready, plans, getPlan, setPlan, togglePlanned, reorderPlan, carryOver, ensureMaterialized, clearPlans }),
+    [ready, plans, getPlan, setPlan, togglePlanned, reorderPlan, carryOver, ensureMaterialized, clearPlans],
   );
 
   return <PlanContext.Provider value={value}>{children}</PlanContext.Provider>;

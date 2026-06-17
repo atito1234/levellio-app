@@ -7,19 +7,28 @@ import { useGame } from '@/state/GameContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { usePlan } from '@/state/PlanContext';
 import { useActivityLog } from '@/state/useActivityLog';
-import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { groupHabitsIntoRails } from '@/lib/dashboard';
-import { gapsFor } from '@/lib/plan';
-import { completedActivityIds, sessionsForDay, sessionsOf } from '@/lib/analytics';
-import { CATEGORY_META } from '@/lib/categories';
-import { dayKey, relativeDayLabel, shiftDayKey } from '@/lib/dates';
+import { sessionDay, sessionsOf } from '@/lib/analytics';
+import { daySchedule, dayCategoryColors, dominantColor, type DaySchedule } from '@/lib/scheduleCalendar';
+import {
+  addMonths,
+  buildMonthMatrix,
+  intensityLevel,
+  monthLabel,
+  monthOf,
+  WEEKDAY_LABELS,
+  type MonthRef,
+} from '@/lib/calendar';
+import { CATEGORY_COLOR, CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
+import { dayKey, dayDiff, relativeDayLabel } from '@/lib/dates';
 import { minutesToLabel } from '@/lib/schedule';
 import { weekdaysLabel } from '@/lib/recurrence';
 import type { Quest } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Plan'>;
+type CalView = 'month' | 'year';
 
 // Locked palette (gold reserved for 100% rings — never here).
 const INK = '#1F2937';
@@ -31,90 +40,51 @@ const MUTED = '#5A5A72';
 const TRACK = '#E3E3EC';
 
 export function PlanScreen({ route, navigation }: Props) {
-  const { quests, character } = useGame();
+  const { quests } = useGame();
   const { buckets, assignments } = useBuckets();
   const { getPlan, togglePlanned } = usePlan();
   const { events } = useActivityLog();
-  const guardAbandon = useAbandonGuard();
 
   const todayK = dayKey(new Date());
-  const tomorrowK = shiftDayKey(todayK, 1);
-  useMaterializeRecurring([todayK, tomorrowK]); // recurring habits fill today + tomorrow
-  const [targetDay, setTargetDay] = useState(() => (route.params?.day === tomorrowK ? tomorrowK : todayK));
+  useMaterializeRecurring([todayK, route.params?.day ?? todayK]);
+
+  const [view, setView] = useState<CalView>('month');
+  const [selected, setSelected] = useState(() => route.params?.day ?? todayK);
+  const [monthRef, setMonthRef] = useState<MonthRef>(() => {
+    const [y, m] = selected.split('-').map(Number);
+    return monthOf(new Date(y ?? 1970, (m ?? 1) - 1, 1));
+  });
+  const [year, setYear] = useState(() => Number(selected.slice(0, 4)));
   const [addOpen, setAddOpen] = useState(false);
+  const [addDates, setAddDates] = useState<string[] | null>(null);
+  const [showLibrary, setShowLibrary] = useState(false);
 
-  const allSessions = useMemo(() => sessionsOf(events), [events]);
-  const planned = getPlan(targetDay);
-  const plannedSet = useMemo(() => new Set(planned ?? []), [planned]);
+  // day → set of completed activity ids that day (for the colour-coded "done" heat).
+  const doneByDay = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const s of sessionsOf(events)) {
+      const d = sessionDay(s);
+      const set = map.get(d) ?? new Set<string>();
+      set.add(s.activityId);
+      if (!map.has(d)) map.set(d, set);
+    }
+    return map;
+  }, [events]);
 
-  // Carry-over: only from an actual prior-day plan (avoid dumping every habit).
-  const prevDay = shiftDayKey(targetDay, -1);
-  const prevPlan = getPlan(prevDay);
-  const gaps = useMemo(() => {
-    if (!prevPlan) return [];
-    const done = completedActivityIds(sessionsForDay(allSessions, prevDay));
-    return gapsFor(quests, prevPlan, done).filter((q) => !plannedSet.has(q.id));
-  }, [prevPlan, allSessions, prevDay, quests, plannedSet]);
+  const summaryFor = useMemo(() => {
+    const empty: ReadonlySet<string> = new Set();
+    return (k: string): DaySchedule => daySchedule(k, quests, getPlan(k), doneByDay.get(k) ?? empty);
+  }, [quests, getPlan, doneByDay]);
+
+  const selSummary = summaryFor(selected);
+  const isPastDay = dayDiff(todayK, selected) < 0;
 
   const rails = useMemo(() => groupHabitsIntoRails(quests, buckets, assignments), [quests, buckets, assignments]);
+  const plannedSet = useMemo(() => new Set(getPlan(selected) ?? []), [getPlan, selected]);
 
-  const Segment = ({ label, value }: { label: string; value: string }) => {
-    const active = targetDay === value;
-    return (
-      <Pressable
-        onPress={() => setTargetDay(value)}
-        accessibilityRole="tab"
-        accessibilityState={{ selected: active }}
-        accessibilityLabel={`Plan ${label}`}
-        style={[styles.segment, active && styles.segmentOn]}
-      >
-        <Text style={[styles.segmentText, active && styles.segmentTextOn]}>{label}</Text>
-      </Pressable>
-    );
-  };
-
-  const onToggle = (quest: Quest, checked: boolean) => {
-    // Un-planning a habit with a real streak earns a "think twice" pause.
-    if (
-      checked &&
-      guardAbandon({
-        kind: 'unplan',
-        ctx: { streakDays: character?.streakDays ?? 0 },
-        onProceed: () => void togglePlanned(targetDay, quest.id),
-      })
-    )
-      return;
-    void togglePlanned(targetDay, quest.id);
-  };
-
-  const Row = ({ quest }: { quest: Quest }) => {
-    const checked = plannedSet.has(quest.id);
-    return (
-      <Pressable
-        onPress={() => onToggle(quest, checked)}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked }}
-        accessibilityLabel={`${quest.title}${quest.scheduledTime !== undefined ? `, at ${minutesToLabel(quest.scheduledTime)}` : ''}`}
-        style={styles.row}
-      >
-        <View style={[styles.check, checked && styles.checkOn]}>
-          {checked && <Text style={styles.checkMark}>✓</Text>}
-        </View>
-        <Text style={styles.rowIcon}>{CATEGORY_META[quest.category].icon}</Text>
-        <View style={styles.rowMain}>
-          <Text style={styles.rowTitle} numberOfLines={1}>
-            {quest.title}
-          </Text>
-          {(quest.scheduledTime !== undefined || quest.scheduledDays?.length) && (
-            <Text style={styles.rowTime}>
-              {quest.scheduledTime !== undefined ? `⏰ ${minutesToLabel(quest.scheduledTime)}` : ''}
-              {quest.scheduledTime !== undefined && quest.scheduledDays?.length ? ' · ' : ''}
-              {quest.scheduledDays?.length ? `↻ ${weekdaysLabel(quest.scheduledDays)}` : ''}
-            </Text>
-          )}
-        </View>
-      </Pressable>
-    );
+  const openAddFor = (day: string) => {
+    setAddDates([day]);
+    setAddOpen(true);
   };
 
   return (
@@ -124,101 +94,397 @@ export function PlanScreen({ route, navigation }: Props) {
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          Plan your day
+          Schedule your habits
         </Text>
         <View style={styles.chevronSpacer} />
       </View>
 
-      <View style={styles.segmentBar} accessibilityRole="tablist">
-        <Segment label="Today" value={todayK} />
-        <Segment label="Tomorrow" value={tomorrowK} />
+      {/* Month / Year view toggle. */}
+      <View style={styles.viewBar} accessibilityRole="tablist">
+        {(['month', 'year'] as CalView[]).map((v) => {
+          const on = view === v;
+          return (
+            <Pressable
+              key={v}
+              onPress={() => setView(v)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: on }}
+              style={[styles.viewTab, on && styles.viewTabOn]}
+            >
+              <Text style={[styles.viewTabText, on && styles.viewTabTextOn]}>{v === 'month' ? 'Month' : 'Year'}</Text>
+            </Pressable>
+          );
+        })}
       </View>
-      <Text style={styles.count}>
-        {plannedSet.size === 0
-          ? `Nothing planned for ${relativeDayLabel(targetDay, todayK)} yet`
-          : `${plannedSet.size} planned for ${relativeDayLabel(targetDay, todayK)}`}
-      </Text>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        {gaps.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>CARRY OVER {relativeDayLabel(prevDay, todayK).toUpperCase()}’S GAPS</Text>
-            <Text style={styles.sectionHint}>Unfinished from your last plan — tap to add.</Text>
-            <View style={styles.chips}>
-              {gaps.map((q) => (
-                <Pressable
-                  key={q.id}
-                  onPress={() => void togglePlanned(targetDay, q.id)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Carry over ${q.title}`}
-                  style={styles.chip}
-                >
-                  <Text style={styles.chipText}>+ {q.title}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
+        {view === 'month' ? (
+          <MonthGrid
+            monthRef={monthRef}
+            onPrev={() => setMonthRef((r) => addMonths(r, -1))}
+            onNext={() => setMonthRef((r) => addMonths(r, 1))}
+            summaryFor={summaryFor}
+            todayKey={todayK}
+            selected={selected}
+            onSelect={setSelected}
+          />
+        ) : (
+          <YearGrid
+            year={year}
+            onPrev={() => setYear((y) => y - 1)}
+            onNext={() => setYear((y) => y + 1)}
+            summaryFor={summaryFor}
+            todayKey={todayK}
+            selected={selected}
+            onSelect={(d) => {
+              setSelected(d);
+              const [y, m] = d.split('-').map(Number);
+              setMonthRef(monthOf(new Date(y ?? 1970, (m ?? 1) - 1, 1)));
+            }}
+          />
         )}
 
-        {rails.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyEmoji}>🌱</Text>
-            <Text style={styles.emptyText}>No habits yet. Create one to start planning.</Text>
+        <Legend />
+
+        {/* Selected day panel. */}
+        <View style={styles.panel}>
+          <View style={styles.panelHead}>
+            <Text style={styles.panelTitle}>{relativeDayLabel(selected, todayK)}</Text>
+            <Text style={styles.panelCount}>
+              {selSummary.count === 0 ? 'Nothing scheduled' : `${selSummary.count} scheduled · ${selSummary.doneCount} done`}
+            </Text>
           </View>
-        ) : (
-          rails.map((rail) => (
-            <View key={rail.id} style={styles.section}>
-              <Text style={styles.sectionLabel}>{rail.label.toUpperCase()}</Text>
-              <View style={styles.rows}>
-                {rail.habits.map((q) => (
-                  <Row key={q.id} quest={q} />
-                ))}
-              </View>
+
+          {selSummary.scheduled.length > 0 && (
+            <View style={styles.rows}>
+              {selSummary.scheduled.map((q) => {
+                const done = selSummary.doneIds.has(q.id);
+                return (
+                  <View key={q.id} style={styles.row}>
+                    <View style={[styles.dot, { backgroundColor: CATEGORY_COLOR[q.category] }]} />
+                    <View style={styles.rowMain}>
+                      <Text style={[styles.rowTitle, done && styles.rowTitleDone]} numberOfLines={1}>
+                        {q.title}
+                      </Text>
+                      {(q.scheduledTime !== undefined || q.scheduledDays?.length) && (
+                        <Text style={styles.rowTime}>
+                          {q.scheduledTime !== undefined ? `⏰ ${minutesToLabel(q.scheduledTime)}` : ''}
+                          {q.scheduledTime !== undefined && q.scheduledDays?.length ? ' · ' : ''}
+                          {q.scheduledDays?.length ? `↻ ${weekdaysLabel(q.scheduledDays)}` : ''}
+                        </Text>
+                      )}
+                    </View>
+                    {done ? (
+                      <Text style={styles.doneTag}>✓</Text>
+                    ) : !isPastDay ? (
+                      <Pressable
+                        onPress={() => void togglePlanned(selected, q.id)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Remove ${q.title} from ${relativeDayLabel(selected, todayK)}`}
+                        hitSlop={10}
+                      >
+                        <Text style={styles.removeX}>✕</Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                );
+              })}
             </View>
-          ))
-        )}
+          )}
+
+          {isPastDay ? (
+            <Pressable
+              onPress={() => navigation.navigate('Insights', { day: selected })}
+              accessibilityRole="button"
+              style={styles.secondaryBtn}
+            >
+              <Text style={styles.secondaryBtnText}>📊 Review this day ›</Text>
+            </Pressable>
+          ) : (
+            <>
+              <Pressable
+                onPress={() => openAddFor(selected)}
+                accessibilityRole="button"
+                accessibilityLabel={`Add an activity for ${relativeDayLabel(selected, todayK)}`}
+                style={styles.addBtn}
+              >
+                <Text style={styles.addBtnText}>＋ Add activity for {relativeDayLabel(selected, todayK)}</Text>
+              </Pressable>
+
+              {rails.length > 0 && (
+                <Pressable onPress={() => setShowLibrary((v) => !v)} accessibilityRole="button" style={styles.libraryToggle}>
+                  <Text style={styles.libraryToggleText}>
+                    {showLibrary ? 'Hide your habits ▲' : '＋ Schedule from your habits ▾'}
+                  </Text>
+                </Pressable>
+              )}
+              {showLibrary &&
+                rails.map((rail) => (
+                  <View key={rail.id} style={styles.librarySection}>
+                    <Text style={styles.sectionLabel}>{rail.label.toUpperCase()}</Text>
+                    <View style={styles.chips}>
+                      {rail.habits.map((q) => {
+                        const on = plannedSet.has(q.id);
+                        return (
+                          <Pressable
+                            key={q.id}
+                            onPress={() => void togglePlanned(selected, q.id)}
+                            accessibilityRole="button"
+                            accessibilityState={{ selected: on }}
+                            accessibilityLabel={`${on ? 'Remove' : 'Add'} ${q.title}`}
+                            style={[styles.habitChip, on && styles.habitChipOn]}
+                          >
+                            <Text style={[styles.habitChipText, on && styles.habitChipTextOn]}>
+                              {on ? '✓ ' : '+ '}
+                              {CATEGORY_META[q.category].icon} {q.title}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ))}
+            </>
+          )}
+        </View>
       </ScrollView>
 
-      <AddActivityFab onPress={() => setAddOpen(true)} />
-      <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} />
+      <AddActivityFab onPress={() => openAddFor(todayK)} />
+      <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultDates={addDates} />
     </ScreenContainer>
   );
 }
 
+// --- Month grid -------------------------------------------------------------
+
+function MonthGrid({
+  monthRef,
+  onPrev,
+  onNext,
+  summaryFor,
+  todayKey,
+  selected,
+  onSelect,
+}: {
+  monthRef: MonthRef;
+  onPrev: () => void;
+  onNext: () => void;
+  summaryFor: (k: string) => DaySchedule;
+  todayKey: string;
+  selected: string;
+  onSelect: (k: string) => void;
+}) {
+  const weeks = buildMonthMatrix(monthRef);
+  return (
+    <View style={styles.calCard}>
+      <View style={styles.calHead}>
+        <Pressable onPress={onPrev} accessibilityRole="button" accessibilityLabel="Previous month" hitSlop={10}>
+          <Text style={styles.nav}>‹</Text>
+        </Pressable>
+        <Text style={styles.month}>{monthLabel(monthRef)}</Text>
+        <Pressable onPress={onNext} accessibilityRole="button" accessibilityLabel="Next month" hitSlop={10}>
+          <Text style={styles.nav}>›</Text>
+        </Pressable>
+      </View>
+      <View style={styles.weekRow}>
+        {WEEKDAY_LABELS.map((d, i) => (
+          <Text key={i} style={styles.weekday}>
+            {d}
+          </Text>
+        ))}
+      </View>
+      {weeks.map((week, wi) => (
+        <View key={wi} style={styles.weekRow}>
+          {week.map((cell, ci) => {
+            if (!cell.key) return <View key={ci} style={styles.mCell} />;
+            const s = summaryFor(cell.key);
+            const isToday = cell.key === todayKey;
+            const on = cell.key === selected;
+            const allDone = s.count > 0 && s.doneCount >= s.count;
+            return (
+              <Pressable
+                key={ci}
+                onPress={() => onSelect(cell.key!)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: on }}
+                accessibilityLabel={`${cell.key}, ${s.count} scheduled`}
+                style={[styles.mCell, styles.mDay, on && styles.mDayOn, isToday && !on && styles.mDayToday]}
+              >
+                <Text style={[styles.mDayText, on && styles.mDayTextOn]}>{cell.day}</Text>
+                <View style={styles.dots}>
+                  {allDone ? (
+                    <Text style={[styles.allDone, on && styles.mDayTextOn]}>✓</Text>
+                  ) : (
+                    dayCategoryColors(s.categories, 3).map((c, i) => (
+                      <View key={i} style={[styles.miniDot, { backgroundColor: on ? '#FFFFFF' : c }]} />
+                    ))
+                  )}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// --- Year grid --------------------------------------------------------------
+
+function YearGrid({
+  year,
+  onPrev,
+  onNext,
+  summaryFor,
+  todayKey,
+  selected,
+  onSelect,
+}: {
+  year: number;
+  onPrev: () => void;
+  onNext: () => void;
+  summaryFor: (k: string) => DaySchedule;
+  todayKey: string;
+  selected: string;
+  onSelect: (k: string) => void;
+}) {
+  const months: MonthRef[] = Array.from({ length: 12 }, (_, m) => ({ year, month: m }));
+  return (
+    <View style={styles.calCard}>
+      <View style={styles.calHead}>
+        <Pressable onPress={onPrev} accessibilityRole="button" accessibilityLabel="Previous year" hitSlop={10}>
+          <Text style={styles.nav}>‹</Text>
+        </Pressable>
+        <Text style={styles.month}>{year}</Text>
+        <Pressable onPress={onNext} accessibilityRole="button" accessibilityLabel="Next year" hitSlop={10}>
+          <Text style={styles.nav}>›</Text>
+        </Pressable>
+      </View>
+      <View style={styles.yearWrap}>
+        {months.map((ref) => (
+          <View key={ref.month} style={styles.miniMonth}>
+            <Text style={styles.miniMonthLabel}>{monthLabel(ref).split(' ')[0]}</Text>
+            <View style={styles.yearGridRows}>
+              {buildMonthMatrix(ref).map((week, wi) => (
+                <View key={wi} style={styles.yearWeek}>
+                  {week.map((cell, ci) => {
+                    if (!cell.key) return <View key={ci} style={styles.yCell} />;
+                    const s = summaryFor(cell.key);
+                    const color = dominantColor(s.categories);
+                    const isToday = cell.key === todayKey;
+                    const on = cell.key === selected;
+                    const level = intensityLevel(s.count);
+                    return (
+                      <Pressable
+                        key={ci}
+                        onPress={() => onSelect(cell.key!)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${cell.key}, ${s.count} scheduled`}
+                        style={[
+                          styles.yCell,
+                          styles.yDay,
+                          { backgroundColor: color ? color : '#ECEAE4', opacity: color ? 0.3 + level * 0.175 : 1 },
+                          on && styles.yDayOn,
+                          isToday && styles.yDayToday,
+                        ]}
+                      />
+                    );
+                  })}
+                </View>
+              ))}
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function Legend() {
+  return (
+    <View style={styles.legend}>
+      {CATEGORY_ORDER.map((c) => (
+        <View key={c} style={styles.legendItem}>
+          <View style={[styles.miniDot, { backgroundColor: CATEGORY_COLOR[c] }]} />
+          <Text style={styles.legendText}>{CATEGORY_META[c].label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+const CELL_RADIUS = 12;
 const styles = StyleSheet.create({
   topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm },
   chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
   chevronSpacer: { width: 28 },
   title: { ...typography.heading, color: INK },
 
-  segmentBar: { flexDirection: 'row', backgroundColor: '#ECEAE4', borderRadius: 999, padding: 4, gap: 4 },
-  segment: { flex: 1, paddingVertical: spacing.sm, borderRadius: 999, alignItems: 'center' },
-  segmentOn: { backgroundColor: CARD },
-  segmentText: { ...typography.label, color: MUTED, fontWeight: '700' },
-  segmentTextOn: { color: VIOLET },
-  count: { ...typography.caption, color: MUTED, marginTop: spacing.sm, textAlign: 'center' },
+  viewBar: { flexDirection: 'row', backgroundColor: '#ECEAE4', borderRadius: 999, padding: 4, gap: 4 },
+  viewTab: { flex: 1, paddingVertical: spacing.sm, borderRadius: 999, alignItems: 'center' },
+  viewTabOn: { backgroundColor: CARD },
+  viewTabText: { ...typography.label, color: MUTED, fontWeight: '700' },
+  viewTabTextOn: { color: VIOLET },
 
   content: { gap: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xl },
-  section: { gap: spacing.sm },
-  sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
-  sectionHint: { ...typography.caption, color: MUTED },
 
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: { backgroundColor: VIOLET_SOFT, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
-  chipText: { ...typography.label, color: VIOLET, fontWeight: '700' },
+  calCard: { backgroundColor: CARD, borderRadius: 24, padding: spacing.md, gap: 6 },
+  calHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.xs },
+  nav: { ...typography.heading, color: VIOLET, width: 32, textAlign: 'center' },
+  month: { ...typography.title, color: INK, fontWeight: '800' },
+  weekRow: { flexDirection: 'row', gap: 6 },
+  weekday: { ...typography.caption, color: MUTED, flex: 1, textAlign: 'center', fontWeight: '700' },
+
+  mCell: { flex: 1, aspectRatio: 1, borderRadius: CELL_RADIUS, alignItems: 'center', justifyContent: 'center' },
+  mDay: { backgroundColor: '#F7F6F2' },
+  mDayOn: { backgroundColor: VIOLET },
+  mDayToday: { borderWidth: 2, borderColor: VIOLET },
+  mDayText: { ...typography.label, color: INK, fontWeight: '700' },
+  mDayTextOn: { color: '#FFFFFF' },
+  dots: { flexDirection: 'row', gap: 2, height: 6, marginTop: 2, alignItems: 'center' },
+  miniDot: { width: 5, height: 5, borderRadius: 3 },
+  allDone: { fontSize: 9, color: VIOLET, fontWeight: '800', lineHeight: 9 },
+
+  yearWrap: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: spacing.sm },
+  miniMonth: { width: '31%', gap: 3, marginBottom: spacing.sm },
+  miniMonthLabel: { ...typography.caption, color: MUTED, fontWeight: '700' },
+  yearGridRows: { gap: 2 },
+  yearWeek: { flexDirection: 'row', gap: 2 },
+  yCell: { flex: 1, aspectRatio: 1, borderRadius: 2 },
+  yDay: {},
+  yDayOn: { borderWidth: 1.5, borderColor: INK },
+  yDayToday: { borderWidth: 1.5, borderColor: VIOLET },
+
+  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center' },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  legendText: { ...typography.caption, color: MUTED, fontSize: 10 },
+
+  panel: { backgroundColor: CARD, borderRadius: 24, padding: spacing.lg, gap: spacing.md },
+  panelHead: { gap: 2 },
+  panelTitle: { ...typography.title, color: INK, fontWeight: '800' },
+  panelCount: { ...typography.caption, color: MUTED },
 
   rows: { gap: spacing.sm },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 18, padding: spacing.md },
-  check: { width: 26, height: 26, borderRadius: 999, borderWidth: 2, borderColor: TRACK, alignItems: 'center', justifyContent: 'center' },
-  checkOn: { backgroundColor: VIOLET, borderColor: VIOLET },
-  checkMark: { color: '#FFFFFF', fontWeight: '800', fontSize: 14 },
-  rowIcon: { fontSize: 20 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  dot: { width: 10, height: 10, borderRadius: 5 },
   rowMain: { flex: 1, gap: 2 },
   rowTitle: { ...typography.body, color: INK, fontWeight: '600' },
+  rowTitleDone: { color: MUTED, textDecorationLine: 'line-through' },
   rowTime: { ...typography.caption, color: VIOLET, fontWeight: '700' },
+  doneTag: { ...typography.body, color: '#16C8A8', fontWeight: '800' },
+  removeX: { ...typography.body, color: MUTED, fontWeight: '800', paddingHorizontal: 4 },
 
-  empty: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
-  emptyEmoji: { fontSize: 36 },
-  emptyText: { ...typography.body, color: MUTED, textAlign: 'center' },
-
+  addBtn: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center' },
+  addBtnText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
+  secondaryBtn: { backgroundColor: VIOLET_SOFT, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center' },
+  secondaryBtnText: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  libraryToggle: { alignItems: 'center', paddingVertical: spacing.xs },
+  libraryToggleText: { ...typography.label, color: VIOLET, fontWeight: '700' },
+  librarySection: { gap: spacing.sm },
+  sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  habitChip: { backgroundColor: '#F7F6F2', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
+  habitChipOn: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET },
+  habitChipText: { ...typography.caption, color: INK, fontWeight: '600' },
+  habitChipTextOn: { color: VIOLET, fontWeight: '800' },
 });

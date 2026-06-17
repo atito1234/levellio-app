@@ -56,6 +56,16 @@ export class MetadataStore {
     await this.persist(uid, []);
   }
 
+  /** Drop all events tied to the given activity ids (sessions + contributions). */
+  async removeActivities(uid: string, activityIds: readonly string[]): Promise<void> {
+    if (activityIds.length === 0) return;
+    const drop = new Set(activityIds);
+    const kept = (await this.load(uid)).filter(
+      (e) => !('activityId' in e) || !drop.has((e as { activityId: string }).activityId),
+    );
+    await this.persist(uid, kept);
+  }
+
   private async persist(uid: string, events: MetadataEvent[]): Promise<void> {
     await this.store.setItem(
       metadataKey(uid),
