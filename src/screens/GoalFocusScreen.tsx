@@ -53,12 +53,13 @@ export function GoalFocusScreen({ route, navigation }: Props) {
 function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['navigation'] }) {
   const { quests, deleteQuest } = useGame();
   const { events } = useActivityLog();
+  const { habitIdsForGoal } = useGoals();
   const progress = useGoalProgress(goal);
 
   const accent = goalColor(goal).accent;
   const todayK = dayKey(new Date());
   const sessions = useMemo(() => sessionsOf(events), [events]);
-  const habits = useMemo(() => goalHabits(quests, goal), [quests, goal]);
+  const habits = useMemo(() => goalHabits(quests, goal, habitIdsForGoal(goal.id)), [quests, goal, habitIdsForGoal]);
 
   // The capacities these activities collectively power — the ripple that ties
   // them together (shared capacities = connected).

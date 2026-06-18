@@ -68,7 +68,7 @@ export function DashboardScreen() {
   const { character, quests, suggestQuest, reorderQuests, status } = useGame();
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
-  const { goals } = useGoals();
+  const { goals, habitIdsForGoal } = useGoals();
   const { signedIn, myProjects, featured, projectsForHabit } = useProjects();
   const { settings } = useSettings();
   const communityAllowed = useCommunityAccess();
@@ -92,17 +92,23 @@ export function DashboardScreen() {
   const gated = goals.length > 0 && !selectedGoal;
   const focusAccent = selectedGoal ? goalColor(selectedGoal).accent : TEAL;
 
+  // Habits explicitly tagged into the selected goal (union with category match).
+  const goalLinkedIds = useMemo(
+    () => (selectedGoal ? habitIdsForGoal(selectedGoal.id) : undefined),
+    [selectedGoal, habitIdsForGoal],
+  );
+
   const progress = useMemo(
-    () => (selectedGoal ? goalDayProgress(quests, plan, selectedGoal) : planProgress(quests, plan)),
-    [quests, plan, selectedGoal],
+    () => (selectedGoal ? goalDayProgress(quests, plan, selectedGoal, goalLinkedIds) : planProgress(quests, plan)),
+    [quests, plan, selectedGoal, goalLinkedIds],
   );
 
   // The planned, still-open habits (timed first) — filtered to the selected goal.
   const openHabits = useMemo(
-    () => (selectedGoal ? goalFocusPool(quests, plan, selectedGoal) : plannedOpen(quests, plan)),
-    [quests, plan, selectedGoal],
+    () => (selectedGoal ? goalFocusPool(quests, plan, selectedGoal, goalLinkedIds) : plannedOpen(quests, plan)),
+    [quests, plan, selectedGoal, goalLinkedIds],
   );
-  const goalHasActivities = selectedGoal ? goalHabits(quests, selectedGoal).length > 0 : true;
+  const goalHasActivities = selectedGoal ? goalHabits(quests, selectedGoal, goalLinkedIds).length > 0 : true;
   // Guided first-run: 1 pick a goal → 2 add activities → 3 schedule habits (0 = done).
   const onboardStep: 0 | 1 | 2 | 3 =
     goals.length === 0 || gated ? 1 : !goalHasActivities ? 2 : plan === undefined ? 3 : 0;

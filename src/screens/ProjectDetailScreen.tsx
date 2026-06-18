@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, ProgressBar } from '@/components';
+import { ActivityTile, AddActivitySheet, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
 import { useProjects } from '@/state/ProjectsContext';
+import { useGoals } from '@/state/GoalContext';
+import { usePlan } from '@/state/PlanContext';
 import {
   cycleEndLabel,
   projectColor,
@@ -43,10 +45,13 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   const { account } = useAuth();
   const { quests, addQuest } = useGame();
   const { subscribe, joinProject, leaveProject, setShareFeed, linkedProjectIds, linkHabit, unlinkHabit } = useProjects();
+  const { goals, goalsForHabit, linkGoal, unlinkGoal, addGoal } = useGoals();
+  const { getPlan, togglePlanned } = usePlan();
 
   const [snap, setSnap] = useState<ProjectSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [joinShare, setJoinShare] = useState(true);
+  const [addOpen, setAddOpen] = useState(false);
 
   useEffect(() => {
     const unsub = subscribe(projectId, (s) => {
@@ -72,20 +77,30 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
     return new Set((snap?.feed ?? []).filter((f) => dayKey(new Date(f.createdAt)) === today).map((f) => f.uid)).size;
   }, [snap]);
 
-  const adopt = async (habit: ProjectSuggestedHabit) => {
-    // Reuse an existing habit with the same name instead of duplicating it.
-    const existing = quests.find((q) => q.title.trim().toLowerCase() === habit.title.trim().toLowerCase());
-    const id = existing?.id ?? (await addQuest({ title: habit.title, category: habit.category, difficulty: 'easy' }))?.id;
-    if (id) {
-      await linkHabit(id, projectId);
-      Alert.alert("You're in 🤝", `“${habit.title}” is now one of your activities — every time you complete it, you move this project forward.`);
-    }
+  const questByTitle = (title: string) => quests.find((q) => q.title.trim().toLowerCase() === title.trim().toLowerCase());
+  const todayK = dayKey(new Date());
+
+  /**
+   * Make a project habit truly the user's: reuse-or-create it as a DAILY habit,
+   * link it to the project, and put it on today's plan so it shows on the home,
+   * the calendar, and analytics straight away.
+   */
+  const ensureOwned = async (habit: { title: string; category: ProjectSuggestedHabit['category'] }): Promise<string | null> => {
+    const existing = questByTitle(habit.title);
+    const id = existing?.id ?? (await addQuest({ title: habit.title, category: habit.category, difficulty: 'easy', scheduledDays: [0, 1, 2, 3, 4, 5, 6] }))?.id;
+    if (!id) return null;
+    await linkHabit(id, projectId);
+    if (!(getPlan(todayK) ?? []).includes(id)) await togglePlanned(todayK, id);
+    return id;
   };
 
-  const questByTitle = (title: string) => quests.find((q) => q.title.trim().toLowerCase() === title.trim().toLowerCase());
+  const adopt = async (habit: ProjectSuggestedHabit) => {
+    const id = await ensureOwned(habit);
+    if (id) Alert.alert("You're in 🤝", `“${habit.title}” is now a daily habit of yours — it shows on your Today and powers this project every time you do it.`);
+  };
 
   // The user's OWN activities that power this project — theirs to add, edit,
-  // remove, and take into battle.
+  // remove, tag into goals, and take into battle.
   const myQuests = useMemo(
     () => quests.filter((q) => linkedProjectIds(q.id).includes(projectId)),
     [quests, linkedProjectIds, projectId],
@@ -93,12 +108,29 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
 
   const addAllSuggested = async () => {
     if (!project) return;
-    for (const h of project.suggestedHabits) {
-      const existing = quests.find((q) => q.title.trim().toLowerCase() === h.title.trim().toLowerCase());
-      const id = existing?.id ?? (await addQuest({ title: h.title, category: h.category, difficulty: 'easy' }))?.id;
-      if (id) await linkHabit(id, projectId);
+    for (const h of project.suggestedHabits) await ensureOwned(h);
+    Alert.alert("They're yours 🤝", 'All suggested habits are now daily habits in your activities, powering this project.');
+  };
+
+  /** Turn this project into one of the user's goals and file its activities in it. */
+  const makeProjectAGoal = async () => {
+    if (!project) return;
+    const cats = [...new Set(project.suggestedHabits.map((h) => h.category))];
+    const goal = await addGoal({
+      title: project.title,
+      emoji: project.emoji,
+      colorId: project.colorId,
+      categories: cats.length ? cats : ['health'],
+    });
+    if (goal) {
+      for (const q of myQuests) await linkGoal(q.id, goal.id);
+      Alert.alert('Goal created 🎯', `“${project.title}” is now a goal — your activities here ladder up to it.`);
     }
-    Alert.alert("They're yours 🤝", 'All suggested habits are now in your activities and powering this project.');
+  };
+
+  const toggleGoalFor = (activityId: string, goalId: string) => {
+    if (goalsForHabit(activityId).includes(goalId)) void unlinkGoal(activityId, goalId);
+    else void linkGoal(activityId, goalId);
   };
 
   const invite = async () => {
@@ -208,7 +240,15 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        {/* YOUR activities — full ownership: edit, remove, or take into battle. */}
+        {/* Big, fun activity tiles: add your own, or ask peers who've solved it. */}
+        {joined && (
+          <View style={styles.tileRow}>
+            <ActivityTile icon="✨" label="New activity" sub="Add your own daily habit" onPress={() => setAddOpen(true)} tint={c.accent} />
+            <ActivityTile icon="🌍" label="Ask peers" sub="Get a habit that worked for them" onPress={() => navigation.navigate('PostComposer', { projectId, kind: 'ask' })} tint={VIOLET} />
+          </View>
+        )}
+
+        {/* YOUR activities — beautiful cards: Do / Battle / Edit / Remove + goals. */}
         {joined && (
           <>
             <View style={styles.sectionRow}>
@@ -225,75 +265,60 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
               )}
             </View>
             {myQuests.length === 0 ? (
-              <Text style={styles.empty}>Adopt a suggested habit below to make it yours.</Text>
+              <Text style={styles.empty}>Add a suggested activity below — or your own — to make it yours.</Text>
             ) : (
-              myQuests.map((q) => (
-                <View key={q.id} style={styles.habitRow}>
-                  <Text style={styles.habitText} numberOfLines={2}>
-                    {CATEGORY_META[q.category].icon} {q.title}
-                  </Text>
-                  <Pressable
-                    onPress={() => navigation.navigate('BattleSetup', { questId: q.id })}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Battle ${q.title}`}
-                    hitSlop={6}
-                    style={styles.ownIcon}
-                  >
-                    <Text style={styles.ownIconText}>⚔️</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => navigation.navigate('QuestEditor', { questId: q.id })}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Edit ${q.title}`}
-                    hitSlop={6}
-                    style={styles.ownIcon}
-                  >
-                    <Text style={styles.ownEdit}>Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => void unlinkHabit(q.id, projectId)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Remove ${q.title} from this project`}
-                    hitSlop={6}
-                    style={styles.ownIcon}
-                  >
-                    <Text style={styles.ownRemove}>✕</Text>
-                  </Pressable>
-                </View>
-              ))
+              <View style={styles.cardList}>
+                {myQuests.map((q) => (
+                  <OwnedActivityCard
+                    key={q.id}
+                    emoji={CATEGORY_META[q.category].icon}
+                    title={q.title}
+                    accent={c.accent}
+                    goals={goals}
+                    inGoalIds={new Set(goalsForHabit(q.id))}
+                    onToggleGoal={(goalId) => toggleGoalFor(q.id, goalId)}
+                    onNewGoal={() => navigation.navigate('GoalEditor')}
+                    onDo={() => navigation.navigate('Ripple', { questId: q.id })}
+                    onBattle={() => navigation.navigate('BattleSetup', { questId: q.id })}
+                    onEdit={() => navigation.navigate('QuestEditor', { questId: q.id })}
+                    onRemove={() => void unlinkHabit(q.id, projectId)}
+                  />
+                ))}
+              </View>
             )}
+            <Pressable onPress={() => void makeProjectAGoal()} accessibilityRole="button" accessibilityLabel="Make this project one of your goals" style={styles.makeGoal}>
+              <Text style={styles.makeGoalText}>🎯 Make this project a goal</Text>
+            </Pressable>
           </>
         )}
 
-        {/* Suggested habits — one-tap adopt (reuses an existing habit by name). */}
+        {/* Suggested activities — big adopt cards (daily habit, reuse by name). */}
         {project.suggestedHabits.length > 0 && (
           <>
             <View style={styles.sectionRow}>
-              <Text style={styles.sectionLabel}>SUGGESTED HABITS</Text>
-              <Pressable onPress={() => void addAllSuggested()} accessibilityRole="button" accessibilityLabel="Add all suggested habits" hitSlop={8}>
-                <Text style={styles.slay}>+ Add all</Text>
+              <Text style={styles.sectionLabel}>SUGGESTED ACTIVITIES</Text>
+              <Pressable onPress={() => void addAllSuggested()} accessibilityRole="button" accessibilityLabel="Add all suggested activities" hitSlop={8}>
+                <Text style={styles.slay}>＋ Add all</Text>
               </Pressable>
             </View>
-            {project.suggestedHabits.map((h, i) => {
-              const owned = questByTitle(h.title);
-              const linked = owned ? linkedProjectIds(owned.id).includes(projectId) : false;
-              return (
-                <View key={`${h.title}-${i}`} style={styles.habitRow}>
-                  <Text style={styles.habitText} numberOfLines={2}>
-                    {CATEGORY_META[h.category].icon} {h.title}{' '}
-                    <Text style={styles.habitVal}>+{h.contribution} {project.unit}</Text>
-                  </Text>
-                  <Pressable
-                    onPress={() => (linked && owned ? navigation.navigate('QuestEditor', { questId: owned.id }) : void adopt(h))}
-                    accessibilityRole="button"
-                    accessibilityLabel={linked ? `Edit ${h.title}` : `Add ${h.title}`}
-                    style={[styles.adoptBtn, linked && styles.adoptDone]}
-                  >
-                    <Text style={[styles.adoptText, linked && styles.adoptDoneText]}>{linked ? '✓ Yours · Edit' : '+ Add'}</Text>
-                  </Pressable>
-                </View>
-              );
-            })}
+            <View style={styles.cardList}>
+              {project.suggestedHabits.map((h, i) => {
+                const owned = questByTitle(h.title);
+                const linked = owned ? linkedProjectIds(owned.id).includes(projectId) : false;
+                return (
+                  <SuggestedActivityCard
+                    key={`${h.title}-${i}`}
+                    emoji={CATEGORY_META[h.category].icon}
+                    title={h.title}
+                    contribution={`+${h.contribution} ${project.unit}`}
+                    accent={c.accent}
+                    added={linked}
+                    onAdd={() => void adopt(h)}
+                    onEdit={() => owned && navigation.navigate('QuestEditor', { questId: owned.id })}
+                  />
+                );
+              })}
+            </View>
           </>
         )}
 
@@ -345,6 +370,9 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
           </Pressable>
         )}
       </ScrollView>
+
+      {/* Add your own activity, pre-linked to this project as a daily habit. */}
+      <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultProjectIds={[projectId]} />
     </ScreenContainer>
   );
 }
@@ -404,6 +432,10 @@ const styles = StyleSheet.create({
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.md },
   slay: { ...typography.label, color: VIOLET, fontWeight: '800' },
   empty: { ...typography.body, color: MUTED },
+  tileRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
+  cardList: { gap: spacing.sm },
+  makeGoal: { alignSelf: 'flex-start', backgroundColor: '#F4F1FE', borderRadius: 999, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, marginTop: spacing.xs },
+  makeGoalText: { ...typography.label, color: VIOLET, fontWeight: '800' },
 
   habitRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: CARD, borderRadius: 14, padding: spacing.md, gap: spacing.sm },
   habitText: { ...typography.label, color: INK, flex: 1 },

@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
 import { communityBackend, type Unsubscribe } from '@/services/community';
-import type { Comment, CommunityIdentity, FeedScope, Post, PostDraft, ReactionEmoji } from '@/lib/community';
+import type { Comment, CommunityIdentity, FeedScope, Post, PostDraft, ReactionEmoji, SuggestedHabit } from '@/lib/community';
 
 interface CommunityContextValue {
   ready: boolean;
@@ -16,7 +16,7 @@ interface CommunityContextValue {
   follow: (targetUid: string) => Promise<void>;
   unfollow: (targetUid: string) => Promise<void>;
   createPost: (draft: PostDraft) => Promise<Post | null>;
-  addComment: (postId: string, text: string) => Promise<void>;
+  addComment: (postId: string, text: string, suggestedHabit?: SuggestedHabit) => Promise<void>;
   setReaction: (postId: string, emoji: ReactionEmoji | null) => Promise<void>;
   subscribeFeed: (scope: FeedScope, cb: (posts: Post[]) => void) => Unsubscribe;
   subscribeComments: (postId: string, cb: (comments: Comment[]) => void) => Unsubscribe;
@@ -69,8 +69,8 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
     [identity],
   );
   const addComment = useCallback(
-    async (postId: string, text: string) => {
-      if (identity) await communityBackend.addComment(identity, postId, text);
+    async (postId: string, text: string, suggestedHabit?: SuggestedHabit) => {
+      if (identity) await communityBackend.addComment(identity, postId, text, suggestedHabit);
     },
     [identity],
   );

@@ -15,6 +15,7 @@ import {
   type Post,
   type PostDraft,
   type ReactionEmoji,
+  type SuggestedHabit,
 } from '@/lib/community';
 import type { CommunityBackend, Unsubscribe } from './CommunityBackend';
 
@@ -78,6 +79,7 @@ export class LocalCommunityBackend implements CommunityBackend {
       ...(draft.habitTitle ? { habitTitle: draft.habitTitle } : {}),
       ...(typeof draft.value === 'number' ? { value: draft.value } : {}),
       ...(draft.mode ? { mode: draft.mode } : {}),
+      ...(draft.categoryHint ? { categoryHint: draft.categoryHint } : {}),
       createdAt: Date.now(),
       reactions: {},
       commentCount: 0,
@@ -107,7 +109,7 @@ export class LocalCommunityBackend implements CommunityBackend {
     };
   }
 
-  async addComment(identity: CommunityIdentity, postId: string, text: string): Promise<void> {
+  async addComment(identity: CommunityIdentity, postId: string, text: string, suggestedHabit?: SuggestedHabit): Promise<void> {
     const comments = await this.read<Comment[]>(commentsKey(postId), []);
     comments.push({
       id: genId('c'),
@@ -116,6 +118,7 @@ export class LocalCommunityBackend implements CommunityBackend {
       displayName: identity.displayName,
       ...(identity.presentation ? { presentation: identity.presentation } : {}),
       text: text.trim(),
+      ...(suggestedHabit ? { suggestedHabit } : {}),
       createdAt: Date.now(),
     });
     await this.write(commentsKey(postId), comments);

@@ -44,6 +44,7 @@ export function AddActivitySheet({
   defaultGoalId = null,
   defaultBucketId = null,
   defaultDates = null,
+  defaultProjectIds = null,
 }: {
   visible: boolean;
   onClose: () => void;
@@ -51,6 +52,8 @@ export function AddActivitySheet({
   defaultBucketId?: string | null;
   /** Pre-target specific calendar days (opens in "Pick date" mode with these selected). */
   defaultDates?: readonly string[] | null;
+  /** Pre-link to projects (opens as a daily habit so it powers them every day). */
+  defaultProjectIds?: readonly string[] | null;
 }) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { quests, addQuest } = useGame();
@@ -76,18 +79,26 @@ export function AddActivitySheet({
     if (visible) {
       setGoalId(defaultGoalId);
       setBucketId(defaultBucketId);
-      setProjectIds([]);
+      const projects = defaultProjectIds ?? [];
+      setProjectIds([...projects]);
       setTitle('');
       // Opened from a chosen calendar day → start in date mode on that day.
+      // Opened from a project → start as a daily habit so it powers it every day.
       const dates = defaultDates ?? [];
-      setWhenMode(dates.length > 0 ? 'date' : 'today');
-      setPickedDates([...dates]);
-      setWeekdays([]);
+      if (projects.length > 0) {
+        setWhenMode('weekly');
+        setWeekdays([...ALL_DAYS]);
+        setPickedDates([]);
+      } else {
+        setWhenMode(dates.length > 0 ? 'date' : 'today');
+        setPickedDates([...dates]);
+        setWeekdays([]);
+      }
       setTimeOn(false);
       setTimeMinutes(DEFAULT_TIME);
       setAdded(null);
     }
-  }, [visible, defaultGoalId, defaultBucketId, defaultDates]);
+  }, [visible, defaultGoalId, defaultBucketId, defaultDates, defaultProjectIds]);
 
   // Best category for a bucket = the most common category among its activities.
   const bucketCategory = useMemo(() => {

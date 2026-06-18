@@ -56,10 +56,18 @@ export function capacitiesForCategories(categories: readonly QuestCategory[]): C
   return [...seen];
 }
 
-/** The habits that contribute to a goal (those in its life areas). */
-export function goalHabits(quests: readonly Quest[], goal: Pick<Goal, 'categories'>): Quest[] {
+/**
+ * The habits that contribute to a goal — those in its life areas, PLUS any
+ * explicitly tagged into it (`linkedIds`, from goalLinks). Explicit membership
+ * lets a single habit belong to several goals regardless of its category.
+ */
+export function goalHabits(
+  quests: readonly Quest[],
+  goal: Pick<Goal, 'categories'>,
+  linkedIds?: ReadonlySet<string>,
+): Quest[] {
   const areas = new Set(goal.categories);
-  return quests.filter((q) => areas.has(q.category));
+  return quests.filter((q) => areas.has(q.category) || (linkedIds?.has(q.id) ?? false));
 }
 
 /**
@@ -89,9 +97,11 @@ export function goalProgress(args: {
   plannedTodayIds?: readonly string[];
   levels: CapacityLevels;
   weeklyDays: number;
+  /** Habit ids explicitly tagged into this goal (from goalLinks). */
+  linkedIds?: ReadonlySet<string>;
 }): GoalProgress {
-  const { goal, quests, plannedTodayIds, levels, weeklyDays } = args;
-  const contributing = goalHabits(quests, goal);
+  const { goal, quests, plannedTodayIds, levels, weeklyDays, linkedIds } = args;
+  const contributing = goalHabits(quests, goal, linkedIds);
   const plannedSet = plannedTodayIds ? new Set(plannedTodayIds) : null;
   const isPlanned = (id: string) => (plannedSet ? plannedSet.has(id) : true); // no plan → all count
 

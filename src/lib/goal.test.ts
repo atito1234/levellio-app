@@ -49,6 +49,12 @@ describe('goalHabits', () => {
     const quests = [q('a', 'fitness'), q('b', 'finance'), q('c', 'health')];
     expect(goalHabits(quests, goal).map((x) => x.id)).toEqual(['a', 'c']);
   });
+
+  it('also includes habits explicitly linked into the goal (union)', () => {
+    const quests = [q('a', 'fitness'), q('b', 'finance'), q('c', 'health')];
+    // 'b' is finance (not a goal area) but is explicitly tagged in.
+    expect(goalHabits(quests, goal, new Set(['b'])).map((x) => x.id)).toEqual(['a', 'b', 'c']);
+  });
 });
 
 describe('goalProgress', () => {

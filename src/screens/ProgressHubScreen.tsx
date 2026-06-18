@@ -84,7 +84,7 @@ export function ProgressHubScreen({ route, navigation }: Props) {
   const { quests, character } = useGame();
   const { getPlan } = usePlan();
   const { levels } = useCapacities();
-  const { goals } = useGoals();
+  const { goals, habitIdsForGoal } = useGoals();
   const { buckets, assignments } = useBuckets();
   const run = useInsightAction();
 
@@ -124,14 +124,14 @@ export function ProgressHubScreen({ route, navigation }: Props) {
           kind: 'goal',
           label: g.title,
           colorId: g.colorId,
-          members: goalHabits(quests, g),
+          members: goalHabits(quests, g, habitIdsForGoal(g.id)),
           sessions,
           getPlan,
           range,
           done,
         }),
       ),
-    [goals, quests, sessions, getPlan, range, done],
+    [goals, quests, sessions, getPlan, range, done, habitIdsForGoal],
   );
 
   const bucketStats = useMemo(
@@ -183,9 +183,9 @@ export function ProgressHubScreen({ route, navigation }: Props) {
   const goalSeries = useMemo(
     () =>
       goals.map((g) =>
-        adherenceTrendSeries({ id: g.id, kind: 'goal', label: g.title, colorId: g.colorId, members: goalHabits(quests, g), sessions, getPlan, range: trendRange, done }),
+        adherenceTrendSeries({ id: g.id, kind: 'goal', label: g.title, colorId: g.colorId, members: goalHabits(quests, g, habitIdsForGoal(g.id)), sessions, getPlan, range: trendRange, done }),
       ),
-    [goals, quests, sessions, getPlan, trendRange, done],
+    [goals, quests, sessions, getPlan, trendRange, done, habitIdsForGoal],
   );
 
   const bucketSeries = useMemo(
@@ -217,11 +217,11 @@ export function ProgressHubScreen({ route, navigation }: Props) {
     const g = goals[0];
     if (!g) return null;
     const adhById = new Map(habitStats.map((s) => [s.id, s.adherencePct]));
-    const nodes: MapNode[] = goalHabits(quests, g)
+    const nodes: MapNode[] = goalHabits(quests, g, habitIdsForGoal(g.id))
       .slice(0, 8)
       .map((q) => ({ id: q.id, label: q.title, colorId: g.colorId, weight: (adhById.get(q.id) ?? 0) / 100 }));
     return { center: { id: g.id, label: g.title, colorId: g.colorId } as MapNode, nodes };
-  }, [goals, quests, habitStats]);
+  }, [goals, quests, habitStats, habitIdsForGoal]);
 
   const reviewDay = (day: string) => navigation.navigate('Insights', { day });
 

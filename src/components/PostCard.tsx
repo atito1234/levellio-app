@@ -59,6 +59,10 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
             {post.mode === 'onsite' ? ' · 📍 on-site' : ''}
           </Text>
         </View>
+      ) : post.kind === 'ask' ? (
+        <View style={styles.askBanner}>
+          <Text style={styles.askText}>❓ Asking peers for help</Text>
+        </View>
       ) : null}
 
       {post.text.length > 0 && (
@@ -113,6 +117,8 @@ const styles = StyleSheet.create({
   meta: { ...typography.caption, color: MUTED },
   contribBanner: { borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   contribText: { ...typography.caption, fontWeight: '800' },
+  askBanner: { borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, backgroundColor: '#FFF3D6' },
+  askText: { ...typography.caption, fontWeight: '800', color: '#8A5A0A' },
   body: { ...typography.body, color: INK },
   tally: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 2 },
   tallyText: { ...typography.caption, color: MUTED },
