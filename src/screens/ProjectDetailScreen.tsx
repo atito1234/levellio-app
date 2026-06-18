@@ -1,13 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ActivityTile, AddActivitySheet, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
+import { ActivityTile, AddActivitySheet, MonthCalendar, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useGoals } from '@/state/GoalContext';
 import { usePlan } from '@/state/PlanContext';
+import { useActivityLog } from '@/state/useActivityLog';
+import { sessionDay, sessionsOf } from '@/lib/analytics';
 import {
   cycleEndLabel,
   projectColor,
@@ -45,8 +47,9 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   const { account } = useAuth();
   const { quests, addQuest } = useGame();
   const { subscribe, joinProject, leaveProject, setShareFeed, linkedProjectIds, linkHabit, unlinkHabit } = useProjects();
-  const { goals, goalsForHabit, linkGoal, unlinkGoal, addGoal } = useGoals();
+  const { goals, goalsForHabit, linkGoal, unlinkGoal } = useGoals();
   const { getPlan, togglePlanned } = usePlan();
+  const { events } = useActivityLog();
 
   const [snap, setSnap] = useState<ProjectSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -112,47 +115,25 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
     Alert.alert("They're yours 🤝", 'All suggested habits are now daily habits in your activities, powering this project.');
   };
 
-  // The goal that mirrors THIS project (auto-created below).
+  // The goal that mirrors THIS project (auto-created by ProjectsContext).
   const projectGoal = useMemo(
     () => goals.find((g) => g.kind === 'project' && g.projectId === projectId),
     [goals, projectId],
   );
 
-  // Auto-create the project's own goal once activities exist, and keep every
-  // adopted activity filed under it — so project activities live in THIS goal,
-  // never bleeding into personal goals. Guarded against double-creation.
-  const creatingGoalRef = useRef(false);
-  useEffect(() => {
-    if (!joined || !project || myQuests.length === 0) return;
-    let cancelled = false;
-    (async () => {
-      let gid = goals.find((g) => g.kind === 'project' && g.projectId === projectId)?.id ?? null;
-      if (!gid) {
-        if (creatingGoalRef.current) return;
-        creatingGoalRef.current = true;
-        const cats = [...new Set(project.suggestedHabits.map((h) => h.category))];
-        const goal = await addGoal({
-          title: project.title,
-          emoji: project.emoji,
-          colorId: project.colorId,
-          categories: cats.length ? cats : ['health'],
-          kind: 'project',
-          projectId,
-        });
-        creatingGoalRef.current = false;
-        gid = goal?.id ?? null;
-      }
-      if (!gid || cancelled) return;
-      for (const q of myQuests) {
-        if (!goalsForHabit(q.id).includes(gid)) await linkGoal(q.id, gid);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // goalsForHabit/linkGoal/addGoal are context fns (unstable identities); re-run on the data deps only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [joined, project, myQuests, goals, projectId]);
+  // Completions per day for this project's activities → the calendar heat.
+  const myIdSet = useMemo(() => new Set(myQuests.map((q) => q.id)), [myQuests]);
+  const doneByDay = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const s of sessionsOf(events)) {
+      if (!myIdSet.has(s.activityId)) continue;
+      const d = sessionDay(s);
+      const set = map.get(d) ?? new Set<string>();
+      set.add(s.activityId);
+      if (!map.has(d)) map.set(d, set);
+    }
+    return map;
+  }, [events, myIdSet]);
 
   // The activity-card goal picker offers PERSONAL goals only (the project goal is automatic).
   const personalGoals = useMemo(() => goals.filter((g) => g.kind !== 'project'), [goals]);
@@ -318,6 +299,13 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
               <Pressable onPress={() => navigation.navigate('GoalFocus', { goalId: projectGoal.id })} accessibilityRole="button" accessibilityLabel="View this project's goal" style={styles.makeGoal}>
                 <Text style={styles.makeGoalText}>🎯 View project goal</Text>
               </Pressable>
+            )}
+
+            {myQuests.length > 0 && (
+              <>
+                <Text style={styles.sectionLabel}>YOUR CALENDAR</Text>
+                <MonthCalendar quests={myQuests} getPlan={getPlan} doneByDay={doneByDay} todayKey={todayK} />
+              </>
             )}
           </>
         )}

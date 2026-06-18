@@ -71,6 +71,18 @@ export function PostComposerScreen({ route, navigation }: Props) {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+          {(() => {
+            const sel = myProjects.find((p) => p.id === projectId);
+            if (!sel) return null;
+            const c = getBucketColor(sel.colorId);
+            return (
+              <View style={[styles.scopeBanner, { backgroundColor: c.soft }]}>
+                <Text style={[styles.scopeText, { color: c.accent }]} numberOfLines={1}>
+                  {isAsk ? '🌍 Asking in' : '🤝 Posting to'} {sel.emoji} {sel.title}
+                </Text>
+              </View>
+            );
+          })()}
           {isAsk && (
             <Text style={styles.askHint}>
               Describe the habit or problem you're working on. Peers who've solved it can answer — and attach a habit you adopt in one tap.
@@ -113,7 +125,7 @@ export function PostComposerScreen({ route, navigation }: Props) {
 
           {myProjects.length > 0 && (
             <>
-              <Text style={styles.label}>Share to a project (optional)</Text>
+              <Text style={styles.label}>{isAsk ? 'Ask in which project?' : 'Share to a project (optional)'}</Text>
               <View style={styles.chips}>
                 {myProjects.map((p) => {
                   const on = projectId === p.id;
@@ -151,6 +163,8 @@ const styles = StyleSheet.create({
   counter: { ...typography.caption, color: MUTED, textAlign: 'right' },
   label: { ...typography.label, color: MUTED, letterSpacing: 1, marginTop: spacing.sm },
   askHint: { ...typography.caption, color: MUTED },
+  scopeBanner: { borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  scopeText: { ...typography.label, fontWeight: '800' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: { backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK, maxWidth: 240 },
   chipOn: { backgroundColor: '#EDE9FE', borderColor: VIOLET },

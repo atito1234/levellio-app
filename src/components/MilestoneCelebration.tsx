@@ -1,15 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ConfettiBurst } from '@/components/ConfettiBurst';
 import { useMilestones } from '@/state/MilestonesContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { getCelebrationTimings } from '@/lib/celebration';
 import { getBucketColor } from '@/lib/buckets';
+import { navigationRef } from '@/navigation/navigationRef';
 import { spacing, typography } from '@/theme';
 import type { MilestoneKind } from '@/lib/milestones';
-import type { RootStackParamList } from '@/navigation/types';
 
 const INK = '#1F2937';
 const CARD = '#FFFFFF';
@@ -35,7 +33,6 @@ const KIND_EMOJI: Record<MilestoneKind, string> = {
  */
 export function MilestoneCelebration() {
   const { queue, popQueue } = useMilestones();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const reduced = useReducedMotion();
   const timings = getCelebrationTimings(reduced);
   const current = queue[0];
@@ -62,9 +59,10 @@ export function MilestoneCelebration() {
   if (!current) return null;
 
   const share = current.share;
-  const go = (action: () => void) => {
+  // Navigate via the container ref — this overlay sits beside the navigator.
+  const go = (nav: () => void) => {
     popQueue();
-    action();
+    if (navigationRef.isReady()) nav();
   };
 
   const accent = current.accentColorId ? getBucketColor(current.accentColorId).accent : GOLD;
@@ -103,7 +101,7 @@ export function MilestoneCelebration() {
               <Pressable
                 onPress={() =>
                   go(() =>
-                    navigation.navigate('PostComposer', {
+                    navigationRef.navigate('PostComposer', {
                       kind: 'contribution',
                       projectId: share.projectId,
                       habitTitle: share.habitTitle,
@@ -119,10 +117,10 @@ export function MilestoneCelebration() {
                 <Text style={styles.shareBtnText}>📣 Share your win</Text>
               </Pressable>
               <View style={styles.quickRow}>
-                <Pressable onPress={() => go(() => navigation.navigate('Main', { screen: 'Feed' }))} accessibilityRole="button" style={styles.quickBtn}>
+                <Pressable onPress={() => go(() => navigationRef.navigate('Main', { screen: 'Feed' }))} accessibilityRole="button" style={styles.quickBtn}>
                   <Text style={styles.quickText}>📰 Feed</Text>
                 </Pressable>
-                <Pressable onPress={() => go(() => navigation.navigate('Plan'))} accessibilityRole="button" style={styles.quickBtn}>
+                <Pressable onPress={() => go(() => navigationRef.navigate('Plan'))} accessibilityRole="button" style={styles.quickBtn}>
                   <Text style={styles.quickText}>📅 Calendar</Text>
                 </Pressable>
               </View>

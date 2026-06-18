@@ -39,6 +39,7 @@ import { PostDetailScreen } from '@/screens/PostDetailScreen';
 import { PeopleScreen } from '@/screens/PeopleScreen';
 import { MilestoneCelebration } from '@/components/MilestoneCelebration';
 import { InterventionOverlay } from '@/components/InterventionOverlay';
+import { navigationRef } from './navigationRef';
 import { MainTabs } from './MainTabs';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -71,7 +72,7 @@ const linking: LinkingOptions<RootStackParamList> = {
  */
 export function RootNavigator() {
   return (
-    <NavigationContainer theme={navTheme} linking={linking}>
+    <NavigationContainer ref={navigationRef} theme={navTheme} linking={linking}>
       <Stack.Navigator initialRouteName="Onboarding" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
