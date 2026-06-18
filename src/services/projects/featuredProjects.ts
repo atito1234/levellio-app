@@ -19,6 +19,9 @@ export const FEATURED_PROJECTS: readonly FeaturedProjectSeed[] = [
     emoji: '🦟',
     colorId: 'teal',
     region: 'Fort-Liberté, Haiti',
+    lat: 19.6657,
+    lng: -71.8449,
+    radiusKm: 10,
     summary:
       'Stop malaria at the source. Drain and clean standing water where mosquitoes breed — every site cleared protects your neighbours.',
     unit: 'sites cleaned',
@@ -37,6 +40,9 @@ export const FEATURED_PROJECTS: readonly FeaturedProjectSeed[] = [
     emoji: '🌱',
     colorId: 'lime',
     region: 'Ouanaminthe, Haiti',
+    lat: 19.545,
+    lng: -71.73,
+    radiusKm: 10,
     summary:
       'Grow food and resilience. Tend shared garden beds so families have fresh vegetables and seedlings to share.',
     unit: 'beds tended',
@@ -55,6 +61,9 @@ export const FEATURED_PROJECTS: readonly FeaturedProjectSeed[] = [
     emoji: '💧',
     colorId: 'sky',
     region: 'Cap-Haïtien, Haiti',
+    lat: 19.757,
+    lng: -72.204,
+    radiusKm: 12,
     summary:
       'Safe water, every day. Treat household water and keep collection points clean to cut waterborne illness.',
     unit: 'households treating water',
@@ -72,6 +81,9 @@ export const FEATURED_PROJECTS: readonly FeaturedProjectSeed[] = [
     emoji: '♻️',
     colorId: 'violet',
     region: 'Port-de-Paix, Haiti',
+    lat: 19.941,
+    lng: -72.83,
+    radiusKm: 10,
     summary:
       'A cleaner block is a healthier block. Collect, sort, and properly dispose of waste to keep drains and streets clear.',
     unit: 'bags collected',
@@ -89,6 +101,9 @@ export const FEATURED_PROJECTS: readonly FeaturedProjectSeed[] = [
     emoji: '🎒',
     colorId: 'rose',
     region: 'Gonaïves, Haiti',
+    lat: 19.45,
+    lng: -72.689,
+    radiusKm: 12,
     summary:
       'Keep kids learning. Help children study daily and prepare kits so every child starts the term ready.',
     unit: 'study sessions logged',

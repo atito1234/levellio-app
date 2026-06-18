@@ -233,6 +233,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
               <View style={[styles.feedDot, { backgroundColor: c.accent }]} />
               <Text style={styles.feedText} numberOfLines={2}>
                 <Text style={styles.feedName}>{f.displayName}</Text> {f.habitTitle} · +{f.value}
+                {f.mode === 'onsite' ? ' · 📍 on-site' : ''}
               </Text>
               <Text style={styles.feedTime}>{timeAgo(f.createdAt)}</Text>
             </View>

@@ -12,7 +12,7 @@ import {
   unlinkProject as unlinkProjectPure,
   type ProjectLinks,
 } from '@/lib/projectLinks';
-import type { CycleProgress, Project } from '@/lib/projects';
+import type { ContributionMode, CycleProgress, Project } from '@/lib/projects';
 import { dayKey } from '@/lib/dates';
 import type { QuestCategory } from '@/types';
 
@@ -22,6 +22,8 @@ export interface CompletedHabit {
   activityId: string;
   title: string;
   category?: QuestCategory;
+  /** Where it was done — defaults to 'remote' when omitted. */
+  mode?: ContributionMode;
 }
 
 interface ProjectsContextValue {
@@ -40,6 +42,8 @@ interface ProjectsContextValue {
   leaveProject: (projectId: string) => Promise<void>;
   setShareFeed: (projectId: string, shareFeed: boolean) => Promise<void>;
   linkedProjectIds: (activityId: string) => string[];
+  /** Resolve a habit's linked projects to full Project objects (for badges). */
+  projectsForHabit: (activityId: string) => Project[];
   linkHabit: (activityId: string, projectId: string) => Promise<void>;
   unlinkHabit: (activityId: string, projectId: string) => Promise<void>;
   /** Subscribe to a project's live detail (project + members + feed + cycle). */
@@ -164,6 +168,17 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     [links, persistLinks],
   );
 
+  const projectsForHabit = useCallback(
+    (activityId: string): Project[] => {
+      const ids = linkedIdsPure(links, activityId);
+      if (ids.length === 0) return [];
+      const byId = new Map<string, Project>();
+      for (const p of [...myProjects, ...featured]) byId.set(p.id, p);
+      return ids.map((id) => byId.get(id)).filter((p): p is Project => p !== undefined);
+    },
+    [links, myProjects, featured],
+  );
+
   const subscribe = useCallback(
     (projectId: string, cb: (snap: ProjectSnapshot | null) => void) =>
       projectsBackend.subscribe(projectId, uid ?? '', cb),
@@ -180,7 +195,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       const results = await Promise.all(
         projectIds.map((projectId) =>
           projectsBackend
-            .contribute(identity, projectId, { habitTitle: habit.title, category: habit.category, value: 0 })
+            .contribute(identity, projectId, { habitTitle: habit.title, category: habit.category, value: 0, mode: habit.mode })
             .catch(() => null),
         ),
       );
@@ -204,12 +219,13 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       leaveProject,
       setShareFeed,
       linkedProjectIds: (activityId: string) => linkedIdsPure(links, activityId),
+      projectsForHabit,
       linkHabit,
       unlinkHabit,
       subscribe,
       recordCompletion,
     }),
-    [ready, uid, featured, myProjects, links, refresh, joinByCode, joinProject, createProject, leaveProject, setShareFeed, linkHabit, unlinkHabit, subscribe, recordCompletion],
+    [ready, uid, featured, myProjects, links, refresh, joinByCode, joinProject, createProject, leaveProject, setShareFeed, projectsForHabit, linkHabit, unlinkHabit, subscribe, recordCompletion],
   );
 
   return <ProjectsContext.Provider value={value}>{children}</ProjectsContext.Provider>;

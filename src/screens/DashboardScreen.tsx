@@ -14,7 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
-import { AddActivityFab, AddActivitySheet, CapacityRing, HeroAvatar, ProjectsStrip, ScreenContainer, WorldProjectsStrip } from '@/components';
+import { AddActivityFab, AddActivitySheet, CapacityRing, HeroAvatar, ProjectBadge, ProjectsStrip, ScreenContainer, WorldProjectsStrip } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
@@ -68,7 +68,7 @@ export function DashboardScreen() {
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
   const { goals } = useGoals();
-  const { signedIn, myProjects, featured } = useProjects();
+  const { signedIn, myProjects, featured, projectsForHabit } = useProjects();
   const { settings } = useSettings();
   const { totalSlain, coins } = useBattles();
   const reduced = useReducedMotion();
@@ -388,6 +388,9 @@ export function DashboardScreen() {
               <Text style={styles.focusName} numberOfLines={2}>
                 {focus.title}
               </Text>
+              {projectsForHabit(focus.id).length > 0 && (
+                <ProjectBadge projects={projectsForHabit(focus.id)} />
+              )}
               {isValidScheduleMinutes(focus.scheduledTime) && (
                 <Text style={styles.focusTime} accessibilityLabel={`Scheduled for ${minutesToLabel(focus.scheduledTime)}`}>
                   ⏰ {minutesToLabel(focus.scheduledTime)}

@@ -2,20 +2,24 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CapacityRing, ScreenContainer } from '@/components';
+import { CapacityRing, ContributionModeSheet, ProjectBadge, ScreenContainer } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useGame } from '@/state/GameContext';
 import { useGoals } from '@/state/GoalContext';
 import { usePlan } from '@/state/PlanContext';
 import { useLinks } from '@/state/LinksContext';
+import { useProjects } from '@/state/ProjectsContext';
+import { useSettings } from '@/state/SettingsContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
+import { getBucketColor } from '@/lib/buckets';
 import { ACHIEVEMENT_GOLD, getAction, getCapacity, ripple } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { activityTiming } from '@/lib/activityTimer';
 import { nextActivity, type NextReason } from '@/lib/nextActivity';
 import { CATEGORY_META } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
+import type { ContributionMode } from '@/lib/projects';
 import type { QuestReward } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -43,6 +47,8 @@ export function RippleScreen({ route, navigation }: Props) {
   const { goals } = useGoals();
   const { getPlan } = usePlan();
   const { links } = useLinks();
+  const { signedIn, myProjects, projectsForHabit, linkedProjectIds, linkHabit, unlinkHabit } = useProjects();
+  const { settings } = useSettings();
   const complete = useCompleteActivity();
 
   // The Ripple is the real habit detail when given a questId; otherwise it's the
@@ -67,6 +73,11 @@ export function RippleScreen({ route, navigation }: Props) {
 
   const [done, setDone] = useState(alreadyDone);
   const [shown, setShown] = useState<number[]>(deltas.map((d) => (alreadyDone ? d.delta : 0)));
+  const [modeSheetOpen, setModeSheetOpen] = useState(false);
+
+  // Projects this habit powers — drives the badge, the link controls, and whether
+  // completing prompts for on-site vs from-anywhere.
+  const linkedProjects = useMemo(() => (quest ? projectsForHabit(quest.id) : []), [quest, projectsForHabit]);
 
   const fill = useRef(new Animated.Value(0)).current; // hero ring 0→1
   const ripA = useRef(new Animated.Value(0)).current; // expanding ripple (the peak)
@@ -120,7 +131,7 @@ export function RippleScreen({ route, navigation }: Props) {
     ).start(startHeroLoop);
   }, [ripA, chipVal, chipPulse, deltas, startHeroLoop]);
 
-  const handleDone = useCallback(async () => {
+  const runCompletion = useCallback(async (contributionMode?: ContributionMode) => {
     if (done) return;
     setDone(true);
 
@@ -128,7 +139,7 @@ export function RippleScreen({ route, navigation }: Props) {
     // levels + bucket contribution + a session record — every screen reflects it.
     let reward: QuestReward | null = null;
     if (quest && !alreadyDone) {
-      reward = await complete(quest, { method: 'manual', durationSec: 0 });
+      reward = await complete(quest, { method: 'manual', durationSec: 0, ...(contributionMode ? { contributionMode } : {}) });
     }
     const celebrate = () => {
       if (reward?.leveledUp) navigation.navigate('QuestComplete', { reward: reward! });
@@ -152,6 +163,16 @@ export function RippleScreen({ route, navigation }: Props) {
     // Let the ripple play, then hand off to the level-up celebration if earned.
     if (reward?.leveledUp) setTimeout(celebrate, 2000);
   }, [done, reduced, fill, chipVal, deltas, playPayoff, quest, alreadyDone, complete, navigation]);
+
+  // For project-linked habits, ask on-site vs from-anywhere first; otherwise log.
+  const handleDone = useCallback(() => {
+    if (done) return;
+    if (quest && !alreadyDone && linkedProjects.length > 0) {
+      setModeSheetOpen(true);
+      return;
+    }
+    void runCompletion();
+  }, [done, quest, alreadyDone, linkedProjects, runCompletion]);
 
   // Hero ring stroke: teal while filling; von Restorff gold ONLY at the 100% win.
   const heroStroke = fill.interpolate({ inputRange: [0, 0.92, 1], outputRange: [TEAL, TEAL, ACHIEVEMENT_GOLD] });
@@ -184,6 +205,11 @@ export function RippleScreen({ route, navigation }: Props) {
         <Text style={styles.title} accessibilityRole="header">
           {title}
         </Text>
+        {linkedProjects.length > 0 && (
+          <View style={styles.badgeRow}>
+            <ProjectBadge projects={linkedProjects} />
+          </View>
+        )}
 
         {/* Hero ring — Zeigarnik: an open ring pulls you to close it. */}
         <View style={styles.heroStage}>
@@ -262,12 +288,51 @@ export function RippleScreen({ route, navigation }: Props) {
             <Text style={styles.connLinkText}>📈 See its history ›</Text>
           </Pressable>
         )}
+        {quest && signedIn && myProjects.length > 0 && (
+          <View style={styles.linkSection}>
+            <Text style={styles.sectionLabel}>SUPPORTS PROJECTS</Text>
+            <Text style={styles.linkHint}>Tap a project to have this habit power it too.</Text>
+            <View style={styles.linkChips}>
+              {myProjects.map((p) => {
+                const on = linkedProjectIds(quest.id).includes(p.id);
+                const col = getBucketColor(p.colorId);
+                return (
+                  <Pressable
+                    key={p.id}
+                    onPress={() => void (on ? unlinkHabit(quest.id, p.id) : linkHabit(quest.id, p.id))}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: on }}
+                    accessibilityLabel={`${on ? 'Stop supporting' : 'Support'} ${p.title} with this habit`}
+                    style={[styles.linkChip, on && { backgroundColor: col.soft, borderColor: col.accent }]}
+                  >
+                    <Text style={[styles.linkChipText, on && { color: col.accent }]} numberOfLines={1}>
+                      {on ? '🤝 ' : '＋ '}
+                      {p.emoji} {p.title}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
         {done && (
           <Text style={styles.srOnly} accessibilityLiveRegion="polite">
             {summary}
           </Text>
         )}
       </ScrollView>
+
+      <ContributionModeSheet
+        visible={modeSheetOpen}
+        projects={linkedProjects}
+        locationEnabled={settings.metadataPrivacy.includeLocation}
+        onChoose={(mode) => {
+          setModeSheetOpen(false);
+          void runCompletion(mode);
+        }}
+        onClose={() => setModeSheetOpen(false)}
+      />
 
       {/* Per-activity actions — timer/Pomodoro to DO it, or log it now (Fitts). */}
       {quest && !done ? (
@@ -405,6 +470,12 @@ const styles = StyleSheet.create({
   doneTextDone: { color: VIOLET },
   connLink: { alignSelf: 'center', paddingVertical: spacing.sm },
   connLinkText: { ...typography.label, color: VIOLET, fontWeight: '700' },
+  badgeRow: { alignItems: 'center', marginTop: spacing.xs },
+  linkSection: { gap: spacing.xs, marginTop: spacing.md },
+  linkHint: { ...typography.caption, color: MUTED, textAlign: 'center' },
+  linkChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center', marginTop: spacing.xs },
+  linkChip: { backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK, maxWidth: 220 },
+  linkChipText: { ...typography.label, color: INK, fontWeight: '600' },
   actions: { gap: spacing.sm, marginBottom: spacing.md },
   nextKicker: { ...typography.caption, color: MUTED, textAlign: 'center', fontWeight: '700' },
   timerBtn: {

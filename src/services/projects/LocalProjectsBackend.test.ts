@@ -120,6 +120,16 @@ describe('LocalProjectsBackend', () => {
     expect(await backend.contribute(ALICE, 'does-not-exist', { habitTitle: 'x', value: 1 })).toBeNull();
   });
 
+  it('records and returns the contribution mode (defaults to remote)', async () => {
+    await backend.joinProject(ALICE, 'proj-malaria', true);
+    const onsite = await backend.contribute(ALICE, 'proj-malaria', { habitTitle: 'Clean a site', value: 1, mode: 'onsite' });
+    expect(onsite!.mode).toBe('onsite');
+    const def = await backend.contribute(ALICE, 'proj-malaria', { habitTitle: 'Clean a site', value: 1 });
+    expect(def!.mode).toBe('remote');
+    const snap = await nextSnap(backend, 'proj-malaria');
+    expect(snap?.feed.some((f) => f.mode === 'onsite')).toBe(true);
+  });
+
   it('removes membership on leave', async () => {
     await backend.joinProject(ALICE, 'proj-gardens', true);
     await backend.leaveProject('alice', 'proj-gardens');

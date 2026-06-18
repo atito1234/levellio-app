@@ -105,6 +105,8 @@ export interface ProjectBeat {
   pct: number;
   reachedGoal: boolean;
   reward?: string;
+  /** 'onsite' shows a 📍 cue in the beat. */
+  mode?: 'onsite' | 'remote';
 }
 
 /**
@@ -130,8 +132,8 @@ export function projectBeats(beats: readonly ProjectBeat[], now: number): Milest
           id: `project-${b.projectId}-${now}-${i}`,
           kind: 'project',
           emoji: b.emoji,
-          label: `+${b.value} ${b.unit} → ${b.title}`,
-          detail: `${b.pct}% of this week’s goal`,
+          label: `+${b.value} ${b.unit} → ${b.title}${b.mode === 'onsite' ? ' 📍' : ''}`,
+          detail: `${b.mode === 'onsite' ? 'On-site · ' : ''}${b.pct}% of this week’s goal`,
           accentColorId: b.colorId,
           progressPct: b.pct,
           earnedAt: now,

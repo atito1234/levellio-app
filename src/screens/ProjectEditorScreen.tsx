@@ -4,7 +4,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useProjects } from '@/state/ProjectsContext';
-import { PROJECT_COLOR_IDS, validateProjectDraft, type ProjectSuggestedHabit } from '@/lib/projects';
+import { captureLocationSafely } from '@/services/sensors/deviceContext';
+import { DEFAULT_GEOFENCE_KM, PROJECT_COLOR_IDS, validateProjectDraft, type ProjectSuggestedHabit } from '@/lib/projects';
 import { getBucketColor, type BucketColorId } from '@/lib/buckets';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import type { QuestCategory } from '@/types';
@@ -34,7 +35,23 @@ export function ProjectEditorScreen({ navigation }: Props) {
   const [goalText, setGoalText] = useState('');
   const [reward, setReward] = useState('');
   const [habits, setHabits] = useState<ProjectSuggestedHabit[]>([]);
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
+  const [pinning, setPinning] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const capturePin = async () => {
+    if (pin) {
+      setPin(null);
+      return;
+    }
+    setPinning(true);
+    try {
+      const sample = await captureLocationSafely(true);
+      if (sample) setPin({ lat: sample.lat, lng: sample.lng });
+    } finally {
+      setPinning(false);
+    }
+  };
 
   // suggested-habit draft
   const [hTitle, setHTitle] = useState('');
@@ -65,6 +82,7 @@ export function ProjectEditorScreen({ navigation }: Props) {
       weeklyGoal,
       reward,
       suggestedHabits: habits,
+      ...(pin ? { lat: pin.lat, lng: pin.lng, radiusKm: DEFAULT_GEOFENCE_KM } : {}),
     });
     if (project) navigation.replace('ProjectDetail', { projectId: project.id });
     else {
@@ -105,6 +123,14 @@ export function ProjectEditorScreen({ navigation }: Props) {
 
         <Text style={styles.fieldLabel}>Reward when the goal is met</Text>
         <TextInput value={reward} onChangeText={setReward} placeholder="e.g. Seeds + tools for the garden" placeholderTextColor={MUTED} style={styles.input} maxLength={80} accessibilityLabel="Reward" />
+
+        <Text style={styles.fieldLabel}>On-site location (optional)</Text>
+        <Pressable onPress={() => void capturePin()} accessibilityRole="button" accessibilityLabel={pin ? 'Clear pinned location' : 'Use my current location as the project site'} style={[styles.pinBtn, pin && styles.pinBtnOn]}>
+          <Text style={[styles.pinText, pin && styles.pinTextOn]}>
+            {pin ? `📍 Pinned (${pin.lat.toFixed(3)}, ${pin.lng.toFixed(3)}) · tap to clear` : pinning ? 'Getting location…' : '📍 Use my current location'}
+          </Text>
+        </Pressable>
+        <Text style={styles.pinHint}>Lets members’ on-the-ground completions show as “on-site”. Requires location permission.</Text>
 
         <Text style={styles.fieldLabel}>Icon</Text>
         <View style={styles.wrap}>
@@ -182,6 +208,11 @@ const styles = StyleSheet.create({
   chipTextOn: { color: VIOLET, fontWeight: '700' },
   addHabit: { alignItems: 'center', paddingVertical: spacing.sm, backgroundColor: VIOLET_SOFT, borderRadius: 999 },
   addHabitText: { ...typography.label, color: VIOLET, fontWeight: '700' },
+  pinBtn: { backgroundColor: CARD, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: TRACK, alignItems: 'center' },
+  pinBtnOn: { backgroundColor: '#EAFBF6', borderColor: '#16C8A8' },
+  pinText: { ...typography.label, color: INK, fontWeight: '600' },
+  pinTextOn: { color: '#0A6E5C', fontWeight: '700' },
+  pinHint: { ...typography.caption, color: MUTED },
   cta: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.md },
   ctaOff: { opacity: 0.4 },
   ctaText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },

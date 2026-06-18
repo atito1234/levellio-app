@@ -15,6 +15,7 @@ import {
   progressPct,
   summarizeFeed,
   type Contribution,
+  type ContributionMode,
   type Project,
   type ProjectMember,
 } from '@/lib/projects';
@@ -84,6 +85,9 @@ export class LocalProjectsBackend implements ProjectsBackend {
         reward: seed.reward,
         memberCount: 0,
         createdAt: now,
+        ...(typeof seed.lat === 'number' ? { lat: seed.lat } : {}),
+        ...(typeof seed.lng === 'number' ? { lng: seed.lng } : {}),
+        ...(typeof seed.radiusKm === 'number' ? { radiusKm: seed.radiusKm } : {}),
       }));
       await this.write(ALL_KEY, projects);
       await this.store.setItem(SEED_KEY, '1');
@@ -140,6 +144,9 @@ export class LocalProjectsBackend implements ProjectsBackend {
       reward: draft.reward.trim(),
       memberCount: 0,
       createdAt: Date.now(),
+      ...(typeof draft.lat === 'number' ? { lat: draft.lat } : {}),
+      ...(typeof draft.lng === 'number' ? { lng: draft.lng } : {}),
+      ...(typeof draft.radiusKm === 'number' ? { radiusKm: draft.radiusKm } : {}),
     };
     await this.saveProject(project);
     await this.joinProject(identity, project.id, true, 'owner');
@@ -210,6 +217,7 @@ export class LocalProjectsBackend implements ProjectsBackend {
     const project = (await this.allProjects()).find((p) => p.id === projectId);
     if (!project) return null;
     const value = Math.max(1, Math.round(input.value || contributionValue(input.habitTitle, project)));
+    const mode: ContributionMode = input.mode ?? 'remote';
     const key = cycleKeyFor();
 
     const contributions = await this.read<Contribution[]>(contribKey(projectId), []);
@@ -224,6 +232,7 @@ export class LocalProjectsBackend implements ProjectsBackend {
       habitTitle: input.habitTitle,
       category: input.category,
       value,
+      mode,
       cycleKey: key,
       createdAt: Date.now(),
     });
@@ -245,6 +254,7 @@ export class LocalProjectsBackend implements ProjectsBackend {
       colorId: project.colorId,
       unit: project.unit,
       value,
+      mode,
       reward: project.reward,
       cycle,
       reachedGoal: progressPct(prevCount, project.weeklyGoal) < 100 && cycle.pct >= 100,

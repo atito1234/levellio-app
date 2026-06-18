@@ -8,6 +8,7 @@
 import type { BucketColorId } from '@/lib/buckets';
 import type {
   Contribution,
+  ContributionMode,
   CycleProgress,
   Project,
   ProjectMember,
@@ -32,6 +33,10 @@ export interface ProjectDraft {
   weeklyGoal: number;
   reward: string;
   suggestedHabits: ProjectSuggestedHabit[];
+  /** Optional geofence pin so on-site completions can be detected. */
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
 }
 
 export interface ContributionInput {
@@ -39,6 +44,8 @@ export interface ContributionInput {
   category?: QuestCategory;
   /** Units this completion adds (>= 1). */
   value: number;
+  /** Where it was done — defaults to 'remote' when omitted. */
+  mode?: ContributionMode;
 }
 
 /**
@@ -54,6 +61,8 @@ export interface ContributionResult {
   unit: string;
   /** Units this completion actually added (>= 1). */
   value: number;
+  /** Where it was done — 'onsite' or 'remote'. */
+  mode: ContributionMode;
   /** The real-world reward unlocked at 100% (for the team-win moment). */
   reward: string;
   /** Cycle progress *after* this contribution. */

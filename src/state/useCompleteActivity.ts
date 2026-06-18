@@ -16,6 +16,7 @@ import { haptics } from '@/services/feedback/haptics';
 import { questKey } from '@/lib/questForm';
 import { sessionsOf } from '@/lib/analytics';
 import { dayKey } from '@/lib/dates';
+import type { ContributionMode } from '@/lib/projects';
 import type { Quest, QuestReward } from '@/types';
 
 export interface CompletionOpts {
@@ -24,6 +25,8 @@ export interface CompletionOpts {
   durationSec: number;
   /** Self-reported 1–5 "how did it go?", for habits that opt into a rating. */
   rating?: 1 | 2 | 3 | 4 | 5;
+  /** For project-linked habits: where it was done (on-site vs anywhere). */
+  contributionMode?: ContributionMode;
 }
 
 /**
@@ -65,7 +68,7 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
       // Share this completion with any community projects the habit feeds, then
       // celebrate it: a firmer haptic + a project beat ("+3 sites → Fort-Liberté
       // · 63% of this week's goal"), or the gold team-win when the goal is hit.
-      const projectResults = await recordProjectContribution({ activityId: quest.id, title: quest.title, category: quest.category });
+      const projectResults = await recordProjectContribution({ activityId: quest.id, title: quest.title, category: quest.category, mode: opts.contributionMode });
       if (projectResults.length > 0) {
         if (projectResults.some((r) => r.reachedGoal)) haptics.teamGoal(hapticsEnabled);
         else haptics.contribute(hapticsEnabled);
@@ -81,6 +84,7 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
               pct: r.cycle.pct,
               reachedGoal: r.reachedGoal,
               reward: r.reward,
+              mode: r.mode,
             })),
             Date.now(),
           ),

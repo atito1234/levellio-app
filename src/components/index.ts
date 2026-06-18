@@ -16,6 +16,8 @@ export { ChipSelector, type ChipOption } from './ChipSelector';
 export { ConfettiBurst } from './ConfettiBurst';
 export { CapacityRing } from './CapacityRing';
 export { ProjectsStrip, WorldProjectsStrip } from './ProjectsStrip';
+export { ProjectBadge } from './ProjectBadge';
+export { ContributionModeSheet } from './ContributionModeSheet';
 export { RatingPrompt } from './RatingPrompt';
 export { AddActivityFab } from './AddActivityFab';
 export { AddActivitySheet } from './AddActivitySheet';

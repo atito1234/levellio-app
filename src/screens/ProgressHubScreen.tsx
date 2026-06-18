@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CapacityRing, ScreenContainer } from '@/components';
+import { CapacityRing, ProjectBadge, ScreenContainer } from '@/components';
 import {
   CalendarHeatmap,
   RadarChart,
@@ -20,6 +20,7 @@ import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { useGoals } from '@/state/GoalContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { useProjects } from '@/state/ProjectsContext';
 import { useInsightAction } from '@/hooks/useInsightAction';
 import { sessionDay, sessionsOf, weekdayLabel } from '@/lib/analytics';
 import { activeDaysInWindow, daysAccomplished, directionVerdict, type Direction } from '@/lib/heroAnalytics';
@@ -524,30 +525,65 @@ function Capacities({ stats, levels, onRun }: { stats: GroupStat[]; levels: Reco
 
 // --- Habits -----------------------------------------------------------------
 
+type HabitFilter = 'all' | 'personal' | 'community';
+
 function Habits({ stats, onRun }: { stats: GroupStat[]; onRun: (a: InsightAction) => void }) {
+  const { projectsForHabit } = useProjects();
+  const [filter, setFilter] = useState<HabitFilter>('all');
   if (stats.length === 0) return <EmptyNote msg="No scheduled habits yet. Add a recurrence or plan a habit to track adherence." />;
+
+  const community = stats.filter((s) => projectsForHabit(s.id).length > 0);
+  const personal = stats.filter((s) => projectsForHabit(s.id).length === 0);
+
+  const row = (s: GroupStat) => {
+    const projects = projectsForHabit(s.id);
+    return (
+      <Pressable
+        key={s.id}
+        style={styles.habitRow}
+        onPress={() => onRun({ label: 'Open', kind: 'focus', target: { questId: s.id } })}
+        accessibilityRole="button"
+        accessibilityLabel={`${s.label}, ${s.adherencePct}% adherence, ${s.done} of ${s.scheduled} done${projects.length ? `, supports ${projects.map((p) => p.title).join(', ')}` : ''}`}
+      >
+        <View style={styles.rowMain}>
+          <Text style={styles.rowTitle} numberOfLines={1}>{s.label}</Text>
+          {projects.length > 0 && <ProjectBadge projects={projects} />}
+          <Text style={styles.rowSub}>
+            {s.done}/{s.scheduled} · {deltaText(s.deltaPct)}
+            {s.streak > 0 ? ` · 🔥 ${s.streak}` : ''}
+          </Text>
+        </View>
+        {s.weekly.length > 1 && <View style={styles.spark}><Sparkline values={s.weekly.map((v) => v / 100)} height={32} color={TEAL} /></View>}
+        <Text style={[styles.pct, { color: s.adherencePct >= 80 ? TEAL : s.adherencePct >= 50 ? VIOLET : MUTED }]}>{s.adherencePct}%</Text>
+      </Pressable>
+    );
+  };
+
+  const FilterChip = ({ value, label }: { value: HabitFilter; label: string }) => {
+    const on = filter === value;
+    return (
+      <Pressable onPress={() => setFilter(value)} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.filterChip, on && styles.filterChipOn]}>
+        <Text style={[styles.filterChipText, on && styles.filterChipTextOn]}>{label}</Text>
+      </Pressable>
+    );
+  };
+
   return (
-    <Section label="RANKED BY ADHERENCE">
-      {stats.map((s) => (
-        <Pressable
-          key={s.id}
-          style={styles.habitRow}
-          onPress={() => onRun({ label: 'Open', kind: 'focus', target: { questId: s.id } })}
-          accessibilityRole="button"
-          accessibilityLabel={`${s.label}, ${s.adherencePct}% adherence, ${s.done} of ${s.scheduled} done`}
-        >
-          <View style={styles.rowMain}>
-            <Text style={styles.rowTitle} numberOfLines={1}>{s.label}</Text>
-            <Text style={styles.rowSub}>
-              {s.done}/{s.scheduled} · {deltaText(s.deltaPct)}
-              {s.streak > 0 ? ` · 🔥 ${s.streak}` : ''}
-            </Text>
-          </View>
-          {s.weekly.length > 1 && <View style={styles.spark}><Sparkline values={s.weekly.map((v) => v / 100)} height={32} color={TEAL} /></View>}
-          <Text style={[styles.pct, { color: s.adherencePct >= 80 ? TEAL : s.adherencePct >= 50 ? VIOLET : MUTED }]}>{s.adherencePct}%</Text>
-        </Pressable>
-      ))}
-    </Section>
+    <>
+      {community.length > 0 && (
+        <View style={styles.filterRow}>
+          <FilterChip value="all" label="All" />
+          <FilterChip value="personal" label="Personal" />
+          <FilterChip value="community" label="🤝 Community" />
+        </View>
+      )}
+      {(filter === 'all' || filter === 'personal') && personal.length > 0 && (
+        <Section label="MY HABITS">{personal.map(row)}</Section>
+      )}
+      {(filter === 'all' || filter === 'community') && community.length > 0 && (
+        <Section label="POWERING PROJECTS">{community.map(row)}</Section>
+      )}
+    </>
   );
 }
 
@@ -631,6 +667,11 @@ const styles = StyleSheet.create({
   rowSub: { ...typography.caption, color: MUTED },
   rowChevron: { fontSize: 24, color: MUTED },
 
+  filterRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.xs },
+  filterChip: { paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: 999, backgroundColor: '#ECECF2' },
+  filterChipOn: { backgroundColor: VIOLET },
+  filterChipText: { ...typography.caption, color: MUTED, fontWeight: '700' },
+  filterChipTextOn: { color: '#FFFFFF' },
   habitRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 18, padding: spacing.md },
   spark: { width: 72 },
   pct: { ...typography.body, fontWeight: '800', width: 48, textAlign: 'right' },
