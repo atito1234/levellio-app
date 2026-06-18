@@ -20,7 +20,7 @@ export type RootStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
   QuestComplete: { reward: QuestReward } | undefined;
   /** Create (no param), edit (questId), or create pre-filled from the quick sheet (prefill). */
-  QuestEditor: { questId?: string; prefill?: Partial<QuestDraft> } | undefined;
+  QuestEditor: { questId?: string; prefill?: Partial<QuestDraft>; goalId?: string; bucketId?: string; projectIds?: string[] } | undefined;
   HabitLibrary: undefined;
   Paywall: undefined;
   /** In-app legal viewer: Privacy Policy or Terms of Service. */
@@ -52,8 +52,8 @@ export type RootStackParamList = {
   GoalEditor: { goalId?: string } | undefined;
   /** A goal's contributing habits + progress. */
   GoalFocus: { goalId: string };
-  /** Frictionless typed/dictated capture of one or more habits. */
-  QuickCapture: undefined;
+  /** Frictionless typed/dictated capture of one or more habits (optionally pre-filed into a goal/group/project). */
+  QuickCapture: { goalId?: string; bucketId?: string; projectIds?: string[] } | undefined;
   /** Set up a focus Battle: choose habits, technique, and dragon. */
   BattleSetup: { questId?: string; questIds?: string[]; bucketId?: string; goalId?: string } | undefined;
   /** The gamified focus session — slay the dragon, complete the bundled habits. */

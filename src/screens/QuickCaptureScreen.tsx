@@ -5,6 +5,9 @@ import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
+import { useGoals } from '@/state/GoalContext';
+import { useBuckets } from '@/state/BucketsContext';
+import { useProjects } from '@/state/ProjectsContext';
 import { parseCapture } from '@/lib/captureParse';
 import { normalizeTitle } from '@/lib/questForm';
 import { CATEGORY_META } from '@/lib/categories';
@@ -23,9 +26,23 @@ const VIOLET_SOFT = '#EDE9FE';
 const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
-export function QuickCaptureScreen({ navigation }: Props) {
+export function QuickCaptureScreen({ route, navigation }: Props) {
   const { addQuest } = useGame();
-  const { togglePlanned } = usePlan();
+  const { getPlan, togglePlanned } = usePlan();
+  const { goals, linkGoal } = useGoals();
+  const { assignActivity } = useBuckets();
+  const { myProjects, linkHabit } = useProjects();
+
+  // Context carried from the quick "Add an activity" sheet.
+  const ctxGoal = route.params?.goalId ? goals.find((g) => g.id === route.params!.goalId) : undefined;
+  const ctxBucketId = route.params?.bucketId;
+  const ctxProjectIds = route.params?.projectIds ?? [];
+  const projectScoped = ctxProjectIds.length > 0 || ctxGoal?.kind === 'project';
+  // A friendly summary of where these will land.
+  const targetLabel = [
+    ctxGoal?.title,
+    ...ctxProjectIds.map((id) => myProjects.find((p) => p.id === id)?.title).filter(Boolean),
+  ].filter(Boolean).join(', ');
 
   const [text, setText] = useState('');
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
@@ -54,8 +71,18 @@ export function QuickCaptureScreen({ navigation }: Props) {
         category: p.category,
         difficulty: p.difficulty,
         ...(p.scheduledTime !== undefined ? { scheduledTime: p.scheduledTime } : {}),
+        // Project-scoped captures become daily habits so they power the project.
+        ...(projectScoped ? { scheduledDays: [0, 1, 2, 3, 4, 5, 6] } : {}),
       });
-      if (quest && planToday) await togglePlanned(today, quest.id);
+      if (!quest) continue;
+      // File each captured habit into the chosen goal / group / projects.
+      if (ctxGoal) {
+        await linkGoal(quest.id, ctxGoal.id);
+        if (ctxGoal.kind === 'project' && ctxGoal.projectId) await linkHabit(quest.id, ctxGoal.projectId);
+      }
+      if (ctxBucketId) await assignActivity(quest.id, ctxBucketId);
+      for (const pid of ctxProjectIds) await linkHabit(quest.id, pid);
+      if (planToday || projectScoped) await togglePlanned(today, quest.id);
     }
     navigation.goBack();
   };
@@ -74,6 +101,12 @@ export function QuickCaptureScreen({ navigation }: Props) {
 
       <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <Text style={styles.lead}>Type it, or tap the 🎤 on your keyboard and just say it.</Text>
+
+        {targetLabel.length > 0 && (
+          <View style={styles.scopeBanner}>
+            <Text style={styles.scopeText} numberOfLines={2}>🎯 Adding to {targetLabel}{projectScoped ? ' — as daily habits' : ''}</Text>
+          </View>
+        )}
 
         <TextInput
           value={text}
@@ -153,6 +186,8 @@ const styles = StyleSheet.create({
 
   content: { gap: spacing.md, paddingBottom: spacing.xl },
   lead: { ...typography.body, color: MUTED },
+  scopeBanner: { backgroundColor: VIOLET_SOFT, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  scopeText: { ...typography.label, color: VIOLET, fontWeight: '800' },
   input: {
     ...typography.body,
     color: INK,

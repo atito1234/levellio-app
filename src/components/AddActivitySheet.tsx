@@ -57,11 +57,17 @@ export function AddActivitySheet({
 }) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { quests, addQuest } = useGame();
-  const { goals } = useGoals();
+  const { goals, linkGoal } = useGoals();
   const { buckets, assignments, assignActivity } = useBuckets();
   const { signedIn, myProjects, linkHabit } = useProjects();
   const { getPlan, togglePlanned } = usePlan();
   const todayK = dayKey(new Date());
+
+  // When opened from a project, we know exactly which project(s) to add to.
+  const scopedProjects = useMemo(
+    () => myProjects.filter((p) => (defaultProjectIds ?? []).includes(p.id)),
+    [myProjects, defaultProjectIds],
+  );
 
   const [title, setTitle] = useState('');
   const [goalId, setGoalId] = useState<string | null>(defaultGoalId);
@@ -132,19 +138,29 @@ export function AddActivitySheet({
   const add = async () => {
     const name = title.trim();
     if (!canAdd) return;
+    // Adding to a project (chips) or a project goal → make it a daily habit so it
+    // powers the project every day and shows in the project goal + calendars.
+    const isProjectGoal = selectedGoal?.kind === 'project';
+    const projectScoped = projectIds.length > 0 || isProjectGoal;
     const draft: QuestDraft = {
       title: name,
       category,
       difficulty: 'easy',
       ...(timeOn ? { scheduledTime: timeMinutes } : {}),
-      ...(whenMode === 'weekly' ? { scheduledDays: weekdays } : {}),
+      ...(whenMode === 'weekly' ? { scheduledDays: weekdays } : projectScoped ? { scheduledDays: ALL_DAYS } : {}),
     };
     const quest = await addQuest(draft);
     if (quest) {
       if (bucketId) await assignActivity(quest.id, bucketId);
+      // File it into the chosen goal (explicit membership works for any kind),
+      // and link it to the underlying project for a project goal.
+      if (selectedGoal) {
+        await linkGoal(quest.id, selectedGoal.id);
+        if (selectedGoal.kind === 'project' && selectedGoal.projectId) await linkHabit(quest.id, selectedGoal.projectId);
+      }
       // Power any community projects chosen — completions will now contribute.
       for (const pid of projectIds) await linkHabit(quest.id, pid);
-      if (whenMode === 'today') {
+      if (projectScoped || whenMode === 'today') {
         await togglePlanned(todayK, quest.id);
       } else if (whenMode === 'date') {
         for (const d of pickedDates) await togglePlanned(d, quest.id);
@@ -157,6 +173,13 @@ export function AddActivitySheet({
     setTitle('');
   };
 
+  // Carry the chosen goal / group / projects so Advanced + bulk add file there too.
+  const context = {
+    ...(goalId ? { goalId } : {}),
+    ...(bucketId ? { bucketId } : {}),
+    ...(projectIds.length > 0 ? { projectIds } : {}),
+  };
+
   const openAdvanced = () => {
     const prefill: Partial<QuestDraft> = {
       ...(title.trim() ? { title: title.trim() } : {}),
@@ -165,7 +188,12 @@ export function AddActivitySheet({
       ...(whenMode === 'weekly' && weekdays.length ? { scheduledDays: weekdays } : {}),
     };
     onClose();
-    navigation.navigate('QuestEditor', { prefill });
+    navigation.navigate('QuestEditor', { prefill, ...context });
+  };
+
+  const openBulk = () => {
+    onClose();
+    navigation.navigate('QuickCapture', context);
   };
 
   const modeChip = (mode: WhenMode, label: string) => {
@@ -220,6 +248,14 @@ export function AddActivitySheet({
               blurOnSubmit={false}
               accessibilityLabel="New activity name"
             />
+
+            {scopedProjects.length > 0 && (
+              <View style={styles.scopeBanner}>
+                <Text style={styles.scopeText} numberOfLines={2}>
+                  🤝 Adding to {scopedProjects.map((p) => `${p.emoji} ${p.title}`).join(', ')} — a daily habit that powers it.
+                </Text>
+              </View>
+            )}
 
             {/* WHEN — today / a specific date / repeat weekly. */}
             <Text style={styles.label}>When</Text>
@@ -355,14 +391,7 @@ export function AddActivitySheet({
               <Pressable onPress={openAdvanced} accessibilityRole="button" hitSlop={8}>
                 <Text style={styles.link}>⚙️ Advanced options ›</Text>
               </Pressable>
-              <Pressable
-                onPress={() => {
-                  onClose();
-                  navigation.navigate('QuickCapture');
-                }}
-                accessibilityRole="button"
-                hitSlop={8}
-              >
+              <Pressable onPress={openBulk} accessibilityRole="button" hitSlop={8}>
                 <Text style={styles.link}>🪄 Add several at once ›</Text>
               </Pressable>
             </View>
@@ -432,6 +461,8 @@ const styles = StyleSheet.create({
   timeToggleHint: { ...typography.caption, color: MUTED },
   added: { ...typography.caption, color: '#0A6E5C', fontWeight: '700' },
   pledge: { ...typography.caption, color: VIOLET, fontWeight: '700' },
+  scopeBanner: { backgroundColor: VIOLET_SOFT, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  scopeText: { ...typography.label, color: VIOLET, fontWeight: '800' },
   links: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.xs, gap: spacing.sm },
   link: { ...typography.label, color: VIOLET, fontWeight: '700' },
   addBtn: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.lg, alignItems: 'center', marginTop: spacing.sm },

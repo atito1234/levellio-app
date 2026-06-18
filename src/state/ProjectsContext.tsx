@@ -1,11 +1,13 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
+import { useGoals } from '@/state/GoalContext';
 import { projectsBackend, type ContributionResult, type ProjectDraft, type ProjectIdentity, type ProjectSnapshot, type Unsubscribe } from '@/services/projects';
 import { ProjectLinkStore } from '@/services/projects/projectLinkStore';
 import { AsyncStorageStore } from '@/services/storage';
 import {
   EMPTY_PROJECT_LINKS,
+  habitsForProject as habitsForProjectPure,
   linkHabit as linkHabitPure,
   linkedProjectIds as linkedIdsPure,
   unlinkHabit as unlinkHabitPure,
@@ -174,6 +176,48 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     () => new Set(Object.keys(links).filter((id) => (links[id]?.length ?? 0) > 0)),
     [links],
   );
+
+  // Keep each project's dedicated goal in sync: wherever an activity gets linked
+  // to a project (home, Feed, project detail…), ensure the project's goal exists
+  // and file the activity under it — so it shows in the goal's focus + calendar,
+  // never bleeding into personal goals.
+  const { goals, addGoal, goalsForHabit, linkGoal } = useGoals();
+  const creatingGoalRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!uid) return;
+    let cancelled = false;
+    (async () => {
+      for (const project of myProjects) {
+        const activityIds = habitsForProjectPure(links, project.id);
+        if (activityIds.length === 0) continue;
+        let gid = goals.find((g) => g.kind === 'project' && g.projectId === project.id)?.id ?? null;
+        if (!gid) {
+          if (creatingGoalRef.current.has(project.id)) continue;
+          creatingGoalRef.current.add(project.id);
+          const cats = [...new Set(project.suggestedHabits.map((h) => h.category))];
+          const created = await addGoal({
+            title: project.title,
+            emoji: project.emoji,
+            colorId: project.colorId,
+            categories: cats.length ? cats : ['health'],
+            kind: 'project',
+            projectId: project.id,
+          });
+          creatingGoalRef.current.delete(project.id);
+          gid = created?.id ?? null;
+        }
+        if (!gid || cancelled) continue;
+        for (const aid of activityIds) {
+          if (!goalsForHabit(aid).includes(gid)) await linkGoal(aid, gid);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // addGoal/linkGoal/goalsForHabit are context fns (unstable identities) — run on data deps only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid, myProjects, links, goals]);
 
   const projectsForHabit = useCallback(
     (activityId: string): Project[] => {

@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AddActivityFab, AddActivitySheet, ScreenContainer } from '@/components';
+import { ActivityTile, AddActivityFab, AddActivitySheet, MonthCalendar, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useProjects } from '@/state/ProjectsContext';
+import { usePlan } from '@/state/PlanContext';
 import { useActivityLog } from '@/state/useActivityLog';
 import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { activityJourney } from '@/lib/journey';
-import { sessionsOf } from '@/lib/analytics';
+import { sessionDay, sessionsOf } from '@/lib/analytics';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { getCapacity, type CapacityId } from '@/lib/compounding';
 import { CATEGORY_META } from '@/lib/categories';
@@ -56,12 +57,27 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
   const { events } = useActivityLog();
   const { goals, membershipFor, setSupportingGoals } = useGoals();
   const { projectActivityIds } = useProjects();
+  const { getPlan } = usePlan();
   const progress = useGoalProgress(goal, projectActivityIds);
 
   const accent = goalColor(goal).accent;
   const todayK = dayKey(new Date());
   const sessions = useMemo(() => sessionsOf(events), [events]);
   const habits = useMemo(() => goalHabits(quests, goal, membershipFor(goal.id), projectActivityIds), [quests, goal, membershipFor, projectActivityIds]);
+
+  // Completions per day, scoped to this goal's activities → the calendar heat.
+  const habitIdSet = useMemo(() => new Set(habits.map((h) => h.id)), [habits]);
+  const doneByDay = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const s of sessions) {
+      if (!habitIdSet.has(s.activityId)) continue;
+      const d = sessionDay(s);
+      const set = map.get(d) ?? new Set<string>();
+      set.add(s.activityId);
+      if (!map.has(d)) map.set(d, set);
+    }
+    return map;
+  }, [sessions, habitIdSet]);
 
   // "Prepare with a personal goal" — only on project goals.
   const personalGoals = useMemo(() => goals.filter((g) => g.kind !== 'project'), [goals]);
@@ -111,6 +127,15 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
             )}
           </View>
         </Pressable>
+        <Pressable
+          onPress={() => navigation.navigate('BattleSetup', { questId: quest.id })}
+          accessibilityRole="button"
+          accessibilityLabel={`Slay your dragon for ${quest.title}`}
+          hitSlop={10}
+          style={styles.rowBattle}
+        >
+          <Text style={styles.rowBattleText}>⚔️</Text>
+        </Pressable>
         <Pressable onPress={() => deleteActivity(quest)} accessibilityRole="button" accessibilityLabel={`Remove ${quest.title}`} hitSlop={10} style={styles.rowDelete}>
           <Text style={styles.rowDeleteText}>✕</Text>
         </Pressable>
@@ -147,6 +172,26 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        {/* Add activities (and, for project goals, ask peers) — same as the project. */}
+        <View style={styles.tileRow}>
+          <ActivityTile
+            icon="✨"
+            label="New activity"
+            sub={goal.kind === 'project' ? 'A daily habit for this project' : 'Add a habit to this goal'}
+            onPress={() => setAddOpen(true)}
+            tint={accent}
+          />
+          {goal.kind === 'project' && goal.projectId ? (
+            <ActivityTile
+              icon="🌍"
+              label="Ask peers"
+              sub="Get a habit that worked"
+              onPress={() => navigation.navigate('PostComposer', { projectId: goal.projectId, kind: 'ask' })}
+              tint={VIOLET}
+            />
+          ) : null}
+        </View>
+
         {/* War strategy: prepare for battle (goal-level). Activity battles come later. */}
         <Pressable
           onPress={() => navigation.navigate('BattleSetup', { goalId: goal.id })}
@@ -215,13 +260,25 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
           </View>
         )}
 
+        {habits.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>YOUR CALENDAR</Text>
+            <MonthCalendar quests={habits} getPlan={getPlan} doneByDay={doneByDay} todayKey={todayK} />
+            <Text style={styles.calHint}>Days you completed these activities. ✓ means all done that day.</Text>
+          </View>
+        )}
+
         <Pressable onPress={() => navigation.navigate('GoalEditor')} accessibilityRole="button" accessibilityLabel="Create another goal" style={styles.newBtn}>
           <Text style={styles.newBtnText}>＋ New goal</Text>
         </Pressable>
       </ScrollView>
 
       <AddActivityFab onPress={() => setAddOpen(true)} accent={accent} highlight={habits.length === 0} />
-      <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultGoalId={goal.id} />
+      <AddActivitySheet
+        visible={addOpen}
+        onClose={() => setAddOpen(false)}
+        {...(goal.kind === 'project' && goal.projectId ? { defaultProjectIds: [goal.projectId] } : { defaultGoalId: goal.id })}
+      />
     </ScreenContainer>
   );
 }
@@ -244,6 +301,8 @@ const styles = StyleSheet.create({
   battleCta: { borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center' },
   battleText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
 
+  tileRow: { flexDirection: 'row', gap: spacing.sm },
+  calHint: { ...typography.caption, color: MUTED, textAlign: 'center' },
   prepCard: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.sm },
   prepChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   prepChip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: 4, backgroundColor: CARD, maxWidth: 220 },
@@ -268,6 +327,8 @@ const styles = StyleSheet.create({
   rowTime: { ...typography.caption, color: VIOLET, fontWeight: '700' },
   rowStreak: { ...typography.caption, color: TEAL, fontWeight: '800' },
   rowEdit: { ...typography.caption, color: MUTED },
+  rowBattle: { paddingHorizontal: spacing.xs, paddingVertical: spacing.sm },
+  rowBattleText: { fontSize: 16 },
   rowDelete: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
   rowDeleteText: { ...typography.label, color: '#C0202C', fontWeight: '800' },
   editGoal: { ...typography.label, fontWeight: '800' },
