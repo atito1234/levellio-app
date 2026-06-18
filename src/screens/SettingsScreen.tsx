@@ -176,6 +176,54 @@ export function SettingsScreen() {
           </View>
         )}
 
+        {/* Community & feedback */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Community &amp; feedback</Text>
+          <Text style={styles.note}>
+            Community Projects let you build habits together toward a shared, real-world goal. These
+            controls are yours — turn them on when you want them.
+          </Text>
+          <View style={styles.toggleRow}>
+            <Text style={styles.toggleLabel}>Haptic feedback</Text>
+            <Switch
+              value={settings.hapticsEnabled}
+              onValueChange={(v) => void update({ hapticsEnabled: v })}
+              accessibilityLabel="Haptic feedback"
+              accessibilityRole="switch"
+              trackColor={{ true: colors.identity, false: colors.border }}
+              thumbColor={colors.surface}
+            />
+          </View>
+          <View style={styles.toggleRow}>
+            <Text style={styles.toggleLabel}>Show World Projects on Today</Text>
+            <Switch
+              value={settings.worldProjectsEnabled}
+              onValueChange={(v) => void update({ worldProjectsEnabled: v, ...(v ? {} : { worldProjectAlerts: false }) })}
+              accessibilityLabel="Show World Projects on Today"
+              accessibilityRole="switch"
+              trackColor={{ true: colors.identity, false: colors.border }}
+              thumbColor={colors.surface}
+            />
+          </View>
+          {settings.worldProjectsEnabled && (
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleLabel}>Notify me about world milestones</Text>
+              <Switch
+                value={settings.worldProjectAlerts}
+                onValueChange={(v) => void update({ worldProjectAlerts: v })}
+                accessibilityLabel="Notify me about world milestones"
+                accessibilityRole="switch"
+                trackColor={{ true: colors.identity, false: colors.border }}
+                thumbColor={colors.surface}
+              />
+            </View>
+          )}
+          <Text style={styles.help}>
+            See what people around the world are building toward. A premium membership for projects is
+            coming in a future update.
+          </Text>
+        </View>
+
         {/* Habit insights & privacy (on-device, opt-in) */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Habit insights</Text>

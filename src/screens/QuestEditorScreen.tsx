@@ -11,6 +11,8 @@ import {
 } from '@/components';
 import { colors, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { useProjects } from '@/state/ProjectsContext';
+import { getBucketColor } from '@/lib/buckets';
 import { validateQuestDraft, findDuplicateActivity, TITLE_MAX, DESCRIPTION_MAX, WHY_MAX, type QuestDraft } from '@/lib/questForm';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import { habitScience } from '@/data/habitScience';
@@ -41,6 +43,7 @@ const CATEGORY_OPTIONS: ChipOption<QuestCategory>[] = CATEGORY_ORDER.map((c) => 
 /** Manual quest creator/editor (no AI). Create, edit, and delete quests. */
 export function QuestEditorScreen({ route, navigation }: Props) {
   const { quests, character, addQuest, updateQuest, deleteQuest } = useGame();
+  const { signedIn, myProjects, linkedProjectIds, linkHabit, unlinkHabit } = useProjects();
   const guardAbandon = useAbandonGuard();
   const editingId = route.params?.questId;
   const existing = editingId ? quests.find((q) => q.id === editingId) : undefined;
@@ -64,6 +67,8 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   const [rateOn, setRateOn] = useState(existing?.metric === 'rating');
   const [why, setWhy] = useState(existing?.why ?? '');
   const [whyError, setWhyError] = useState<string | undefined>();
+  // Which community projects this habit powers (cross-pollination).
+  const [projectIds, setProjectIds] = useState<string[]>(() => (editingId ? linkedProjectIds(editingId) : []));
 
   const isEditing = Boolean(existing);
   const scheduledTime = scheduleOn ? partsToMinutes(parts) : undefined;
@@ -75,10 +80,18 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   const persist = async (draft: QuestDraft) => {
     setSaving(true);
     try {
+      let id = editingId;
       if (isEditing && editingId) {
         await updateQuest(editingId, draft);
       } else {
-        await addQuest(draft);
+        const created = await addQuest(draft);
+        id = created?.id;
+      }
+      // Reconcile project links to the current selection.
+      if (id) {
+        const current = linkedProjectIds(id);
+        for (const pid of projectIds) if (!current.includes(pid)) await linkHabit(id, pid);
+        for (const pid of current) if (!projectIds.includes(pid)) await unlinkHabit(id, pid);
       }
       navigation.goBack();
     } finally {
@@ -257,6 +270,36 @@ export function QuestEditorScreen({ route, navigation }: Props) {
               multiline
             />
           </View>
+
+          {/* Cross-pollination: also power community projects with this habit. */}
+          {signedIn && myProjects.length > 0 && (
+            <View style={styles.scheduleBlock}>
+              <View style={styles.scheduleHeadText}>
+                <Text style={styles.scheduleLabel}>Contributes to a project (optional)</Text>
+                <Text style={styles.scheduleHint}>Completing this habit will also power the projects you pick.</Text>
+              </View>
+              <View style={styles.projChips}>
+                {myProjects.map((p) => {
+                  const on = projectIds.includes(p.id);
+                  const c = getBucketColor(p.colorId);
+                  return (
+                    <Pressable
+                      key={p.id}
+                      onPress={() => setProjectIds((cur) => (on ? cur.filter((x) => x !== p.id) : [...cur, p.id]))}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
+                      style={[styles.projChip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
+                    >
+                      <Text style={[styles.projChipText, on && { color: c.accent }]} numberOfLines={1}>
+                        {on ? '🤝 ' : '＋ '}
+                        {p.emoji} {p.title}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          )}
         </ScrollView>
 
         <View style={styles.actions}>
@@ -319,4 +362,7 @@ const styles = StyleSheet.create({
   weekdayOn: { backgroundColor: colors.identity, borderColor: colors.identity },
   weekdayText: { ...typography.label, color: colors.textPrimary, fontWeight: '700' },
   weekdayTextOn: { color: '#FFFFFF' },
+  projChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  projChip: { backgroundColor: colors.surface, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: colors.border, maxWidth: 240 },
+  projChipText: { ...typography.label, color: colors.textPrimary, fontWeight: '600' },
 });

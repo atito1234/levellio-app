@@ -13,10 +13,18 @@
  */
 import { dayKey } from './dates';
 import { getBucketColor, type BucketColor, type BucketColorId } from './buckets';
+import { isWithinRadius } from './geo';
 import type { HeroPresentation, QuestCategory } from '@/types';
 
 /** Colours a project may use — the shared palette minus gold (kept for 100%/reward). */
 export const PROJECT_COLOR_IDS: readonly BucketColorId[] = ['violet', 'teal', 'rose', 'sky', 'lime', 'slate'];
+
+/**
+ * How a completion was logged toward a project:
+ *  - 'onsite'  — done on the ground, at/near the project's location.
+ *  - 'remote'  — done anywhere for personal benefit; still helps the project.
+ */
+export type ContributionMode = 'onsite' | 'remote';
 
 export const MAX_PROJECT_TITLE = 60;
 export const MAX_PROJECT_SUMMARY = 240;
@@ -57,6 +65,11 @@ export interface Project {
   /** Denormalized member count for catalog cards. */
   memberCount: number;
   createdAt: number;
+  /** Optional geofence centre — when set, completions nearby tag as 'onsite'. */
+  lat?: number;
+  lng?: number;
+  /** Geofence radius in km (defaults applied at use-site). */
+  radiusKm?: number;
 }
 
 export interface ProjectMember {
@@ -82,9 +95,14 @@ export interface Contribution {
   category?: QuestCategory;
   /** Units this completion added (>= 1). */
   value: number;
+  /** Where it was done — 'onsite' (on the ground) or 'remote' (anywhere). */
+  mode?: ContributionMode;
   cycleKey: string;
   createdAt: number;
 }
+
+/** Default geofence radius (km) when a project has a pin but no explicit radius. */
+export const DEFAULT_GEOFENCE_KM = 5;
 
 export interface CycleProgress {
   cycleKey: string;
@@ -177,6 +195,29 @@ function titlesMatch(a: string, b: string): boolean {
 export function contributionValue(habitTitle: string, project: Pick<Project, 'suggestedHabits'>): number {
   const match = project.suggestedHabits.find((h) => titlesMatch(h.title, habitTitle));
   return Math.max(1, Math.round(match?.contribution ?? 1));
+}
+
+/** True when a project has a usable geofence (a pin to compare against). */
+export function hasGeofence(project: Pick<Project, 'lat' | 'lng'>): boolean {
+  return typeof project.lat === 'number' && typeof project.lng === 'number';
+}
+
+/**
+ * Auto-detect contribution mode for a completion: 'onsite' when the sample falls
+ * within ANY of the geofenced projects' radius, else 'remote'. With no location
+ * sample or no geofences, defaults to 'remote'.
+ */
+export function detectContributionMode(
+  sample: { lat: number; lng: number } | null | undefined,
+  projects: readonly Pick<Project, 'lat' | 'lng' | 'radiusKm'>[],
+): ContributionMode {
+  if (!sample) return 'remote';
+  const onsite = projects.some(
+    (p) =>
+      hasGeofence(p) &&
+      isWithinRadius(sample.lat, sample.lng, p.lat!, p.lng!, p.radiusKm ?? DEFAULT_GEOFENCE_KM),
+  );
+  return onsite ? 'onsite' : 'remote';
 }
 
 /** Most-recent-first feed slice, bounded for display. */

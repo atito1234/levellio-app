@@ -6,15 +6,32 @@
  */
 import { CAPACITIES, getCapacity, type CapacityId, type CapacityLevels } from './compounding';
 import { SOLIDIFY_DAYS } from './activityStreak';
+import type { BucketColorId } from './buckets';
 import type { Goal } from './goal';
 
-export type MilestoneKind = 'streak' | 'activity_solid' | 'capacity_full' | 'goal';
+export type MilestoneKind =
+  | 'streak'
+  | 'activity_solid'
+  | 'capacity_full'
+  | 'goal'
+  /** A community-project contribution beat ("+3 sites → Fort-Liberté"). */
+  | 'project'
+  /** The team crossed this week's project goal — the shared-win moment. */
+  | 'project_goal';
 
 export interface Milestone {
   id: string;
   kind: MilestoneKind;
   label: string;
   earnedAt: number;
+  /** Optional override emoji (else a per-kind default is used). */
+  emoji?: string;
+  /** A second, smaller line under the label (e.g. "63% of this week's goal"). */
+  detail?: string;
+  /** Palette colour for the accent/progress bar (projects use their colour). */
+  accentColorId?: BucketColorId;
+  /** 0..100 — when present, the celebration shows a thin progress bar. */
+  progressPct?: number;
 }
 
 /** Global daily-streak thresholds worth a celebration. */
@@ -72,4 +89,54 @@ export function detectMilestones(args: DetectArgs): Milestone[] {
   }
 
   return out;
+}
+
+// --- Project contribution beats ---------------------------------------------
+
+/** One project's outcome from a completion — the celebratable shape. */
+export interface ProjectBeat {
+  projectId: string;
+  title: string;
+  emoji: string;
+  unit: string;
+  value: number;
+  colorId: BucketColorId;
+  /** Cycle progress after this contribution (0..100). */
+  pct: number;
+  reachedGoal: boolean;
+  reward?: string;
+  /** 'onsite' shows a 📍 cue in the beat. */
+  mode?: 'onsite' | 'remote';
+}
+
+/**
+ * Turn project contributions into transient celebration milestones — the
+ * dopamine beat that ties a personal completion to collective progress. These
+ * are NOT persisted/deduped (they fire every time); `reachedGoal` is the
+ * once-per-cycle team-win. Pure: ids are derived from `now` + index.
+ */
+export function projectBeats(beats: readonly ProjectBeat[], now: number): Milestone[] {
+  return beats.map((b, i) =>
+    b.reachedGoal
+      ? {
+          id: `project_goal-${b.projectId}-${now}-${i}`,
+          kind: 'project_goal',
+          emoji: '🏆',
+          label: `${b.title} hit this week’s goal!`,
+          detail: b.reward ? `Reward unlocked: ${b.reward}` : 'Goal reached together',
+          accentColorId: 'gold',
+          progressPct: 100,
+          earnedAt: now,
+        }
+      : {
+          id: `project-${b.projectId}-${now}-${i}`,
+          kind: 'project',
+          emoji: b.emoji,
+          label: `+${b.value} ${b.unit} → ${b.title}${b.mode === 'onsite' ? ' 📍' : ''}`,
+          detail: `${b.mode === 'onsite' ? 'On-site · ' : ''}${b.pct}% of this week’s goal`,
+          accentColorId: b.colorId,
+          progressPct: b.pct,
+          earnedAt: now,
+        },
+  );
 }

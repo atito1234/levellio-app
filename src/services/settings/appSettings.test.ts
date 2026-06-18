@@ -16,6 +16,9 @@ describe('normalizeSettings', () => {
       cosmeticThemeId: 'classic',
       bucketViewMode: 'list',
       metadataPrivacy: DEFAULT_METADATA_PRIVACY,
+      hapticsEnabled: true,
+      worldProjectsEnabled: false,
+      worldProjectAlerts: false,
     });
   });
 
@@ -28,6 +31,16 @@ describe('normalizeSettings', () => {
     expect(normalizeSettings({}).bucketViewMode).toBe('list');
     expect(normalizeSettings({ bucketViewMode: 'buckets' }).bucketViewMode).toBe('buckets');
     expect(normalizeSettings({ bucketViewMode: 'weird' as never }).bucketViewMode).toBe('list');
+  });
+
+  it('defaults haptics on, world projects + alerts off (opt-in)', () => {
+    const d = normalizeSettings({});
+    expect(d.hapticsEnabled).toBe(true);
+    expect(d.worldProjectsEnabled).toBe(false);
+    expect(d.worldProjectAlerts).toBe(false);
+    expect(normalizeSettings({ hapticsEnabled: false }).hapticsEnabled).toBe(false);
+    expect(normalizeSettings({ worldProjectsEnabled: true }).worldProjectsEnabled).toBe(true);
+    expect(normalizeSettings({ worldProjectAlerts: 'yes' as unknown as boolean }).worldProjectAlerts).toBe(false);
   });
 
   it('normalizes metadata privacy with privacy-preserving defaults', () => {
@@ -58,6 +71,9 @@ describe('SettingsStore', () => {
       cosmeticThemeId: 'emerald',
       bucketViewMode: 'buckets',
       metadataPrivacy: { ...DEFAULT_METADATA_PRIVACY, includeContext: true },
+      hapticsEnabled: false,
+      worldProjectsEnabled: true,
+      worldProjectAlerts: true,
     });
     const loaded = await store.load();
     expect(loaded.bucketViewMode).toBe('buckets');

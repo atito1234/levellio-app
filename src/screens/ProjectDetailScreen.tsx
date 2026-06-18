@@ -15,6 +15,7 @@ import {
 } from '@/lib/projects';
 import type { ProjectSnapshot } from '@/services/projects';
 import { CATEGORY_META } from '@/lib/categories';
+import { dayKey } from '@/lib/dates';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProjectDetail'>;
@@ -66,12 +67,16 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   const c = project ? projectColor(project) : { accent: VIOLET, soft: '#EDE9FE', id: 'violet' as const };
   const pct = snap?.cycle.pct ?? 0;
   const barColor = pct >= 100 ? GOLD : c.accent;
+  const activeToday = useMemo(() => {
+    const today = dayKey(new Date());
+    return new Set((snap?.feed ?? []).filter((f) => dayKey(new Date(f.createdAt)) === today).map((f) => f.uid)).size;
+  }, [snap]);
 
   const adopt = async (habit: ProjectSuggestedHabit) => {
     const quest = await addQuest({ title: habit.title, category: habit.category, difficulty: 'easy' });
     if (quest) {
       await linkHabit(quest.id, projectId);
-      Alert.alert('Habit added', `“${habit.title}” is now in your habits and contributes to this project.`);
+      Alert.alert("You're in 🤝", `“${habit.title}” is now one of your habits — every time you complete it, you move this project forward.`);
     }
   };
 
@@ -144,6 +149,9 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
           <Text style={styles.progressCount}>
             {snap?.cycle.count ?? 0} / {project.weeklyGoal} {project.unit} this week
           </Text>
+          {activeToday > 0 && (
+            <Text style={[styles.pulse, { color: c.accent }]}>👥 {activeToday} active today</Text>
+          )}
           {project.reward.length > 0 && (
             <Text style={styles.reward}>🎁 Reward at 100%: {project.reward}</Text>
           )}
@@ -225,6 +233,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
               <View style={[styles.feedDot, { backgroundColor: c.accent }]} />
               <Text style={styles.feedText} numberOfLines={2}>
                 <Text style={styles.feedName}>{f.displayName}</Text> {f.habitTitle} · +{f.value}
+                {f.mode === 'onsite' ? ' · 📍 on-site' : ''}
               </Text>
               <Text style={styles.feedTime}>{timeAgo(f.createdAt)}</Text>
             </View>
@@ -293,6 +302,7 @@ const styles = StyleSheet.create({
   progressPct: { ...typography.heading, color: INK, fontWeight: '900' },
   progressCycle: { ...typography.caption, color: MUTED },
   progressCount: { ...typography.label, color: INK, fontWeight: '700' },
+  pulse: { ...typography.caption, fontWeight: '800' },
   reward: { ...typography.caption, color: MUTED },
 
   consentRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },

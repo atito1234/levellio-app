@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AddActivityFab, AddActivitySheet, ScreenContainer } from '@/components';
+import { AddActivityFab, AddActivitySheet, ProjectBadge, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { useProjects } from '@/state/ProjectsContext';
 import { usePlan } from '@/state/PlanContext';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
@@ -42,6 +43,7 @@ const TRACK = '#E3E3EC';
 export function PlanScreen({ route, navigation }: Props) {
   const { quests } = useGame();
   const { buckets, assignments } = useBuckets();
+  const { projectsForHabit } = useProjects();
   const { getPlan, togglePlanned } = usePlan();
   const { events } = useActivityLog();
 
@@ -166,6 +168,7 @@ export function PlanScreen({ route, navigation }: Props) {
                       <Text style={[styles.rowTitle, done && styles.rowTitleDone]} numberOfLines={1}>
                         {q.title}
                       </Text>
+                      {projectsForHabit(q.id).length > 0 && <ProjectBadge projects={projectsForHabit(q.id)} compact />}
                       {(q.scheduledTime !== undefined || q.scheduledDays?.length) && (
                         <Text style={styles.rowTime}>
                           {q.scheduledTime !== undefined ? `⏰ ${minutesToLabel(q.scheduledTime)}` : ''}

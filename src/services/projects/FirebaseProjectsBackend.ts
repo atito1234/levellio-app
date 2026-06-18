@@ -37,14 +37,17 @@ import {
   cycleProgress,
   genInviteCode,
   normalizeInviteCode,
+  progressPct,
   summarizeFeed,
   MAX_FEED_ITEMS,
   type Contribution,
+  type ContributionMode,
   type Project,
   type ProjectMember,
 } from '@/lib/projects';
 import type {
   ContributionInput,
+  ContributionResult,
   ProjectDraft,
   ProjectIdentity,
   ProjectSnapshot,
@@ -69,6 +72,9 @@ function toProject(id: string, d: DocumentData): Project {
     reward: d.reward ?? '',
     memberCount: typeof d.memberCount === 'number' ? d.memberCount : 0,
     createdAt: typeof d.createdAt === 'number' ? d.createdAt : 0,
+    ...(typeof d.lat === 'number' ? { lat: d.lat } : {}),
+    ...(typeof d.lng === 'number' ? { lng: d.lng } : {}),
+    ...(typeof d.radiusKm === 'number' ? { radiusKm: d.radiusKm } : {}),
   };
 }
 
@@ -122,6 +128,9 @@ export class FirebaseProjectsBackend implements ProjectsBackend {
       reward: draft.reward.trim(),
       memberCount: 0,
       createdAt: Date.now(),
+      ...(typeof draft.lat === 'number' ? { lat: draft.lat } : {}),
+      ...(typeof draft.lng === 'number' ? { lng: draft.lng } : {}),
+      ...(typeof draft.radiusKm === 'number' ? { radiusKm: draft.radiusKm } : {}),
     };
     await setDoc(ref, project);
     await this.joinAs(identity, ref.id, true, 'owner');
@@ -172,23 +181,32 @@ export class FirebaseProjectsBackend implements ProjectsBackend {
     await updateDoc(doc(this.db, 'projects', projectId, 'members', uid), { shareFeed });
   }
 
-  async contribute(identity: ProjectIdentity, projectId: string, input: ContributionInput): Promise<void> {
+  async contribute(
+    identity: ProjectIdentity,
+    projectId: string,
+    input: ContributionInput,
+  ): Promise<ContributionResult | null> {
     const projectRef = doc(this.db, 'projects', projectId);
     const memberRef = doc(this.db, 'projects', projectId, 'members', identity.uid);
-    const [projectSnap, memberSnap] = await Promise.all([getDoc(projectRef), getDoc(memberRef)]);
-    if (!projectSnap.exists()) return;
+    const cycleKey = cycleKeyFor();
+    const cycleRef = doc(this.db, 'projects', projectId, 'cycles', cycleKey);
+    const [projectSnap, memberSnap, cycleSnap] = await Promise.all([
+      getDoc(projectRef),
+      getDoc(memberRef),
+      getDoc(cycleRef),
+    ]);
+    if (!projectSnap.exists()) return null;
     const project = toProject(projectSnap.id, projectSnap.data());
     const value = Math.max(1, Math.round(input.value || contributionValue(input.habitTitle, project)));
-    const cycleKey = cycleKeyFor();
+    const mode: ContributionMode = input.mode ?? 'remote';
     const shareFeed = memberSnap.exists() ? memberSnap.data().shareFeed !== false : true;
+    // Cycle total before this write — to detect the goal-crossing moment. May be
+    // mildly stale across devices, which is acceptable for a celebration cue.
+    const prevCount = cycleSnap.exists() && typeof cycleSnap.data().count === 'number' ? cycleSnap.data().count : 0;
 
     const batch = writeBatch(this.db);
     // Counter doc per cycle (created on first contribution).
-    batch.set(
-      doc(this.db, 'projects', projectId, 'cycles', cycleKey),
-      { cycleKey, goal: project.weeklyGoal, count: increment(value) },
-      { merge: true },
-    );
+    batch.set(cycleRef, { cycleKey, goal: project.weeklyGoal, count: increment(value) }, { merge: true });
     batch.set(memberRef, { contributionTotal: increment(value) }, { merge: true });
     // Only opted-in members appear in the shared feed; the count always counts.
     if (shareFeed) {
@@ -198,12 +216,27 @@ export class FirebaseProjectsBackend implements ProjectsBackend {
         habitTitle: input.habitTitle,
         category: input.category ?? null,
         value,
+        mode,
         cycleKey,
         createdAt: Date.now(),
         serverAt: serverTimestamp(),
       });
     }
     await batch.commit();
+
+    const cycle = cycleProgress(cycleKey, prevCount + value, project.weeklyGoal);
+    return {
+      projectId,
+      title: project.title,
+      emoji: project.emoji,
+      colorId: project.colorId,
+      unit: project.unit,
+      value,
+      mode,
+      reward: project.reward,
+      cycle,
+      reachedGoal: progressPct(prevCount, project.weeklyGoal) < 100 && cycle.pct >= 100,
+    };
   }
 
   subscribe(projectId: string, _uid: string, cb: (snap: ProjectSnapshot | null) => void): Unsubscribe {
