@@ -21,6 +21,12 @@ export const MAX_COMMENT_TEXT = 300;
 
 export type PostKind = 'post' | 'contribution' | 'ask';
 
+/** Attached media on a post. `url` is a hosted (Firebase Storage) download URL. */
+export interface PostMedia {
+  url: string;
+  type: 'image' | 'video';
+}
+
 /** A peer's answer can attach a ready-made habit the asker adopts in one tap. */
 export interface SuggestedHabit {
   title: string;
@@ -52,6 +58,8 @@ export interface Post {
   mode?: ContributionMode;
   /** For 'ask' posts: the life-area the asker wants help with. */
   categoryHint?: QuestCategory;
+  /** Optional attached photo/video (hosted). Off until Firebase Storage/Blaze. */
+  media?: PostMedia;
   createdAt: number;
   /** uid → emoji. The source of truth for counts + the viewer's own reaction. */
   reactions: Record<string, ReactionEmoji>;
@@ -83,6 +91,7 @@ export interface PostDraft {
   value?: number;
   mode?: ContributionMode;
   categoryHint?: QuestCategory;
+  media?: PostMedia;
 }
 
 // --- reaction helpers --------------------------------------------------------

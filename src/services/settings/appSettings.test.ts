@@ -19,6 +19,7 @@ describe('normalizeSettings', () => {
       hapticsEnabled: true,
       worldProjectsEnabled: false,
       worldProjectAlerts: false,
+      projectPrepLinkMode: 'visual',
     });
   });
 
@@ -41,6 +42,12 @@ describe('normalizeSettings', () => {
     expect(normalizeSettings({ hapticsEnabled: false }).hapticsEnabled).toBe(false);
     expect(normalizeSettings({ worldProjectsEnabled: true }).worldProjectsEnabled).toBe(true);
     expect(normalizeSettings({ worldProjectAlerts: 'yes' as unknown as boolean }).worldProjectAlerts).toBe(false);
+  });
+
+  it('defaults project prep-link mode to visual; honours full', () => {
+    expect(normalizeSettings({}).projectPrepLinkMode).toBe('visual');
+    expect(normalizeSettings({ projectPrepLinkMode: 'full' }).projectPrepLinkMode).toBe('full');
+    expect(normalizeSettings({ projectPrepLinkMode: 'weird' as never }).projectPrepLinkMode).toBe('visual');
   });
 
   it('normalizes metadata privacy with privacy-preserving defaults', () => {
@@ -74,6 +81,7 @@ describe('SettingsStore', () => {
       hapticsEnabled: false,
       worldProjectsEnabled: true,
       worldProjectAlerts: true,
+      projectPrepLinkMode: 'full',
     });
     const loaded = await store.load();
     expect(loaded.bucketViewMode).toBe('buckets');

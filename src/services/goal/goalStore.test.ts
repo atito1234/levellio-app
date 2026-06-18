@@ -10,6 +10,7 @@ const goal = (id: string, over: Partial<Goal> = {}): Goal => ({
   categories: ['fitness'],
   createdAt: 0,
   order: 0,
+  kind: 'personal',
   ...over,
 });
 
@@ -32,6 +33,22 @@ describe('normalizeGoals', () => {
   it('returns [] for malformed input', () => {
     expect(normalizeGoals(null)).toEqual([]);
     expect(normalizeGoals({ goals: 7 })).toEqual([]);
+  });
+
+  it('migrates legacy goals to kind:personal, and keeps project kind + projectId', () => {
+    const goals = normalizeGoals({
+      goals: [
+        { id: 'a', title: 'Legacy', categories: ['fitness'] }, // v1 → personal
+        { id: 'b', title: 'Proj', categories: ['health'], kind: 'project', projectId: 'proj-x', supportingGoalIds: ['a'] },
+        { id: 'c', title: 'NoPid', categories: [], kind: 'project' }, // project without projectId
+      ],
+    });
+    expect(goals.find((g) => g.id === 'a')!.kind).toBe('personal');
+    const proj = goals.find((g) => g.id === 'b')!;
+    expect(proj.kind).toBe('project');
+    expect(proj.projectId).toBe('proj-x');
+    expect(proj.supportingGoalIds).toEqual(['a']);
+    expect(goals.find((g) => g.id === 'c')!.projectId).toBeUndefined();
   });
 
   it('accepts palette colours, falls back for gold/unknown, keeps legacy violet/teal', () => {

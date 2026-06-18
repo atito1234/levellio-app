@@ -85,6 +85,7 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
               reachedGoal: r.reachedGoal,
               reward: r.reward,
               mode: r.mode,
+              habitTitle: quest.title,
             })),
             Date.now(),
           ),

@@ -22,6 +22,12 @@ export interface Goal {
   categories: QuestCategory[];
   createdAt: number;
   order: number;
+  /** 'personal' (default) or 'project' — a goal that mirrors a community project. */
+  kind: 'personal' | 'project';
+  /** The community project this goal mirrors (only when kind === 'project'). */
+  projectId?: string;
+  /** Personal goals chosen to "prepare" for this (project) goal. */
+  supportingGoalIds?: string[];
 }
 
 /** Colours a goal may use — the shared palette minus gold (kept for 100%/reward). */
@@ -57,18 +63,32 @@ export function capacitiesForCategories(categories: readonly QuestCategory[]): C
 }
 
 /**
- * The habits that contribute to a goal — those in its life areas, PLUS any
- * explicitly tagged into it (`linkedIds`, from goalLinks). Explicit membership
- * lets a single habit belong to several goals regardless of its category.
+ * The habits that contribute to a goal.
+ *  - Personal goal: habits in its life areas (category match) — EXCLUDING any
+ *    activity that belongs to a community project (those live in their project
+ *    goal, not random personal goals) — PLUS any explicitly tagged in (`linkedIds`).
+ *  - Project goal: explicit members only (`linkedIds`); never by bare category,
+ *    so unrelated personal habits don't leak in.
+ *
+ * `projectActivityIds` is the set of all project-linked activity ids (the
+ * exclusion set); omit it to keep the old category-only behaviour.
  */
 export function goalHabits(
   quests: readonly Quest[],
-  goal: Pick<Goal, 'categories'>,
+  goal: Pick<Goal, 'categories' | 'kind'>,
   linkedIds?: ReadonlySet<string>,
+  projectActivityIds?: ReadonlySet<string>,
 ): Quest[] {
   const areas = new Set(goal.categories);
-  return quests.filter((q) => areas.has(q.category) || (linkedIds?.has(q.id) ?? false));
+  const linked = linkedIds ?? EMPTY_IDS;
+  if (goal.kind === 'project') {
+    return quests.filter((q) => linked.has(q.id));
+  }
+  const exclude = projectActivityIds ?? EMPTY_IDS;
+  return quests.filter((q) => linked.has(q.id) || (areas.has(q.category) && !exclude.has(q.id)));
 }
+
+const EMPTY_IDS: ReadonlySet<string> = new Set();
 
 /**
  * Distinct days in the given week-window with a session in one of the goal's
@@ -99,9 +119,11 @@ export function goalProgress(args: {
   weeklyDays: number;
   /** Habit ids explicitly tagged into this goal (from goalLinks). */
   linkedIds?: ReadonlySet<string>;
+  /** All project-linked activity ids — excluded from personal goals' category match. */
+  projectActivityIds?: ReadonlySet<string>;
 }): GoalProgress {
-  const { goal, quests, plannedTodayIds, levels, weeklyDays, linkedIds } = args;
-  const contributing = goalHabits(quests, goal, linkedIds);
+  const { goal, quests, plannedTodayIds, levels, weeklyDays, linkedIds, projectActivityIds } = args;
+  const contributing = goalHabits(quests, goal, linkedIds, projectActivityIds);
   const plannedSet = plannedTodayIds ? new Set(plannedTodayIds) : null;
   const isPlanned = (id: string) => (plannedSet ? plannedSet.has(id) : true); // no plan → all count
 

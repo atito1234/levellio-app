@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ConfettiBurst } from '@/components/ConfettiBurst';
 import { useMilestones } from '@/state/MilestonesContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -7,9 +9,12 @@ import { getCelebrationTimings } from '@/lib/celebration';
 import { getBucketColor } from '@/lib/buckets';
 import { spacing, typography } from '@/theme';
 import type { MilestoneKind } from '@/lib/milestones';
+import type { RootStackParamList } from '@/navigation/types';
 
 const INK = '#1F2937';
 const CARD = '#FFFFFF';
+const VIOLET = '#6C4CF1';
+const TEAL = '#16C8A8';
 const GOLD = '#FFB23E';
 const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
@@ -30,10 +35,13 @@ const KIND_EMOJI: Record<MilestoneKind, string> = {
  */
 export function MilestoneCelebration() {
   const { queue, popQueue } = useMilestones();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const reduced = useReducedMotion();
   const timings = getCelebrationTimings(reduced);
   const current = queue[0];
   const scale = useRef(new Animated.Value(0)).current;
+  // Project wins are interactive (share/feed/calendar) → don't auto-dismiss them.
+  const interactive = Boolean(current?.share);
 
   useEffect(() => {
     if (!current) return;
@@ -43,6 +51,7 @@ export function MilestoneCelebration() {
     } else {
       scale.setValue(1);
     }
+    if (interactive) return; // wait for the user to act/dismiss
     const dwell = reduced ? 1600 : 2800;
     const t = setTimeout(() => popQueue(), dwell);
     return () => clearTimeout(t);
@@ -51,6 +60,12 @@ export function MilestoneCelebration() {
   }, [current?.id]);
 
   if (!current) return null;
+
+  const share = current.share;
+  const go = (action: () => void) => {
+    popQueue();
+    action();
+  };
 
   const accent = current.accentColorId ? getBucketColor(current.accentColorId).accent : GOLD;
   // The team-win and the sanctioned 100% moments wear gold; lighter beats wear
@@ -82,7 +97,42 @@ export function MilestoneCelebration() {
               />
             </View>
           )}
-          <Text style={styles.hint}>Tap to continue</Text>
+
+          {share ? (
+            <>
+              <Pressable
+                onPress={() =>
+                  go(() =>
+                    navigation.navigate('PostComposer', {
+                      kind: 'contribution',
+                      projectId: share.projectId,
+                      habitTitle: share.habitTitle,
+                      value: share.value,
+                      mode: share.mode,
+                    }),
+                  )
+                }
+                accessibilityRole="button"
+                accessibilityLabel="Share your win with members"
+                style={[styles.shareBtn, { backgroundColor: TEAL }]}
+              >
+                <Text style={styles.shareBtnText}>📣 Share your win</Text>
+              </Pressable>
+              <View style={styles.quickRow}>
+                <Pressable onPress={() => go(() => navigation.navigate('Main', { screen: 'Feed' }))} accessibilityRole="button" style={styles.quickBtn}>
+                  <Text style={styles.quickText}>📰 Feed</Text>
+                </Pressable>
+                <Pressable onPress={() => go(() => navigation.navigate('Plan'))} accessibilityRole="button" style={styles.quickBtn}>
+                  <Text style={styles.quickText}>📅 Calendar</Text>
+                </Pressable>
+              </View>
+              <Pressable onPress={popQueue} accessibilityRole="button" hitSlop={8}>
+                <Text style={styles.hint}>Done</Text>
+              </Pressable>
+            </>
+          ) : (
+            <Text style={styles.hint}>Tap to continue</Text>
+          )}
         </Animated.View>
       </Pressable>
     </View>
@@ -114,4 +164,9 @@ const styles = StyleSheet.create({
   barTrack: { alignSelf: 'stretch', height: 8, borderRadius: 999, backgroundColor: TRACK, overflow: 'hidden', marginTop: spacing.xs },
   barFill: { height: 8, borderRadius: 999 },
   hint: { ...typography.caption, color: MUTED },
+  shareBtn: { alignSelf: 'stretch', borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.xs },
+  shareBtnText: { ...typography.label, color: '#0B3D33', fontWeight: '800' },
+  quickRow: { flexDirection: 'row', gap: spacing.sm, alignSelf: 'stretch' },
+  quickBtn: { flex: 1, borderRadius: 999, paddingVertical: spacing.sm, alignItems: 'center', backgroundColor: '#F4F1FE' },
+  quickText: { ...typography.label, color: VIOLET, fontWeight: '800' },
 });

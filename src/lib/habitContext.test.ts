@@ -12,6 +12,7 @@ const goal = (title: string, categories: Quest['category'][]): Goal => ({
   categories,
   createdAt: 0,
   order: 0,
+  kind: 'personal',
 });
 
 describe('habitScience', () => {

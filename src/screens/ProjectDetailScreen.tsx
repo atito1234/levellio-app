@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ActivityTile, AddActivitySheet, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
@@ -112,22 +112,50 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
     Alert.alert("They're yours 🤝", 'All suggested habits are now daily habits in your activities, powering this project.');
   };
 
-  /** Turn this project into one of the user's goals and file its activities in it. */
-  const makeProjectAGoal = async () => {
-    if (!project) return;
-    const cats = [...new Set(project.suggestedHabits.map((h) => h.category))];
-    const goal = await addGoal({
-      title: project.title,
-      emoji: project.emoji,
-      colorId: project.colorId,
-      categories: cats.length ? cats : ['health'],
-    });
-    if (goal) {
-      for (const q of myQuests) await linkGoal(q.id, goal.id);
-      Alert.alert('Goal created 🎯', `“${project.title}” is now a goal — your activities here ladder up to it.`);
-    }
-  };
+  // The goal that mirrors THIS project (auto-created below).
+  const projectGoal = useMemo(
+    () => goals.find((g) => g.kind === 'project' && g.projectId === projectId),
+    [goals, projectId],
+  );
 
+  // Auto-create the project's own goal once activities exist, and keep every
+  // adopted activity filed under it — so project activities live in THIS goal,
+  // never bleeding into personal goals. Guarded against double-creation.
+  const creatingGoalRef = useRef(false);
+  useEffect(() => {
+    if (!joined || !project || myQuests.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      let gid = goals.find((g) => g.kind === 'project' && g.projectId === projectId)?.id ?? null;
+      if (!gid) {
+        if (creatingGoalRef.current) return;
+        creatingGoalRef.current = true;
+        const cats = [...new Set(project.suggestedHabits.map((h) => h.category))];
+        const goal = await addGoal({
+          title: project.title,
+          emoji: project.emoji,
+          colorId: project.colorId,
+          categories: cats.length ? cats : ['health'],
+          kind: 'project',
+          projectId,
+        });
+        creatingGoalRef.current = false;
+        gid = goal?.id ?? null;
+      }
+      if (!gid || cancelled) return;
+      for (const q of myQuests) {
+        if (!goalsForHabit(q.id).includes(gid)) await linkGoal(q.id, gid);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // goalsForHabit/linkGoal/addGoal are context fns (unstable identities); re-run on the data deps only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [joined, project, myQuests, goals, projectId]);
+
+  // The activity-card goal picker offers PERSONAL goals only (the project goal is automatic).
+  const personalGoals = useMemo(() => goals.filter((g) => g.kind !== 'project'), [goals]);
   const toggleGoalFor = (activityId: string, goalId: string) => {
     if (goalsForHabit(activityId).includes(goalId)) void unlinkGoal(activityId, goalId);
     else void linkGoal(activityId, goalId);
@@ -274,7 +302,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
                     emoji={CATEGORY_META[q.category].icon}
                     title={q.title}
                     accent={c.accent}
-                    goals={goals}
+                    goals={personalGoals}
                     inGoalIds={new Set(goalsForHabit(q.id))}
                     onToggleGoal={(goalId) => toggleGoalFor(q.id, goalId)}
                     onNewGoal={() => navigation.navigate('GoalEditor')}
@@ -286,9 +314,11 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
                 ))}
               </View>
             )}
-            <Pressable onPress={() => void makeProjectAGoal()} accessibilityRole="button" accessibilityLabel="Make this project one of your goals" style={styles.makeGoal}>
-              <Text style={styles.makeGoalText}>🎯 Make this project a goal</Text>
-            </Pressable>
+            {projectGoal && (
+              <Pressable onPress={() => navigation.navigate('GoalFocus', { goalId: projectGoal.id })} accessibilityRole="button" accessibilityLabel="View this project's goal" style={styles.makeGoal}>
+                <Text style={styles.makeGoalText}>🎯 View project goal</Text>
+              </Pressable>
+            )}
           </>
         )}
 

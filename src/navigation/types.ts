@@ -2,6 +2,7 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { QuestCategory, QuestReward } from '@/types';
 import type { QuestDraft } from '@/lib/questForm';
 import type { PostKind } from '@/lib/community';
+import type { ContributionMode } from '@/lib/projects';
 import type { LegalDocKey } from '@/content/aboutInfo';
 
 /** Main app tabs (shown after onboarding). */
@@ -83,8 +84,10 @@ export type RootStackParamList = {
   JoinProject: { code?: string } | undefined;
   /** Sign in / create an account to unlock community projects. */
   SignIn: undefined;
-  /** Compose a community post or an "ask peers" request (optionally pre-scoped to a project). */
-  PostComposer: { projectId?: string; kind?: PostKind; categoryHint?: QuestCategory } | undefined;
+  /** Compose a community post, an "ask peers" request, or a completion "win" (kind:'contribution'). */
+  PostComposer:
+    | { projectId?: string; kind?: PostKind; categoryHint?: QuestCategory; habitTitle?: string; value?: number; mode?: ContributionMode }
+    | undefined;
   /** A single post with its comment thread. */
   PostDetail: { postId: string };
   /** Discover & manage the people in your network. */

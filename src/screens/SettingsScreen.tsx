@@ -218,9 +218,21 @@ export function SettingsScreen() {
               />
             </View>
           )}
+          <View style={styles.toggleRow}>
+            <Text style={styles.toggleLabel}>Prep goals feed project progress</Text>
+            <Switch
+              value={settings.projectPrepLinkMode === 'full'}
+              onValueChange={(v) => void update({ projectPrepLinkMode: v ? 'full' : 'visual' })}
+              accessibilityLabel="Prep goals feed project progress"
+              accessibilityRole="switch"
+              trackColor={{ true: colors.identity, false: colors.border }}
+              thumbColor={colors.surface}
+            />
+          </View>
           <Text style={styles.help}>
-            See what people around the world are building toward. A premium membership for projects is
-            coming in a future update.
+            When you pick a personal goal to “prepare” for a project goal: ON makes its habits count
+            toward the project goal’s progress; OFF just shows it as a reminder. See what people
+            around the world are building toward — a premium membership for projects is coming soon.
           </Text>
         </View>
 

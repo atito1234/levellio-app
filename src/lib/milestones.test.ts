@@ -11,6 +11,7 @@ const goal: Goal = {
   categories: ['fitness'],
   createdAt: 0,
   order: 0,
+  kind: 'personal',
 };
 
 function args(over: Partial<DetectArgs> = {}): DetectArgs {

@@ -17,6 +17,7 @@ const goal = (title: string, categories: Goal['categories']): Goal => ({
   categories,
   createdAt: 0,
   order: 0,
+  kind: 'personal',
 });
 
 describe('buildCoaching', () => {

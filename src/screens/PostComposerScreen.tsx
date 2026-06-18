@@ -25,7 +25,14 @@ export function PostComposerScreen({ route, navigation }: Props) {
   const { createPost } = useCommunity();
   const { myProjects } = useProjects();
   const isAsk = route.params?.kind === 'ask';
-  const [text, setText] = useState('');
+  const isWin = route.params?.kind === 'contribution';
+  const winHabit = route.params?.habitTitle;
+  const winValue = route.params?.value;
+  const winMode = route.params?.mode;
+  const winProject = myProjects.find((p) => p.id === route.params?.projectId);
+  const [text, setText] = useState(
+    isWin && winHabit ? `🎉 Just did ${winHabit}${winProject ? ` — +${winValue ?? 1} for ${winProject.title}` : ''}!` : '',
+  );
   const [projectId, setProjectId] = useState<string | null>(route.params?.projectId ?? null);
   const [categoryHint, setCategoryHint] = useState<QuestCategory | null>(route.params?.categoryHint ?? null);
   const [posting, setPosting] = useState(false);
@@ -40,11 +47,15 @@ export function PostComposerScreen({ route, navigation }: Props) {
       text,
       ...(isAsk ? { kind: 'ask' as const } : {}),
       ...(isAsk && categoryHint ? { categoryHint } : {}),
+      ...(isWin ? { kind: 'contribution' as const, ...(winHabit ? { habitTitle: winHabit } : {}), ...(typeof winValue === 'number' ? { value: winValue } : {}), ...(winMode ? { mode: winMode } : {}) } : {}),
       ...(project ? { projectId: project.id, projectTitle: project.title, projectColorId: project.colorId } : {}),
     });
     if (ok) navigation.goBack();
     else setPosting(false);
   };
+
+  const headerTitle = isAsk ? 'Ask peers' : isWin ? 'Share your win' : 'New post';
+  const ctaLabel = isAsk ? 'Ask' : isWin ? 'Share' : 'Post';
 
   return (
     <ScreenContainer backgroundColor={BG}>
@@ -53,9 +64,9 @@ export function PostComposerScreen({ route, navigation }: Props) {
           <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Cancel" hitSlop={12}>
             <Text style={styles.cancel}>Cancel</Text>
           </Pressable>
-          <Text style={styles.title}>{isAsk ? 'Ask peers' : 'New post'}</Text>
-          <Pressable onPress={() => void submit()} disabled={!canPost} accessibilityRole="button" accessibilityLabel={isAsk ? 'Ask' : 'Post'} hitSlop={12}>
-            <Text style={[styles.post, !canPost && styles.postOff]}>{isAsk ? 'Ask' : 'Post'}</Text>
+          <Text style={styles.title}>{headerTitle}</Text>
+          <Pressable onPress={() => void submit()} disabled={!canPost} accessibilityRole="button" accessibilityLabel={ctaLabel} hitSlop={12}>
+            <Text style={[styles.post, !canPost && styles.postOff]}>{ctaLabel}</Text>
           </Pressable>
         </View>
 
