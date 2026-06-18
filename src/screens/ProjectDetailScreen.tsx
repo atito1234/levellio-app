@@ -42,7 +42,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   const { projectId } = route.params;
   const { account } = useAuth();
   const { quests, addQuest } = useGame();
-  const { subscribe, joinProject, leaveProject, setShareFeed, linkedProjectIds, linkHabit } = useProjects();
+  const { subscribe, joinProject, leaveProject, setShareFeed, linkedProjectIds, linkHabit, unlinkHabit } = useProjects();
 
   const [snap, setSnap] = useState<ProjectSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,16 +73,33 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   }, [snap]);
 
   const adopt = async (habit: ProjectSuggestedHabit) => {
-    const quest = await addQuest({ title: habit.title, category: habit.category, difficulty: 'easy' });
-    if (quest) {
-      await linkHabit(quest.id, projectId);
-      Alert.alert("You're in 🤝", `“${habit.title}” is now one of your habits — every time you complete it, you move this project forward.`);
+    // Reuse an existing habit with the same name instead of duplicating it.
+    const existing = quests.find((q) => q.title.trim().toLowerCase() === habit.title.trim().toLowerCase());
+    const id = existing?.id ?? (await addQuest({ title: habit.title, category: habit.category, difficulty: 'easy' }))?.id;
+    if (id) {
+      await linkHabit(id, projectId);
+      Alert.alert("You're in 🤝", `“${habit.title}” is now one of your activities — every time you complete it, you move this project forward.`);
     }
   };
 
-  const myLinkedTitles = useMemo(() => {
-    return quests.filter((q) => linkedProjectIds(q.id).includes(projectId)).map((q) => q.title);
-  }, [quests, linkedProjectIds, projectId]);
+  const questByTitle = (title: string) => quests.find((q) => q.title.trim().toLowerCase() === title.trim().toLowerCase());
+
+  // The user's OWN activities that power this project — theirs to add, edit,
+  // remove, and take into battle.
+  const myQuests = useMemo(
+    () => quests.filter((q) => linkedProjectIds(q.id).includes(projectId)),
+    [quests, linkedProjectIds, projectId],
+  );
+
+  const addAllSuggested = async () => {
+    if (!project) return;
+    for (const h of project.suggestedHabits) {
+      const existing = quests.find((q) => q.title.trim().toLowerCase() === h.title.trim().toLowerCase());
+      const id = existing?.id ?? (await addQuest({ title: h.title, category: h.category, difficulty: 'easy' }))?.id;
+      if (id) await linkHabit(id, projectId);
+    }
+    Alert.alert("They're yours 🤝", 'All suggested habits are now in your activities and powering this project.');
+  };
 
   const invite = async () => {
     if (!project) return;
@@ -188,20 +205,78 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
                 accessibilityLabel="Share my activity"
               />
             </View>
-            {myLinkedTitles.length > 0 && (
-              <Text style={styles.linkedNote}>
-                Contributing: {myLinkedTitles.join(', ')}
-              </Text>
-            )}
           </View>
         )}
 
-        {/* Suggested habits */}
+        {/* YOUR activities — full ownership: edit, remove, or take into battle. */}
+        {joined && (
+          <>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionLabel}>YOUR ACTIVITIES HERE</Text>
+              {myQuests.length > 1 && (
+                <Pressable
+                  onPress={() => navigation.navigate('BattleSetup', { questIds: myQuests.map((q) => q.id) })}
+                  accessibilityRole="button"
+                  accessibilityLabel="Take these activities into battle"
+                  hitSlop={8}
+                >
+                  <Text style={styles.slay}>⚔️ Slay these</Text>
+                </Pressable>
+              )}
+            </View>
+            {myQuests.length === 0 ? (
+              <Text style={styles.empty}>Adopt a suggested habit below to make it yours.</Text>
+            ) : (
+              myQuests.map((q) => (
+                <View key={q.id} style={styles.habitRow}>
+                  <Text style={styles.habitText} numberOfLines={2}>
+                    {CATEGORY_META[q.category].icon} {q.title}
+                  </Text>
+                  <Pressable
+                    onPress={() => navigation.navigate('BattleSetup', { questId: q.id })}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Battle ${q.title}`}
+                    hitSlop={6}
+                    style={styles.ownIcon}
+                  >
+                    <Text style={styles.ownIconText}>⚔️</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => navigation.navigate('QuestEditor', { questId: q.id })}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Edit ${q.title}`}
+                    hitSlop={6}
+                    style={styles.ownIcon}
+                  >
+                    <Text style={styles.ownEdit}>Edit</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => void unlinkHabit(q.id, projectId)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remove ${q.title} from this project`}
+                    hitSlop={6}
+                    style={styles.ownIcon}
+                  >
+                    <Text style={styles.ownRemove}>✕</Text>
+                  </Pressable>
+                </View>
+              ))
+            )}
+          </>
+        )}
+
+        {/* Suggested habits — one-tap adopt (reuses an existing habit by name). */}
         {project.suggestedHabits.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>SUGGESTED HABITS</Text>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionLabel}>SUGGESTED HABITS</Text>
+              <Pressable onPress={() => void addAllSuggested()} accessibilityRole="button" accessibilityLabel="Add all suggested habits" hitSlop={8}>
+                <Text style={styles.slay}>+ Add all</Text>
+              </Pressable>
+            </View>
             {project.suggestedHabits.map((h, i) => {
-              const already = quests.some((q) => q.title.trim().toLowerCase() === h.title.trim().toLowerCase());
+              const owned = questByTitle(h.title);
+              const linked = owned ? linkedProjectIds(owned.id).includes(projectId) : false;
               return (
                 <View key={`${h.title}-${i}`} style={styles.habitRow}>
                   <Text style={styles.habitText} numberOfLines={2}>
@@ -209,13 +284,12 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
                     <Text style={styles.habitVal}>+{h.contribution} {project.unit}</Text>
                   </Text>
                   <Pressable
-                    onPress={() => void adopt(h)}
-                    disabled={already}
+                    onPress={() => (linked && owned ? navigation.navigate('QuestEditor', { questId: owned.id }) : void adopt(h))}
                     accessibilityRole="button"
-                    accessibilityLabel={`Add ${h.title}`}
-                    style={[styles.adoptBtn, already && styles.adoptOff]}
+                    accessibilityLabel={linked ? `Edit ${h.title}` : `Add ${h.title}`}
+                    style={[styles.adoptBtn, linked && styles.adoptDone]}
                   >
-                    <Text style={styles.adoptText}>{already ? 'Added' : '+ Add'}</Text>
+                    <Text style={[styles.adoptText, linked && styles.adoptDoneText]}>{linked ? '✓ Yours · Edit' : '+ Add'}</Text>
                   </Pressable>
                 </View>
               );
@@ -327,6 +401,8 @@ const styles = StyleSheet.create({
   postUpdateText: { ...typography.label, color: VIOLET, fontWeight: '800' },
 
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2, marginTop: spacing.md },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.md },
+  slay: { ...typography.label, color: VIOLET, fontWeight: '800' },
   empty: { ...typography.body, color: MUTED },
 
   habitRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: CARD, borderRadius: 14, padding: spacing.md, gap: spacing.sm },
@@ -334,7 +410,13 @@ const styles = StyleSheet.create({
   habitVal: { color: MUTED, fontWeight: '700' },
   adoptBtn: { backgroundColor: '#EDE9FE', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 6 },
   adoptOff: { opacity: 0.5 },
+  adoptDone: { backgroundColor: '#EAFBF6' },
   adoptText: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  adoptDoneText: { color: '#0A6E5C' },
+  ownIcon: { paddingHorizontal: spacing.xs, paddingVertical: 2 },
+  ownIconText: { fontSize: 16 },
+  ownEdit: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  ownRemove: { ...typography.label, color: '#C0202C', fontWeight: '800', fontSize: 16 },
 
   feedRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: CARD, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   feedDot: { width: 8, height: 8, borderRadius: 4 },

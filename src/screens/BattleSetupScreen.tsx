@@ -54,7 +54,7 @@ function gadgetSub(id: TechniqueId, customMin: number): string {
 }
 
 export function BattleSetupScreen({ route, navigation }: Props) {
-  const { questId, bucketId, goalId } = route.params ?? {};
+  const { questId, questIds, bucketId, goalId } = route.params ?? {};
   const { quests, addQuest } = useGame();
   const { getPlan } = usePlan();
   const { assignments, buckets } = useBuckets();
@@ -66,6 +66,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const activeQuests = useMemo(() => quests.filter((q) => !q.completed), [quests]);
 
   const preselected = useMemo(() => {
+    if (questIds && questIds.length > 0) return new Set(questIds);
     if (questId) return new Set([questId]);
     if (bucketId) return new Set(activitiesInBucket({ buckets, assignments }, bucketId));
     if (goalId) {
@@ -73,7 +74,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
       return new Set(goal ? goalHabits(activeQuests, goal).map((q) => q.id) : []);
     }
     return new Set(plannedOpen(quests, getPlan(dayKey(new Date()))).map((q) => q.id));
-  }, [questId, bucketId, goalId, buckets, assignments, goals, activeQuests, quests, getPlan]);
+  }, [questId, questIds, bucketId, goalId, buckets, assignments, goals, activeQuests, quests, getPlan]);
 
   const [selected, setSelected] = useState<Set<string>>(preselected);
   const [techniqueId, setTechniqueId] = useState<TechniqueId>(lastTechniqueId ?? 'pomodoro');
