@@ -7,6 +7,7 @@ import type { LegalDocKey } from '@/content/aboutInfo';
 export type MainTabParamList = {
   Dashboard: undefined;
   Character: undefined;
+  Feed: undefined;
   Projects: undefined;
   Settings: undefined;
 };
@@ -52,7 +53,7 @@ export type RootStackParamList = {
   /** Frictionless typed/dictated capture of one or more habits. */
   QuickCapture: undefined;
   /** Set up a focus Battle: choose habits, technique, and dragon. */
-  BattleSetup: { questId?: string; bucketId?: string; goalId?: string } | undefined;
+  BattleSetup: { questId?: string; questIds?: string[]; bucketId?: string; goalId?: string } | undefined;
   /** The gamified focus session — slay the dragon, complete the bundled habits. */
   Battle: {
     questIds: string[];
@@ -81,6 +82,12 @@ export type RootStackParamList = {
   JoinProject: { code?: string } | undefined;
   /** Sign in / create an account to unlock community projects. */
   SignIn: undefined;
+  /** Compose a community post (optionally pre-scoped to a project). */
+  PostComposer: { projectId?: string } | undefined;
+  /** A single post with its comment thread. */
+  PostDetail: { postId: string };
+  /** Discover & manage the people in your network. */
+  People: undefined;
 };
 
 declare global {

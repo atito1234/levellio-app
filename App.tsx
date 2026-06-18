@@ -5,6 +5,7 @@ import { RootNavigator } from '@/navigation';
 import { GameProvider } from '@/state/GameContext';
 import { AuthProvider } from '@/state/AuthContext';
 import { ProjectsProvider } from '@/state/ProjectsContext';
+import { CommunityProvider } from '@/state/CommunityContext';
 import { SettingsProvider } from '@/state/SettingsContext';
 import { BucketsProvider } from '@/state/BucketsContext';
 import { CapacitiesProvider } from '@/state/CapacitiesContext';
@@ -34,7 +35,9 @@ export default function App() {
                         <LinksProvider>
                           <InterventionProvider>
                             <ProjectsProvider>
-                              <RootNavigator />
+                              <CommunityProvider>
+                                <RootNavigator />
+                              </CommunityProvider>
                             </ProjectsProvider>
                           </InterventionProvider>
                         </LinksProvider>

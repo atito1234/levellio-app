@@ -5,6 +5,7 @@ import type { MainTabParamList } from './types';
 import { colors, typography } from '@/theme';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { CharacterScreen } from '@/screens/CharacterScreen';
+import { NewsfeedScreen } from '@/screens/NewsfeedScreen';
 import { ProjectsCatalogScreen } from '@/screens/ProjectsCatalogScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
 
@@ -47,6 +48,11 @@ export function MainTabs() {
         name="Character"
         component={CharacterScreen}
         options={{ title: 'Hero', tabBarIcon: tabIcon('🦸') }}
+      />
+      <Tab.Screen
+        name="Feed"
+        component={NewsfeedScreen}
+        options={{ headerShown: false, title: 'Feed', tabBarIcon: tabIcon('📣') }}
       />
       <Tab.Screen
         name="Projects"

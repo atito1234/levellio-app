@@ -34,6 +34,9 @@ import { ProjectDetailScreen } from '@/screens/ProjectDetailScreen';
 import { ProjectEditorScreen } from '@/screens/ProjectEditorScreen';
 import { JoinProjectScreen } from '@/screens/JoinProjectScreen';
 import { SignInScreen } from '@/screens/SignInScreen';
+import { PostComposerScreen } from '@/screens/PostComposerScreen';
+import { PostDetailScreen } from '@/screens/PostDetailScreen';
+import { PeopleScreen } from '@/screens/PeopleScreen';
 import { MilestoneCelebration } from '@/components/MilestoneCelebration';
 import { InterventionOverlay } from '@/components/InterventionOverlay';
 import { MainTabs } from './MainTabs';
@@ -126,6 +129,9 @@ export function RootNavigator() {
         <Stack.Screen name="ProjectEditor" component={ProjectEditorScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="JoinProject" component={JoinProjectScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="SignIn" component={SignInScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="PostComposer" component={PostComposerScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="PostDetail" component={PostDetailScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="People" component={PeopleScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
       {/* Overlays any screen to celebrate earned milestones (queue-driven). */}
       <MilestoneCelebration />
