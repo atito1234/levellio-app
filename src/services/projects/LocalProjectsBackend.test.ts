@@ -84,6 +84,42 @@ describe('LocalProjectsBackend', () => {
     expect(snap?.members[0]?.role).toBe('owner');
   });
 
+  it('returns a contribution result with live cycle progress + reward', async () => {
+    await backend.joinProject(ALICE, 'proj-malaria', true);
+    const res = await backend.contribute(ALICE, 'proj-malaria', { habitTitle: 'manual log', value: 3 });
+    expect(res).not.toBeNull();
+    expect(res!.projectId).toBe('proj-malaria');
+    expect(res!.value).toBe(3);
+    expect(res!.cycle.count).toBe(3);
+    expect(res!.unit).toBeTruthy();
+    expect(res!.reachedGoal).toBe(false);
+  });
+
+  it('flags reachedGoal only on the completion that crosses the weekly goal', async () => {
+    const project = await backend.createProject(ALICE, {
+      title: 'Tiny Goal',
+      emoji: '🎯',
+      colorId: 'teal',
+      region: '',
+      summary: '',
+      unit: 'reps',
+      weeklyGoal: 3,
+      reward: 'High fives',
+      suggestedHabits: [],
+    });
+    const r1 = await backend.contribute(ALICE, project.id, { habitTitle: 'rep', value: 2 }); // 0 -> 2
+    expect(r1!.reachedGoal).toBe(false);
+    const r2 = await backend.contribute(ALICE, project.id, { habitTitle: 'rep', value: 2 }); // 2 -> 4 (crosses 3)
+    expect(r2!.reachedGoal).toBe(true);
+    expect(r2!.reward).toBe('High fives');
+    const r3 = await backend.contribute(ALICE, project.id, { habitTitle: 'rep', value: 1 }); // already past goal
+    expect(r3!.reachedGoal).toBe(false);
+  });
+
+  it('returns null when contributing to a missing project', async () => {
+    expect(await backend.contribute(ALICE, 'does-not-exist', { habitTitle: 'x', value: 1 })).toBeNull();
+  });
+
   it('removes membership on leave', async () => {
     await backend.joinProject(ALICE, 'proj-gardens', true);
     await backend.leaveProject('alice', 'proj-gardens');

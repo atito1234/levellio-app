@@ -23,6 +23,7 @@ export const projectsBackend: ProjectsBackend = build();
 
 export type {
   ContributionInput,
+  ContributionResult,
   ProjectDraft,
   ProjectIdentity,
   ProjectSnapshot,

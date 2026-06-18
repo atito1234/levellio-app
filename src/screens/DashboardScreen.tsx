@@ -14,12 +14,14 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
-import { AddActivityFab, AddActivitySheet, CapacityRing, HeroAvatar, ScreenContainer } from '@/components';
+import { AddActivityFab, AddActivitySheet, CapacityRing, HeroAvatar, ProjectsStrip, ScreenContainer, WorldProjectsStrip } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { usePlan } from '@/state/PlanContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
+import { useProjects } from '@/state/ProjectsContext';
+import { useSettings } from '@/state/SettingsContext';
 import { useBattles } from '@/state/BattlesContext';
 import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -66,6 +68,8 @@ export function DashboardScreen() {
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
   const { goals } = useGoals();
+  const { signedIn, myProjects, featured } = useProjects();
+  const { settings } = useSettings();
   const { totalSlain, coins } = useBattles();
   const reduced = useReducedMotion();
 
@@ -306,6 +310,16 @@ export function DashboardScreen() {
           onManage={(id) => navigation.navigate('GoalFocus', { goalId: id })}
           onNew={() => navigation.navigate('GoalEditor')}
         />
+
+        {/* Community — the member's projects, live. Outside the goal gate so the
+            collective momentum is always visible (drives the daily ritual). */}
+        {signedIn && myProjects.length > 0 && (
+          <ProjectsStrip
+            projects={myProjects}
+            onOpen={(projectId) => navigation.navigate('ProjectDetail', { projectId })}
+            onBrowse={() => navigation.navigate('Main', { screen: 'Projects' })}
+          />
+        )}
 
         {/* Everything below is governed by the chosen goal — faded until picked. */}
         <View style={[styles.gatedWrap, gated && styles.gatedOff]} pointerEvents={gated ? 'none' : 'auto'}>
@@ -590,6 +604,14 @@ export function DashboardScreen() {
           })}
         </ScrollView>
         </View>
+
+        {/* Around the world — opt-in discovery of community projects everywhere. */}
+        {settings.worldProjectsEnabled && featured.length > 0 && (
+          <WorldProjectsStrip
+            projects={featured}
+            onOpen={(projectId) => navigation.navigate('ProjectDetail', { projectId })}
+          />
+        )}
 
         <View style={{ height: spacing.xl }} />
       </ScrollView>

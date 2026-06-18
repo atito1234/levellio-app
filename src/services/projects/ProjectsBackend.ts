@@ -41,6 +41,27 @@ export interface ContributionInput {
   value: number;
 }
 
+/**
+ * What a single contribution achieved — enough to celebrate it richly without a
+ * round-trip: the units added, the project's identity/colour, the new cycle
+ * progress, and whether this completion is the one that crossed the weekly goal.
+ */
+export interface ContributionResult {
+  projectId: string;
+  title: string;
+  emoji: string;
+  colorId: BucketColorId;
+  unit: string;
+  /** Units this completion actually added (>= 1). */
+  value: number;
+  /** The real-world reward unlocked at 100% (for the team-win moment). */
+  reward: string;
+  /** Cycle progress *after* this contribution. */
+  cycle: CycleProgress;
+  /** True only on the completion that takes the cycle from <100% to >=100%. */
+  reachedGoal: boolean;
+}
+
 /** Everything the detail screen needs, recomputed on any change. */
 export interface ProjectSnapshot {
   project: Project;
@@ -69,8 +90,16 @@ export interface ProjectsBackend {
   leaveProject(uid: string, projectId: string): Promise<void>;
   setShareFeed(uid: string, projectId: string, shareFeed: boolean): Promise<void>;
 
-  /** Record a member's contribution; bumps the current cycle counter + member total + feed. */
-  contribute(identity: ProjectIdentity, projectId: string, input: ContributionInput): Promise<void>;
+  /**
+   * Record a member's contribution; bumps the current cycle counter + member
+   * total + feed. Returns what was achieved (for celebration), or null if the
+   * project no longer exists.
+   */
+  contribute(
+    identity: ProjectIdentity,
+    projectId: string,
+    input: ContributionInput,
+  ): Promise<ContributionResult | null>;
 
   /** Live (or near-live) detail subscription. Calls back with null if the project is gone. */
   subscribe(projectId: string, uid: string, cb: (snap: ProjectSnapshot | null) => void): Unsubscribe;

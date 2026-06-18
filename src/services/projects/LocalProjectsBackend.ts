@@ -12,6 +12,7 @@ import {
   cycleProgress,
   genInviteCode,
   normalizeInviteCode,
+  progressPct,
   summarizeFeed,
   type Contribution,
   type Project,
@@ -20,6 +21,7 @@ import {
 import { FEATURED_PROJECTS } from './featuredProjects';
 import type {
   ContributionInput,
+  ContributionResult,
   ProjectDraft,
   ProjectIdentity,
   ProjectSnapshot,
@@ -200,12 +202,21 @@ export class LocalProjectsBackend implements ProjectsBackend {
     await this.notify(projectId);
   }
 
-  async contribute(identity: ProjectIdentity, projectId: string, input: ContributionInput): Promise<void> {
+  async contribute(
+    identity: ProjectIdentity,
+    projectId: string,
+    input: ContributionInput,
+  ): Promise<ContributionResult | null> {
     const project = (await this.allProjects()).find((p) => p.id === projectId);
-    if (!project) return;
+    if (!project) return null;
     const value = Math.max(1, Math.round(input.value || contributionValue(input.habitTitle, project)));
+    const key = cycleKeyFor();
 
     const contributions = await this.read<Contribution[]>(contribKey(projectId), []);
+    // Cycle total before this contribution — to detect the goal-crossing moment.
+    const prevCount = contributions
+      .filter((c) => c.cycleKey === key)
+      .reduce((sum, c) => sum + c.value, 0);
     contributions.push({
       id: genId('c'),
       uid: identity.uid,
@@ -213,7 +224,7 @@ export class LocalProjectsBackend implements ProjectsBackend {
       habitTitle: input.habitTitle,
       category: input.category,
       value,
-      cycleKey: cycleKeyFor(),
+      cycleKey: key,
       createdAt: Date.now(),
     });
     await this.write(contribKey(projectId), contributions.slice(-500));
@@ -225,6 +236,19 @@ export class LocalProjectsBackend implements ProjectsBackend {
       await this.write(membersKey(projectId), members);
     }
     await this.notify(projectId);
+
+    const cycle = cycleProgress(key, prevCount + value, project.weeklyGoal);
+    return {
+      projectId,
+      title: project.title,
+      emoji: project.emoji,
+      colorId: project.colorId,
+      unit: project.unit,
+      value,
+      reward: project.reward,
+      cycle,
+      reachedGoal: progressPct(prevCount, project.weeklyGoal) < 100 && cycle.pct >= 100,
+    };
   }
 
   // --- subscriptions ---------------------------------------------------------

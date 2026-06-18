@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
-import { projectsBackend, type ProjectDraft, type ProjectIdentity, type ProjectSnapshot, type Unsubscribe } from '@/services/projects';
+import { projectsBackend, type ContributionResult, type ProjectDraft, type ProjectIdentity, type ProjectSnapshot, type Unsubscribe } from '@/services/projects';
 import { ProjectLinkStore } from '@/services/projects/projectLinkStore';
 import { AsyncStorageStore } from '@/services/storage';
 import {
@@ -12,7 +12,8 @@ import {
   unlinkProject as unlinkProjectPure,
   type ProjectLinks,
 } from '@/lib/projectLinks';
-import type { Project } from '@/lib/projects';
+import type { CycleProgress, Project } from '@/lib/projects';
+import { dayKey } from '@/lib/dates';
 import type { QuestCategory } from '@/types';
 
 const linkStore = new ProjectLinkStore(new AsyncStorageStore());
@@ -43,8 +44,11 @@ interface ProjectsContextValue {
   unlinkHabit: (activityId: string, projectId: string) => Promise<void>;
   /** Subscribe to a project's live detail (project + members + feed + cycle). */
   subscribe: (projectId: string, cb: (snap: ProjectSnapshot | null) => void) => Unsubscribe;
-  /** Emit contributions for a completed habit to every project it's linked to. */
-  recordCompletion: (habit: CompletedHabit) => Promise<void>;
+  /**
+   * Emit contributions for a completed habit to every project it's linked to.
+   * Returns what each contribution achieved (for celebration).
+   */
+  recordCompletion: (habit: CompletedHabit) => Promise<ContributionResult[]>;
 }
 
 const ProjectsContext = createContext<ProjectsContextValue | null>(null);
@@ -167,19 +171,20 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   );
 
   const recordCompletion = useCallback(
-    async (habit: CompletedHabit) => {
-      if (!identity) return;
+    async (habit: CompletedHabit): Promise<ContributionResult[]> => {
+      if (!identity) return [];
       const projectIds = linkedIdsPure(links, habit.activityId);
-      if (projectIds.length === 0) return;
+      if (projectIds.length === 0) return [];
       // Best-effort and non-blocking for the completion flow; the local backend
       // is durable and Firestore queues writes while offline.
-      await Promise.all(
+      const results = await Promise.all(
         projectIds.map((projectId) =>
           projectsBackend
             .contribute(identity, projectId, { habitTitle: habit.title, category: habit.category, value: 0 })
-            .catch(() => undefined),
+            .catch(() => null),
         ),
       );
+      return results.filter((r): r is ContributionResult => r !== null);
     },
     [identity, links],
   );
@@ -214,4 +219,40 @@ export function useProjects(): ProjectsContextValue {
   const ctx = useContext(ProjectsContext);
   if (!ctx) throw new Error('useProjects must be used within a ProjectsProvider');
   return ctx;
+}
+
+/** Live, glanceable summary of one project — for the home strips. */
+export interface ProjectSummary {
+  cycle: CycleProgress;
+  /** Distinct members who contributed today (the "who's here" pulse). */
+  activeToday: number;
+  memberCount: number;
+}
+
+/**
+ * Subscribe to a single project's live cycle + today's activity for compact
+ * cards (Community / World strips). Returns null until the first snapshot.
+ */
+export function useProjectSummary(projectId: string): ProjectSummary | null {
+  const { subscribe } = useProjects();
+  const [summary, setSummary] = useState<ProjectSummary | null>(null);
+  useEffect(() => {
+    const unsub = subscribe(projectId, (snap) => {
+      if (!snap) {
+        setSummary(null);
+        return;
+      }
+      const today = dayKey(new Date());
+      const activeToday = new Set(
+        snap.feed.filter((c) => dayKey(new Date(c.createdAt)) === today).map((c) => c.uid),
+      ).size;
+      setSummary({
+        cycle: snap.cycle,
+        activeToday,
+        memberCount: snap.members.length || snap.project.memberCount,
+      });
+    });
+    return unsub;
+  }, [projectId, subscribe]);
+  return summary;
 }

@@ -26,6 +26,12 @@ export interface AppSettings {
   bucketViewMode: BucketViewMode;
   /** Per-field opt-in toggles for habit-formation metadata capture. */
   metadataPrivacy: MetadataPrivacy;
+  /** Tactile feedback (vibration) on completions & community wins. */
+  hapticsEnabled: boolean;
+  /** Opt-in: surface the "Around the world" community projects strip on Today. */
+  worldProjectsEnabled: boolean;
+  /** Opt-in: alerts about world/community project milestones. */
+  worldProjectAlerts: boolean;
 }
 
 /** Privacy-first, free-by-default settings. */
@@ -36,6 +42,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
   cosmeticThemeId: 'classic',
   bucketViewMode: 'list',
   metadataPrivacy: { ...DEFAULT_METADATA_PRIVACY },
+  // Haptics on by default (delightful); world projects opt-in so members feel in control.
+  hapticsEnabled: true,
+  worldProjectsEnabled: false,
+  worldProjectAlerts: false,
 };
 
 const SETTINGS_KEY = 'levellio:settings';
@@ -54,6 +64,9 @@ export function normalizeSettings(raw: unknown): AppSettings {
       typeof r.cosmeticThemeId === 'string' ? r.cosmeticThemeId : DEFAULT_SETTINGS.cosmeticThemeId,
     bucketViewMode: r.bucketViewMode === 'buckets' ? 'buckets' : 'list',
     metadataPrivacy: normalizeMetadataPrivacy(r.metadataPrivacy),
+    hapticsEnabled: r.hapticsEnabled !== false,
+    worldProjectsEnabled: r.worldProjectsEnabled === true,
+    worldProjectAlerts: r.worldProjectAlerts === true,
   };
 }
 

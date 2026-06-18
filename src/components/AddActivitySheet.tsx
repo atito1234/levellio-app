@@ -6,6 +6,7 @@ import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals } from '@/state/GoalContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { useProjects } from '@/state/ProjectsContext';
 import { usePlan } from '@/state/PlanContext';
 import { goalColor } from '@/lib/goal';
 import { getBucketColor } from '@/lib/buckets';
@@ -55,12 +56,14 @@ export function AddActivitySheet({
   const { quests, addQuest } = useGame();
   const { goals } = useGoals();
   const { buckets, assignments, assignActivity } = useBuckets();
+  const { signedIn, myProjects, linkHabit } = useProjects();
   const { getPlan, togglePlanned } = usePlan();
   const todayK = dayKey(new Date());
 
   const [title, setTitle] = useState('');
   const [goalId, setGoalId] = useState<string | null>(defaultGoalId);
   const [bucketId, setBucketId] = useState<string | null>(defaultBucketId);
+  const [projectIds, setProjectIds] = useState<string[]>([]);
   const [whenMode, setWhenMode] = useState<WhenMode>('today');
   const [pickedDates, setPickedDates] = useState<string[]>([]);
   const [weekdays, setWeekdays] = useState<number[]>([]);
@@ -73,6 +76,7 @@ export function AddActivitySheet({
     if (visible) {
       setGoalId(defaultGoalId);
       setBucketId(defaultBucketId);
+      setProjectIds([]);
       setTitle('');
       // Opened from a chosen calendar day → start in date mode on that day.
       const dates = defaultDates ?? [];
@@ -127,6 +131,8 @@ export function AddActivitySheet({
     const quest = await addQuest(draft);
     if (quest) {
       if (bucketId) await assignActivity(quest.id, bucketId);
+      // Power any community projects chosen — completions will now contribute.
+      for (const pid of projectIds) await linkHabit(quest.id, pid);
       if (whenMode === 'today') {
         await togglePlanned(todayK, quest.id);
       } else if (whenMode === 'date') {
@@ -304,6 +310,34 @@ export function AddActivitySheet({
               </>
             )}
 
+            {signedIn && myProjects.length > 0 && (
+              <>
+                <Text style={styles.label}>Contributes to (optional)</Text>
+                <View style={styles.chips}>
+                  {myProjects.map((p) => {
+                    const on = projectIds.includes(p.id);
+                    const c = getBucketColor(p.colorId);
+                    return (
+                      <Pressable
+                        key={p.id}
+                        onPress={() => setProjectIds((cur) => (on ? cur.filter((x) => x !== p.id) : [...cur, p.id]))}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: on }}
+                        style={[styles.chip, on && { backgroundColor: c.soft, borderColor: c.accent }]}
+                      >
+                        <Text style={[styles.chipText, on && { color: c.accent }]}>
+                          {p.emoji} {p.title}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                {projectIds.length > 0 && (
+                  <Text style={styles.pledge}>Your completions now power {projectIds.length === 1 ? 'this project' : 'these projects'}. 🤝</Text>
+                )}
+              </>
+            )}
+
             {added && <Text style={styles.added}>✓ Added “{added}” — add another, or tap Done.</Text>}
 
             <View style={styles.links}>
@@ -386,6 +420,7 @@ const styles = StyleSheet.create({
   timeToggleText: { ...typography.label, color: INK, fontWeight: '700' },
   timeToggleHint: { ...typography.caption, color: MUTED },
   added: { ...typography.caption, color: '#0A6E5C', fontWeight: '700' },
+  pledge: { ...typography.caption, color: VIOLET, fontWeight: '700' },
   links: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.xs, gap: spacing.sm },
   link: { ...typography.label, color: VIOLET, fontWeight: '700' },
   addBtn: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.lg, alignItems: 'center', marginTop: spacing.sm },

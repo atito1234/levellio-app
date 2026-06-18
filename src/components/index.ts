@@ -15,6 +15,7 @@ export { TextField } from './TextField';
 export { ChipSelector, type ChipOption } from './ChipSelector';
 export { ConfettiBurst } from './ConfettiBurst';
 export { CapacityRing } from './CapacityRing';
+export { ProjectsStrip, WorldProjectsStrip } from './ProjectsStrip';
 export { RatingPrompt } from './RatingPrompt';
 export { AddActivityFab } from './AddActivityFab';
 export { AddActivitySheet } from './AddActivitySheet';

@@ -1,4 +1,4 @@
-import { detectMilestones, STREAK_THRESHOLDS, type DetectArgs } from './milestones';
+import { detectMilestones, projectBeats, STREAK_THRESHOLDS, type DetectArgs, type ProjectBeat } from './milestones';
 import { SOLIDIFY_DAYS } from './activityStreak';
 import { emptyLevels } from './compounding';
 import type { Goal } from './goal';
@@ -81,5 +81,46 @@ describe('detectMilestones', () => {
 
   it('exposes the documented thresholds', () => {
     expect(STREAK_THRESHOLDS).toEqual([3, 7, 14, 30, 66]);
+  });
+});
+
+describe('projectBeats', () => {
+  const base: ProjectBeat = {
+    projectId: 'p1',
+    title: 'Fort-Liberté Malaria',
+    emoji: '🦟',
+    unit: 'sites cleaned',
+    value: 3,
+    colorId: 'teal',
+    pct: 63,
+    reachedGoal: false,
+  };
+
+  it('maps a normal contribution to a project beat with progress', () => {
+    const m = projectBeats([base], 1000)[0]!;
+    expect(m.kind).toBe('project');
+    expect(m.emoji).toBe('🦟');
+    expect(m.label).toBe('+3 sites cleaned → Fort-Liberté Malaria');
+    expect(m.detail).toBe('63% of this week’s goal');
+    expect(m.accentColorId).toBe('teal');
+    expect(m.progressPct).toBe(63);
+  });
+
+  it('maps a goal-crossing to the gold team-win with the reward', () => {
+    const m = projectBeats([{ ...base, pct: 100, reachedGoal: true, reward: 'Water filters' }], 1000)[0]!;
+    expect(m.kind).toBe('project_goal');
+    expect(m.accentColorId).toBe('gold');
+    expect(m.progressPct).toBe(100);
+    expect(m.detail).toBe('Reward unlocked: Water filters');
+  });
+
+  it('generates unique ids per beat (never deduped)', () => {
+    const ms = projectBeats([base, { ...base, projectId: 'p2' }], 2000);
+    expect(ms).toHaveLength(2);
+    expect(new Set(ms.map((m) => m.id)).size).toBe(2);
+  });
+
+  it('returns nothing for no contributions', () => {
+    expect(projectBeats([], 1000)).toEqual([]);
   });
 });

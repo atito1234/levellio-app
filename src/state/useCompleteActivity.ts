@@ -11,7 +11,8 @@ import { captureLocationSafely } from '@/services/sensors/deviceContext';
 import { applyDeltas } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { activityStreakDays } from '@/lib/activityStreak';
-import { detectMilestones } from '@/lib/milestones';
+import { detectMilestones, projectBeats } from '@/lib/milestones';
+import { haptics } from '@/services/feedback/haptics';
 import { questKey } from '@/lib/questForm';
 import { sessionsOf } from '@/lib/analytics';
 import { dayKey } from '@/lib/dates';
@@ -37,15 +38,17 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
   const { recordCompletion, levels } = useCapacities();
   const { goals } = useGoals();
   const { recordCompletion: recordProjectContribution } = useProjects();
-  const { earnedIds, recordMilestones } = useMilestones();
+  const { earnedIds, recordMilestones, celebrate } = useMilestones();
   const { events } = useActivityLog();
   const { settings } = useSettings();
   const includeLocation = settings.metadataPrivacy.includeLocation;
+  const hapticsEnabled = settings.hapticsEnabled;
 
   return useCallback(
     async (quest: Quest, opts: CompletionOpts): Promise<QuestReward | null> => {
       const reward = await completeQuest(quest.id);
       if (!reward) return null; // already completed today / not found
+      haptics.success(hapticsEnabled); // tactile payoff the instant it lands
       await recordContribution({ id: quest.id, category: quest.category, difficulty: quest.difficulty, xp: reward.totalXp });
       await recordCompletion(quest);
       const location = await captureLocationSafely(includeLocation);
@@ -59,8 +62,30 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
         ...(opts.rating ? { rating: opts.rating } : {}),
       });
 
-      // Share this completion with any community projects the habit feeds.
-      await recordProjectContribution({ activityId: quest.id, title: quest.title, category: quest.category });
+      // Share this completion with any community projects the habit feeds, then
+      // celebrate it: a firmer haptic + a project beat ("+3 sites → Fort-Liberté
+      // · 63% of this week's goal"), or the gold team-win when the goal is hit.
+      const projectResults = await recordProjectContribution({ activityId: quest.id, title: quest.title, category: quest.category });
+      if (projectResults.length > 0) {
+        if (projectResults.some((r) => r.reachedGoal)) haptics.teamGoal(hapticsEnabled);
+        else haptics.contribute(hapticsEnabled);
+        celebrate(
+          projectBeats(
+            projectResults.map((r) => ({
+              projectId: r.projectId,
+              title: r.title,
+              emoji: r.emoji,
+              unit: r.unit,
+              value: r.value,
+              colorId: r.colorId,
+              pct: r.cycle.pct,
+              reachedGoal: r.reachedGoal,
+              reward: r.reward,
+            })),
+            Date.now(),
+          ),
+        );
+      }
 
       // Detect & celebrate milestones from this completion. prevLevels is the
       // pre-ripple snapshot; postLevels mirrors what recordCompletion applied.
@@ -84,6 +109,6 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
 
       return reward;
     },
-    [completeQuest, recordContribution, recordCompletion, recordSession, recordProjectContribution, includeLocation, levels, events, goals, earnedIds, recordMilestones],
+    [completeQuest, recordContribution, recordCompletion, recordSession, recordProjectContribution, includeLocation, hapticsEnabled, levels, events, goals, earnedIds, recordMilestones, celebrate],
   );
 }

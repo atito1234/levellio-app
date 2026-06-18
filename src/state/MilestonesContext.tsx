@@ -13,6 +13,11 @@ interface MilestonesContextValue {
   queue: Milestone[];
   /** Persist newly-earned milestones and enqueue them for celebration. */
   recordMilestones: (milestones: readonly Milestone[]) => Promise<void>;
+  /**
+   * Enqueue transient celebrations that are NOT persisted or deduped (e.g.
+   * project contribution beats, which fire on every completion).
+   */
+  celebrate: (milestones: readonly Milestone[]) => void;
   /** Remove the front of the celebration queue (after it's shown). */
   popQueue: () => void;
 }
@@ -64,11 +69,16 @@ export function MilestonesProvider({ children }: { children: React.ReactNode }) 
     [uid, earned, earnedIds],
   );
 
+  const celebrate = useCallback((milestones: readonly Milestone[]) => {
+    if (milestones.length === 0) return;
+    setQueue((q) => [...q, ...milestones]);
+  }, []);
+
   const popQueue = useCallback(() => setQueue((q) => q.slice(1)), []);
 
   const value = useMemo<MilestonesContextValue>(
-    () => ({ ready, earned, earnedIds, queue, recordMilestones, popQueue }),
-    [ready, earned, earnedIds, queue, recordMilestones, popQueue],
+    () => ({ ready, earned, earnedIds, queue, recordMilestones, celebrate, popQueue }),
+    [ready, earned, earnedIds, queue, recordMilestones, celebrate, popQueue],
   );
 
   return <MilestonesContext.Provider value={value}>{children}</MilestonesContext.Provider>;

@@ -4,6 +4,7 @@ import { ConfettiBurst } from '@/components/ConfettiBurst';
 import { useMilestones } from '@/state/MilestonesContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { getCelebrationTimings } from '@/lib/celebration';
+import { getBucketColor } from '@/lib/buckets';
 import { spacing, typography } from '@/theme';
 import type { MilestoneKind } from '@/lib/milestones';
 
@@ -11,12 +12,15 @@ const INK = '#1F2937';
 const CARD = '#FFFFFF';
 const GOLD = '#FFB23E';
 const MUTED = '#5A5A72';
+const TRACK = '#ECEAE4';
 
 const KIND_EMOJI: Record<MilestoneKind, string> = {
   streak: '🔥',
   activity_solid: '🌱',
   capacity_full: '✨',
   goal: '🏆',
+  project: '🤝',
+  project_goal: '🏆',
 };
 
 /**
@@ -48,18 +52,36 @@ export function MilestoneCelebration() {
 
   if (!current) return null;
 
+  const accent = current.accentColorId ? getBucketColor(current.accentColorId).accent : GOLD;
+  // The team-win and the sanctioned 100% moments wear gold; lighter beats wear
+  // their project colour so the gold reward cue stays special.
+  const goldMoment = current.kind === 'project_goal' || (current.progressPct ?? 0) >= 100;
+  const borderColor = goldMoment ? GOLD : accent;
+  const hasBar = typeof current.progressPct === 'number';
+
   return (
     <View style={styles.overlay} pointerEvents="box-none">
       <Pressable style={styles.fill} onPress={popQueue} accessibilityRole="button" accessibilityLabel="Dismiss celebration">
         {timings.confetti && <ConfettiBurst />}
         <Animated.View
-          style={[styles.card, { transform: [{ scale }] }]}
+          style={[styles.card, { borderColor, transform: [{ scale }] }]}
           accessible
           accessibilityLiveRegion="polite"
-          accessibilityLabel={`Milestone: ${current.label}`}
+          accessibilityLabel={`Milestone: ${current.label}${current.detail ? `. ${current.detail}` : ''}`}
         >
-          <Text style={styles.emoji}>{KIND_EMOJI[current.kind]}</Text>
+          <Text style={styles.emoji}>{current.emoji ?? KIND_EMOJI[current.kind]}</Text>
           <Text style={styles.label}>{current.label}</Text>
+          {current.detail ? <Text style={styles.detail}>{current.detail}</Text> : null}
+          {hasBar && (
+            <View style={styles.barTrack}>
+              <View
+                style={[
+                  styles.barFill,
+                  { width: `${Math.max(4, Math.min(100, current.progressPct ?? 0))}%`, backgroundColor: borderColor },
+                ]}
+              />
+            </View>
+          )}
           <Text style={styles.hint}>Tap to continue</Text>
         </Animated.View>
       </Pressable>
@@ -88,5 +110,8 @@ const styles = StyleSheet.create({
   },
   emoji: { fontSize: 48 },
   label: { ...typography.title, color: INK, fontWeight: '800', textAlign: 'center' },
+  detail: { ...typography.caption, color: MUTED, textAlign: 'center' },
+  barTrack: { alignSelf: 'stretch', height: 8, borderRadius: 999, backgroundColor: TRACK, overflow: 'hidden', marginTop: spacing.xs },
+  barFill: { height: 8, borderRadius: 999 },
   hint: { ...typography.caption, color: MUTED },
 });
