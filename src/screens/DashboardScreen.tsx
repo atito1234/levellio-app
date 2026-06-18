@@ -22,6 +22,7 @@ import { usePlan } from '@/state/PlanContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useSettings } from '@/state/SettingsContext';
+import { useCommunityAccess } from '@/services/community/access';
 import { useBattles } from '@/state/BattlesContext';
 import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -70,6 +71,7 @@ export function DashboardScreen() {
   const { goals } = useGoals();
   const { signedIn, myProjects, featured, projectsForHabit } = useProjects();
   const { settings } = useSettings();
+  const communityAllowed = useCommunityAccess();
   const { totalSlain, coins } = useBattles();
   const reduced = useReducedMotion();
 
@@ -298,6 +300,20 @@ export function DashboardScreen() {
             </View>
           </View>
         </View>
+
+        {/* Facebook-style composer — share to the community in one tap from home. */}
+        {signedIn && communityAllowed && (
+          <Pressable
+            onPress={() => navigation.navigate('PostComposer')}
+            accessibilityRole="button"
+            accessibilityLabel="Share an update with your community"
+            style={styles.homeComposer}
+          >
+            <HeroAvatar presentation={character.presentation} tier={character.tier} kitId={character.kitId} size={36} />
+            <Text style={styles.homeComposerHint}>Share an update…</Text>
+            <Text style={styles.homeComposerIcon}>✏️</Text>
+          </Pressable>
+        )}
 
         {/* STEP 1 — pick a goal. It governs the focus below and tints it. */}
         {goals.length > 0 && (
@@ -825,6 +841,9 @@ const styles = StyleSheet.create({
   planCtaSub: { ...typography.caption, color: MUTED },
   planCtaChevron: { fontSize: 26, color: VIOLET, fontWeight: '800' },
 
+  homeComposer: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginHorizontal: PAD, backgroundColor: CARD, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#ECEAE4' },
+  homeComposerHint: { ...typography.body, color: MUTED, flex: 1 },
+  homeComposerIcon: { fontSize: 16 },
   stepHint: { ...typography.label, color: VIOLET, fontWeight: '800', letterSpacing: 1, paddingHorizontal: PAD },
   gatedWrap: { gap: spacing.lg },
   gatedOff: { opacity: 0.35 },

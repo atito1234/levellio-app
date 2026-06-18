@@ -15,9 +15,38 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // A user's own profile.
+    // A user's own profile + their follow graph (network).
     match /users/{uid} {
       allow read, write: if signedIn() && request.auth.uid == uid;
+
+      // Who this user follows. Readable by any signed-in user (so feeds/profiles
+      // can resolve a network); writable only by the owner.
+      match /following/{targetUid} {
+        allow read: if signedIn();
+        allow write: if signedIn() && request.auth.uid == uid;
+      }
+    }
+
+    // Community newsfeed posts (manual shares + contribution posts).
+    match /posts/{postId} {
+      // Visible to any signed-in member of the community.
+      allow read: if signedIn();
+      // Authors create their own posts.
+      allow create: if signedIn() && request.resource.data.authorUid == request.auth.uid;
+      // The author may edit/delete their post; anyone signed-in may toggle ONLY
+      // their own reaction (reactions is a { uid: emoji } map) or bump commentCount.
+      allow update: if signedIn() && (
+        resource.data.authorUid == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'commentCount'])
+      );
+      allow delete: if signedIn() && resource.data.authorUid == request.auth.uid;
+
+      // The comment thread: any signed-in user may add their own comment.
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+        allow update, delete: if signedIn() && resource.data.uid == request.auth.uid;
+      }
     }
 
     match /projects/{projectId} {

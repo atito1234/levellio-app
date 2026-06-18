@@ -18,6 +18,8 @@ export { CapacityRing } from './CapacityRing';
 export { ProjectsStrip, WorldProjectsStrip } from './ProjectsStrip';
 export { ProjectBadge } from './ProjectBadge';
 export { ContributionModeSheet } from './ContributionModeSheet';
+export { FollowButton } from './FollowButton';
+export { PostCard } from './PostCard';
 export { RatingPrompt } from './RatingPrompt';
 export { AddActivityFab } from './AddActivityFab';
 export { AddActivitySheet } from './AddActivitySheet';

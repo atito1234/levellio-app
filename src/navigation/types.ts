@@ -7,6 +7,7 @@ import type { LegalDocKey } from '@/content/aboutInfo';
 export type MainTabParamList = {
   Dashboard: undefined;
   Character: undefined;
+  Feed: undefined;
   Projects: undefined;
   Settings: undefined;
 };
@@ -81,6 +82,12 @@ export type RootStackParamList = {
   JoinProject: { code?: string } | undefined;
   /** Sign in / create an account to unlock community projects. */
   SignIn: undefined;
+  /** Compose a community post (optionally pre-scoped to a project). */
+  PostComposer: { projectId?: string } | undefined;
+  /** A single post with its comment thread. */
+  PostDetail: { postId: string };
+  /** Discover & manage the people in your network. */
+  People: undefined;
 };
 
 declare global {

@@ -223,6 +223,18 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
           </>
         )}
 
+        {/* Post to the community feed, scoped to this project. */}
+        {joined && (
+          <Pressable
+            onPress={() => navigation.navigate('PostComposer', { projectId })}
+            accessibilityRole="button"
+            accessibilityLabel="Post an update to this project"
+            style={styles.postUpdate}
+          >
+            <Text style={styles.postUpdateText}>💬 Post an update to your community</Text>
+          </Pressable>
+        )}
+
         {/* Activity feed */}
         <Text style={styles.sectionLabel}>LIVE ACTIVITY</Text>
         {(snap?.feed.length ?? 0) === 0 ? (
@@ -311,6 +323,8 @@ const styles = StyleSheet.create({
   linkedNote: { ...typography.caption, color: MUTED },
   cta: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center' },
   ctaText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
+  postUpdate: { backgroundColor: '#EDE9FE', borderRadius: 14, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm },
+  postUpdateText: { ...typography.label, color: VIOLET, fontWeight: '800' },
 
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2, marginTop: spacing.md },
   empty: { ...typography.body, color: MUTED },
