@@ -10,6 +10,7 @@ const goal: Goal = {
   categories: ['fitness', 'health'],
   createdAt: 0,
   order: 0,
+  kind: 'personal',
 };
 
 describe('goal colours', () => {
@@ -48,6 +49,27 @@ describe('goalHabits', () => {
   it('returns only habits in the goal’s life areas', () => {
     const quests = [q('a', 'fitness'), q('b', 'finance'), q('c', 'health')];
     expect(goalHabits(quests, goal).map((x) => x.id)).toEqual(['a', 'c']);
+  });
+
+  it('also includes habits explicitly linked into the goal (union)', () => {
+    const quests = [q('a', 'fitness'), q('b', 'finance'), q('c', 'health')];
+    // 'b' is finance (not a goal area) but is explicitly tagged in.
+    expect(goalHabits(quests, goal, new Set(['b'])).map((x) => x.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('excludes project activities from a personal goal’s category match (unless tagged in)', () => {
+    const quests = [q('a', 'fitness'), q('b', 'health')];
+    const projectIds = new Set(['a']); // 'a' belongs to a project
+    expect(goalHabits(quests, goal, undefined, projectIds).map((x) => x.id)).toEqual(['b']);
+    // explicit tag overrides the exclusion
+    expect(goalHabits(quests, goal, new Set(['a']), projectIds).map((x) => x.id)).toEqual(['a', 'b']);
+  });
+
+  it('a project goal includes ONLY explicitly linked habits (never bare category)', () => {
+    const quests = [q('a', 'fitness'), q('b', 'health')];
+    const projectGoal = { ...goal, kind: 'project' as const };
+    expect(goalHabits(quests, projectGoal, new Set(['b'])).map((x) => x.id)).toEqual(['b']);
+    expect(goalHabits(quests, projectGoal).map((x) => x.id)).toEqual([]);
   });
 });
 

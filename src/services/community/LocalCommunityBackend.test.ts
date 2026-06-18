@@ -79,6 +79,16 @@ describe('LocalCommunityBackend', () => {
     expect(mineOnly.map((p) => p.text)).toEqual(['from alice']);
   });
 
+  it('supports ask posts with an answer that attaches a suggested habit', async () => {
+    const ask = await b.createPost(ALICE, { text: 'How do you keep water containers covered?', kind: 'ask', categoryHint: 'health' });
+    expect(ask.kind).toBe('ask');
+    expect(ask.categoryHint).toBe('health');
+    await b.addComment(BOB, ask.id, 'This worked for me!', { title: 'Cover water containers', category: 'health', contribution: 1 });
+    const comments = await nextComments(b, ask.id);
+    expect(comments[0]!.suggestedHabit?.title).toBe('Cover water containers');
+    expect(comments[0]!.suggestedHabit?.category).toBe('health');
+  });
+
   it('follows and unfollows', async () => {
     await b.follow('me', 'alice');
     expect(await nextFollowing(b, 'me')).toEqual(['alice']);

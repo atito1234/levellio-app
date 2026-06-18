@@ -7,6 +7,7 @@ import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { useGoals } from '@/state/GoalContext';
+import { useProjects } from '@/state/ProjectsContext';
 import { useBattles } from '@/state/BattlesContext';
 import { useJournal } from '@/state/JournalContext';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
@@ -58,7 +59,8 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const { quests, addQuest } = useGame();
   const { getPlan } = usePlan();
   const { assignments, buckets } = useBuckets();
-  const { goals } = useGoals();
+  const { goals, membershipFor } = useGoals();
+  const { projectActivityIds } = useProjects();
   const { lastTechniqueId, lastCustomMin, setTechnique, coins } = useBattles();
   const { entriesForDragon } = useJournal();
   const guardAbandon = useAbandonGuard();
@@ -71,10 +73,10 @@ export function BattleSetupScreen({ route, navigation }: Props) {
     if (bucketId) return new Set(activitiesInBucket({ buckets, assignments }, bucketId));
     if (goalId) {
       const goal = goals.find((g) => g.id === goalId);
-      return new Set(goal ? goalHabits(activeQuests, goal).map((q) => q.id) : []);
+      return new Set(goal ? goalHabits(activeQuests, goal, membershipFor(goal.id), projectActivityIds).map((q) => q.id) : []);
     }
     return new Set(plannedOpen(quests, getPlan(dayKey(new Date()))).map((q) => q.id));
-  }, [questId, questIds, bucketId, goalId, buckets, assignments, goals, activeQuests, quests, getPlan]);
+  }, [questId, questIds, bucketId, goalId, buckets, assignments, goals, membershipFor, projectActivityIds, activeQuests, quests, getPlan]);
 
   const [selected, setSelected] = useState<Set<string>>(preselected);
   const [techniqueId, setTechniqueId] = useState<TechniqueId>(lastTechniqueId ?? 'pomodoro');

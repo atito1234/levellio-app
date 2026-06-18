@@ -50,9 +50,11 @@ export function planProgress(quests: readonly Quest[], plannedIds?: readonly str
 export function goalFocusPool(
   quests: readonly Quest[],
   plannedIds: readonly string[] | undefined,
-  goal: Pick<Goal, 'categories'>,
+  goal: Pick<Goal, 'categories' | 'kind'>,
+  linkedIds?: ReadonlySet<string>,
+  projectActivityIds?: ReadonlySet<string>,
 ): Quest[] {
-  const inGoal = new Set(goalHabits(quests, goal).map((q) => q.id));
+  const inGoal = new Set(goalHabits(quests, goal, linkedIds, projectActivityIds).map((q) => q.id));
   return plannedOpen(quests, plannedIds).filter((q) => inGoal.has(q.id));
 }
 
@@ -60,9 +62,11 @@ export function goalFocusPool(
 export function goalDayProgress(
   quests: readonly Quest[],
   plannedIds: readonly string[] | undefined,
-  goal: Pick<Goal, 'categories'>,
+  goal: Pick<Goal, 'categories' | 'kind'>,
+  linkedIds?: ReadonlySet<string>,
+  projectActivityIds?: ReadonlySet<string>,
 ): DayProgress {
-  const inGoal = new Set(goalHabits(quests, goal).map((q) => q.id));
+  const inGoal = new Set(goalHabits(quests, goal, linkedIds, projectActivityIds).map((q) => q.id));
   return dayProgress(effectivePlan(quests, plannedIds).filter((q) => inGoal.has(q.id)));
 }
 

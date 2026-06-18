@@ -10,7 +10,7 @@
  */
 import type { BucketColorId } from './buckets';
 import type { ContributionMode } from './projects';
-import type { HeroPresentation } from '@/types';
+import type { HeroPresentation, QuestCategory } from '@/types';
 
 /** The one-tap reactions, in display order (clap, fire, strength, heart). */
 export const REACTIONS = ['👏', '🔥', '💪', '❤️'] as const;
@@ -19,7 +19,20 @@ export type ReactionEmoji = (typeof REACTIONS)[number];
 export const MAX_POST_TEXT = 500;
 export const MAX_COMMENT_TEXT = 300;
 
-export type PostKind = 'post' | 'contribution';
+export type PostKind = 'post' | 'contribution' | 'ask';
+
+/** Attached media on a post. `url` is a hosted (Firebase Storage) download URL. */
+export interface PostMedia {
+  url: string;
+  type: 'image' | 'video';
+}
+
+/** A peer's answer can attach a ready-made habit the asker adopts in one tap. */
+export interface SuggestedHabit {
+  title: string;
+  category: QuestCategory;
+  contribution: number;
+}
 
 /** Who is acting in the community — derived from the account + hero identity. */
 export interface CommunityIdentity {
@@ -43,6 +56,10 @@ export interface Post {
   habitTitle?: string;
   value?: number;
   mode?: ContributionMode;
+  /** For 'ask' posts: the life-area the asker wants help with. */
+  categoryHint?: QuestCategory;
+  /** Optional attached photo/video (hosted). Off until Firebase Storage/Blaze. */
+  media?: PostMedia;
   createdAt: number;
   /** uid → emoji. The source of truth for counts + the viewer's own reaction. */
   reactions: Record<string, ReactionEmoji>;
@@ -56,6 +73,8 @@ export interface Comment {
   displayName: string;
   presentation?: HeroPresentation;
   text: string;
+  /** When present, an answer that proposes a habit the asker can adopt in one tap. */
+  suggestedHabit?: SuggestedHabit;
   createdAt: number;
 }
 
@@ -71,6 +90,8 @@ export interface PostDraft {
   habitTitle?: string;
   value?: number;
   mode?: ContributionMode;
+  categoryHint?: QuestCategory;
+  media?: PostMedia;
 }
 
 // --- reaction helpers --------------------------------------------------------

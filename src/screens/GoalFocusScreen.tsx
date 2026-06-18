@@ -5,6 +5,7 @@ import { AddActivityFab, AddActivitySheet, ScreenContainer } from '@/components'
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
+import { useProjects } from '@/state/ProjectsContext';
 import { useActivityLog } from '@/state/useActivityLog';
 import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { activityJourney } from '@/lib/journey';
@@ -53,12 +54,21 @@ export function GoalFocusScreen({ route, navigation }: Props) {
 function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['navigation'] }) {
   const { quests, deleteQuest } = useGame();
   const { events } = useActivityLog();
-  const progress = useGoalProgress(goal);
+  const { goals, membershipFor, setSupportingGoals } = useGoals();
+  const { projectActivityIds } = useProjects();
+  const progress = useGoalProgress(goal, projectActivityIds);
 
   const accent = goalColor(goal).accent;
   const todayK = dayKey(new Date());
   const sessions = useMemo(() => sessionsOf(events), [events]);
-  const habits = useMemo(() => goalHabits(quests, goal), [quests, goal]);
+  const habits = useMemo(() => goalHabits(quests, goal, membershipFor(goal.id), projectActivityIds), [quests, goal, membershipFor, projectActivityIds]);
+
+  // "Prepare with a personal goal" — only on project goals.
+  const personalGoals = useMemo(() => goals.filter((g) => g.kind !== 'project'), [goals]);
+  const supportingIds = goal.supportingGoalIds ?? [];
+  const [prepOpen, setPrepOpen] = useState(false);
+  const toggleSupporting = (sgId: string) =>
+    void setSupportingGoals(goal.id, supportingIds.includes(sgId) ? supportingIds.filter((x) => x !== sgId) : [...supportingIds, sgId]);
 
   // The capacities these activities collectively power — the ripple that ties
   // them together (shared capacities = connected).
@@ -165,6 +175,33 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
           </View>
         )}
 
+        {/* Prepare a project goal with a personal goal. */}
+        {goal.kind === 'project' && personalGoals.length > 0 && (
+          <View style={styles.prepCard}>
+            <Text style={styles.sectionLabel}>PREPARING WITH</Text>
+            <View style={styles.prepChips}>
+              {personalGoals.filter((g) => supportingIds.includes(g.id)).map((g) => (
+                <Pressable key={g.id} onPress={() => toggleSupporting(g.id)} accessibilityRole="button" accessibilityLabel={`Stop preparing with ${g.title}`} style={[styles.prepChip, { borderColor: goalColor(g).accent, backgroundColor: goalColor(g).soft }]}>
+                  <Text style={[styles.prepChipText, { color: goalColor(g).accent }]}>{g.emoji} {g.title} ✓</Text>
+                </Pressable>
+              ))}
+              <Pressable onPress={() => setPrepOpen((v) => !v)} accessibilityRole="button" accessibilityLabel="Add a personal goal to prepare with" style={styles.prepAdd}>
+                <Text style={styles.prepAddText}>{prepOpen ? 'Done' : '＋ Prepare with a goal'}</Text>
+              </Pressable>
+            </View>
+            {prepOpen && (
+              <View style={styles.prepChips}>
+                {personalGoals.filter((g) => !supportingIds.includes(g.id)).map((g) => (
+                  <Pressable key={g.id} onPress={() => toggleSupporting(g.id)} accessibilityRole="button" accessibilityLabel={`Prepare with ${g.title}`} style={[styles.prepChip, { borderColor: goalColor(g).accent }]}>
+                    <Text style={[styles.prepChipText, { color: goalColor(g).accent }]}>＋ {g.emoji} {g.title}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+            <Text style={styles.prepHint}>Personal goals that help you get ready. In Settings, choose whether they just remind you or also feed this goal's progress.</Text>
+          </View>
+        )}
+
         {habits.length === 0 ? (
           <Text style={styles.empty}>No activities on this journey yet. Tap the 🎙️ button to add your first.</Text>
         ) : (
@@ -207,6 +244,13 @@ const styles = StyleSheet.create({
   battleCta: { borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center' },
   battleText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
 
+  prepCard: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.sm },
+  prepChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  prepChip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: 4, backgroundColor: CARD, maxWidth: 220 },
+  prepChipText: { ...typography.caption, fontWeight: '800' },
+  prepAdd: { borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 4, backgroundColor: VIOLET_SOFT },
+  prepAddText: { ...typography.caption, color: VIOLET, fontWeight: '800' },
+  prepHint: { ...typography.caption, color: MUTED },
   rippleCard: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.sm },
   capChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   capChip: { backgroundColor: VIOLET_SOFT, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 4 },

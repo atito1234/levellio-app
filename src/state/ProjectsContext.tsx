@@ -42,6 +42,8 @@ interface ProjectsContextValue {
   leaveProject: (projectId: string) => Promise<void>;
   setShareFeed: (projectId: string, shareFeed: boolean) => Promise<void>;
   linkedProjectIds: (activityId: string) => string[];
+  /** All activity ids that belong to ≥1 project (exclusion set for personal goals). */
+  projectActivityIds: Set<string>;
   /** Resolve a habit's linked projects to full Project objects (for badges). */
   projectsForHabit: (activityId: string) => Project[];
   linkHabit: (activityId: string, projectId: string) => Promise<void>;
@@ -168,6 +170,11 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     [links, persistLinks],
   );
 
+  const projectActivityIds = useMemo(
+    () => new Set(Object.keys(links).filter((id) => (links[id]?.length ?? 0) > 0)),
+    [links],
+  );
+
   const projectsForHabit = useCallback(
     (activityId: string): Project[] => {
       const ids = linkedIdsPure(links, activityId);
@@ -219,13 +226,14 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       leaveProject,
       setShareFeed,
       linkedProjectIds: (activityId: string) => linkedIdsPure(links, activityId),
+      projectActivityIds,
       projectsForHabit,
       linkHabit,
       unlinkHabit,
       subscribe,
       recordCompletion,
     }),
-    [ready, uid, featured, myProjects, links, refresh, joinByCode, joinProject, createProject, leaveProject, setShareFeed, projectsForHabit, linkHabit, unlinkHabit, subscribe, recordCompletion],
+    [ready, uid, featured, myProjects, links, projectActivityIds, refresh, joinByCode, joinProject, createProject, leaveProject, setShareFeed, projectsForHabit, linkHabit, unlinkHabit, subscribe, recordCompletion],
   );
 
   return <ProjectsContext.Provider value={value}>{children}</ProjectsContext.Provider>;

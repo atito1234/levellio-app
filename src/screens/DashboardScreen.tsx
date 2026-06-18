@@ -68,8 +68,8 @@ export function DashboardScreen() {
   const { character, quests, suggestQuest, reorderQuests, status } = useGame();
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
-  const { goals } = useGoals();
-  const { signedIn, myProjects, featured, projectsForHabit } = useProjects();
+  const { goals, membershipFor } = useGoals();
+  const { signedIn, myProjects, featured, projectsForHabit, projectActivityIds } = useProjects();
   const { settings } = useSettings();
   const communityAllowed = useCommunityAccess();
   const { totalSlain, coins } = useBattles();
@@ -92,17 +92,24 @@ export function DashboardScreen() {
   const gated = goals.length > 0 && !selectedGoal;
   const focusAccent = selectedGoal ? goalColor(selectedGoal).accent : TEAL;
 
+  // Effective members of the selected goal (explicit links + supporting goals in
+  // full prep mode); personal goals also exclude project activities.
+  const goalLinkedIds = useMemo(
+    () => (selectedGoal ? membershipFor(selectedGoal.id) : undefined),
+    [selectedGoal, membershipFor],
+  );
+
   const progress = useMemo(
-    () => (selectedGoal ? goalDayProgress(quests, plan, selectedGoal) : planProgress(quests, plan)),
-    [quests, plan, selectedGoal],
+    () => (selectedGoal ? goalDayProgress(quests, plan, selectedGoal, goalLinkedIds, projectActivityIds) : planProgress(quests, plan)),
+    [quests, plan, selectedGoal, goalLinkedIds, projectActivityIds],
   );
 
   // The planned, still-open habits (timed first) — filtered to the selected goal.
   const openHabits = useMemo(
-    () => (selectedGoal ? goalFocusPool(quests, plan, selectedGoal) : plannedOpen(quests, plan)),
-    [quests, plan, selectedGoal],
+    () => (selectedGoal ? goalFocusPool(quests, plan, selectedGoal, goalLinkedIds, projectActivityIds) : plannedOpen(quests, plan)),
+    [quests, plan, selectedGoal, goalLinkedIds, projectActivityIds],
   );
-  const goalHasActivities = selectedGoal ? goalHabits(quests, selectedGoal).length > 0 : true;
+  const goalHasActivities = selectedGoal ? goalHabits(quests, selectedGoal, goalLinkedIds, projectActivityIds).length > 0 : true;
   // Guided first-run: 1 pick a goal → 2 add activities → 3 schedule habits (0 = done).
   const onboardStep: 0 | 1 | 2 | 3 =
     goals.length === 0 || gated ? 1 : !goalHasActivities ? 2 : plan === undefined ? 3 : 0;
@@ -681,10 +688,23 @@ function GoalsStrip({
       </Pressable>
     );
   }
+  const projectGoals = goals.filter((g) => g.kind === 'project');
+  const personalGoals = goals.filter((g) => g.kind !== 'project');
   return (
     <View style={styles.goalsWrap}>
+      {projectGoals.length > 0 && (
+        <>
+          <Text style={styles.goalsRowLabel}>🤝 PROJECT GOALS</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalsRow}>
+            {projectGoals.map((g) => (
+              <GoalCard key={g.id} goal={g} selected={g.id === selectedId} onPress={() => onSelect(g.id)} />
+            ))}
+          </ScrollView>
+        </>
+      )}
+      {projectGoals.length > 0 && <Text style={styles.goalsRowLabel}>YOUR GOALS</Text>}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalsRow}>
-        {goals.map((g) => (
+        {personalGoals.map((g) => (
           <GoalCard key={g.id} goal={g} selected={g.id === selectedId} onPress={() => onSelect(g.id)} />
         ))}
         <Pressable onPress={onNew} accessibilityRole="button" accessibilityLabel="New goal" style={styles.goalNew}>
@@ -703,7 +723,8 @@ function GoalsStrip({
 }
 
 function GoalCard({ goal, selected, onPress }: { goal: Goal; selected: boolean; onPress: () => void }) {
-  const progress = useGoalProgress(goal);
+  const { projectActivityIds } = useProjects();
+  const progress = useGoalProgress(goal, projectActivityIds);
   const c = goalColor(goal);
   return (
     <Pressable
@@ -849,6 +870,7 @@ const styles = StyleSheet.create({
   gatedOff: { opacity: 0.35 },
 
   goalsWrap: { gap: spacing.xs },
+  goalsRowLabel: { ...typography.label, color: MUTED, letterSpacing: 1, fontWeight: '800', paddingHorizontal: PAD, marginTop: spacing.xs },
   goalsRow: { gap: spacing.sm, paddingHorizontal: PAD, paddingVertical: 2 },
   manageRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingHorizontal: PAD, paddingTop: 2 },
   manageText: { ...typography.label, color: VIOLET, fontWeight: '800' },

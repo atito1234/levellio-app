@@ -21,6 +21,7 @@ const goal = (id: string, categories: Quest['category'][]): Goal => ({
   categories,
   createdAt: 0,
   order: 0,
+  kind: 'personal',
 });
 
 describe('nextActivity', () => {

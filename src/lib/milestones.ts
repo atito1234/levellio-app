@@ -32,6 +32,17 @@ export interface Milestone {
   accentColorId?: BucketColorId;
   /** 0..100 — when present, the celebration shows a thin progress bar. */
   progressPct?: number;
+  /** Project context — when present, the celebration offers a "Share your win" action. */
+  share?: ProjectShare;
+}
+
+/** Enough context to share a completion to the project's members. */
+export interface ProjectShare {
+  projectId: string;
+  projectTitle: string;
+  habitTitle: string;
+  value: number;
+  mode?: 'onsite' | 'remote';
 }
 
 /** Global daily-streak thresholds worth a celebration. */
@@ -107,6 +118,8 @@ export interface ProjectBeat {
   reward?: string;
   /** 'onsite' shows a 📍 cue in the beat. */
   mode?: 'onsite' | 'remote';
+  /** The habit just completed (for the "share your win" action). */
+  habitTitle?: string;
 }
 
 /**
@@ -116,8 +129,11 @@ export interface ProjectBeat {
  * once-per-cycle team-win. Pure: ids are derived from `now` + index.
  */
 export function projectBeats(beats: readonly ProjectBeat[], now: number): Milestone[] {
-  return beats.map((b, i) =>
-    b.reachedGoal
+  return beats.map((b, i) => {
+    const share: ProjectShare | undefined = b.habitTitle
+      ? { projectId: b.projectId, projectTitle: b.title, habitTitle: b.habitTitle, value: b.value, mode: b.mode }
+      : undefined;
+    return b.reachedGoal
       ? {
           id: `project_goal-${b.projectId}-${now}-${i}`,
           kind: 'project_goal',
@@ -127,6 +143,7 @@ export function projectBeats(beats: readonly ProjectBeat[], now: number): Milest
           accentColorId: 'gold',
           progressPct: 100,
           earnedAt: now,
+          ...(share ? { share } : {}),
         }
       : {
           id: `project-${b.projectId}-${now}-${i}`,
@@ -137,6 +154,7 @@ export function projectBeats(beats: readonly ProjectBeat[], now: number): Milest
           accentColorId: b.colorId,
           progressPct: b.pct,
           earnedAt: now,
-        },
-  );
+          ...(share ? { share } : {}),
+        };
+  });
 }

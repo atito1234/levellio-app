@@ -11,6 +11,7 @@ import type {
   Post,
   PostDraft,
   ReactionEmoji,
+  SuggestedHabit,
 } from '@/lib/community';
 
 export type Unsubscribe = () => void;
@@ -25,7 +26,7 @@ export interface CommunityBackend {
 
   /** Live comment thread for a post. */
   subscribeComments(postId: string, cb: (comments: Comment[]) => void): Unsubscribe;
-  addComment(identity: CommunityIdentity, postId: string, text: string): Promise<void>;
+  addComment(identity: CommunityIdentity, postId: string, text: string, suggestedHabit?: SuggestedHabit): Promise<void>;
 
   /** Set or clear (null) the viewer's reaction on a post. */
   setReaction(uid: string, postId: string, emoji: ReactionEmoji | null): Promise<void>;

@@ -8,7 +8,7 @@ import { CATEGORY_ORDER } from '@/lib/categories';
 import { GOAL_COLOR_IDS, type Goal } from '@/lib/goal';
 import type { QuestCategory } from '@/types';
 
-export const GOAL_SCHEMA_VERSION = 1;
+export const GOAL_SCHEMA_VERSION = 2;
 export const MAX_GOALS = 20;
 
 const NS = 'levellio';
@@ -22,6 +22,12 @@ function normalizeGoal(raw: unknown, index: number): Goal | null {
   const categories = Array.isArray(g.categories)
     ? (g.categories.filter((c) => typeof c === 'string' && VALID_CATEGORIES.has(c)) as QuestCategory[])
     : [];
+  // Legacy goals (schema v1) have no `kind` → default to 'personal'.
+  const kind: Goal['kind'] = g.kind === 'project' ? 'project' : 'personal';
+  const projectId = kind === 'project' && typeof g.projectId === 'string' ? g.projectId : undefined;
+  const supportingGoalIds = Array.isArray(g.supportingGoalIds)
+    ? [...new Set(g.supportingGoalIds.filter((s): s is string => typeof s === 'string'))]
+    : undefined;
   return {
     id: g.id,
     title: g.title.trim(),
@@ -30,6 +36,9 @@ function normalizeGoal(raw: unknown, index: number): Goal | null {
     categories: [...new Set(categories)],
     createdAt: typeof g.createdAt === 'number' && Number.isFinite(g.createdAt) ? g.createdAt : 0,
     order: typeof g.order === 'number' && Number.isFinite(g.order) ? g.order : index,
+    kind,
+    ...(projectId ? { projectId } : {}),
+    ...(supportingGoalIds && supportingGoalIds.length > 0 ? { supportingGoalIds } : {}),
   };
 }
 

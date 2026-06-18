@@ -35,6 +35,7 @@ import {
   type Post,
   type PostDraft,
   type ReactionEmoji,
+  type SuggestedHabit,
 } from '@/lib/community';
 import type { CommunityBackend, Unsubscribe } from './CommunityBackend';
 
@@ -47,13 +48,15 @@ function toPost(id: string, d: DocumentData): Post {
     displayName: d.displayName ?? 'Hero',
     ...(d.presentation ? { presentation: d.presentation } : {}),
     text: d.text ?? '',
-    kind: d.kind === 'contribution' ? 'contribution' : 'post',
+    kind: d.kind === 'contribution' || d.kind === 'ask' ? d.kind : 'post',
     ...(d.projectId ? { projectId: d.projectId } : {}),
     ...(d.projectTitle ? { projectTitle: d.projectTitle } : {}),
     ...(d.projectColorId ? { projectColorId: d.projectColorId } : {}),
     ...(d.habitTitle ? { habitTitle: d.habitTitle } : {}),
     ...(typeof d.value === 'number' ? { value: d.value } : {}),
     ...(d.mode ? { mode: d.mode } : {}),
+    ...(d.categoryHint ? { categoryHint: d.categoryHint } : {}),
+    ...(d.media ? { media: d.media } : {}),
     createdAt: typeof d.createdAt === 'number' ? d.createdAt : 0,
     reactions: (d.reactions ?? {}) as Record<string, ReactionEmoji>,
     commentCount: typeof d.commentCount === 'number' ? d.commentCount : 0,
@@ -68,6 +71,7 @@ function toComment(id: string, postId: string, d: DocumentData): Comment {
     displayName: d.displayName ?? 'Hero',
     ...(d.presentation ? { presentation: d.presentation } : {}),
     text: d.text ?? '',
+    ...(d.suggestedHabit ? { suggestedHabit: d.suggestedHabit as SuggestedHabit } : {}),
     createdAt: typeof d.createdAt === 'number' ? d.createdAt : 0,
   };
 }
@@ -103,6 +107,8 @@ export class FirebaseCommunityBackend implements CommunityBackend {
       ...(draft.habitTitle ? { habitTitle: draft.habitTitle } : {}),
       ...(typeof draft.value === 'number' ? { value: draft.value } : {}),
       ...(draft.mode ? { mode: draft.mode } : {}),
+      ...(draft.categoryHint ? { categoryHint: draft.categoryHint } : {}),
+      ...(draft.media ? { media: draft.media } : {}),
       createdAt: Date.now(),
       reactions: {},
       commentCount: 0,
@@ -118,13 +124,14 @@ export class FirebaseCommunityBackend implements CommunityBackend {
     );
   }
 
-  async addComment(identity: CommunityIdentity, postId: string, text: string): Promise<void> {
+  async addComment(identity: CommunityIdentity, postId: string, text: string, suggestedHabit?: SuggestedHabit): Promise<void> {
     const batch = writeBatch(this.db);
     batch.set(doc(collection(this.db, 'posts', postId, 'comments')), {
       uid: identity.uid,
       displayName: identity.displayName,
       ...(identity.presentation ? { presentation: identity.presentation } : {}),
       text: text.trim(),
+      ...(suggestedHabit ? { suggestedHabit } : {}),
       createdAt: Date.now(),
       serverAt: serverTimestamp(),
     });

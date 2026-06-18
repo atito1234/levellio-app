@@ -6,7 +6,9 @@ import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { getBucketColor } from '@/lib/buckets';
+import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import { MAX_POST_TEXT, isValidPostText } from '@/lib/community';
+import type { QuestCategory } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PostComposer'>;
@@ -22,8 +24,17 @@ const TRACK = '#ECEAE4';
 export function PostComposerScreen({ route, navigation }: Props) {
   const { createPost } = useCommunity();
   const { myProjects } = useProjects();
-  const [text, setText] = useState('');
+  const isAsk = route.params?.kind === 'ask';
+  const isWin = route.params?.kind === 'contribution';
+  const winHabit = route.params?.habitTitle;
+  const winValue = route.params?.value;
+  const winMode = route.params?.mode;
+  const winProject = myProjects.find((p) => p.id === route.params?.projectId);
+  const [text, setText] = useState(
+    isWin && winHabit ? `🎉 Just did ${winHabit}${winProject ? ` — +${winValue ?? 1} for ${winProject.title}` : ''}!` : '',
+  );
   const [projectId, setProjectId] = useState<string | null>(route.params?.projectId ?? null);
+  const [categoryHint, setCategoryHint] = useState<QuestCategory | null>(route.params?.categoryHint ?? null);
   const [posting, setPosting] = useState(false);
 
   const canPost = isValidPostText(text) && !posting;
@@ -34,11 +45,17 @@ export function PostComposerScreen({ route, navigation }: Props) {
     const project = myProjects.find((p) => p.id === projectId);
     const ok = await createPost({
       text,
+      ...(isAsk ? { kind: 'ask' as const } : {}),
+      ...(isAsk && categoryHint ? { categoryHint } : {}),
+      ...(isWin ? { kind: 'contribution' as const, ...(winHabit ? { habitTitle: winHabit } : {}), ...(typeof winValue === 'number' ? { value: winValue } : {}), ...(winMode ? { mode: winMode } : {}) } : {}),
       ...(project ? { projectId: project.id, projectTitle: project.title, projectColorId: project.colorId } : {}),
     });
     if (ok) navigation.goBack();
     else setPosting(false);
   };
+
+  const headerTitle = isAsk ? 'Ask peers' : isWin ? 'Share your win' : 'New post';
+  const ctaLabel = isAsk ? 'Ask' : isWin ? 'Share' : 'Post';
 
   return (
     <ScreenContainer backgroundColor={BG}>
@@ -47,25 +64,52 @@ export function PostComposerScreen({ route, navigation }: Props) {
           <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Cancel" hitSlop={12}>
             <Text style={styles.cancel}>Cancel</Text>
           </Pressable>
-          <Text style={styles.title}>New post</Text>
-          <Pressable onPress={() => void submit()} disabled={!canPost} accessibilityRole="button" accessibilityLabel="Post" hitSlop={12}>
-            <Text style={[styles.post, !canPost && styles.postOff]}>Post</Text>
+          <Text style={styles.title}>{headerTitle}</Text>
+          <Pressable onPress={() => void submit()} disabled={!canPost} accessibilityRole="button" accessibilityLabel={ctaLabel} hitSlop={12}>
+            <Text style={[styles.post, !canPost && styles.postOff]}>{ctaLabel}</Text>
           </Pressable>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+          {isAsk && (
+            <Text style={styles.askHint}>
+              Describe the habit or problem you're working on. Peers who've solved it can answer — and attach a habit you adopt in one tap.
+            </Text>
+          )}
           <TextInput
             value={text}
             onChangeText={setText}
-            placeholder="Share a win, ask for support, or cheer someone on…"
+            placeholder={isAsk ? 'e.g. How do you keep standing water from coming back after the rains?' : 'Share a win, ask for support, or cheer someone on…'}
             placeholderTextColor={MUTED}
             style={styles.input}
             multiline
             autoFocus
             maxLength={MAX_POST_TEXT}
-            accessibilityLabel="Post text"
+            accessibilityLabel={isAsk ? 'Your question' : 'Post text'}
           />
           <Text style={styles.counter}>{text.length}/{MAX_POST_TEXT}</Text>
+
+          {isAsk && (
+            <>
+              <Text style={styles.label}>What area is this about? (optional)</Text>
+              <View style={styles.chips}>
+                {CATEGORY_ORDER.map((cat) => {
+                  const on = categoryHint === cat;
+                  return (
+                    <Pressable
+                      key={cat}
+                      onPress={() => setCategoryHint(on ? null : cat)}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
+                      style={[styles.chip, on && styles.chipOn]}
+                    >
+                      <Text style={[styles.chipText, on && styles.chipTextOn]}>{CATEGORY_META[cat].icon} {CATEGORY_META[cat].label}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </>
+          )}
 
           {myProjects.length > 0 && (
             <>
@@ -106,7 +150,10 @@ const styles = StyleSheet.create({
   input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: 16, padding: spacing.md, minHeight: 140, textAlignVertical: 'top', borderWidth: 1, borderColor: TRACK },
   counter: { ...typography.caption, color: MUTED, textAlign: 'right' },
   label: { ...typography.label, color: MUTED, letterSpacing: 1, marginTop: spacing.sm },
+  askHint: { ...typography.caption, color: MUTED },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: { backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK, maxWidth: 240 },
+  chipOn: { backgroundColor: '#EDE9FE', borderColor: VIOLET },
   chipText: { ...typography.label, color: INK, fontWeight: '600' },
+  chipTextOn: { color: VIOLET, fontWeight: '800' },
 });

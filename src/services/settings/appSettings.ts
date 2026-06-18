@@ -15,6 +15,9 @@ export type CloudProvider = 'gemini' | 'openai' | 'anthropic';
 /** How the activity/organize surface is displayed. */
 export type BucketViewMode = 'list' | 'buckets';
 
+/** How a personal goal that "prepares" for a project goal links to it. */
+export type PrepLinkMode = 'visual' | 'full';
+
 export interface AppSettings {
   aiMode: AIMode;
   provider: CloudProvider;
@@ -32,6 +35,8 @@ export interface AppSettings {
   worldProjectsEnabled: boolean;
   /** Opt-in: alerts about world/community project milestones. */
   worldProjectAlerts: boolean;
+  /** Whether a "prepare" personal goal merely links visually or shares progress. */
+  projectPrepLinkMode: PrepLinkMode;
 }
 
 /** Privacy-first, free-by-default settings. */
@@ -46,6 +51,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   hapticsEnabled: true,
   worldProjectsEnabled: false,
   worldProjectAlerts: false,
+  projectPrepLinkMode: 'visual',
 };
 
 const SETTINGS_KEY = 'levellio:settings';
@@ -67,6 +73,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
     hapticsEnabled: r.hapticsEnabled !== false,
     worldProjectsEnabled: r.worldProjectsEnabled === true,
     worldProjectAlerts: r.worldProjectAlerts === true,
+    projectPrepLinkMode: r.projectPrepLinkMode === 'full' ? 'full' : 'visual',
   };
 }
 

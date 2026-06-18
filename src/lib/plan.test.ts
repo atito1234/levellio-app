@@ -29,7 +29,7 @@ const q2 = quest({ id: 'q2', title: 'Read', category: 'learning' });
 const q3 = quest({ id: 'q3', title: 'Meditate', category: 'mind' });
 const all = [q1, q2, q3];
 
-const fitGoal: Pick<Goal, 'categories'> = { categories: ['fitness', 'mind'] };
+const fitGoal: Pick<Goal, 'categories' | 'kind'> = { categories: ['fitness', 'mind'], kind: 'personal' };
 
 describe('goalFocusPool / goalDayProgress', () => {
   it('restricts the open focus pool to the goal’s categories, keeping order', () => {
