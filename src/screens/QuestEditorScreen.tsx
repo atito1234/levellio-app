@@ -12,6 +12,10 @@ import {
 import { colors, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useProjects } from '@/state/ProjectsContext';
+import { useGoals } from '@/state/GoalContext';
+import { useBuckets } from '@/state/BucketsContext';
+import { usePlan } from '@/state/PlanContext';
+import { dayKey } from '@/lib/dates';
 import { getBucketColor } from '@/lib/buckets';
 import { validateQuestDraft, findDuplicateActivity, TITLE_MAX, DESCRIPTION_MAX, WHY_MAX, type QuestDraft } from '@/lib/questForm';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
@@ -44,8 +48,15 @@ const CATEGORY_OPTIONS: ChipOption<QuestCategory>[] = CATEGORY_ORDER.map((c) => 
 export function QuestEditorScreen({ route, navigation }: Props) {
   const { quests, character, addQuest, updateQuest, deleteQuest } = useGame();
   const { signedIn, myProjects, linkedProjectIds, linkHabit, unlinkHabit } = useProjects();
+  const { goals, linkGoal } = useGoals();
+  const { assignActivity } = useBuckets();
+  const { getPlan, togglePlanned } = usePlan();
   const guardAbandon = useAbandonGuard();
   const editingId = route.params?.questId;
+  // Context carried from the quick "Add an activity" sheet (goal/group/projects).
+  const ctxGoal = route.params?.goalId ? goals.find((g) => g.id === route.params!.goalId) : undefined;
+  const ctxBucketId = route.params?.bucketId;
+  const todayK = dayKey(new Date());
   const existing = editingId ? quests.find((q) => q.id === editingId) : undefined;
   // When opened from the quick sheet's "Advanced options", seed from its prefill.
   const prefill = existing ? undefined : route.params?.prefill;
@@ -68,7 +79,9 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   const [why, setWhy] = useState(existing?.why ?? '');
   const [whyError, setWhyError] = useState<string | undefined>();
   // Which community projects this habit powers (cross-pollination).
-  const [projectIds, setProjectIds] = useState<string[]>(() => (editingId ? linkedProjectIds(editingId) : []));
+  const [projectIds, setProjectIds] = useState<string[]>(() => (editingId ? linkedProjectIds(editingId) : route.params?.projectIds ?? []));
+  // A project context → make it a daily habit and file it in by default.
+  const projectScoped = projectIds.length > 0 || ctxGoal?.kind === 'project';
 
   const isEditing = Boolean(existing);
   const scheduledTime = scheduleOn ? partsToMinutes(parts) : undefined;
@@ -93,6 +106,15 @@ export function QuestEditorScreen({ route, navigation }: Props) {
         for (const pid of projectIds) if (!current.includes(pid)) await linkHabit(id, pid);
         for (const pid of current) if (!projectIds.includes(pid)) await unlinkHabit(id, pid);
       }
+      // Apply the goal / group / project context carried from the quick sheet.
+      if (id) {
+        if (ctxGoal) {
+          await linkGoal(id, ctxGoal.id);
+          if (ctxGoal.kind === 'project' && ctxGoal.projectId) await linkHabit(id, ctxGoal.projectId);
+        }
+        if (ctxBucketId) await assignActivity(id, ctxBucketId);
+        if (projectScoped && !(getPlan(todayK) ?? []).includes(id)) await togglePlanned(todayK, id);
+      }
       navigation.goBack();
     } finally {
       setSaving(false);
@@ -106,7 +128,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
       category,
       difficulty,
       scheduledTime,
-      ...(repeatDays.length ? { scheduledDays: repeatDays } : {}),
+      ...(repeatDays.length ? { scheduledDays: repeatDays } : projectScoped ? { scheduledDays: [0, 1, 2, 3, 4, 5, 6] } : {}),
       ...(rateOn ? { metric: 'rating' as const } : {}),
       ...(why.trim() ? { why } : {}),
     };

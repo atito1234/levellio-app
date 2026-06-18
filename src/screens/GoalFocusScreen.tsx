@@ -127,6 +127,15 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
             )}
           </View>
         </Pressable>
+        <Pressable
+          onPress={() => navigation.navigate('BattleSetup', { questId: quest.id })}
+          accessibilityRole="button"
+          accessibilityLabel={`Slay your dragon for ${quest.title}`}
+          hitSlop={10}
+          style={styles.rowBattle}
+        >
+          <Text style={styles.rowBattleText}>⚔️</Text>
+        </Pressable>
         <Pressable onPress={() => deleteActivity(quest)} accessibilityRole="button" accessibilityLabel={`Remove ${quest.title}`} hitSlop={10} style={styles.rowDelete}>
           <Text style={styles.rowDeleteText}>✕</Text>
         </Pressable>
@@ -318,6 +327,8 @@ const styles = StyleSheet.create({
   rowTime: { ...typography.caption, color: VIOLET, fontWeight: '700' },
   rowStreak: { ...typography.caption, color: TEAL, fontWeight: '800' },
   rowEdit: { ...typography.caption, color: MUTED },
+  rowBattle: { paddingHorizontal: spacing.xs, paddingVertical: spacing.sm },
+  rowBattleText: { fontSize: 16 },
   rowDelete: { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
   rowDeleteText: { ...typography.label, color: '#C0202C', fontWeight: '800' },
   editGoal: { ...typography.label, fontWeight: '800' },

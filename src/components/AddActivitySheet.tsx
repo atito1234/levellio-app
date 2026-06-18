@@ -173,6 +173,13 @@ export function AddActivitySheet({
     setTitle('');
   };
 
+  // Carry the chosen goal / group / projects so Advanced + bulk add file there too.
+  const context = {
+    ...(goalId ? { goalId } : {}),
+    ...(bucketId ? { bucketId } : {}),
+    ...(projectIds.length > 0 ? { projectIds } : {}),
+  };
+
   const openAdvanced = () => {
     const prefill: Partial<QuestDraft> = {
       ...(title.trim() ? { title: title.trim() } : {}),
@@ -181,7 +188,12 @@ export function AddActivitySheet({
       ...(whenMode === 'weekly' && weekdays.length ? { scheduledDays: weekdays } : {}),
     };
     onClose();
-    navigation.navigate('QuestEditor', { prefill });
+    navigation.navigate('QuestEditor', { prefill, ...context });
+  };
+
+  const openBulk = () => {
+    onClose();
+    navigation.navigate('QuickCapture', context);
   };
 
   const modeChip = (mode: WhenMode, label: string) => {
@@ -379,14 +391,7 @@ export function AddActivitySheet({
               <Pressable onPress={openAdvanced} accessibilityRole="button" hitSlop={8}>
                 <Text style={styles.link}>⚙️ Advanced options ›</Text>
               </Pressable>
-              <Pressable
-                onPress={() => {
-                  onClose();
-                  navigation.navigate('QuickCapture');
-                }}
-                accessibilityRole="button"
-                hitSlop={8}
-              >
+              <Pressable onPress={openBulk} accessibilityRole="button" hitSlop={8}>
                 <Text style={styles.link}>🪄 Add several at once ›</Text>
               </Pressable>
             </View>
