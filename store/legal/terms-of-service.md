@@ -1,6 +1,6 @@
 # Levellio — Terms of Service
 
-**Effective date: June 10, 2026**
+**Effective date: June 19, 2026**
 
 ## 1. Agreement to these terms
 
@@ -25,14 +25,32 @@ You agree not to:
 - reverse engineer or attempt to extract source code, except to the extent that
   applicable law expressly allows;
 - use the App to break any law or to infringe anyone's rights;
-- interfere with or disrupt the integrity or performance of the App.
+- interfere with or disrupt the integrity or performance of the App;
+- in community spaces, post content that is unlawful, hateful, harassing,
+  threatening, deceptive, or that infringes others' rights, or impersonate anyone.
+
+We may remove content or restrict access that violates these Terms.
 
 ## 4. Your content
 
-The quests, habits, notes, and other content you create are yours and are stored
-on your device (see the Privacy Policy). You are responsible for your content and
-for keeping your own backups; uninstalling the App may permanently delete locally
-stored data.
+The quests, habits, notes, and other content you create are yours. Solo content
+is stored on your device; you are responsible for your own backups, and
+uninstalling may permanently delete locally stored data.
+
+If you create an optional account and use **Community Projects** or the community
+feed, the content you choose to share (project memberships and contributions,
+posts, comments, reactions, and who you follow) is stored in our cloud backend
+and shown to other members. You are responsible for what you share, you grant
+other members the ability to view it within the App, and you can delete it — leave
+a project, or delete your account in **Settings → Account → Delete account**,
+which removes your account and community/project data. Project owners manage their
+own projects and invite codes; share invite codes only with people you trust.
+
+## 4a. Location (optional)
+
+If you enable location in Settings, the App may record where an activity happened
+and confirm when a community-project habit was done on-site. This is optional and
+can be turned off at any time.
 
 ## 5. Bring-your-own-key AI and third-party services
 

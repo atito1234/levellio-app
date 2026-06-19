@@ -21,6 +21,13 @@ export interface AccountService {
   signIn(email: string, password: string): Promise<Account>;
   signOut(): Promise<void>;
   resetPassword(email: string): Promise<void>;
+  /** Re-verify the current user's password (for sensitive actions like deletion). */
+  reauthenticate(password: string): Promise<void>;
+  /**
+   * Permanently delete the signed-in account. `password` is used to re-verify if
+   * the session is too old (Firebase `auth/requires-recent-login`).
+   */
+  deleteAccount(password?: string): Promise<void>;
 }
 
 /** Human-readable error mapping shared by both implementations. */

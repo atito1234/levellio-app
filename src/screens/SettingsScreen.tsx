@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Linking,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -21,6 +24,7 @@ import {
 } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { useAuth } from '@/state/AuthContext';
 import { useSettings } from '@/state/SettingsContext';
 import { type AIMode, type CloudProvider } from '@/services/settings';
 import type { MetadataPrivacy } from '@/lib/metadata';
@@ -58,10 +62,34 @@ const PRESENTATION_OPTIONS: ChipOption<HeroPresentation>[] = [
 export function SettingsScreen() {
   const navigation = useNavigation<Nav>();
   const { character, setPresentation } = useGame();
+  const { account, isReal, signOut, deleteAccount } = useAuth();
   const { settings, ready, update } = useSettings();
 
   const [keySaved, setKeySaved] = useState(false);
   const [keyInput, setKeyInput] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | undefined>();
+
+  const confirmSignOut = () =>
+    Alert.alert('Sign out?', 'You can sign back in anytime.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Sign out', style: 'destructive', onPress: () => void signOut() },
+    ]);
+
+  const runDelete = async () => {
+    setDeleteBusy(true);
+    setDeleteError(undefined);
+    const res = await deleteAccount(isReal ? deletePassword : undefined);
+    setDeleteBusy(false);
+    if (res.ok) {
+      setDeleteOpen(false);
+      setDeletePassword('');
+    } else {
+      setDeleteError(res.error ?? 'Could not delete your account. Please try again.');
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -99,6 +127,31 @@ export function SettingsScreen() {
   return (
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        {/* Account — only when signed in (community/projects). */}
+        {account && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Account</Text>
+            <Text style={styles.note}>Signed in{account.email ? ` as ${account.email}` : ''}.</Text>
+            <PrimaryButton label="Sign out" variant="ghost" onPress={confirmSignOut} />
+            <Pressable
+              onPress={() => {
+                setDeleteError(undefined);
+                setDeletePassword('');
+                setDeleteOpen(true);
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Delete account"
+              style={styles.deleteBtn}
+            >
+              <Text style={styles.deleteBtnText}>Delete account</Text>
+            </Pressable>
+            <Text style={styles.help}>
+              Permanently deletes your account and your community + project data (memberships,
+              contributions, posts, comments, reactions, follows). This can’t be undone.
+            </Text>
+          </View>
+        )}
+
         {/* Beta banner — honest, no charging */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{SETTINGS_COPY.betaBannerTitle}</Text>
@@ -333,6 +386,38 @@ export function SettingsScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Delete-account confirmation (with password re-verify for real accounts). */}
+      <Modal visible={deleteOpen} transparent animationType="fade" onRequestClose={() => setDeleteOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Delete your account?</Text>
+            <Text style={styles.note}>
+              This permanently removes your account and your community + project data. It can’t be undone.
+            </Text>
+            {isReal && (
+              <TextField
+                label="Confirm your password"
+                value={deletePassword}
+                onChangeText={setDeletePassword}
+                placeholder="Your password"
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            )}
+            {deleteError && <Text style={styles.deleteError}>{deleteError}</Text>}
+            <PrimaryButton
+              label="Delete forever"
+              variant="ghost"
+              onPress={() => void runDelete()}
+              loading={deleteBusy}
+              disabled={deleteBusy || (isReal && deletePassword.trim().length === 0)}
+            />
+            <PrimaryButton label="Cancel" variant="ghost" onPress={() => setDeleteOpen(false)} disabled={deleteBusy} />
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }
@@ -366,8 +451,15 @@ function PrivacyToggle({
   );
 }
 
+const DANGER = '#C0202C';
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  deleteBtn: { alignItems: 'center', paddingVertical: spacing.sm },
+  deleteBtnText: { ...typography.label, color: DANGER, fontWeight: '800' },
+  deleteError: { ...typography.caption, color: DANGER, fontWeight: '700' },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(31,41,55,0.45)', alignItems: 'center', justifyContent: 'center', padding: spacing.lg },
+  modalCard: { width: '100%', maxWidth: 420, backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, gap: spacing.md },
+  modalTitle: { ...typography.title, color: DANGER, fontWeight: '800' },
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',

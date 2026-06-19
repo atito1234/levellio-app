@@ -296,6 +296,25 @@ export class LocalProjectsBackend implements ProjectsBackend {
     };
   }
 
+  async deleteMyData(uid: string): Promise<void> {
+    const all = await this.allProjects();
+    for (const p of all) {
+      const members = await this.read<ProjectMember[]>(membersKey(p.id), []);
+      if (members.some((m) => m.uid === uid)) {
+        const next = members.filter((m) => m.uid !== uid);
+        await this.write(membersKey(p.id), next);
+        p.memberCount = next.length;
+        await this.saveProject(p);
+      }
+      const contributions = await this.read<Contribution[]>(contribKey(p.id), []);
+      if (contributions.some((c) => c.uid === uid)) {
+        await this.write(contribKey(p.id), contributions.filter((c) => c.uid !== uid));
+      }
+      await this.notify(p.id);
+    }
+    await this.store.removeItem(mineKey(uid));
+  }
+
   private async notify(projectId: string): Promise<void> {
     const set = this.listeners.get(projectId);
     if (!set || set.size === 0) return;

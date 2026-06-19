@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ActivityTile, AddActivitySheet, MonthCalendar, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
+import { ActivityTile, AddActivitySheet, MiniScheduler, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
@@ -55,6 +55,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [joinShare, setJoinShare] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
+  const [addDates, setAddDates] = useState<string[] | null>(null);
 
   useEffect(() => {
     const unsub = subscribe(projectId, (s) => {
@@ -108,12 +109,6 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
     () => quests.filter((q) => linkedProjectIds(q.id).includes(projectId)),
     [quests, linkedProjectIds, projectId],
   );
-
-  const addAllSuggested = async () => {
-    if (!project) return;
-    for (const h of project.suggestedHabits) await ensureOwned(h);
-    Alert.alert("They're yours 🤝", 'All suggested habits are now daily habits in your activities, powering this project.');
-  };
 
   // The goal that mirrors THIS project (auto-created by ProjectsContext).
   const projectGoal = useMemo(
@@ -252,7 +247,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         {/* Big, fun activity tiles: add your own, or ask peers who've solved it. */}
         {joined && (
           <View style={styles.tileRow}>
-            <ActivityTile icon="✨" label="New activity" sub="Add your own daily habit" onPress={() => setAddOpen(true)} tint={c.accent} />
+            <ActivityTile icon="✨" label="New activity" sub="Add your own daily habit" onPress={() => { setAddDates(null); setAddOpen(true); }} tint={c.accent} />
             <ActivityTile icon="🌍" label="Ask peers" sub="Get a habit that worked for them" onPress={() => navigation.navigate('PostComposer', { projectId, kind: 'ask' })} tint={VIOLET} />
           </View>
         )}
@@ -303,8 +298,18 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
 
             {myQuests.length > 0 && (
               <>
-                <Text style={styles.sectionLabel}>YOUR CALENDAR</Text>
-                <MonthCalendar quests={myQuests} getPlan={getPlan} doneByDay={doneByDay} todayKey={todayK} />
+                <Text style={styles.sectionLabel}>YOUR CALENDAR · SCHEDULE ANY DAY</Text>
+                <MiniScheduler
+                  quests={myQuests}
+                  getPlan={getPlan}
+                  togglePlanned={togglePlanned}
+                  doneByDay={doneByDay}
+                  accent={c.accent}
+                  onAddForDay={(day) => {
+                    setAddDates([day]);
+                    setAddOpen(true);
+                  }}
+                />
               </>
             )}
           </>
@@ -313,12 +318,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         {/* Suggested activities — big adopt cards (daily habit, reuse by name). */}
         {project.suggestedHabits.length > 0 && (
           <>
-            <View style={styles.sectionRow}>
-              <Text style={styles.sectionLabel}>SUGGESTED ACTIVITIES</Text>
-              <Pressable onPress={() => void addAllSuggested()} accessibilityRole="button" accessibilityLabel="Add all suggested activities" hitSlop={8}>
-                <Text style={styles.slay}>＋ Add all</Text>
-              </Pressable>
-            </View>
+            <Text style={styles.sectionLabel}>SUGGESTED ACTIVITIES</Text>
             <View style={styles.cardList}>
               {project.suggestedHabits.map((h, i) => {
                 const owned = questByTitle(h.title);
@@ -389,8 +389,16 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         )}
       </ScrollView>
 
-      {/* Add your own activity, pre-linked to this project as a daily habit. */}
-      <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultProjectIds={[projectId]} />
+      {/* Add your own activity, pre-linked to this project (daily, or a specific day from the calendar). */}
+      <AddActivitySheet
+        visible={addOpen}
+        onClose={() => {
+          setAddOpen(false);
+          setAddDates(null);
+        }}
+        defaultProjectIds={[projectId]}
+        defaultDates={addDates}
+      />
     </ScreenContainer>
   );
 }

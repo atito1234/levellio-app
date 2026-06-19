@@ -35,4 +35,7 @@ export interface CommunityBackend {
   follow(uid: string, targetUid: string): Promise<void>;
   unfollow(uid: string, targetUid: string): Promise<void>;
   subscribeFollowing(uid: string, cb: (following: string[]) => void): Unsubscribe;
+
+  /** Remove all of a user's data (posts, comments, reactions, follows) — for account deletion. */
+  deleteMyData(uid: string): Promise<void>;
 }

@@ -181,7 +181,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
   // to a project (home, Feed, project detail…), ensure the project's goal exists
   // and file the activity under it — so it shows in the goal's focus + calendar,
   // never bleeding into personal goals.
-  const { goals, addGoal, goalsForHabit, linkGoal } = useGoals();
+  const { goals, addGoal, goalsForHabit, linkGoals } = useGoals();
   const creatingGoalRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     if (!uid) return;
@@ -190,12 +190,14 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       for (const project of myProjects) {
         const activityIds = habitsForProjectPure(links, project.id);
         if (activityIds.length === 0) continue;
-        let gid = goals.find((g) => g.kind === 'project' && g.projectId === project.id)?.id ?? null;
+        const gid = goals.find((g) => g.kind === 'project' && g.projectId === project.id)?.id ?? null;
         if (!gid) {
+          // Create exactly ONE goal per pass; the goals-change re-runs this effect
+          // to handle the rest (avoids clobbering goals written in the same tick).
           if (creatingGoalRef.current.has(project.id)) continue;
           creatingGoalRef.current.add(project.id);
           const cats = [...new Set(project.suggestedHabits.map((h) => h.category))];
-          const created = await addGoal({
+          await addGoal({
             title: project.title,
             emoji: project.emoji,
             colorId: project.colorId,
@@ -204,12 +206,12 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
             projectId: project.id,
           });
           creatingGoalRef.current.delete(project.id);
-          gid = created?.id ?? null;
+          return;
         }
-        if (!gid || cancelled) continue;
-        for (const aid of activityIds) {
-          if (!goalsForHabit(aid).includes(gid)) await linkGoal(aid, gid);
-        }
+        if (cancelled) return;
+        // Link any not-yet-filed activities in a single write (loop-safe).
+        const toLink = activityIds.filter((aid) => !goalsForHabit(aid).includes(gid));
+        if (toLink.length > 0) await linkGoals(toLink, gid);
       }
     })();
     return () => {

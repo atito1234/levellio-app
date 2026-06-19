@@ -89,6 +89,24 @@ describe('LocalCommunityBackend', () => {
     expect(comments[0]!.suggestedHabit?.category).toBe('health');
   });
 
+  it('deleteMyData removes my posts, comments, reactions, and follows', async () => {
+    const mine = await b.createPost(ALICE, { text: 'my post' });
+    const bobs = await b.createPost(BOB, { text: 'bob post' });
+    await b.addComment(ALICE, bobs.id, 'nice, bob');
+    await b.setReaction('alice', bobs.id, '🔥');
+    await b.follow('alice', 'bob');
+
+    await b.deleteMyData('alice');
+
+    const feed = await nextFeed(b, 'observer', NONE);
+    expect(feed.some((p) => p.id === mine.id)).toBe(false); // my post gone
+    const bobPost = feed.find((p) => p.id === bobs.id)!;
+    expect(myReaction(bobPost.reactions, 'alice')).toBeNull(); // my reaction stripped
+    const comments = await nextComments(b, bobs.id);
+    expect(comments.some((c) => c.uid === 'alice')).toBe(false); // my comment gone
+    expect(await nextFollowing(b, 'alice')).toEqual([]);
+  });
+
   it('follows and unfollows', async () => {
     await b.follow('me', 'alice');
     expect(await nextFollowing(b, 'me')).toEqual(['alice']);

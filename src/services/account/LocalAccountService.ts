@@ -105,6 +105,21 @@ export class LocalAccountService implements AccountService {
   async resetPassword(): Promise<void> {
     // No email delivery offline; this is a no-op stand-in.
   }
+
+  async reauthenticate(_password: string): Promise<void> {
+    // No re-verification needed for the local fallback.
+  }
+
+  async deleteAccount(): Promise<void> {
+    const uid = this.currentAccount?.uid;
+    if (uid) {
+      const remaining = (await this.users()).filter((u) => u.uid !== uid);
+      await this.store.setItem(usersKey, JSON.stringify(remaining));
+    }
+    this.currentAccount = null;
+    await this.store.removeItem(SESSION_KEY);
+    this.emit();
+  }
 }
 
 /** Carries a Firebase-style `code` so describeAuthError works for both backends. */

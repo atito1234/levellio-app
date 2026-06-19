@@ -16,8 +16,8 @@ describe('user-facing copy honesty', () => {
     expect(hits.length).toBeGreaterThan(0);
   });
 
-  it('forbids the key over-claims (cloud sync, accounts, managed AI, health, social)', () => {
-    for (const p of ['cloud sync', 'managed cloud', 'sign in', 'health connect', 'workout']) {
+  it('forbids the key over-claims (cloud sync, managed AI, leaderboard, health)', () => {
+    for (const p of ['cloud sync', 'managed cloud', 'managed ai', 'leaderboard', 'health connect', 'workout']) {
       expect(FORBIDDEN_USER_FACING).toContain(p);
     }
   });

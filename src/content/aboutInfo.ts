@@ -14,7 +14,7 @@ export const OWNER = 'Ethix Innova LLC';
 export const PRINCIPAL = 'Antonio Joel Tito, PhD';
 export const CONTACT_EMAIL = 'doctortitoconsulting@gmail.com';
 export const GOVERNING_LAW = 'State of Texas, USA';
-export const EFFECTIVE_DATE = 'June 10, 2026';
+export const EFFECTIVE_DATE = 'June 19, 2026';
 
 /**
  * Mission statement — intentionally QUALITATIVE and future-tense. There are no

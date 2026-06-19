@@ -136,6 +136,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Keep a live ref to state for the foreground listener (no re-subscribe churn).
   const stateRef = useRef(state);
   stateRef.current = state;
+  // Live ref to the quest list so sequential awaited mutations (e.g. bulk add)
+  // compose instead of each reading the same stale render snapshot.
+  const questsRef = useRef(state.quests);
+  questsRef.current = state.quests;
 
   // When the app returns to the foreground, roll over to the new day if needed.
   useEffect(() => {
@@ -171,45 +175,51 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const completeQuest = useCallback(
     async (questId: string): Promise<QuestReward | null> => {
-      if (!state.user || !state.character) return null;
-      const quest = state.quests.find((q) => q.id === questId);
+      const s = stateRef.current;
+      if (!s.user || !s.character) return null;
+      const quest = questsRef.current.find((q) => q.id === questId);
       if (!quest || quest.completed) return null;
 
       // Real date-based completion: advances the daily streak and awards XP.
       const { character: nextCharacter, reward } = engineCompleteQuest(
-        state.character,
+        s.character,
         quest.baseXp,
         questId,
         new Date(),
       );
-      const nextQuests = state.quests.map((q) =>
+      const nextQuests = questsRef.current.map((q) =>
         q.id === questId ? { ...q, completed: true, lastCompletedDate: dayKey(new Date()) } : q,
       );
 
+      questsRef.current = nextQuests;
       dispatch({ type: 'update', payload: { character: nextCharacter, quests: nextQuests } });
       await Promise.all([
-        backend.saveCharacter(state.user.uid, nextCharacter),
-        backend.saveQuests(state.user.uid, nextQuests),
+        backend.saveCharacter(s.user.uid, nextCharacter),
+        backend.saveQuests(s.user.uid, nextQuests),
       ]);
       return reward;
     },
-    [state.user, state.character, state.quests],
+    [],
   );
 
-  // Shared helper: dispatch + persist a new quest list, returning a value.
+  // Shared helper: dispatch + persist a new quest list, returning a value. Reads
+  // refs so it's stable and composes across sequential awaited calls.
   const persistQuests = useCallback(
     async <T,>(nextQuests: Quest[], result: T): Promise<T | null> => {
-      if (!state.user || !state.character) return null;
-      dispatch({ type: 'update', payload: { character: state.character, quests: nextQuests } });
-      await backend.saveQuests(state.user.uid, nextQuests);
+      const s = stateRef.current;
+      if (!s.user || !s.character) return null;
+      questsRef.current = nextQuests;
+      dispatch({ type: 'update', payload: { character: s.character, quests: nextQuests } });
+      await backend.saveQuests(s.user.uid, nextQuests);
       return result;
     },
-    [state.user, state.character],
+    [],
   );
 
   const suggestQuest = useCallback(
     async (goal: string): Promise<Quest | null> => {
-      if (!state.user || !state.character) return null;
+      const s = stateRef.current;
+      if (!s.user || !s.character) return null;
       // Build the engine the user selected (on-device by default; cloud uses
       // their own key from secure storage). Always falls back gracefully.
       const settings = await settingsStore.load();
@@ -219,26 +229,26 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (!first) return null;
 
       // Merge instead of appending so the AI path can't create a duplicate.
-      const { quests, quest } = upsertQuestByCanonical(state.quests, suggestedToQuest(first, genQuestId()));
+      const { quests, quest } = upsertQuestByCanonical(questsRef.current, suggestedToQuest(first, genQuestId()));
       return persistQuests(quests, quest);
     },
-    [state.user, state.character, state.quests, persistQuests],
+    [persistQuests],
   );
 
   const addQuest = useCallback(
     async (draft: QuestDraft): Promise<Quest | null> => {
       if (!validateQuestDraft(draft).valid) return null;
-      const { quests, quest } = upsertQuestByCanonical(state.quests, draftToQuest(draft, genQuestId()));
+      const { quests, quest } = upsertQuestByCanonical(questsRef.current, draftToQuest(draft, genQuestId()));
       return persistQuests(quests, quest);
     },
-    [state.quests, persistQuests],
+    [persistQuests],
   );
 
   const updateQuest = useCallback(
     async (questId: string, draft: QuestDraft): Promise<boolean> => {
       if (!validateQuestDraft(draft).valid) return false;
-      if (!state.quests.some((q) => q.id === questId)) return false;
-      const next = updateQuestInList(state.quests, questId, {
+      if (!questsRef.current.some((q) => q.id === questId)) return false;
+      const next = updateQuestInList(questsRef.current, questId, {
         title: draft.title.trim(),
         description: draft.description?.trim() || undefined,
         category: draft.category,
@@ -251,43 +261,43 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       });
       return (await persistQuests(next, true)) ?? false;
     },
-    [state.quests, persistQuests],
+    [persistQuests],
   );
 
   const deleteQuest = useCallback(
     async (questId: string): Promise<void> => {
-      await persistQuests(removeQuestFromList(state.quests, questId), true);
+      await persistQuests(removeQuestFromList(questsRef.current, questId), true);
     },
-    [state.quests, persistQuests],
+    [persistQuests],
   );
 
   const deleteQuests = useCallback(
     async (questIds: readonly string[]): Promise<void> => {
       if (questIds.length === 0) return;
       const drop = new Set(questIds);
-      await persistQuests(state.quests.filter((q) => !drop.has(q.id)), true);
+      await persistQuests(questsRef.current.filter((q) => !drop.has(q.id)), true);
     },
-    [state.quests, persistQuests],
+    [persistQuests],
   );
 
   const setRecurrence = useCallback(
     async (edits: readonly { id: string; scheduledDays: number[] }[]): Promise<void> => {
       if (edits.length === 0) return;
       const byId = new Map(edits.map((e) => [e.id, e.scheduledDays]));
-      const next = state.quests.map((q) =>
+      const next = questsRef.current.map((q) =>
         byId.has(q.id) ? { ...q, scheduledDays: byId.get(q.id)! } : q,
       );
       await persistQuests(next, true);
     },
-    [state.quests, persistQuests],
+    [persistQuests],
   );
 
   const addLibraryHabit = useCallback(
     async (habit: LibraryHabit): Promise<Quest | null> => {
-      const { quests, quest } = upsertQuestByCanonical(state.quests, libraryHabitToQuest(habit, genQuestId()));
+      const { quests, quest } = upsertQuestByCanonical(questsRef.current, libraryHabitToQuest(habit, genQuestId()));
       return persistQuests(quests, quest);
     },
-    [state.quests, persistQuests],
+    [persistQuests],
   );
 
   const reorderQuests = useCallback(
@@ -299,23 +309,25 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const setPresentation = useCallback(
     async (presentation: HeroPresentation): Promise<void> => {
-      if (!state.user || !state.character) return;
-      const next: Character = { ...state.character, presentation };
-      dispatch({ type: 'update', payload: { character: next, quests: state.quests } });
-      await backend.saveCharacter(state.user.uid, next);
+      const s = stateRef.current;
+      if (!s.user || !s.character) return;
+      const next: Character = { ...s.character, presentation };
+      dispatch({ type: 'update', payload: { character: next, quests: questsRef.current } });
+      await backend.saveCharacter(s.user.uid, next);
     },
-    [state.user, state.character, state.quests],
+    [],
   );
 
   const setKit = useCallback(
     async (kitId: string): Promise<void> => {
-      if (!state.user || !state.character) return;
+      const s = stateRef.current;
+      if (!s.user || !s.character) return;
       // NO_KIT_ID clears back to the classic hoodie (stored as undefined).
-      const next: Character = { ...state.character, kitId: kitId === NO_KIT_ID ? undefined : kitId };
-      dispatch({ type: 'update', payload: { character: next, quests: state.quests } });
-      await backend.saveCharacter(state.user.uid, next);
+      const next: Character = { ...s.character, kitId: kitId === NO_KIT_ID ? undefined : kitId };
+      dispatch({ type: 'update', payload: { character: next, quests: questsRef.current } });
+      await backend.saveCharacter(s.user.uid, next);
     },
-    [state.user, state.character, state.quests],
+    [],
   );
 
   const value = useMemo<GameContextValue>(

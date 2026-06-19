@@ -22,13 +22,19 @@ export function MonthCalendar({
   getPlan,
   doneByDay,
   todayKey,
+  selected,
+  onSelectDay,
 }: {
   quests: readonly Quest[];
   getPlan: (k: string) => readonly string[] | undefined;
   doneByDay: Map<string, Set<string>>;
   todayKey: string;
+  /** Selected day (interactive mode). */
+  selected?: string;
+  /** When provided, days are tappable to select them. */
+  onSelectDay?: (k: string) => void;
 }) {
-  const [monthRef, setMonthRef] = useState<MonthRef>(() => monthOf(new Date()));
+  const [monthRef, setMonthRef] = useState<MonthRef>(() => monthOf(new Date(selected ?? todayKey)));
   const weeks = useMemo(() => buildMonthMatrix(monthRef), [monthRef]);
   const summaryFor = (k: string) => daySchedule(k, quests, getPlan(k), doneByDay.get(k) ?? EMPTY);
 
@@ -52,19 +58,40 @@ export function MonthCalendar({
         <View key={wi} style={styles.weekRow}>
           {week.map((cell, ci) => {
             if (!cell.key) return <View key={ci} style={styles.cell} />;
-            const s = summaryFor(cell.key);
-            const isToday = cell.key === todayKey;
+            const key = cell.key;
+            const s = summaryFor(key);
+            const isToday = key === todayKey;
+            const on = key === selected;
             const allDone = s.count > 0 && s.doneCount >= s.count;
-            return (
-              <View key={ci} style={[styles.cell, styles.day, isToday && styles.dayToday]}>
-                <Text style={styles.dayText}>{cell.day}</Text>
+            const body = (
+              <>
+                <Text style={[styles.dayText, on && styles.dayTextOn]}>{cell.day}</Text>
                 <View style={styles.dots}>
                   {allDone ? (
-                    <Text style={styles.allDone}>✓</Text>
+                    <Text style={[styles.allDone, on && styles.dayTextOn]}>✓</Text>
                   ) : (
-                    dayCategoryColors(s.categories, 3).map((c, i) => <View key={i} style={[styles.miniDot, { backgroundColor: c }]} />)
+                    dayCategoryColors(s.categories, 3).map((c, i) => <View key={i} style={[styles.miniDot, { backgroundColor: on ? '#FFFFFF' : c }]} />)
                   )}
                 </View>
+              </>
+            );
+            if (onSelectDay) {
+              return (
+                <Pressable
+                  key={ci}
+                  onPress={() => onSelectDay(key)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: on }}
+                  accessibilityLabel={`${key}, ${s.count} scheduled`}
+                  style={[styles.cell, styles.day, on && styles.dayOn, isToday && !on && styles.dayToday]}
+                >
+                  {body}
+                </Pressable>
+              );
+            }
+            return (
+              <View key={ci} style={[styles.cell, styles.day, isToday && styles.dayToday]}>
+                {body}
               </View>
             );
           })}
@@ -83,8 +110,10 @@ const styles = StyleSheet.create({
   weekday: { ...typography.caption, color: MUTED, flex: 1, textAlign: 'center', fontWeight: '700' },
   cell: { flex: 1, aspectRatio: 1, borderRadius: CELL_RADIUS, alignItems: 'center', justifyContent: 'center' },
   day: { backgroundColor: '#F7F6F2' },
+  dayOn: { backgroundColor: VIOLET },
   dayToday: { borderWidth: 2, borderColor: VIOLET },
   dayText: { ...typography.label, color: INK, fontWeight: '700' },
+  dayTextOn: { color: '#FFFFFF' },
   dots: { flexDirection: 'row', gap: 2, height: 6, marginTop: 2, alignItems: 'center' },
   miniDot: { width: 5, height: 5, borderRadius: 3 },
   allDone: { fontSize: 9, color: VIOLET, fontWeight: '800', lineHeight: 9 },

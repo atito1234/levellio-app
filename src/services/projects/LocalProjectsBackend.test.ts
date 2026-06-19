@@ -130,6 +130,19 @@ describe('LocalProjectsBackend', () => {
     expect(snap?.feed.some((f) => f.mode === 'onsite')).toBe(true);
   });
 
+  it('deleteMyData removes the user from projects + their contributions, leaving others', async () => {
+    await backend.joinProject(ALICE, 'proj-malaria', true);
+    await backend.joinProject(BOB, 'proj-malaria', true);
+    await backend.contribute(ALICE, 'proj-malaria', { habitTitle: 'Clean a site', value: 2 });
+    await backend.contribute(BOB, 'proj-malaria', { habitTitle: 'Clean a site', value: 3 });
+    await backend.deleteMyData('alice');
+    expect(await backend.listMine('alice')).toEqual([]);
+    const snap = await nextSnap(backend, 'proj-malaria');
+    expect(snap?.members.some((m) => m.uid === 'alice')).toBe(false);
+    expect(snap?.members.some((m) => m.uid === 'bob')).toBe(true);
+    expect(snap?.feed.some((f) => f.uid === 'alice')).toBe(false);
+  });
+
   it('removes membership on leave', async () => {
     await backend.joinProject(ALICE, 'proj-gardens', true);
     await backend.leaveProject('alice', 'proj-gardens');
