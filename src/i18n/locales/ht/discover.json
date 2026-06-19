@@ -1,0 +1,21 @@
+{
+  "title": "Dekouvri",
+  "searchPlaceholder": "Chèche moun, abitid, pwojè",
+  "tabs": {
+    "people": "Moun",
+    "habits": "Abitid",
+    "projects": "Pwojè"
+  },
+  "empty": {
+    "people": "Pa jwenn okenn moun.",
+    "habits": "Pa jwenn okenn abitid.",
+    "projects": "Pa jwenn okenn pwojè."
+  },
+  "addHabit": "Ajoute",
+  "people": {
+    "title": "Moun",
+    "following": "W ap swiv",
+    "suggested": "Sijesyon",
+    "empty": "Poko gen moun pou montre. Pibliye yon bagay pou rankontre moun."
+  }
+}

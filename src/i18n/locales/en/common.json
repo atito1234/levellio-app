@@ -14,5 +14,11 @@
     "loading": "Loading…",
     "send": "Send",
     "comment": "Comment"
+  },
+  "follow": {
+    "follow": "+ Follow",
+    "following": "✓ Following",
+    "a11yFollow": "Follow",
+    "a11yFollowing": "Following — tap to unfollow"
   }
 }

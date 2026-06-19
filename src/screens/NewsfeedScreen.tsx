@@ -27,7 +27,7 @@ export function NewsfeedScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation(['feed', 'common']);
   const allowed = useCommunityAccess();
-  const { signedIn, subscribeFeed } = useCommunity();
+  const { uid, signedIn, subscribeFeed } = useCommunity();
   const { unreadCount } = useNotifications();
   const { character } = useGame();
   const [scope, setScope] = useState<ScopeKey>('all');
@@ -56,10 +56,15 @@ export function NewsfeedScreen() {
               </View>
             )}
           </Pressable>
+          {uid && (
+            <Pressable onPress={() => navigation.navigate('Profile', { uid })} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.meA11y')} style={styles.meBtn}>
+              <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={32} />
+            </Pressable>
+          )}
         </View>
       </View>
     ),
-    [navigation, t, unreadCount],
+    [navigation, t, unreadCount, uid, character?.presentation, character?.tier, character?.kitId],
   );
 
   if (!allowed) {
@@ -98,6 +103,12 @@ export function NewsfeedScreen() {
     <ScreenContainer backgroundColor={BG} noPadding edges={['top', 'left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {header}
+
+        {/* Search pill — opens discovery (LinkedIn-style). */}
+        <Pressable onPress={() => navigation.navigate('Discover')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.searchA11y')} style={styles.searchPill}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <Text style={styles.searchText}>{t('feed:newsfeed.searchPlaceholder')}</Text>
+        </Pressable>
 
         {/* Facebook-style composer — one tap to share. */}
         <Pressable onPress={() => navigation.navigate('PostComposer')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.composerA11y')} style={styles.composer}>
@@ -148,6 +159,10 @@ const styles = StyleSheet.create({
   bellIcon: { fontSize: 18 },
   badge: { position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: 999, backgroundColor: '#C0202C', alignItems: 'center', justifyContent: 'center' },
   badgeText: { ...typography.caption, color: '#FFFFFF', fontWeight: '800', fontSize: 10 },
+  meBtn: { width: 40, height: 40, borderRadius: 999, alignItems: 'center', justifyContent: 'center', backgroundColor: CARD, borderWidth: 1, borderColor: '#ECEAE4', overflow: 'hidden' },
+  searchPill: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: '#ECEAE4', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  searchIcon: { fontSize: 16 },
+  searchText: { ...typography.body, color: MUTED, flex: 1 },
 
   composer: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#ECEAE4' },
   composerHint: { ...typography.body, color: MUTED, flex: 1 },

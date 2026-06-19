@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FollowButton, HeroAvatar, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -23,6 +24,7 @@ interface Person {
 
 /** Discover & manage your network — follow the people sharing in the community. */
 export function PeopleScreen({ navigation }: Props) {
+  const { t } = useTranslation(['discover', 'common']);
   const { uid, following, subscribeFeed } = useCommunity();
   const [posts, setPosts] = useState<Post[]>([]);
 
@@ -47,8 +49,10 @@ export function PeopleScreen({ navigation }: Props) {
 
   const row = (person: Person) => (
     <View key={person.uid} style={styles.row}>
-      <HeroAvatar presentation={person.presentation ?? 'neutral'} tier="novice" size={40} />
-      <Text style={styles.name} numberOfLines={1}>{person.displayName}</Text>
+      <Pressable onPress={() => navigation.navigate('Profile', { uid: person.uid })} accessibilityRole="button" style={styles.rowTap}>
+        <HeroAvatar presentation={person.presentation ?? 'neutral'} tier="novice" size={40} />
+        <Text style={styles.name} numberOfLines={1}>{person.displayName}</Text>
+      </Pressable>
       <FollowButton targetUid={person.uid} size="md" />
     </View>
   );
@@ -56,27 +60,27 @@ export function PeopleScreen({ navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('common:action.back')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
-        <Text style={styles.title}>People</Text>
+        <Text style={styles.title}>{t('discover:people.title')}</Text>
         <View style={{ width: 28 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {people.length === 0 ? (
-          <Text style={styles.empty}>As people share in the community, they’ll show up here to follow.</Text>
+          <Text style={styles.empty}>{t('discover:people.empty')}</Text>
         ) : (
           <>
             {followingPeople.length > 0 && (
               <>
-                <Text style={styles.sectionLabel}>FOLLOWING ({followingPeople.length})</Text>
+                <Text style={styles.sectionLabel}>{t('discover:people.following')} ({followingPeople.length})</Text>
                 {followingPeople.map(row)}
               </>
             )}
             {suggestions.length > 0 && (
               <>
-                <Text style={styles.sectionLabel}>SUGGESTED</Text>
+                <Text style={styles.sectionLabel}>{t('discover:people.suggested')}</Text>
                 {suggestions.map(row)}
               </>
             )}
@@ -94,6 +98,7 @@ const styles = StyleSheet.create({
   content: { gap: spacing.sm, paddingBottom: spacing.xl },
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2, marginTop: spacing.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 16, padding: spacing.md },
+  rowTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   name: { ...typography.body, color: INK, fontWeight: '700', flex: 1 },
   empty: { ...typography.body, color: MUTED, textAlign: 'center', paddingVertical: spacing.xl },
 });

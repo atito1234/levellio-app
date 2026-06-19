@@ -14,5 +14,11 @@
     "loading": "Ap chaje…",
     "send": "Voye",
     "comment": "Kòmante"
+  },
+  "follow": {
+    "follow": "+ Swiv",
+    "following": "✓ Ap swiv",
+    "a11yFollow": "Swiv",
+    "a11yFollowing": "Ap swiv — peze pou sispann"
   }
 }
