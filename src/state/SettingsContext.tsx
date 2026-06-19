@@ -6,7 +6,15 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import * as Localization from 'expo-localization';
 import { settingsStore, DEFAULT_SETTINGS, type AppSettings } from '@/services/settings';
+import { resolveLocale, setI18nLanguage } from '@/i18n';
+
+/** Apply the user's locale preference (or device default) to i18next. */
+function applyLocale(settings: AppSettings) {
+  const device = Localization.getLocales()[0]?.languageCode ?? null;
+  setI18nLanguage(resolveLocale(settings.locale, device));
+}
 
 /**
  * Reactive app settings (AI prefs, premium entitlement, cosmetic theme). Kept
@@ -27,7 +35,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true;
     settingsStore.load().then((loaded) => {
-      if (active) setSettings(loaded);
+      if (!active) return;
+      applyLocale(loaded);
+      setSettings(loaded);
     });
     return () => {
       active = false;
@@ -36,6 +46,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const update = useCallback(async (patch: Partial<AppSettings>) => {
     const next = await settingsStore.update(patch);
+    if (patch.locale !== undefined) applyLocale(next);
     setSettings(next);
   }, []);
 

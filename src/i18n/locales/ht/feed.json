@@ -1,0 +1,13 @@
+{
+  "scope": {
+    "all": "Pou ou",
+    "network": "Rezo ou"
+  },
+  "composer": {
+    "hint": "Pataje yon viktwa oswa mande èd…"
+  },
+  "empty": {
+    "title": "Fil ou a trankil",
+    "body": "Swiv moun oswa antre nan yon pwojè pou wè nouvèl isit la."
+  }
+}

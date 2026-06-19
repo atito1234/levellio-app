@@ -20,7 +20,14 @@ describe('normalizeSettings', () => {
       worldProjectsEnabled: false,
       worldProjectAlerts: false,
       projectPrepLinkMode: 'visual',
+      locale: 'system',
     });
+  });
+
+  it('defaults locale to system and coerces unknown values', () => {
+    expect(normalizeSettings({}).locale).toBe('system');
+    expect(normalizeSettings({ locale: 'ht' as never }).locale).toBe('ht');
+    expect(normalizeSettings({ locale: 'de' as never }).locale).toBe('system');
   });
 
   it('coerces the premium flag to a strict boolean', () => {
@@ -82,11 +89,13 @@ describe('SettingsStore', () => {
       worldProjectsEnabled: true,
       worldProjectAlerts: true,
       projectPrepLinkMode: 'full',
+      locale: 'fr',
     });
     const loaded = await store.load();
     expect(loaded.bucketViewMode).toBe('buckets');
     expect(loaded.metadataPrivacy.includeContext).toBe(true);
     expect(loaded.isPremium).toBe(true);
+    expect(loaded.locale).toBe('fr');
   });
 
   it('update merges a partial patch', async () => {

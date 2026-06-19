@@ -1,0 +1,13 @@
+{
+  "scope": {
+    "all": "Pour vous",
+    "network": "Votre réseau"
+  },
+  "composer": {
+    "hint": "Partagez une réussite ou demandez de l'aide…"
+  },
+  "empty": {
+    "title": "Votre fil est calme",
+    "body": "Suivez des personnes ou rejoignez un projet pour voir les actualités ici."
+  }
+}

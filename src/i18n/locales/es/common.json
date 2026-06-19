@@ -1,0 +1,16 @@
+{
+  "action": {
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "post": "Publicar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "retry": "Reintentar",
+    "done": "Listo",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "skip": "Omitir",
+    "loading": "Cargando…"
+  }
+}

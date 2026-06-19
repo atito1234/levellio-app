@@ -1,0 +1,13 @@
+{
+  "scope": {
+    "all": "For you",
+    "network": "Your network"
+  },
+  "composer": {
+    "hint": "Share a win or ask for help…"
+  },
+  "empty": {
+    "title": "Your feed is quiet",
+    "body": "Follow people or join a project to see updates here."
+  }
+}

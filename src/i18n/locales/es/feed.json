@@ -1,0 +1,13 @@
+{
+  "scope": {
+    "all": "Para ti",
+    "network": "Tu red"
+  },
+  "composer": {
+    "hint": "Comparte un logro o pide ayuda…"
+  },
+  "empty": {
+    "title": "Tu feed está tranquilo",
+    "body": "Sigue a personas o únete a un proyecto para ver novedades aquí."
+  }
+}

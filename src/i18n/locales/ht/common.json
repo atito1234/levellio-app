@@ -1,0 +1,16 @@
+{
+  "action": {
+    "cancel": "Anile",
+    "save": "Anrejistre",
+    "close": "Fèmen",
+    "post": "Pibliye",
+    "delete": "Efase",
+    "edit": "Modifye",
+    "retry": "Reeseye",
+    "done": "Fini",
+    "back": "Tounen",
+    "next": "Pwochen",
+    "skip": "Sote",
+    "loading": "Ap chaje…"
+  }
+}
