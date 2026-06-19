@@ -41,6 +41,14 @@ service cloud.firestore {
       allow write: if signedIn() && request.auth.uid == uid;
     }
 
+    // Ephemeral stories (24h). Readable by any signed-in user; an author writes
+    // and deletes only their own.
+    match /stories/{storyId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
     // Community newsfeed posts (manual shares + contribution posts).
     match /posts/{postId} {
       // Visible to any signed-in member of the community.

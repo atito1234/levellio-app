@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HeroAvatar, PostCard, ScreenContainer } from '@/components';
+import { HeroAvatar, PostCard, ScreenContainer, StoriesRail } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
 import { useNotifications } from '@/state/NotificationsContext';
@@ -103,6 +103,9 @@ export function NewsfeedScreen() {
     <ScreenContainer backgroundColor={BG} noPadding edges={['top', 'left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {header}
+
+        {/* Stories rail (Instagram-style). "Add" is gated until media is enabled. */}
+        <StoriesRail />
 
         {/* Search pill — opens discovery (LinkedIn-style). */}
         <Pressable onPress={() => navigation.navigate('Discover')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.searchA11y')} style={styles.searchPill}>

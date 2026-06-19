@@ -49,6 +49,7 @@
     "a11yAsk": "Votre question",
     "a11yPost": "Texte de la publication",
     "counter": "{{current}}/{{max}}",
+    "mediaA11y": "Ajouter une photo ou vidéo",
     "areaLabel": "De quel domaine s'agit-il ? (facultatif)",
     "projectLabelAsk": "Demander dans quel projet ?",
     "projectLabelPost": "Partager dans un projet (facultatif)"

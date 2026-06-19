@@ -98,6 +98,8 @@ export type RootStackParamList = {
   Notifications: undefined;
   /** Search & discover people, habits, and projects. */
   Discover: undefined;
+  /** Full-screen story viewer for one user's active stories. */
+  StoryViewer: { uid: string };
 };
 
 declare global {

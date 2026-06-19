@@ -49,6 +49,7 @@
     "a11yAsk": "Your question",
     "a11yPost": "Post text",
     "counter": "{{current}}/{{max}}",
+    "mediaA11y": "Add photo or video",
     "areaLabel": "What area is this about? (optional)",
     "projectLabelAsk": "Ask in which project?",
     "projectLabelPost": "Share to a project (optional)"

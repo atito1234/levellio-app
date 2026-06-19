@@ -23,6 +23,7 @@ export { MiniScheduler } from './MiniScheduler';
 export { ContributionModeSheet } from './ContributionModeSheet';
 export { FollowButton } from './FollowButton';
 export { PostCard } from './PostCard';
+export { StoriesRail } from './StoriesRail';
 export { RatingPrompt } from './RatingPrompt';
 export { AddActivityFab } from './AddActivityFab';
 export { AddActivitySheet } from './AddActivitySheet';

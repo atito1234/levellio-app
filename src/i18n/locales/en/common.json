@@ -20,5 +20,9 @@
     "following": "✓ Following",
     "a11yFollow": "Follow",
     "a11yFollowing": "Following — tap to unfollow"
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "body": "Photo & video sharing arrives next week."
   }
 }
