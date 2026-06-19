@@ -1,39 +1,40 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PrimaryButton, ScreenContainer } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
-import { getPlan } from '@/services/monetization';
-import { PAYWALL_COPY } from '@/content/uiCopy';
-import { PLAN_CONFIG } from '@/services/monetization';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Paywall'>;
 
 /**
- * v1.0 BETA upgrade surface. Monetization is OFF: there is no purchase button,
- * no toggle, and no charge can be initiated here. We show an honest "Premium is
- * coming soon — you're an early beta member" state and never claim a feature
- * that isn't live. The component is kept intact for reactivation in v1.5.
+ * BETA upgrade surface, fully localized. Monetization is OFF: `canInitiatePurchase()`
+ * is false, so there is no purchase button and no charge can be initiated here. We
+ * show an honest "Premium is coming soon — you're an early beta member" state and
+ * never claim a feature that isn't live. Display copy lives in the `paywall` locale
+ * namespace (honesty-scanned across all languages); the EN copy is kept in lockstep
+ * with PLAN_CONFIG by paywallCopy.test.ts.
  */
 export function PaywallScreen({ navigation }: Props) {
-  const free = getPlan('free');
+  const { t } = useTranslation('paywall');
+  const freeFeatures = t('freeFeatures', { returnObjects: true }) as unknown as string[];
 
   return (
     <ScreenContainer>
       <View style={styles.header}>
-        <Text style={styles.kicker}>{PAYWALL_COPY.kicker}</Text>
-        <Text style={styles.heading}>{PAYWALL_COPY.heading}</Text>
-        <Text style={styles.sub}>{PLAN_CONFIG.disclosure}</Text>
+        <Text style={styles.kicker}>{t('kicker')}</Text>
+        <Text style={styles.heading}>{t('heading')}</Text>
+        <Text style={styles.sub}>{t('disclosure')}</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* Free plan — what everyone has today */}
-        <View style={styles.card} accessibilityLabel="Your current plan: Free">
-          <Text style={styles.planName}>{PAYWALL_COPY.freeCardTitle}</Text>
-          <Text style={styles.tagline}>{free.tagline}</Text>
+        <View style={styles.card} accessibilityLabel={t('freeCardTitle')}>
+          <Text style={styles.planName}>{t('freeCardTitle')}</Text>
+          <Text style={styles.tagline}>{t('freeTagline')}</Text>
           <View style={styles.features}>
-            {free.features.map((feature) => (
+            {freeFeatures.map((feature) => (
               <View key={feature} style={styles.featureRow}>
                 <Text style={styles.check} accessibilityElementsHidden>
                   ✓
@@ -45,20 +46,17 @@ export function PaywallScreen({ navigation }: Props) {
         </View>
 
         {/* Premium — honest "coming soon", no purchase path */}
-        <View
-          style={[styles.card, styles.comingSoon]}
-          accessibilityLabel="Premium is coming soon. No purchase is available."
-        >
+        <View style={[styles.card, styles.comingSoon]} accessibilityLabel={t('comingSoonTitle')}>
           <View style={styles.cardHead}>
-            <Text style={styles.planName}>{PAYWALL_COPY.comingSoonTitle}</Text>
+            <Text style={styles.planName}>{t('comingSoonTitle')}</Text>
             <View style={styles.soonPill}>
-              <Text style={styles.soonText}>COMING SOON</Text>
+              <Text style={styles.soonText}>{t('comingSoonBadge')}</Text>
             </View>
           </View>
-          <Text style={styles.tagline}>{PLAN_CONFIG.betaNotice}</Text>
+          <Text style={styles.tagline}>{t('betaNotice')}</Text>
         </View>
 
-        <PrimaryButton label={PAYWALL_COPY.closeLabel} variant="ghost" onPress={() => navigation.goBack()} />
+        <PrimaryButton label={t('closeLabel')} variant="ghost" onPress={() => navigation.goBack()} />
       </ScrollView>
     </ScreenContainer>
   );

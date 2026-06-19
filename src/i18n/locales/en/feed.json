@@ -3,11 +3,74 @@
     "all": "For you",
     "network": "Your network"
   },
-  "composer": {
-    "hint": "Share a win or ask for help…"
+  "newsfeed": {
+    "title": "Community",
+    "people": "👥 People",
+    "peopleA11y": "People in your network",
+    "composerHint": "Share an update with your community…",
+    "composerA11y": "Share an update",
+    "emptyNetwork": "Follow people to see their updates here. Tap 👥 People to find them.",
+    "emptyAll": "No posts yet. Be the first to share an update!",
+    "gateMemberTitle": "Community is a membership feature",
+    "gateMemberBody": "Share your progress, cheer each other on, and grow your network with people working toward the same goals.",
+    "gateMemberCta": "See membership",
+    "gateSignInTitle": "Join the community",
+    "gateSignInBody": "Sign in to share updates, react, and follow people on the same journey.",
+    "gateSignInCta": "Sign in"
   },
-  "empty": {
-    "title": "Your feed is quiet",
-    "body": "Follow people or join a project to see updates here."
+  "post": {
+    "contribution": "✅ {{habit}} · +{{value}}",
+    "onsiteSuffix": " · 📍 on-site",
+    "ask": "❓ Asking peers for help",
+    "openA11y": "Open post by {{name}}",
+    "reactA11y": "React {{emoji}}",
+    "comments_one": "{{count}} comment",
+    "comments_other": "{{count}} comments",
+    "commentBtn": "💬 Comment"
+  },
+  "composerScreen": {
+    "winPrefill": "🎉 Just did {{habit}}!",
+    "winPrefillProject": "🎉 Just did {{habit}} — +{{value}} for {{project}}!",
+    "titleAsk": "Ask peers",
+    "titleWin": "Share your win",
+    "titleNew": "New post",
+    "ctaAsk": "Ask",
+    "ctaWin": "Share",
+    "scopeAsk": "🌍 Asking in",
+    "scopePost": "🤝 Posting to",
+    "askHint": "Describe the habit or problem you're working on. Peers who've solved it can answer — and attach a habit you adopt in one tap.",
+    "placeholderAsk": "e.g. How do you keep standing water from coming back after the rains?",
+    "placeholderPost": "Share a win, ask for support, or cheer someone on…",
+    "a11yAsk": "Your question",
+    "a11yPost": "Post text",
+    "counter": "{{current}}/{{max}}",
+    "areaLabel": "What area is this about? (optional)",
+    "projectLabelAsk": "Ask in which project?",
+    "projectLabelPost": "Share to a project (optional)"
+  },
+  "detail": {
+    "titleAsk": "Ask",
+    "titlePost": "Post",
+    "loading": "Loading…",
+    "answers_one": "{{count}} ANSWER",
+    "answers_other": "{{count}} ANSWERS",
+    "answersEmpty": "ANSWERS",
+    "comments_one": "{{count}} COMMENT",
+    "comments_other": "{{count}} COMMENTS",
+    "commentsEmpty": "COMMENTS",
+    "emptyAsk": "No answers yet. Be the first to share what worked.",
+    "emptyPost": "Be the first to comment.",
+    "adoptA11y": "Adopt the habit {{habit}}",
+    "adopt": "➕ Adopt: {{icon}} {{habit}}",
+    "attachPlaceholder": "Habit that worked (e.g. Cover water containers daily)",
+    "attachA11y": "Suggested habit title",
+    "attachToggleA11y": "Attach a habit to your answer",
+    "answerPlaceholder": "Share what worked for you…",
+    "commentPlaceholder": "Add a comment…",
+    "answerA11y": "Answer text",
+    "commentA11y": "Comment text",
+    "adoptedTitle": "Adopted 🌱",
+    "adoptedBody": "“{{habit}}” is now a daily habit of yours. Find it on your Today.",
+    "adoptedBodyProject": "“{{habit}}” is now a daily habit of yours, powering {{project}}. Find it on your Today."
   }
 }

@@ -11,6 +11,8 @@
     "back": "Retour",
     "next": "Suivant",
     "skip": "Passer",
-    "loading": "Chargement…"
+    "loading": "Chargement…",
+    "send": "Envoyer",
+    "comment": "Commenter"
   }
 }

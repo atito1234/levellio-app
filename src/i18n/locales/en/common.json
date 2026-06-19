@@ -11,6 +11,8 @@
     "back": "Back",
     "next": "Next",
     "skip": "Skip",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "send": "Send",
+    "comment": "Comment"
   }
 }

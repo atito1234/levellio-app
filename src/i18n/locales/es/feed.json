@@ -3,11 +3,74 @@
     "all": "Para ti",
     "network": "Tu red"
   },
-  "composer": {
-    "hint": "Comparte un logro o pide ayuda…"
+  "newsfeed": {
+    "title": "Comunidad",
+    "people": "👥 Personas",
+    "peopleA11y": "Personas de tu red",
+    "composerHint": "Comparte una novedad con tu comunidad…",
+    "composerA11y": "Compartir una novedad",
+    "emptyNetwork": "Sigue a personas para ver sus novedades aquí. Toca 👥 Personas para encontrarlas.",
+    "emptyAll": "Aún no hay publicaciones. ¡Sé el primero en compartir!",
+    "gateMemberTitle": "La comunidad es una función de membresía",
+    "gateMemberBody": "Comparte tu progreso, anímense mutuamente y haz crecer tu red con personas que buscan las mismas metas.",
+    "gateMemberCta": "Ver membresía",
+    "gateSignInTitle": "Únete a la comunidad",
+    "gateSignInBody": "Inicia sesión para compartir novedades, reaccionar y seguir a personas en el mismo camino.",
+    "gateSignInCta": "Iniciar sesión"
   },
-  "empty": {
-    "title": "Tu feed está tranquilo",
-    "body": "Sigue a personas o únete a un proyecto para ver novedades aquí."
+  "post": {
+    "contribution": "✅ {{habit}} · +{{value}}",
+    "onsiteSuffix": " · 📍 en el lugar",
+    "ask": "❓ Pidiendo ayuda a otros",
+    "openA11y": "Abrir la publicación de {{name}}",
+    "reactA11y": "Reaccionar {{emoji}}",
+    "comments_one": "{{count}} comentario",
+    "comments_other": "{{count}} comentarios",
+    "commentBtn": "💬 Comentar"
+  },
+  "composerScreen": {
+    "winPrefill": "🎉 ¡Acabo de hacer {{habit}}!",
+    "winPrefillProject": "🎉 ¡Acabo de hacer {{habit}} — +{{value}} para {{project}}!",
+    "titleAsk": "Preguntar a otros",
+    "titleWin": "Comparte tu logro",
+    "titleNew": "Nueva publicación",
+    "ctaAsk": "Preguntar",
+    "ctaWin": "Compartir",
+    "scopeAsk": "🌍 Preguntando en",
+    "scopePost": "🤝 Publicando en",
+    "askHint": "Describe el hábito o problema en el que trabajas. Quienes lo han resuelto pueden responder — y adjuntar un hábito que adoptas con un solo toque.",
+    "placeholderAsk": "ej. ¿Cómo evitas que el agua estancada vuelva después de las lluvias?",
+    "placeholderPost": "Comparte un logro, pide apoyo o anima a alguien…",
+    "a11yAsk": "Tu pregunta",
+    "a11yPost": "Texto de la publicación",
+    "counter": "{{current}}/{{max}}",
+    "areaLabel": "¿De qué área se trata? (opcional)",
+    "projectLabelAsk": "¿En qué proyecto preguntar?",
+    "projectLabelPost": "Compartir en un proyecto (opcional)"
+  },
+  "detail": {
+    "titleAsk": "Pregunta",
+    "titlePost": "Publicación",
+    "loading": "Cargando…",
+    "answers_one": "{{count}} RESPUESTA",
+    "answers_other": "{{count}} RESPUESTAS",
+    "answersEmpty": "RESPUESTAS",
+    "comments_one": "{{count}} COMENTARIO",
+    "comments_other": "{{count}} COMENTARIOS",
+    "commentsEmpty": "COMENTARIOS",
+    "emptyAsk": "Aún no hay respuestas. Sé el primero en compartir lo que funcionó.",
+    "emptyPost": "Sé el primero en comentar.",
+    "adoptA11y": "Adoptar el hábito {{habit}}",
+    "adopt": "➕ Adoptar: {{icon}} {{habit}}",
+    "attachPlaceholder": "Hábito que funcionó (ej. Cubrir los recipientes de agua a diario)",
+    "attachA11y": "Título del hábito sugerido",
+    "attachToggleA11y": "Adjuntar un hábito a tu respuesta",
+    "answerPlaceholder": "Comparte lo que te funcionó…",
+    "commentPlaceholder": "Añadir un comentario…",
+    "answerA11y": "Texto de la respuesta",
+    "commentA11y": "Texto del comentario",
+    "adoptedTitle": "Adoptado 🌱",
+    "adoptedBody": "«{{habit}}» ahora es un hábito diario tuyo. Encuéntralo en tu Hoy.",
+    "adoptedBodyProject": "«{{habit}}» ahora es un hábito diario tuyo, impulsando {{project}}. Encuéntralo en tu Hoy."
   }
 }

@@ -11,6 +11,8 @@
     "back": "Atrás",
     "next": "Siguiente",
     "skip": "Omitir",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "send": "Enviar",
+    "comment": "Comentar"
   }
 }

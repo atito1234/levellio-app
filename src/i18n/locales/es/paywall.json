@@ -3,5 +3,16 @@
   "heading": "Premium llegará pronto",
   "freeCardTitle": "Tu plan: Gratis",
   "comingSoonTitle": "Premium — próximamente",
-  "closeLabel": "Cerrar"
+  "closeLabel": "Cerrar",
+  "comingSoonBadge": "PRÓXIMAMENTE",
+  "freeTagline": "Todo en la beta — gratis.",
+  "freeFeatures": [
+    "Crea tus propias misiones",
+    "Biblioteca completa de hábitos iniciales",
+    "Rachas y niveles",
+    "Sugerencias de IA en el dispositivo (privadas, sin clave)",
+    "IA en la nube con tu propia clave (tu clave, nunca la nuestra)"
+  ],
+  "disclosure": "Levellio es totalmente gratis durante la beta. No hay ningún pago, y el seguimiento básico de hábitos siempre será gratis. Pueden llegar extras opcionales en una futura actualización — y nunca te cobraremos sin preguntarte primero.",
+  "betaNotice": "Eres un miembro beta temprano 💜 Premium aún no está disponible — no hay nada que comprar, y aquí nunca se iniciará ningún pago. Disfruta de todo gratis mientras lo construimos."
 }

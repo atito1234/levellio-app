@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HeroAvatar, PostCard, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -26,6 +27,7 @@ const TRACK = '#ECEAE4';
 /** A post + its comment thread. For "ask" posts, peers can attach a habit the asker adopts in one tap. */
 export function PostDetailScreen({ route, navigation }: Props) {
   const { postId } = route.params;
+  const { t } = useTranslation(['feed', 'common']);
   const { subscribeFeed, subscribeComments, addComment } = useCommunity();
   const { quests, addQuest } = useGame();
   const { linkHabit } = useProjects();
@@ -73,28 +75,39 @@ export function PostDetailScreen({ route, navigation }: Props) {
     if (post?.projectId) await linkHabit(id, post.projectId);
     const todayK = dayKey(new Date());
     if (!(getPlan(todayK) ?? []).includes(id)) await togglePlanned(todayK, id);
-    Alert.alert('Adopted 🌱', `“${s.title}” is now a daily habit of yours${post?.projectTitle ? `, powering ${post.projectTitle}` : ''}. Find it on your Today.`);
+    Alert.alert(
+      t('feed:detail.adoptedTitle'),
+      post?.projectTitle
+        ? t('feed:detail.adoptedBodyProject', { habit: s.title, project: post.projectTitle })
+        : t('feed:detail.adoptedBody', { habit: s.title }),
+    );
   };
 
   return (
     <ScreenContainer backgroundColor={BG}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.topbar}>
-          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('common:action.back')} hitSlop={12}>
             <Text style={styles.chevron}>‹</Text>
           </Pressable>
-          <Text style={styles.title}>{isAsk ? 'Ask' : 'Post'}</Text>
+          <Text style={styles.title}>{isAsk ? t('feed:detail.titleAsk') : t('feed:detail.titlePost')}</Text>
           <View style={{ width: 28 }} />
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-          {post ? <PostCard post={post} onOpen={() => undefined} /> : <Text style={styles.loading}>Loading…</Text>}
+          {post ? <PostCard post={post} onOpen={() => undefined} /> : <Text style={styles.loading}>{t('feed:detail.loading')}</Text>}
 
           <Text style={styles.sectionLabel}>
-            {isAsk ? (comments.length > 0 ? `${comments.length} ${comments.length === 1 ? 'ANSWER' : 'ANSWERS'}` : 'ANSWERS') : comments.length > 0 ? `${comments.length} ${comments.length === 1 ? 'COMMENT' : 'COMMENTS'}` : 'COMMENTS'}
+            {isAsk
+              ? comments.length > 0
+                ? t(comments.length === 1 ? 'feed:detail.answers_one' : 'feed:detail.answers_other', { count: comments.length })
+                : t('feed:detail.answersEmpty')
+              : comments.length > 0
+                ? t(comments.length === 1 ? 'feed:detail.comments_one' : 'feed:detail.comments_other', { count: comments.length })
+                : t('feed:detail.commentsEmpty')}
           </Text>
           {comments.length === 0 ? (
-            <Text style={styles.empty}>{isAsk ? 'No answers yet. Be the first to share what worked.' : 'Be the first to comment.'}</Text>
+            <Text style={styles.empty}>{isAsk ? t('feed:detail.emptyAsk') : t('feed:detail.emptyPost')}</Text>
           ) : (
             comments.map((c) => (
               <View key={c.id} style={styles.comment}>
@@ -106,11 +119,11 @@ export function PostDetailScreen({ route, navigation }: Props) {
                     <Pressable
                       onPress={() => void adoptSuggestion(c.suggestedHabit!)}
                       accessibilityRole="button"
-                      accessibilityLabel={`Adopt the habit ${c.suggestedHabit.title}`}
+                      accessibilityLabel={t('feed:detail.adoptA11y', { habit: c.suggestedHabit.title })}
                       style={styles.adoptSuggestion}
                     >
                       <Text style={styles.adoptSuggestionText}>
-                        ➕ Adopt: {CATEGORY_META[c.suggestedHabit.category].icon} {c.suggestedHabit.title}
+                        {t('feed:detail.adopt', { icon: CATEGORY_META[c.suggestedHabit.category].icon, habit: c.suggestedHabit.title })}
                       </Text>
                     </Pressable>
                   )}
@@ -126,11 +139,11 @@ export function PostDetailScreen({ route, navigation }: Props) {
             <TextInput
               value={hTitle}
               onChangeText={setHTitle}
-              placeholder="Habit that worked (e.g. Cover water containers daily)"
+              placeholder={t('feed:detail.attachPlaceholder')}
               placeholderTextColor={MUTED}
               style={styles.attachInput}
               maxLength={60}
-              accessibilityLabel="Suggested habit title"
+              accessibilityLabel={t('feed:detail.attachA11y')}
             />
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.attachChips}>
               {CATEGORY_ORDER.map((cat) => {
@@ -147,21 +160,21 @@ export function PostDetailScreen({ route, navigation }: Props) {
 
         <View style={styles.inputRow}>
           {isAsk && (
-            <Pressable onPress={() => setAttachOpen((v) => !v)} accessibilityRole="button" accessibilityLabel="Attach a habit to your answer" style={styles.attachToggle} hitSlop={6}>
+            <Pressable onPress={() => setAttachOpen((v) => !v)} accessibilityRole="button" accessibilityLabel={t('feed:detail.attachToggleA11y')} style={styles.attachToggle} hitSlop={6}>
               <Text style={[styles.attachToggleText, attachOpen && { color: TEAL }]}>＋🌱</Text>
             </Pressable>
           )}
           <TextInput
             value={text}
             onChangeText={setText}
-            placeholder={isAsk ? 'Share what worked for you…' : 'Add a comment…'}
+            placeholder={isAsk ? t('feed:detail.answerPlaceholder') : t('feed:detail.commentPlaceholder')}
             placeholderTextColor={MUTED}
             style={styles.input}
             multiline
-            accessibilityLabel={isAsk ? 'Answer text' : 'Comment text'}
+            accessibilityLabel={isAsk ? t('feed:detail.answerA11y') : t('feed:detail.commentA11y')}
           />
-          <Pressable onPress={() => void send()} disabled={!isValidCommentText(text) || sending} accessibilityRole="button" accessibilityLabel="Send" style={styles.send}>
-            <Text style={[styles.sendText, (!isValidCommentText(text) || sending) && styles.sendOff]}>Send</Text>
+          <Pressable onPress={() => void send()} disabled={!isValidCommentText(text) || sending} accessibilityRole="button" accessibilityLabel={t('common:action.send')} style={styles.send}>
+            <Text style={[styles.sendText, (!isValidCommentText(text) || sending) && styles.sendOff]}>{t('common:action.send')}</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>

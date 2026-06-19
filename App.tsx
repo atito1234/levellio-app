@@ -12,6 +12,7 @@ import { AuthProvider } from '@/state/AuthContext';
 import { ProjectsProvider } from '@/state/ProjectsContext';
 import { CommunityProvider } from '@/state/CommunityContext';
 import { SettingsProvider } from '@/state/SettingsContext';
+import { SubscriptionProvider } from '@/state/SubscriptionContext';
 import { BucketsProvider } from '@/state/BucketsContext';
 import { CapacitiesProvider } from '@/state/CapacitiesContext';
 import { PlanProvider } from '@/state/PlanContext';
@@ -29,6 +30,7 @@ export default function App() {
       <StatusBar style="dark" />
       <SettingsProvider>
         <AuthProvider>
+        <SubscriptionProvider>
         <GameProvider>
           <BucketsProvider>
             <CapacitiesProvider>
@@ -54,6 +56,7 @@ export default function App() {
             </CapacitiesProvider>
           </BucketsProvider>
         </GameProvider>
+        </SubscriptionProvider>
         </AuthProvider>
       </SettingsProvider>
     </SafeAreaProvider>

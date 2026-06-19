@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HeroAvatar, PostCard, ScreenContainer } from '@/components';
@@ -23,6 +24,7 @@ type ScopeKey = 'all' | 'network';
 /** The community newsfeed — composer up top, scope tabs, realtime post list. */
 export function NewsfeedScreen() {
   const navigation = useNavigation<Nav>();
+  const { t } = useTranslation(['feed', 'common']);
   const allowed = useCommunityAccess();
   const { signedIn, subscribeFeed } = useCommunity();
   const { character } = useGame();
@@ -39,13 +41,13 @@ export function NewsfeedScreen() {
   const header = useMemo(
     () => (
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Community</Text>
-        <Pressable onPress={() => navigation.navigate('People')} accessibilityRole="button" accessibilityLabel="People in your network" style={styles.peopleBtn}>
-          <Text style={styles.peopleText}>👥 People</Text>
+        <Text style={styles.title}>{t('feed:newsfeed.title')}</Text>
+        <Pressable onPress={() => navigation.navigate('People')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.peopleA11y')} style={styles.peopleBtn}>
+          <Text style={styles.peopleText}>{t('feed:newsfeed.people')}</Text>
         </Pressable>
       </View>
     ),
-    [navigation],
+    [navigation, t],
   );
 
   if (!allowed) {
@@ -54,10 +56,10 @@ export function NewsfeedScreen() {
         {header}
         <View style={styles.center}>
           <Text style={styles.lockEmoji}>✨</Text>
-          <Text style={styles.lockTitle}>Community is a membership feature</Text>
-          <Text style={styles.lockBody}>Share your progress, cheer each other on, and grow your network with people working toward the same goals.</Text>
+          <Text style={styles.lockTitle}>{t('feed:newsfeed.gateMemberTitle')}</Text>
+          <Text style={styles.lockBody}>{t('feed:newsfeed.gateMemberBody')}</Text>
           <Pressable onPress={() => navigation.navigate('Paywall')} accessibilityRole="button" style={styles.cta}>
-            <Text style={styles.ctaText}>See membership</Text>
+            <Text style={styles.ctaText}>{t('feed:newsfeed.gateMemberCta')}</Text>
           </Pressable>
         </View>
       </ScreenContainer>
@@ -70,10 +72,10 @@ export function NewsfeedScreen() {
         {header}
         <View style={styles.center}>
           <Text style={styles.lockEmoji}>🤝</Text>
-          <Text style={styles.lockTitle}>Join the community</Text>
-          <Text style={styles.lockBody}>Sign in to share updates, react, and follow people on the same journey.</Text>
+          <Text style={styles.lockTitle}>{t('feed:newsfeed.gateSignInTitle')}</Text>
+          <Text style={styles.lockBody}>{t('feed:newsfeed.gateSignInBody')}</Text>
           <Pressable onPress={() => navigation.navigate('SignIn')} accessibilityRole="button" style={styles.cta}>
-            <Text style={styles.ctaText}>Sign in</Text>
+            <Text style={styles.ctaText}>{t('feed:newsfeed.gateSignInCta')}</Text>
           </Pressable>
         </View>
       </ScreenContainer>
@@ -86,9 +88,9 @@ export function NewsfeedScreen() {
         {header}
 
         {/* Facebook-style composer — one tap to share. */}
-        <Pressable onPress={() => navigation.navigate('PostComposer')} accessibilityRole="button" accessibilityLabel="Share an update" style={styles.composer}>
+        <Pressable onPress={() => navigation.navigate('PostComposer')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.composerA11y')} style={styles.composer}>
           <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={40} />
-          <Text style={styles.composerHint}>Share an update with your community…</Text>
+          <Text style={styles.composerHint}>{t('feed:newsfeed.composerHint')}</Text>
           <Text style={styles.composerIcon}>✏️</Text>
         </Pressable>
 
@@ -98,7 +100,7 @@ export function NewsfeedScreen() {
             const on = scope === s;
             return (
               <Pressable key={s} onPress={() => setScope(s)} accessibilityRole="tab" accessibilityState={{ selected: on }} style={[styles.tab, on && styles.tabOn]}>
-                <Text style={[styles.tabText, on && styles.tabTextOn]}>{s === 'all' ? 'For you' : 'Your network'}</Text>
+                <Text style={[styles.tabText, on && styles.tabTextOn]}>{t(s === 'all' ? 'feed:scope.all' : 'feed:scope.network')}</Text>
               </Pressable>
             );
           })}
@@ -107,8 +109,8 @@ export function NewsfeedScreen() {
         {posts.length === 0 ? (
           <Text style={styles.empty}>
             {scope === 'network'
-              ? 'Follow people to see their updates here. Tap 👥 People to find them.'
-              : 'No posts yet. Be the first to share an update!'}
+              ? t('feed:newsfeed.emptyNetwork')
+              : t('feed:newsfeed.emptyAll')}
           </Text>
         ) : (
           <View style={styles.list}>
