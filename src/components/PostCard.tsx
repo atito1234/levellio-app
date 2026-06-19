@@ -1,10 +1,13 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HeroAvatar } from '@/components/HeroAvatar';
 import { FollowButton } from '@/components/FollowButton';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
+import type { RootStackParamList } from '@/navigation/types';
 import { getBucketColor } from '@/lib/buckets';
 import {
   REACTIONS,
@@ -29,7 +32,9 @@ const TRACK = '#ECEAE4';
  */
 export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string) => void }) {
   const { t } = useTranslation(['feed', 'common']);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { uid, setReaction } = useCommunity();
+  const openProfile = () => navigation.navigate('Profile', { uid: post.authorUid });
   const mine = uid ? myReaction(post.reactions, uid) : null;
   const total = reactionTotal(post.reactions);
   const tops = topReactions(post.reactions);
@@ -43,14 +48,16 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
   return (
     <View style={styles.card}>
       <View style={styles.head}>
-        <HeroAvatar presentation={post.presentation ?? 'neutral'} tier="novice" size={40} />
-        <View style={styles.headText}>
-          <Text style={styles.name} numberOfLines={1}>{post.displayName}</Text>
-          <Text style={styles.meta} numberOfLines={1}>
-            {timeAgo(post.createdAt)}
-            {post.projectTitle ? ` · ${post.projectTitle}` : ''}
-          </Text>
-        </View>
+        <Pressable onPress={openProfile} accessibilityRole="button" accessibilityLabel={t('feed:post.openProfileA11y', { name: post.displayName })} style={styles.headTap}>
+          <HeroAvatar presentation={post.presentation ?? 'neutral'} tier="novice" size={40} />
+          <View style={styles.headText}>
+            <Text style={styles.name} numberOfLines={1}>{post.displayName}</Text>
+            <Text style={styles.meta} numberOfLines={1}>
+              {timeAgo(post.createdAt)}
+              {post.projectTitle ? ` · ${post.projectTitle}` : ''}
+            </Text>
+          </View>
+        </Pressable>
         {post.authorUid !== uid && <FollowButton targetUid={post.authorUid} />}
       </View>
 
@@ -114,6 +121,7 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
 const styles = StyleSheet.create({
   card: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.sm, shadowColor: '#1B1B2A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 2 },
   head: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  headTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   headText: { flex: 1 },
   name: { ...typography.label, color: INK, fontWeight: '800' },
   meta: { ...typography.caption, color: MUTED },

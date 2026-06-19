@@ -27,6 +27,13 @@ service cloud.firestore {
       }
     }
 
+    // Public profile snapshots — a small, public-safe projection any signed-in
+    // user can read (so people can learn from each other); owner-writable only.
+    match /profiles/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
     // Community newsfeed posts (manual shares + contribution posts).
     match /posts/{postId} {
       // Visible to any signed-in member of the community.

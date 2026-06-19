@@ -1,0 +1,30 @@
+{
+  "title": "Profil",
+  "loading": "Chargement du profil…",
+  "notFound": "Ce profil n'est pas encore disponible.",
+  "edit": "Modifier le profil",
+  "editHeadline": "Titre",
+  "editCountry": "Lieu",
+  "headlinePlaceholder": "Ajoutez un titre (ex. Construire de meilleures matinées)",
+  "countryPlaceholder": "Ajoutez votre lieu",
+  "stats": {
+    "level": "Niveau",
+    "streak": "Jours de suite",
+    "xp": "XP à vie",
+    "projects": "Projets"
+  },
+  "tier": {
+    "novice": "Novice",
+    "pathfinder": "Éclaireur",
+    "luminary": "Luminaire"
+  },
+  "sections": {
+    "milestones": "Jalons récents",
+    "projects": "Projets",
+    "posts": "Publications récentes"
+  },
+  "empty": {
+    "milestones": "Pas encore de jalons.",
+    "posts": "Pas encore de publications."
+  }
+}

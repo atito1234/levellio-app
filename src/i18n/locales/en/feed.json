@@ -23,6 +23,7 @@
     "onsiteSuffix": " · 📍 on-site",
     "ask": "❓ Asking peers for help",
     "openA11y": "Open post by {{name}}",
+    "openProfileA11y": "View {{name}}'s profile",
     "reactA11y": "React {{emoji}}",
     "comments_one": "{{count}} comment",
     "comments_other": "{{count}} comments",

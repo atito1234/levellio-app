@@ -23,6 +23,7 @@
     "onsiteSuffix": " · 📍 en el lugar",
     "ask": "❓ Pidiendo ayuda a otros",
     "openA11y": "Abrir la publicación de {{name}}",
+    "openProfileA11y": "Ver el perfil de {{name}}",
     "reactA11y": "Reaccionar {{emoji}}",
     "comments_one": "{{count}} comentario",
     "comments_other": "{{count}} comentarios",

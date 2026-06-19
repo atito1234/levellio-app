@@ -92,6 +92,12 @@ export type RootStackParamList = {
   PostDetail: { postId: string };
   /** Discover & manage the people in your network. */
   People: undefined;
+  /** A user's public profile (habits, streaks, milestones, posts). */
+  Profile: { uid: string };
+  /** The in-app notification center (reactions, comments, follows). */
+  Notifications: undefined;
+  /** Search & discover people, habits, and projects. */
+  Discover: undefined;
 };
 
 declare global {

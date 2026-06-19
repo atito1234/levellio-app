@@ -40,6 +40,10 @@ export interface AppSettings {
   projectPrepLinkMode: PrepLinkMode;
   /** App language: an explicit locale, or 'system' to follow the device. */
   locale: LocaleSetting;
+  /** Optional public profile headline (LinkedIn-style one-liner). */
+  profileHeadline?: string;
+  /** Optional public profile location/country. */
+  profileCountry?: string;
 }
 
 /** Privacy-first, free-by-default settings. */
@@ -79,6 +83,8 @@ export function normalizeSettings(raw: unknown): AppSettings {
     worldProjectAlerts: r.worldProjectAlerts === true,
     projectPrepLinkMode: r.projectPrepLinkMode === 'full' ? 'full' : 'visual',
     locale: r.locale === 'system' || isSupportedLocale(r.locale) ? r.locale : 'system',
+    ...(typeof r.profileHeadline === 'string' ? { profileHeadline: r.profileHeadline } : {}),
+    ...(typeof r.profileCountry === 'string' ? { profileCountry: r.profileCountry } : {}),
   };
 }
 

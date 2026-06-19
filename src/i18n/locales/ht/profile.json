@@ -1,0 +1,30 @@
+{
+  "title": "Pwofil",
+  "loading": "Ap chaje pwofil…",
+  "notFound": "Pwofil sa a poko disponib.",
+  "edit": "Modifye pwofil",
+  "editHeadline": "Tit",
+  "editCountry": "Kote",
+  "headlinePlaceholder": "Ajoute yon tit (egz. Bati pi bon maten)",
+  "countryPlaceholder": "Ajoute kote ou ye",
+  "stats": {
+    "level": "Nivo",
+    "streak": "Jou youn dèyè lòt",
+    "xp": "XP total",
+    "projects": "Pwojè"
+  },
+  "tier": {
+    "novice": "Novis",
+    "pathfinder": "Eksploratè",
+    "luminary": "Limyè"
+  },
+  "sections": {
+    "milestones": "Etap resan",
+    "projects": "Pwojè",
+    "posts": "Piblikasyon resan"
+  },
+  "empty": {
+    "milestones": "Poko gen etap.",
+    "posts": "Poko gen piblikasyon."
+  }
+}

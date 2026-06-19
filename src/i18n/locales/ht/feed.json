@@ -23,6 +23,7 @@
     "onsiteSuffix": " · 📍 sou plas",
     "ask": "❓ Ap mande èd nan men lòt moun",
     "openA11y": "Louvri piblikasyon {{name}}",
+    "openProfileA11y": "Wè pwofil {{name}}",
     "reactA11y": "Reyaji {{emoji}}",
     "comments_one": "{{count}} kòmantè",
     "comments_other": "{{count}} kòmantè",
