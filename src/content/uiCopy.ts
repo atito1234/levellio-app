@@ -3,9 +3,10 @@
  * Settings banners/notes). Centralized here so a single unit test can guarantee
  * we never show a phrase that claims a feature we don't actually ship in v1.0.
  *
- * Rule: keep BYO-key / on-device AI messaging (true). Never claim cloud sync,
- * accounts/sign-in, managed (no-key) cloud AI, workouts, health integrations,
- * or social features.
+ * Rule: keep BYO-key / on-device AI messaging (true). Never claim generic cloud
+ * sync of solo data, managed (no-key) cloud AI, workouts/health integrations, or
+ * leaderboards. (Optional accounts + Community Projects ARE live now, so account
+ * and community wording is allowed and disclosed honestly.)
  */
 
 /** Phrases that must never appear in any user-facing copy in v1.0. */
@@ -15,13 +16,7 @@ export const FORBIDDEN_USER_FACING: readonly string[] = [
   'managed cloud',
   'managed ai',
   'no-key cloud',
-  'cloud account',
-  'create an account',
-  'sign in',
-  'sign up',
   'leaderboard',
-  'add friends',
-  'social network',
   'health connect',
   'apple health',
   'google fit',

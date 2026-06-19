@@ -28,7 +28,7 @@ describe('app identity', () => {
     expect(PRINCIPAL).toContain('Antonio Joel Tito');
     expect(CONTACT_EMAIL).toMatch(/^[^@\s]+@[^@\s]+\.[^@\s]+$/);
     expect(GOVERNING_LAW).toMatch(/Texas/);
-    expect(EFFECTIVE_DATE).toBe('June 10, 2026');
+    expect(EFFECTIVE_DATE).toBe('June 19, 2026');
   });
 
   it('renders a version label with the beta channel', () => {

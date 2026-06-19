@@ -30,10 +30,13 @@ You never need an AI key to get value:
 • Optional quest suggestions can run privately, on your device.
 
 PRIVATE BY DESIGN
-Levellio is local-first. Your habits and progress live on your device — not on our servers, because we don't operate one that collects your data.
+Levellio is local-first. Your solo habits and progress live on your device by default.
 • On-device suggestions make no network calls.
 • Prefer a cloud AI model? Bring your own API key. It is stored only in your device's secure keychain and used only to reach the provider you choose.
 • No ads. No third-party analytics or tracking SDKs.
+
+OPTIONAL: BUILD TOGETHER
+Want company on the journey? Create a free account to join Community Projects — team up on shared, real-world goals, cheer each other on, and track progress together. It's always optional: the solo app works fully without an account, and you can delete your account and its data anytime.
 
 FREE DURING THE BETA
 Levellio is completely free during the open beta — no ads, and none of the core habit-tracking features are behind a paywall. We may add optional extras in a future update, but we'll never charge you without asking first.

@@ -30,10 +30,20 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.levellio.placeholder"
+      "bundleIdentifier": "app.levellio",
+      "buildNumber": "1",
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          }
+        ]
+      }
     },
     "android": {
-      "package": "app.levellio.placeholder",
+      "package": "app.levellio",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon-foreground.png",
         "backgroundImage": "./assets/adaptive-icon-background.png",
