@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ActivityTile, AddActivitySheet, MonthCalendar, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
+import { ActivityTile, AddActivitySheet, MiniScheduler, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
@@ -55,6 +55,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [joinShare, setJoinShare] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
+  const [addDates, setAddDates] = useState<string[] | null>(null);
 
   useEffect(() => {
     const unsub = subscribe(projectId, (s) => {
@@ -252,7 +253,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         {/* Big, fun activity tiles: add your own, or ask peers who've solved it. */}
         {joined && (
           <View style={styles.tileRow}>
-            <ActivityTile icon="✨" label="New activity" sub="Add your own daily habit" onPress={() => setAddOpen(true)} tint={c.accent} />
+            <ActivityTile icon="✨" label="New activity" sub="Add your own daily habit" onPress={() => { setAddDates(null); setAddOpen(true); }} tint={c.accent} />
             <ActivityTile icon="🌍" label="Ask peers" sub="Get a habit that worked for them" onPress={() => navigation.navigate('PostComposer', { projectId, kind: 'ask' })} tint={VIOLET} />
           </View>
         )}
@@ -303,8 +304,18 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
 
             {myQuests.length > 0 && (
               <>
-                <Text style={styles.sectionLabel}>YOUR CALENDAR</Text>
-                <MonthCalendar quests={myQuests} getPlan={getPlan} doneByDay={doneByDay} todayKey={todayK} />
+                <Text style={styles.sectionLabel}>YOUR CALENDAR · SCHEDULE ANY DAY</Text>
+                <MiniScheduler
+                  quests={myQuests}
+                  getPlan={getPlan}
+                  togglePlanned={togglePlanned}
+                  doneByDay={doneByDay}
+                  accent={c.accent}
+                  onAddForDay={(day) => {
+                    setAddDates([day]);
+                    setAddOpen(true);
+                  }}
+                />
               </>
             )}
           </>
@@ -389,8 +400,16 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         )}
       </ScrollView>
 
-      {/* Add your own activity, pre-linked to this project as a daily habit. */}
-      <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultProjectIds={[projectId]} />
+      {/* Add your own activity, pre-linked to this project (daily, or a specific day from the calendar). */}
+      <AddActivitySheet
+        visible={addOpen}
+        onClose={() => {
+          setAddOpen(false);
+          setAddDates(null);
+        }}
+        defaultProjectIds={[projectId]}
+        defaultDates={addDates}
+      />
     </ScreenContainer>
   );
 }

@@ -19,6 +19,7 @@ export { ProjectsStrip, WorldProjectsStrip } from './ProjectsStrip';
 export { ProjectBadge } from './ProjectBadge';
 export { OwnedActivityCard, SuggestedActivityCard, ActivityTile } from './ActivityCard';
 export { MonthCalendar } from './MonthCalendar';
+export { MiniScheduler } from './MiniScheduler';
 export { ContributionModeSheet } from './ContributionModeSheet';
 export { FollowButton } from './FollowButton';
 export { PostCard } from './PostCard';

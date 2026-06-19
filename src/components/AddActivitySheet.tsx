@@ -91,13 +91,18 @@ export function AddActivitySheet({
       // Opened from a chosen calendar day → start in date mode on that day.
       // Opened from a project → start as a daily habit so it powers it every day.
       const dates = defaultDates ?? [];
-      if (projects.length > 0) {
+      if (dates.length > 0) {
+        // A specific day was chosen (e.g. from a calendar) → schedule just that day.
+        setWhenMode('date');
+        setPickedDates([...dates]);
+        setWeekdays([]);
+      } else if (projects.length > 0) {
         setWhenMode('weekly');
         setWeekdays([...ALL_DAYS]);
         setPickedDates([]);
       } else {
-        setWhenMode(dates.length > 0 ? 'date' : 'today');
-        setPickedDates([...dates]);
+        setWhenMode('today');
+        setPickedDates([]);
         setWeekdays([]);
       }
       setTimeOn(false);
@@ -147,7 +152,8 @@ export function AddActivitySheet({
       category,
       difficulty: 'easy',
       ...(timeOn ? { scheduledTime: timeMinutes } : {}),
-      ...(whenMode === 'weekly' ? { scheduledDays: weekdays } : projectScoped ? { scheduledDays: ALL_DAYS } : {}),
+      // Daily recurrence for project-scoped adds — unless a specific day was picked.
+      ...(whenMode === 'weekly' ? { scheduledDays: weekdays } : projectScoped && whenMode !== 'date' ? { scheduledDays: ALL_DAYS } : {}),
     };
     const quest = await addQuest(draft);
     if (quest) {
@@ -160,10 +166,10 @@ export function AddActivitySheet({
       }
       // Power any community projects chosen — completions will now contribute.
       for (const pid of projectIds) await linkHabit(quest.id, pid);
-      if (projectScoped || whenMode === 'today') {
-        await togglePlanned(todayK, quest.id);
-      } else if (whenMode === 'date') {
+      if (whenMode === 'date') {
         for (const d of pickedDates) await togglePlanned(d, quest.id);
+      } else if (projectScoped || whenMode === 'today') {
+        await togglePlanned(todayK, quest.id);
       } else if (whenMode === 'weekly' && weekdays.includes(weekdayOfKey(todayK))) {
         // Show it today too if today is one of the repeat days.
         await togglePlanned(todayK, quest.id);

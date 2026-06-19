@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ActivityTile, AddActivityFab, AddActivitySheet, MonthCalendar, ScreenContainer } from '@/components';
+import { ActivityTile, AddActivityFab, AddActivitySheet, MiniScheduler, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
@@ -57,7 +57,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
   const { events } = useActivityLog();
   const { goals, membershipFor, setSupportingGoals } = useGoals();
   const { projectActivityIds } = useProjects();
-  const { getPlan } = usePlan();
+  const { getPlan, togglePlanned } = usePlan();
   const progress = useGoalProgress(goal, projectActivityIds);
 
   const accent = goalColor(goal).accent;
@@ -95,6 +95,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
   }, [habits]);
 
   const [addOpen, setAddOpen] = useState(false);
+  const [addDates, setAddDates] = useState<string[] | null>(null);
 
   const deleteActivity = (quest: Quest) =>
     Alert.alert('Remove activity?', `Remove “${quest.title}” from your activities?`, [
@@ -178,7 +179,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
             icon="✨"
             label="New activity"
             sub={goal.kind === 'project' ? 'A daily habit for this project' : 'Add a habit to this goal'}
-            onPress={() => setAddOpen(true)}
+            onPress={() => { setAddDates(null); setAddOpen(true); }}
             tint={accent}
           />
           {goal.kind === 'project' && goal.projectId ? (
@@ -262,9 +263,19 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
 
         {habits.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>YOUR CALENDAR</Text>
-            <MonthCalendar quests={habits} getPlan={getPlan} doneByDay={doneByDay} todayKey={todayK} />
-            <Text style={styles.calHint}>Days you completed these activities. ✓ means all done that day.</Text>
+            <Text style={styles.sectionLabel}>YOUR CALENDAR · SCHEDULE ANY DAY</Text>
+            <MiniScheduler
+              quests={habits}
+              getPlan={getPlan}
+              togglePlanned={togglePlanned}
+              doneByDay={doneByDay}
+              accent={accent}
+              onAddForDay={(day) => {
+                setAddDates([day]);
+                setAddOpen(true);
+              }}
+            />
+            <Text style={styles.calHint}>Tap a day to schedule these activities; ✓ marks days you completed them.</Text>
           </View>
         )}
 
@@ -273,10 +284,11 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         </Pressable>
       </ScrollView>
 
-      <AddActivityFab onPress={() => setAddOpen(true)} accent={accent} highlight={habits.length === 0} />
+      <AddActivityFab onPress={() => { setAddDates(null); setAddOpen(true); }} accent={accent} highlight={habits.length === 0} />
       <AddActivitySheet
         visible={addOpen}
-        onClose={() => setAddOpen(false)}
+        onClose={() => { setAddOpen(false); setAddDates(null); }}
+        defaultDates={addDates}
         {...(goal.kind === 'project' && goal.projectId ? { defaultProjectIds: [goal.projectId] } : { defaultGoalId: goal.id })}
       />
     </ScreenContainer>
