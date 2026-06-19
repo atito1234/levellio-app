@@ -1,0 +1,18 @@
+{
+  "action": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "post": "Publier",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "retry": "Réessayer",
+    "done": "Terminé",
+    "back": "Retour",
+    "next": "Suivant",
+    "skip": "Passer",
+    "loading": "Chargement…",
+    "send": "Envoyer",
+    "comment": "Commenter"
+  }
+}

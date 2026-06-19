@@ -1,0 +1,18 @@
+{
+  "action": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "post": "Post",
+    "delete": "Delete",
+    "edit": "Edit",
+    "retry": "Retry",
+    "done": "Done",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "loading": "Loading…",
+    "send": "Send",
+    "comment": "Comment"
+  }
+}

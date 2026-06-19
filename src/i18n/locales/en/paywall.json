@@ -1,0 +1,18 @@
+{
+  "kicker": "LEVELLIO BETA",
+  "heading": "Premium is coming soon",
+  "freeCardTitle": "Your plan: Free",
+  "comingSoonTitle": "Premium — coming soon",
+  "closeLabel": "Close",
+  "comingSoonBadge": "COMING SOON",
+  "freeTagline": "Everything in the beta — free.",
+  "freeFeatures": [
+    "Create your own quests",
+    "Full starter habit library",
+    "Streaks & leveling",
+    "On-device AI suggestions (private, no key)",
+    "Bring-your-own-key cloud AI (your key, never ours)"
+  ],
+  "disclosure": "Levellio is completely free during the beta. There is no payment, and the core habit tracking will always be free. Optional extras may arrive in a future update — and we will never charge you without asking first.",
+  "betaNotice": "You're an early beta member 💜 Premium isn't available yet — there's nothing to buy, and no payment will ever start here. Enjoy everything for free while we build."
+}

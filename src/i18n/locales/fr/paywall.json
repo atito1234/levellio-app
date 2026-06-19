@@ -1,0 +1,18 @@
+{
+  "kicker": "LEVELLIO BÊTA",
+  "heading": "Premium arrive bientôt",
+  "freeCardTitle": "Votre forfait : Gratuit",
+  "comingSoonTitle": "Premium — bientôt disponible",
+  "closeLabel": "Fermer",
+  "comingSoonBadge": "BIENTÔT DISPONIBLE",
+  "freeTagline": "Tout dans la bêta — gratuit.",
+  "freeFeatures": [
+    "Créez vos propres quêtes",
+    "Bibliothèque complète d'habitudes de départ",
+    "Séries et niveaux",
+    "Suggestions d'IA sur l'appareil (privées, sans clé)",
+    "IA cloud avec votre propre clé (votre clé, jamais la nôtre)"
+  ],
+  "disclosure": "Levellio est entièrement gratuit pendant la bêta. Il n'y a aucun paiement, et le suivi des habitudes de base restera toujours gratuit. Des extras facultatifs pourront arriver dans une future mise à jour — et nous ne vous facturerons jamais sans vous demander d'abord.",
+  "betaNotice": "Vous êtes un membre bêta de la première heure 💜 Premium n'est pas encore disponible — il n'y a rien à acheter, et aucun paiement ne démarrera jamais ici. Profitez de tout gratuitement pendant que nous construisons."
+}

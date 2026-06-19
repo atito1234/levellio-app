@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { HeroAvatar } from '@/components/HeroAvatar';
 import { FollowButton } from '@/components/FollowButton';
 import { spacing, typography } from '@/theme';
@@ -27,6 +28,7 @@ const TRACK = '#ECEAE4';
  * Mirrors the familiar Facebook/LinkedIn card so it's instantly intuitive.
  */
 export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string) => void }) {
+  const { t } = useTranslation(['feed', 'common']);
   const { uid, setReaction } = useCommunity();
   const mine = uid ? myReaction(post.reactions, uid) : null;
   const total = reactionTotal(post.reactions);
@@ -55,18 +57,18 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
       {post.kind === 'contribution' && post.habitTitle ? (
         <View style={[styles.contribBanner, { backgroundColor: getBucketColor(post.projectColorId ?? 'violet').soft }]}>
           <Text style={[styles.contribText, { color: projectColor }]}>
-            ✅ {post.habitTitle} · +{post.value ?? 1}
-            {post.mode === 'onsite' ? ' · 📍 on-site' : ''}
+            {t('feed:post.contribution', { habit: post.habitTitle, value: post.value ?? 1 })}
+            {post.mode === 'onsite' ? t('feed:post.onsiteSuffix') : ''}
           </Text>
         </View>
       ) : post.kind === 'ask' ? (
         <View style={styles.askBanner}>
-          <Text style={styles.askText}>❓ Asking peers for help</Text>
+          <Text style={styles.askText}>{t('feed:post.ask')}</Text>
         </View>
       ) : null}
 
       {post.text.length > 0 && (
-        <Pressable onPress={() => onOpen(post.id)} accessibilityRole="button" accessibilityLabel={`Open post by ${post.displayName}`}>
+        <Pressable onPress={() => onOpen(post.id)} accessibilityRole="button" accessibilityLabel={t('feed:post.openA11y', { name: post.displayName })}>
           <Text style={styles.body}>{post.text}</Text>
         </Pressable>
       )}
@@ -76,7 +78,7 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
           <Text style={styles.tallyText}>{total > 0 ? `${tops.join('')} ${total}` : ''}</Text>
           {post.commentCount > 0 && (
             <Pressable onPress={() => onOpen(post.id)} accessibilityRole="button">
-              <Text style={styles.tallyText}>{post.commentCount} {post.commentCount === 1 ? 'comment' : 'comments'}</Text>
+              <Text style={styles.tallyText}>{t(post.commentCount === 1 ? 'feed:post.comments_one' : 'feed:post.comments_other', { count: post.commentCount })}</Text>
             </Pressable>
           )}
         </View>
@@ -92,7 +94,7 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
                 onPress={() => react(emoji)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
-                accessibilityLabel={`React ${emoji}`}
+                accessibilityLabel={t('feed:post.reactA11y', { emoji })}
                 style={[styles.reactBtn, on && styles.reactBtnOn]}
                 hitSlop={6}
               >
@@ -101,8 +103,8 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
             );
           })}
         </View>
-        <Pressable onPress={() => onOpen(post.id)} accessibilityRole="button" accessibilityLabel="Comment" style={styles.commentBtn}>
-          <Text style={styles.commentText}>💬 Comment</Text>
+        <Pressable onPress={() => onOpen(post.id)} accessibilityRole="button" accessibilityLabel={t('common:action.comment')} style={styles.commentBtn}>
+          <Text style={styles.commentText}>{t('feed:post.commentBtn')}</Text>
         </Pressable>
       </View>
     </View>

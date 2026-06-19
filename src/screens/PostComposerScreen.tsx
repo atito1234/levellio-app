@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -22,6 +23,7 @@ const TRACK = '#ECEAE4';
 
 /** Compose a community post — optionally scoped to one of your projects. */
 export function PostComposerScreen({ route, navigation }: Props) {
+  const { t } = useTranslation(['feed', 'common']);
   const { createPost } = useCommunity();
   const { myProjects } = useProjects();
   const isAsk = route.params?.kind === 'ask';
@@ -31,7 +33,11 @@ export function PostComposerScreen({ route, navigation }: Props) {
   const winMode = route.params?.mode;
   const winProject = myProjects.find((p) => p.id === route.params?.projectId);
   const [text, setText] = useState(
-    isWin && winHabit ? `🎉 Just did ${winHabit}${winProject ? ` — +${winValue ?? 1} for ${winProject.title}` : ''}!` : '',
+    isWin && winHabit
+      ? winProject
+        ? t('feed:composerScreen.winPrefillProject', { habit: winHabit, value: winValue ?? 1, project: winProject.title })
+        : t('feed:composerScreen.winPrefill', { habit: winHabit })
+      : '',
   );
   const [projectId, setProjectId] = useState<string | null>(route.params?.projectId ?? null);
   const [categoryHint, setCategoryHint] = useState<QuestCategory | null>(route.params?.categoryHint ?? null);
@@ -54,15 +60,23 @@ export function PostComposerScreen({ route, navigation }: Props) {
     else setPosting(false);
   };
 
-  const headerTitle = isAsk ? 'Ask peers' : isWin ? 'Share your win' : 'New post';
-  const ctaLabel = isAsk ? 'Ask' : isWin ? 'Share' : 'Post';
+  const headerTitle = isAsk
+    ? t('feed:composerScreen.titleAsk')
+    : isWin
+      ? t('feed:composerScreen.titleWin')
+      : t('feed:composerScreen.titleNew');
+  const ctaLabel = isAsk
+    ? t('feed:composerScreen.ctaAsk')
+    : isWin
+      ? t('feed:composerScreen.ctaWin')
+      : t('common:action.post');
 
   return (
     <ScreenContainer backgroundColor={BG}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.topbar}>
-          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Cancel" hitSlop={12}>
-            <Text style={styles.cancel}>Cancel</Text>
+          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('common:action.cancel')} hitSlop={12}>
+            <Text style={styles.cancel}>{t('common:action.cancel')}</Text>
           </Pressable>
           <Text style={styles.title}>{headerTitle}</Text>
           <Pressable onPress={() => void submit()} disabled={!canPost} accessibilityRole="button" accessibilityLabel={ctaLabel} hitSlop={12}>
@@ -78,32 +92,30 @@ export function PostComposerScreen({ route, navigation }: Props) {
             return (
               <View style={[styles.scopeBanner, { backgroundColor: c.soft }]}>
                 <Text style={[styles.scopeText, { color: c.accent }]} numberOfLines={1}>
-                  {isAsk ? '🌍 Asking in' : '🤝 Posting to'} {sel.emoji} {sel.title}
+                  {isAsk ? t('feed:composerScreen.scopeAsk') : t('feed:composerScreen.scopePost')} {sel.emoji} {sel.title}
                 </Text>
               </View>
             );
           })()}
           {isAsk && (
-            <Text style={styles.askHint}>
-              Describe the habit or problem you're working on. Peers who've solved it can answer — and attach a habit you adopt in one tap.
-            </Text>
+            <Text style={styles.askHint}>{t('feed:composerScreen.askHint')}</Text>
           )}
           <TextInput
             value={text}
             onChangeText={setText}
-            placeholder={isAsk ? 'e.g. How do you keep standing water from coming back after the rains?' : 'Share a win, ask for support, or cheer someone on…'}
+            placeholder={isAsk ? t('feed:composerScreen.placeholderAsk') : t('feed:composerScreen.placeholderPost')}
             placeholderTextColor={MUTED}
             style={styles.input}
             multiline
             autoFocus
             maxLength={MAX_POST_TEXT}
-            accessibilityLabel={isAsk ? 'Your question' : 'Post text'}
+            accessibilityLabel={isAsk ? t('feed:composerScreen.a11yAsk') : t('feed:composerScreen.a11yPost')}
           />
-          <Text style={styles.counter}>{text.length}/{MAX_POST_TEXT}</Text>
+          <Text style={styles.counter}>{t('feed:composerScreen.counter', { current: text.length, max: MAX_POST_TEXT })}</Text>
 
           {isAsk && (
             <>
-              <Text style={styles.label}>What area is this about? (optional)</Text>
+              <Text style={styles.label}>{t('feed:composerScreen.areaLabel')}</Text>
               <View style={styles.chips}>
                 {CATEGORY_ORDER.map((cat) => {
                   const on = categoryHint === cat;
@@ -125,7 +137,7 @@ export function PostComposerScreen({ route, navigation }: Props) {
 
           {myProjects.length > 0 && (
             <>
-              <Text style={styles.label}>{isAsk ? 'Ask in which project?' : 'Share to a project (optional)'}</Text>
+              <Text style={styles.label}>{isAsk ? t('feed:composerScreen.projectLabelAsk') : t('feed:composerScreen.projectLabelPost')}</Text>
               <View style={styles.chips}>
                 {myProjects.map((p) => {
                   const on = projectId === p.id;

@@ -8,6 +8,7 @@ import {
   normalizeMetadataPrivacy,
   type MetadataPrivacy,
 } from '@/lib/metadata';
+import { isSupportedLocale, type LocaleSetting } from '@/i18n/config';
 
 export type AIMode = 'on-device' | 'cloud';
 export type CloudProvider = 'gemini' | 'openai' | 'anthropic';
@@ -37,6 +38,8 @@ export interface AppSettings {
   worldProjectAlerts: boolean;
   /** Whether a "prepare" personal goal merely links visually or shares progress. */
   projectPrepLinkMode: PrepLinkMode;
+  /** App language: an explicit locale, or 'system' to follow the device. */
+  locale: LocaleSetting;
 }
 
 /** Privacy-first, free-by-default settings. */
@@ -52,6 +55,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   worldProjectsEnabled: false,
   worldProjectAlerts: false,
   projectPrepLinkMode: 'visual',
+  locale: 'system',
 };
 
 const SETTINGS_KEY = 'levellio:settings';
@@ -74,6 +78,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
     worldProjectsEnabled: r.worldProjectsEnabled === true,
     worldProjectAlerts: r.worldProjectAlerts === true,
     projectPrepLinkMode: r.projectPrepLinkMode === 'full' ? 'full' : 'visual',
+    locale: r.locale === 'system' || isSupportedLocale(r.locale) ? r.locale : 'system',
   };
 }
 

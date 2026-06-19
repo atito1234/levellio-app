@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -39,6 +40,12 @@ import {
 } from '@/content/aboutInfo';
 import type { HeroPresentation } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
+import {
+  LOCALE_LABELS,
+  LOCALE_STATUS,
+  SUPPORTED_LOCALES,
+  type LocaleSetting,
+} from '@/i18n/config';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -61,9 +68,18 @@ const PRESENTATION_OPTIONS: ChipOption<HeroPresentation>[] = [
 
 export function SettingsScreen() {
   const navigation = useNavigation<Nav>();
+  const { t } = useTranslation('settings');
   const { character, setPresentation } = useGame();
   const { account, isReal, signOut, deleteAccount } = useAuth();
   const { settings, ready, update } = useSettings();
+
+  const localeOptions: ChipOption<LocaleSetting>[] = [
+    { value: 'system', label: t('language.system') },
+    ...SUPPORTED_LOCALES.map((l) => ({
+      value: l as LocaleSetting,
+      label: LOCALE_STATUS[l] === 'draft' ? `${LOCALE_LABELS[l]} · ${t('language.draftBadge')}` : LOCALE_LABELS[l],
+    })),
+  ];
 
   const [keySaved, setKeySaved] = useState(false);
   const [keyInput, setKeyInput] = useState('');
@@ -151,6 +167,18 @@ export function SettingsScreen() {
             </Text>
           </View>
         )}
+
+        {/* Language */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{t('language.title')}</Text>
+          <Text style={styles.note}>{t('language.subtitle')}</Text>
+          <ChipSelector
+            label={t('language.title')}
+            options={localeOptions}
+            selected={settings.locale}
+            onSelect={(locale) => update({ locale })}
+          />
+        </View>
 
         {/* Beta banner — honest, no charging */}
         <View style={styles.card}>
