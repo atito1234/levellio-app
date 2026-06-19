@@ -197,11 +197,6 @@ export function AddActivitySheet({
     navigation.navigate('QuestEditor', { prefill, ...context });
   };
 
-  const openBulk = () => {
-    onClose();
-    navigation.navigate('QuickCapture', context);
-  };
-
   const modeChip = (mode: WhenMode, label: string) => {
     const on = whenMode === mode;
     return (
@@ -396,9 +391,6 @@ export function AddActivitySheet({
             <View style={styles.links}>
               <Pressable onPress={openAdvanced} accessibilityRole="button" hitSlop={8}>
                 <Text style={styles.link}>⚙️ Advanced options ›</Text>
-              </Pressable>
-              <Pressable onPress={openBulk} accessibilityRole="button" hitSlop={8}>
-                <Text style={styles.link}>🪄 Add several at once ›</Text>
               </Pressable>
             </View>
           </ScrollView>

@@ -60,6 +60,8 @@ interface GoalContextValue {
    */
   membershipFor: (goalId: string) => Set<string>;
   linkGoal: (activityId: string, goalId: string) => Promise<void>;
+  /** Link several habits into one goal in a SINGLE write (loop-safe). */
+  linkGoals: (activityIds: readonly string[], goalId: string) => Promise<void>;
   unlinkGoal: (activityId: string, goalId: string) => Promise<void>;
   /** Set which personal goals "prepare" for a (project) goal. */
   setSupportingGoals: (goalId: string, supportingGoalIds: string[]) => Promise<void>;
@@ -152,6 +154,14 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
     (activityId: string, goalId: string) => persistLinks(linkGoalPure(goalLinks, activityId, goalId)),
     [goalLinks, persistLinks],
   );
+  const linkGoals = useCallback(
+    (activityIds: readonly string[], goalId: string) => {
+      let next = goalLinks;
+      for (const aid of activityIds) next = linkGoalPure(next, aid, goalId);
+      return persistLinks(next);
+    },
+    [goalLinks, persistLinks],
+  );
   const unlinkGoal = useCallback(
     (activityId: string, goalId: string) => persistLinks(unlinkGoalPure(goalLinks, activityId, goalId)),
     [goalLinks, persistLinks],
@@ -208,10 +218,11 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
       habitIdsForGoal: (goalId: string) => new Set(habitsForGoalPure(goalLinks, goalId)),
       membershipFor,
       linkGoal,
+      linkGoals,
       unlinkGoal,
       setSupportingGoals,
     }),
-    [ready, goals, addGoal, updateGoal, removeGoal, reorderGoals, goalLinks, membershipFor, linkGoal, unlinkGoal, setSupportingGoals],
+    [ready, goals, addGoal, updateGoal, removeGoal, reorderGoals, goalLinks, membershipFor, linkGoal, linkGoals, unlinkGoal, setSupportingGoals],
   );
 
   return <GoalContext.Provider value={value}>{children}</GoalContext.Provider>;

@@ -110,12 +110,6 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
     [quests, linkedProjectIds, projectId],
   );
 
-  const addAllSuggested = async () => {
-    if (!project) return;
-    for (const h of project.suggestedHabits) await ensureOwned(h);
-    Alert.alert("They're yours 🤝", 'All suggested habits are now daily habits in your activities, powering this project.');
-  };
-
   // The goal that mirrors THIS project (auto-created by ProjectsContext).
   const projectGoal = useMemo(
     () => goals.find((g) => g.kind === 'project' && g.projectId === projectId),
@@ -324,12 +318,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         {/* Suggested activities — big adopt cards (daily habit, reuse by name). */}
         {project.suggestedHabits.length > 0 && (
           <>
-            <View style={styles.sectionRow}>
-              <Text style={styles.sectionLabel}>SUGGESTED ACTIVITIES</Text>
-              <Pressable onPress={() => void addAllSuggested()} accessibilityRole="button" accessibilityLabel="Add all suggested activities" hitSlop={8}>
-                <Text style={styles.slay}>＋ Add all</Text>
-              </Pressable>
-            </View>
+            <Text style={styles.sectionLabel}>SUGGESTED ACTIVITIES</Text>
             <View style={styles.cardList}>
               {project.suggestedHabits.map((h, i) => {
                 const owned = questByTitle(h.title);
