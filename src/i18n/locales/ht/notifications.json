@@ -1,0 +1,14 @@
+{
+  "title": "Notifikasyon",
+  "empty": "Ou wè tout bagay deja.",
+  "groups": {
+    "today": "Jodi a",
+    "week": "Semèn sa a",
+    "earlier": "Pi bonè"
+  },
+  "line": {
+    "reaction": "{{name}} reyaji {{emoji}} sou piblikasyon ou",
+    "comment": "{{name}} kòmante sou piblikasyon ou",
+    "follow": "{{name}} kòmanse swiv ou"
+  }
+}

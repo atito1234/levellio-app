@@ -1,0 +1,21 @@
+{
+  "title": "Descubrir",
+  "searchPlaceholder": "Busca personas, hábitos, proyectos",
+  "tabs": {
+    "people": "Personas",
+    "habits": "Hábitos",
+    "projects": "Proyectos"
+  },
+  "empty": {
+    "people": "No se encontraron personas.",
+    "habits": "No se encontraron hábitos.",
+    "projects": "No se encontraron proyectos."
+  },
+  "addHabit": "Añadir",
+  "people": {
+    "title": "Personas",
+    "following": "Siguiendo",
+    "suggested": "Sugerencias",
+    "empty": "Aún no hay nadie. Publica algo para conocer gente."
+  }
+}

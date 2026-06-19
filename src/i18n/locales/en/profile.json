@@ -1,0 +1,30 @@
+{
+  "title": "Profile",
+  "loading": "Loading profile…",
+  "notFound": "This profile isn't available yet.",
+  "edit": "Edit profile",
+  "editHeadline": "Headline",
+  "editCountry": "Location",
+  "headlinePlaceholder": "Add a headline (e.g. Building better mornings)",
+  "countryPlaceholder": "Add your location",
+  "stats": {
+    "level": "Level",
+    "streak": "Day streak",
+    "xp": "Lifetime XP",
+    "projects": "Projects"
+  },
+  "tier": {
+    "novice": "Novice",
+    "pathfinder": "Pathfinder",
+    "luminary": "Luminary"
+  },
+  "sections": {
+    "milestones": "Recent milestones",
+    "projects": "Projects",
+    "posts": "Recent posts"
+  },
+  "empty": {
+    "milestones": "No milestones yet.",
+    "posts": "No posts yet."
+  }
+}

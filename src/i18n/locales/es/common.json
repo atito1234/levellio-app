@@ -14,5 +14,15 @@
     "loading": "Cargando…",
     "send": "Enviar",
     "comment": "Comentar"
+  },
+  "follow": {
+    "follow": "+ Seguir",
+    "following": "✓ Siguiendo",
+    "a11yFollow": "Seguir",
+    "a11yFollowing": "Siguiendo — toca para dejar de seguir"
+  },
+  "comingSoon": {
+    "title": "Próximamente",
+    "body": "Compartir fotos y videos llega la próxima semana."
   }
 }

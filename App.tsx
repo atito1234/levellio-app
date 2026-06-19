@@ -13,6 +13,10 @@ import { ProjectsProvider } from '@/state/ProjectsContext';
 import { CommunityProvider } from '@/state/CommunityContext';
 import { SettingsProvider } from '@/state/SettingsContext';
 import { SubscriptionProvider } from '@/state/SubscriptionContext';
+import { ProfileProvider } from '@/state/ProfileContext';
+import { NotificationsProvider } from '@/state/NotificationsContext';
+import { StoriesProvider } from '@/state/StoriesContext';
+import { MessagingProvider } from '@/state/MessagingContext';
 import { BucketsProvider } from '@/state/BucketsContext';
 import { CapacitiesProvider } from '@/state/CapacitiesContext';
 import { PlanProvider } from '@/state/PlanContext';
@@ -43,7 +47,15 @@ export default function App() {
                           <InterventionProvider>
                             <ProjectsProvider>
                               <CommunityProvider>
-                                <RootNavigator />
+                                <NotificationsProvider>
+                                  <ProfileProvider>
+                                    <StoriesProvider>
+                                      <MessagingProvider>
+                                        <RootNavigator />
+                                      </MessagingProvider>
+                                    </StoriesProvider>
+                                  </ProfileProvider>
+                                </NotificationsProvider>
                               </CommunityProvider>
                             </ProjectsProvider>
                           </InterventionProvider>

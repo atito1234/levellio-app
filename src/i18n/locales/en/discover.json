@@ -1,0 +1,21 @@
+{
+  "title": "Discover",
+  "searchPlaceholder": "Search people, habits, projects",
+  "tabs": {
+    "people": "People",
+    "habits": "Habits",
+    "projects": "Projects"
+  },
+  "empty": {
+    "people": "No people found.",
+    "habits": "No habits found.",
+    "projects": "No projects found."
+  },
+  "addHabit": "Add",
+  "people": {
+    "title": "People",
+    "following": "Following",
+    "suggested": "Suggested",
+    "empty": "No one to show yet. Share a post to meet people."
+  }
+}

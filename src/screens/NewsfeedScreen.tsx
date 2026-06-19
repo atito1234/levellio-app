@@ -3,9 +3,11 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HeroAvatar, PostCard, ScreenContainer } from '@/components';
+import { HeroAvatar, PostCard, ScreenContainer, StoriesRail } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
+import { useNotifications } from '@/state/NotificationsContext';
+import { useMessaging } from '@/state/MessagingContext';
 import { useGame } from '@/state/GameContext';
 import { useCommunityAccess } from '@/services/community/access';
 import { type FeedScope, type Post } from '@/lib/community';
@@ -24,9 +26,11 @@ type ScopeKey = 'all' | 'network';
 /** The community newsfeed — composer up top, scope tabs, realtime post list. */
 export function NewsfeedScreen() {
   const navigation = useNavigation<Nav>();
-  const { t } = useTranslation(['feed', 'common']);
+  const { t } = useTranslation(['feed', 'common', 'messaging']);
   const allowed = useCommunityAccess();
-  const { signedIn, subscribeFeed } = useCommunity();
+  const { uid, signedIn, subscribeFeed } = useCommunity();
+  const { unreadCount } = useNotifications();
+  const { unreadCount: msgUnread } = useMessaging();
   const { character } = useGame();
   const [scope, setScope] = useState<ScopeKey>('all');
   const [posts, setPosts] = useState<Post[]>([]);
@@ -42,12 +46,35 @@ export function NewsfeedScreen() {
     () => (
       <View style={styles.headerRow}>
         <Text style={styles.title}>{t('feed:newsfeed.title')}</Text>
-        <Pressable onPress={() => navigation.navigate('People')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.peopleA11y')} style={styles.peopleBtn}>
-          <Text style={styles.peopleText}>{t('feed:newsfeed.people')}</Text>
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable onPress={() => navigation.navigate('People')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.peopleA11y')} style={styles.peopleBtn}>
+            <Text style={styles.peopleText}>{t('feed:newsfeed.people')}</Text>
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate('Notifications')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.notificationsA11y')} style={styles.bellBtn}>
+            <Text style={styles.bellIcon}>🔔</Text>
+            {unreadCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+              </View>
+            )}
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate('Inbox')} accessibilityRole="button" accessibilityLabel={t('messaging:a11y')} style={styles.bellBtn}>
+            <Text style={styles.bellIcon}>💬</Text>
+            {msgUnread > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{msgUnread > 9 ? '9+' : msgUnread}</Text>
+              </View>
+            )}
+          </Pressable>
+          {uid && (
+            <Pressable onPress={() => navigation.navigate('Profile', { uid })} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.meA11y')} style={styles.meBtn}>
+              <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={32} />
+            </Pressable>
+          )}
+        </View>
       </View>
     ),
-    [navigation, t],
+    [navigation, t, unreadCount, msgUnread, uid, character?.presentation, character?.tier, character?.kitId],
   );
 
   if (!allowed) {
@@ -86,6 +113,15 @@ export function NewsfeedScreen() {
     <ScreenContainer backgroundColor={BG} noPadding edges={['top', 'left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {header}
+
+        {/* Stories rail (Instagram-style). "Add" is gated until media is enabled. */}
+        <StoriesRail />
+
+        {/* Search pill — opens discovery (LinkedIn-style). */}
+        <Pressable onPress={() => navigation.navigate('Discover')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.searchA11y')} style={styles.searchPill}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <Text style={styles.searchText}>{t('feed:newsfeed.searchPlaceholder')}</Text>
+        </Pressable>
 
         {/* Facebook-style composer — one tap to share. */}
         <Pressable onPress={() => navigation.navigate('PostComposer')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.composerA11y')} style={styles.composer}>
@@ -128,9 +164,18 @@ export function NewsfeedScreen() {
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, gap: spacing.md },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   title: { ...typography.heading, color: INK },
   peopleBtn: { backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#ECEAE4' },
   peopleText: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  bellBtn: { backgroundColor: CARD, borderRadius: 999, width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#ECEAE4' },
+  bellIcon: { fontSize: 18 },
+  badge: { position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: 999, backgroundColor: '#C0202C', alignItems: 'center', justifyContent: 'center' },
+  badgeText: { ...typography.caption, color: '#FFFFFF', fontWeight: '800', fontSize: 10 },
+  meBtn: { width: 40, height: 40, borderRadius: 999, alignItems: 'center', justifyContent: 'center', backgroundColor: CARD, borderWidth: 1, borderColor: '#ECEAE4', overflow: 'hidden' },
+  searchPill: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: '#ECEAE4', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  searchIcon: { fontSize: 16 },
+  searchText: { ...typography.body, color: MUTED, flex: 1 },
 
   composer: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#ECEAE4' },
   composerHint: { ...typography.body, color: MUTED, flex: 1 },

@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HeroAvatar, PostCard, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
+import { useNotifications } from '@/state/NotificationsContext';
 import { useGame } from '@/state/GameContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { usePlan } from '@/state/PlanContext';
@@ -29,6 +30,7 @@ export function PostDetailScreen({ route, navigation }: Props) {
   const { postId } = route.params;
   const { t } = useTranslation(['feed', 'common']);
   const { subscribeFeed, subscribeComments, addComment } = useCommunity();
+  const { notifyComment } = useNotifications();
   const { quests, addQuest } = useGame();
   const { linkHabit } = useProjects();
   const { getPlan, togglePlanned } = usePlan();
@@ -59,6 +61,7 @@ export function PostDetailScreen({ route, navigation }: Props) {
       const suggested: SuggestedHabit | undefined =
         attachOpen && hTitle.trim().length > 0 ? { title: hTitle.trim(), category: hCat, contribution: 1 } : undefined;
       await addComment(postId, text, suggested);
+      if (post) notifyComment(post);
       setText('');
       setHTitle('');
       setAttachOpen(false);

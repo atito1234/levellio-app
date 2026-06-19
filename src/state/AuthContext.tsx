@@ -2,6 +2,10 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { accountService, describeAuthError, type Account } from '@/services/account';
 import { projectsBackend } from '@/services/projects';
 import { communityBackend } from '@/services/community';
+import { profileBackend } from '@/services/profile';
+import { notificationsBackend } from '@/services/notifications';
+import { storiesBackend } from '@/services/stories';
+import { messagingBackend } from '@/services/messaging';
 
 interface AuthContextValue {
   /** False until the first auth-state resolution. */
@@ -78,7 +82,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Purge the user's shared data FIRST (while still authenticated, so the
         // rules permit it), then delete the auth account.
         if (uid) {
-          await Promise.allSettled([communityBackend.deleteMyData(uid), projectsBackend.deleteMyData(uid)]);
+          await Promise.allSettled([
+            communityBackend.deleteMyData(uid),
+            projectsBackend.deleteMyData(uid),
+            profileBackend.deleteMyData(uid),
+            notificationsBackend.deleteMyData(uid),
+            storiesBackend.deleteMyData(uid),
+            messagingBackend.deleteMyData(uid),
+          ]);
         }
         await accountService.deleteAccount(password);
         return { ok: true };

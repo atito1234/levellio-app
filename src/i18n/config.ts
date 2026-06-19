@@ -19,7 +19,7 @@ export type LocaleSetting = 'system' | SupportedLocale;
 export const DEFAULT_LOCALE: SupportedLocale = 'en';
 
 /** Namespaces (one JSON file per area, per locale). Add new areas here. */
-export const NAMESPACES = ['common', 'tabs', 'feed', 'settings', 'paywall'] as const;
+export const NAMESPACES = ['common', 'tabs', 'feed', 'settings', 'paywall', 'profile', 'notifications', 'discover', 'stories', 'messaging'] as const;
 export type Namespace = (typeof NAMESPACES)[number];
 
 /** Translation maturity, surfaced in the language picker so testers know. */

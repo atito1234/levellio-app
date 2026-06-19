@@ -14,5 +14,15 @@
     "loading": "Ap chaje…",
     "send": "Voye",
     "comment": "Kòmante"
+  },
+  "follow": {
+    "follow": "+ Swiv",
+    "following": "✓ Ap swiv",
+    "a11yFollow": "Swiv",
+    "a11yFollowing": "Ap swiv — peze pou sispann"
+  },
+  "comingSoon": {
+    "title": "Ap vini byento",
+    "body": "Pataje foto ak videyo ap vini semèn pwochèn."
   }
 }

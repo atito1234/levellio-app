@@ -92,6 +92,18 @@ export type RootStackParamList = {
   PostDetail: { postId: string };
   /** Discover & manage the people in your network. */
   People: undefined;
+  /** A user's public profile (habits, streaks, milestones, posts). */
+  Profile: { uid: string };
+  /** The in-app notification center (reactions, comments, follows). */
+  Notifications: undefined;
+  /** Search & discover people, habits, and projects. */
+  Discover: undefined;
+  /** Full-screen story viewer for one user's active stories. */
+  StoryViewer: { uid: string };
+  /** Direct-message conversation list. */
+  Inbox: undefined;
+  /** A 1:1 chat with another user. */
+  Chat: { uid: string; displayName?: string; presentation?: import('@/types').HeroPresentation };
 };
 
 declare global {

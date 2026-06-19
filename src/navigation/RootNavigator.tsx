@@ -37,6 +37,12 @@ import { SignInScreen } from '@/screens/SignInScreen';
 import { PostComposerScreen } from '@/screens/PostComposerScreen';
 import { PostDetailScreen } from '@/screens/PostDetailScreen';
 import { PeopleScreen } from '@/screens/PeopleScreen';
+import { ProfileScreen } from '@/screens/ProfileScreen';
+import { NotificationsScreen } from '@/screens/NotificationsScreen';
+import { DiscoverScreen } from '@/screens/DiscoverScreen';
+import { StoryViewerScreen } from '@/screens/StoryViewerScreen';
+import { InboxScreen } from '@/screens/InboxScreen';
+import { ChatScreen } from '@/screens/ChatScreen';
 import { MilestoneCelebration } from '@/components/MilestoneCelebration';
 import { InterventionOverlay } from '@/components/InterventionOverlay';
 import { navigationRef } from './navigationRef';
@@ -133,6 +139,12 @@ export function RootNavigator() {
         <Stack.Screen name="PostComposer" component={PostComposerScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="PostDetail" component={PostDetailScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="People" component={PeopleScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Discover" component={DiscoverScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="StoryViewer" component={StoryViewerScreen} options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="Inbox" component={InboxScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Chat" component={ChatScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
       {/* Overlays any screen to celebrate earned milestones (queue-driven). */}
       <MilestoneCelebration />

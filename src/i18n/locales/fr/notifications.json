@@ -1,0 +1,14 @@
+{
+  "title": "Notifications",
+  "empty": "Vous êtes à jour.",
+  "groups": {
+    "today": "Aujourd'hui",
+    "week": "Cette semaine",
+    "earlier": "Plus tôt"
+  },
+  "line": {
+    "reaction": "{{name}} a réagi {{emoji}} à votre publication",
+    "comment": "{{name}} a commenté votre publication",
+    "follow": "{{name}} a commencé à vous suivre"
+  }
+}
