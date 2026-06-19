@@ -100,6 +100,10 @@ export type RootStackParamList = {
   Discover: undefined;
   /** Full-screen story viewer for one user's active stories. */
   StoryViewer: { uid: string };
+  /** Direct-message conversation list. */
+  Inbox: undefined;
+  /** A 1:1 chat with another user. */
+  Chat: { uid: string; displayName?: string; presentation?: import('@/types').HeroPresentation };
 };
 
 declare global {

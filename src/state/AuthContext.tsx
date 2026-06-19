@@ -5,6 +5,7 @@ import { communityBackend } from '@/services/community';
 import { profileBackend } from '@/services/profile';
 import { notificationsBackend } from '@/services/notifications';
 import { storiesBackend } from '@/services/stories';
+import { messagingBackend } from '@/services/messaging';
 
 interface AuthContextValue {
   /** False until the first auth-state resolution. */
@@ -87,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             profileBackend.deleteMyData(uid),
             notificationsBackend.deleteMyData(uid),
             storiesBackend.deleteMyData(uid),
+            messagingBackend.deleteMyData(uid),
           ]);
         }
         await accountService.deleteAccount(password);

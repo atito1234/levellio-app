@@ -49,6 +49,23 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
+    // Direct messages — 1:1 threads. Only participants can read/write the thread;
+    // messages are readable by participants and created only by their sender.
+    match /threads/{threadId} {
+      allow read, update: if signedIn() && request.auth.uid in resource.data.participants;
+      allow create: if signedIn() && request.auth.uid in request.resource.data.participants;
+      allow delete: if signedIn() && request.auth.uid in resource.data.participants;
+
+      match /messages/{messageId} {
+        allow read: if signedIn() &&
+          request.auth.uid in get(/databases/$(database)/documents/threads/$(threadId)).data.participants;
+        allow create: if signedIn() && request.resource.data.senderUid == request.auth.uid &&
+          request.auth.uid in get(/databases/$(database)/documents/threads/$(threadId)).data.participants;
+        allow delete: if signedIn() &&
+          request.auth.uid in get(/databases/$(database)/documents/threads/$(threadId)).data.participants;
+      }
+    }
+
     // Community newsfeed posts (manual shares + contribution posts).
     match /posts/{postId} {
       // Visible to any signed-in member of the community.

@@ -16,6 +16,7 @@ import { SubscriptionProvider } from '@/state/SubscriptionContext';
 import { ProfileProvider } from '@/state/ProfileContext';
 import { NotificationsProvider } from '@/state/NotificationsContext';
 import { StoriesProvider } from '@/state/StoriesContext';
+import { MessagingProvider } from '@/state/MessagingContext';
 import { BucketsProvider } from '@/state/BucketsContext';
 import { CapacitiesProvider } from '@/state/CapacitiesContext';
 import { PlanProvider } from '@/state/PlanContext';
@@ -49,7 +50,9 @@ export default function App() {
                                 <NotificationsProvider>
                                   <ProfileProvider>
                                     <StoriesProvider>
-                                      <RootNavigator />
+                                      <MessagingProvider>
+                                        <RootNavigator />
+                                      </MessagingProvider>
                                     </StoriesProvider>
                                   </ProfileProvider>
                                 </NotificationsProvider>

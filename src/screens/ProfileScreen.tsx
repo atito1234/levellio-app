@@ -27,7 +27,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
 
 export function ProfileScreen({ route, navigation }: Props) {
   const { uid } = route.params;
-  const { t } = useTranslation(['profile', 'common']);
+  const { t } = useTranslation(['profile', 'common', 'messaging']);
   const myUid = useMyUid();
   const isMe = myUid === uid;
   const { profile, loading } = useProfile(uid);
@@ -75,7 +75,21 @@ export function ProfileScreen({ route, navigation }: Props) {
             <HeroAvatar presentation={profile.presentation ?? 'neutral'} tier={profile.tier} size={88} />
           </View>
           <View style={styles.headerRight}>
-            {isMe ? <EditProfileButton /> : <FollowButton targetUid={uid} size="md" />}
+            {isMe ? (
+              <EditProfileButton />
+            ) : (
+              <View style={styles.headerActions}>
+                <Pressable
+                  onPress={() => navigation.navigate('Chat', { uid, displayName: profile.displayName, presentation: profile.presentation })}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('messaging:message')}
+                  style={styles.messageBtn}
+                >
+                  <Text style={styles.messageBtnText}>{t('messaging:message')}</Text>
+                </Pressable>
+                <FollowButton targetUid={uid} size="md" />
+              </View>
+            )}
           </View>
           <Text style={styles.name}>{profile.displayName}</Text>
           <View style={styles.tierRow}>
@@ -215,6 +229,9 @@ const styles = StyleSheet.create({
     marginTop: -52,
   },
   headerRight: { position: 'absolute', right: spacing.lg, top: spacing.lg },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  messageBtn: { backgroundColor: colors.surface, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: 6, borderWidth: 1, borderColor: colors.identity },
+  messageBtnText: { ...typography.caption, color: colors.identity, fontWeight: '800' },
   name: { ...typography.heading, color: colors.textPrimary },
   tierRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   tierChip: { backgroundColor: colors.violetSoft, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radii.pill },

@@ -7,6 +7,7 @@ import { HeroAvatar, PostCard, ScreenContainer, StoriesRail } from '@/components
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
 import { useNotifications } from '@/state/NotificationsContext';
+import { useMessaging } from '@/state/MessagingContext';
 import { useGame } from '@/state/GameContext';
 import { useCommunityAccess } from '@/services/community/access';
 import { type FeedScope, type Post } from '@/lib/community';
@@ -25,10 +26,11 @@ type ScopeKey = 'all' | 'network';
 /** The community newsfeed — composer up top, scope tabs, realtime post list. */
 export function NewsfeedScreen() {
   const navigation = useNavigation<Nav>();
-  const { t } = useTranslation(['feed', 'common']);
+  const { t } = useTranslation(['feed', 'common', 'messaging']);
   const allowed = useCommunityAccess();
   const { uid, signedIn, subscribeFeed } = useCommunity();
   const { unreadCount } = useNotifications();
+  const { unreadCount: msgUnread } = useMessaging();
   const { character } = useGame();
   const [scope, setScope] = useState<ScopeKey>('all');
   const [posts, setPosts] = useState<Post[]>([]);
@@ -56,6 +58,14 @@ export function NewsfeedScreen() {
               </View>
             )}
           </Pressable>
+          <Pressable onPress={() => navigation.navigate('Inbox')} accessibilityRole="button" accessibilityLabel={t('messaging:a11y')} style={styles.bellBtn}>
+            <Text style={styles.bellIcon}>💬</Text>
+            {msgUnread > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{msgUnread > 9 ? '9+' : msgUnread}</Text>
+              </View>
+            )}
+          </Pressable>
           {uid && (
             <Pressable onPress={() => navigation.navigate('Profile', { uid })} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.meA11y')} style={styles.meBtn}>
               <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={32} />
@@ -64,7 +74,7 @@ export function NewsfeedScreen() {
         </View>
       </View>
     ),
-    [navigation, t, unreadCount, uid, character?.presentation, character?.tier, character?.kitId],
+    [navigation, t, unreadCount, msgUnread, uid, character?.presentation, character?.tier, character?.kitId],
   );
 
   if (!allowed) {
