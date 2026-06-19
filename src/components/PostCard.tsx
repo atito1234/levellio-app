@@ -7,6 +7,7 @@ import { HeroAvatar } from '@/components/HeroAvatar';
 import { FollowButton } from '@/components/FollowButton';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
+import { useNotifications } from '@/state/NotificationsContext';
 import type { RootStackParamList } from '@/navigation/types';
 import { getBucketColor } from '@/lib/buckets';
 import {
@@ -34,6 +35,7 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
   const { t } = useTranslation(['feed', 'common']);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { uid, setReaction } = useCommunity();
+  const { notifyReaction } = useNotifications();
   const openProfile = () => navigation.navigate('Profile', { uid: post.authorUid });
   const mine = uid ? myReaction(post.reactions, uid) : null;
   const total = reactionTotal(post.reactions);
@@ -42,7 +44,9 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
 
   const react = (emoji: ReactionEmoji) => {
     // Tapping your current reaction clears it; otherwise set the new one.
-    void setReaction(post.id, mine === emoji ? null : emoji);
+    const clearing = mine === emoji;
+    void setReaction(post.id, clearing ? null : emoji);
+    if (!clearing) notifyReaction(post, emoji);
   };
 
   return (

@@ -3,6 +3,7 @@ import { accountService, describeAuthError, type Account } from '@/services/acco
 import { projectsBackend } from '@/services/projects';
 import { communityBackend } from '@/services/community';
 import { profileBackend } from '@/services/profile';
+import { notificationsBackend } from '@/services/notifications';
 
 interface AuthContextValue {
   /** False until the first auth-state resolution. */
@@ -83,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             communityBackend.deleteMyData(uid),
             projectsBackend.deleteMyData(uid),
             profileBackend.deleteMyData(uid),
+            notificationsBackend.deleteMyData(uid),
           ]);
         }
         await accountService.deleteAccount(password);

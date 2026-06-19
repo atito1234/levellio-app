@@ -1,0 +1,14 @@
+{
+  "title": "Notifications",
+  "empty": "You're all caught up.",
+  "groups": {
+    "today": "Today",
+    "week": "This week",
+    "earlier": "Earlier"
+  },
+  "line": {
+    "reaction": "{{name}} reacted {{emoji}} to your post",
+    "comment": "{{name}} commented on your post",
+    "follow": "{{name}} started following you"
+  }
+}
