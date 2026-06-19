@@ -185,6 +185,35 @@ export class LocalCommunityBackend implements CommunityBackend {
     await this.write(followingKey(uid), [...set]);
     this.followListeners.get(uid)?.forEach((fn) => fn());
   }
+
+  async deleteMyData(uid: string): Promise<void> {
+    const posts = await this.allPosts();
+    const keep: Post[] = [];
+    for (const p of posts) {
+      if (p.authorUid === uid) {
+        await this.store.removeItem(commentsKey(p.id)); // drop my post + its thread
+        continue;
+      }
+      // Strip my reaction + my comments from posts I don't own.
+      if (p.reactions[uid]) {
+        const r = { ...p.reactions };
+        delete r[uid];
+        p.reactions = r;
+      }
+      const comments = await this.read<Comment[]>(commentsKey(p.id), []);
+      const filtered = comments.filter((c) => c.uid !== uid);
+      if (filtered.length !== comments.length) {
+        await this.write(commentsKey(p.id), filtered);
+        p.commentCount = filtered.length;
+        this.commentListeners.get(p.id)?.forEach((fn) => fn());
+      }
+      keep.push(p);
+    }
+    await this.write(POSTS_KEY, keep);
+    await this.store.removeItem(followingKey(uid));
+    this.feedListeners.forEach((fn) => fn());
+    this.followListeners.get(uid)?.forEach((fn) => fn());
+  }
 }
 
 // Exported only for tests that want the toggle helper alongside the backend.

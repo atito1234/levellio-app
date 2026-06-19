@@ -112,4 +112,7 @@ export interface ProjectsBackend {
 
   /** Live (or near-live) detail subscription. Calls back with null if the project is gone. */
   subscribe(projectId: string, uid: string, cb: (snap: ProjectSnapshot | null) => void): Unsubscribe;
+
+  /** Remove all of a user's data (memberships + contributions) — for account deletion. */
+  deleteMyData(uid: string): Promise<void>;
 }

@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { accountService, describeAuthError, type Account } from '@/services/account';
+import { projectsBackend } from '@/services/projects';
+import { communityBackend } from '@/services/community';
 
 interface AuthContextValue {
   /** False until the first auth-state resolution. */
@@ -11,6 +13,11 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  /**
+   * Permanently delete the account: purge the user's community + project data,
+   * then delete the auth user. `password` re-verifies if the session is old.
+   */
+  deleteAccount: (password?: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -64,9 +71,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const deleteAccount = useCallback(
+    async (password?: string) => {
+      const uid = account?.uid ?? null;
+      try {
+        // Purge the user's shared data FIRST (while still authenticated, so the
+        // rules permit it), then delete the auth account.
+        if (uid) {
+          await Promise.allSettled([communityBackend.deleteMyData(uid), projectsBackend.deleteMyData(uid)]);
+        }
+        await accountService.deleteAccount(password);
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: errorOf(e) };
+      }
+    },
+    [account],
+  );
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ready, account, isReal: accountService.isReal, signUp, signIn, signOut, resetPassword }),
-    [ready, account, signUp, signIn, signOut, resetPassword],
+    () => ({ ready, account, isReal: accountService.isReal, signUp, signIn, signOut, resetPassword, deleteAccount }),
+    [ready, account, signUp, signIn, signOut, resetPassword, deleteAccount],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

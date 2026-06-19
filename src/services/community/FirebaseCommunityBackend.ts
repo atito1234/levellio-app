@@ -10,9 +10,11 @@
  */
 import {
   collection,
+  collectionGroup,
   deleteDoc,
   deleteField,
   doc,
+  getDocs,
   increment,
   limit,
   onSnapshot,
@@ -21,6 +23,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
   writeBatch,
   type DocumentData,
   type Firestore,
@@ -156,5 +159,22 @@ export class FirebaseCommunityBackend implements CommunityBackend {
 
   async unfollow(uid: string, targetUid: string): Promise<void> {
     await deleteDoc(doc(this.db, 'users', uid, 'following', targetUid));
+  }
+
+  async deleteMyData(uid: string): Promise<void> {
+    // Delete my posts (and their comment threads).
+    const myPosts = await getDocs(query(collection(this.db, 'posts'), where('authorUid', '==', uid)));
+    for (const p of myPosts.docs) {
+      const comments = await getDocs(collection(this.db, 'posts', p.id, 'comments'));
+      for (const c of comments.docs) await deleteDoc(c.ref);
+      await deleteDoc(p.ref);
+    }
+    // Delete my comments on others' posts.
+    const myComments = await getDocs(query(collectionGroup(this.db, 'comments'), where('uid', '==', uid)));
+    for (const c of myComments.docs) await deleteDoc(c.ref);
+    // Drop my network graph. (Reactions I left on others' posts are an emoji keyed
+    // by a now-deleted uid — left as a harmless best-effort orphan.)
+    const following = await getDocs(collection(this.db, 'users', uid, 'following'));
+    for (const f of following.docs) await deleteDoc(f.ref);
   }
 }

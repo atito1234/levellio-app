@@ -14,6 +14,7 @@
 import {
   collection,
   collectionGroup,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -237,6 +238,23 @@ export class FirebaseProjectsBackend implements ProjectsBackend {
       cycle,
       reachedGoal: progressPct(prevCount, project.weeklyGoal) < 100 && cycle.pct >= 100,
     };
+  }
+
+  async deleteMyData(uid: string): Promise<void> {
+    // Leave every project (delete membership + decrement count).
+    const memberships = await getDocs(query(collectionGroup(this.db, 'members'), where('uid', '==', uid)));
+    for (const m of memberships.docs) {
+      const projectRef = m.ref.parent.parent;
+      const batch = writeBatch(this.db);
+      batch.delete(m.ref);
+      if (projectRef) batch.update(projectRef, { memberCount: increment(-1) });
+      await batch.commit();
+    }
+    // Delete the user's own contributions across all projects.
+    const contributions = await getDocs(query(collectionGroup(this.db, 'contributions'), where('uid', '==', uid)));
+    for (const c of contributions.docs) {
+      await deleteDoc(c.ref);
+    }
   }
 
   subscribe(projectId: string, _uid: string, cb: (snap: ProjectSnapshot | null) => void): Unsubscribe {

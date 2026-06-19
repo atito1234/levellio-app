@@ -77,11 +77,13 @@ service cloud.firestore {
         allow create, update, delete: if signedIn() && request.auth.uid == uid;
       }
 
-      // The activity feed: a member may only create their own contributions.
+      // The activity feed: a member may only create their own contributions, and
+      // may delete their own (for account deletion). No edits.
       match /contributions/{contribId} {
         allow read: if signedIn() && (isMember() || isFeatured());
         allow create: if isMember() && request.resource.data.uid == request.auth.uid;
-        allow update, delete: if false;
+        allow update: if false;
+        allow delete: if signedIn() && resource.data.uid == request.auth.uid;
       }
 
       // Per-cycle counter docs: writable by members (increment-only in practice).

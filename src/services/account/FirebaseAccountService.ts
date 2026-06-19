@@ -5,7 +5,10 @@
  */
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
+  EmailAuthProvider,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut as fbSignOut,
@@ -58,5 +61,28 @@ export class FirebaseAccountService implements AccountService {
 
   async resetPassword(email: string): Promise<void> {
     await sendPasswordResetEmail(getFirebaseAuth(), email.trim());
+  }
+
+  async reauthenticate(password: string): Promise<void> {
+    const user = getFirebaseAuth().currentUser;
+    if (!user || !user.email) return;
+    await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+  }
+
+  async deleteAccount(password?: string): Promise<void> {
+    const user = getFirebaseAuth().currentUser;
+    if (!user) return;
+    try {
+      await deleteUser(user);
+    } catch (e) {
+      // Firebase requires a recent login before deletion — re-verify and retry.
+      if ((e as { code?: string }).code === 'auth/requires-recent-login' && password && user.email) {
+        await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+        await deleteUser(user);
+      } else {
+        throw e;
+      }
+    }
+    this.currentAccount = null;
   }
 }
