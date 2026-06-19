@@ -55,11 +55,22 @@ describe('invite codes', () => {
     expect(isValidInviteCode(code)).toBe(true);
   });
 
-  it('normalizes pasted codes (uppercase, strips junk, drops ambiguous chars)', () => {
+  it('normalizes typed/shared codes (uppercase, keep A–Z & 0–9, strip the rest)', () => {
     expect(normalizeInviteCode('k7m2qp')).toBe('K7M2QP');
     expect(normalizeInviteCode('  K7-M2 QP ')).toBe('K7M2QP');
-    expect(normalizeInviteCode('0OIL1')).toBe(''); // all ambiguous → removed
-    expect(isValidInviteCode('K7M2')).toBe(false);
+    // Real-word codes keep their letters (including I/L/O/U).
+    expect(normalizeInviteCode('  mal-aria ')).toBe('MALARIA');
+    expect(isValidInviteCode('MALARIA')).toBe(true);
+    // A pasted share link normalizes down to just the code.
+    expect(normalizeInviteCode('levellio://join/CLEANH2O')).toBe('CLEANH2O');
+    expect(normalizeInviteCode('CLEANH2O')).toBe('CLEANH2O');
+    expect(isValidInviteCode('CLEANH2O')).toBe(true);
+  });
+
+  it('rejects codes that are too short', () => {
+    expect(isValidInviteCode('AB')).toBe(false);
+    expect(isValidInviteCode('')).toBe(false);
+    expect(isValidInviteCode('ABCD')).toBe(true);
   });
 });
 

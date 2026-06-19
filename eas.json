@@ -7,15 +7,33 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "ios": { "simulator": true }
+      "ios": { "simulator": true },
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDvMEOthuVOPFc8nWry9AkZ5fgkYbd9nDc",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "levellio-social.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "levellio-social",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:524780213630:web:dd416541092a9fab924f2f"
+      }
     },
     "preview": {
       "distribution": "internal",
       "ios": { "simulator": false },
-      "android": { "buildType": "apk" }
+      "android": { "buildType": "apk" },
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDvMEOthuVOPFc8nWry9AkZ5fgkYbd9nDc",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "levellio-social.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "levellio-social",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:524780213630:web:dd416541092a9fab924f2f"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDvMEOthuVOPFc8nWry9AkZ5fgkYbd9nDc",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "levellio-social.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "levellio-social",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:524780213630:web:dd416541092a9fab924f2f"
+      }
     }
   },
   "submit": {
