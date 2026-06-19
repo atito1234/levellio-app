@@ -30,8 +30,12 @@ export const MAX_PROJECT_TITLE = 60;
 export const MAX_PROJECT_SUMMARY = 240;
 export const MAX_PROJECT_UNIT = 40;
 export const MAX_FEED_ITEMS = 50;
+/** Length of auto-generated codes. */
 export const INVITE_CODE_LENGTH = 6;
-/** Unambiguous alphabet for invite codes (no 0/O, 1/I/L). */
+/** Accepted length range for a typed/shared code (lets real words like "MALARIA" through). */
+export const MIN_INVITE_CODE_LENGTH = 4;
+export const MAX_INVITE_CODE_LENGTH = 16;
+/** Unambiguous alphabet used only when GENERATING codes (no 0/O, 1/I/L). */
 const INVITE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
 /** A habit a project suggests members adopt, with how much one completion contributes. */
@@ -166,18 +170,23 @@ export function genInviteCode(rand: () => number = Math.random): string {
   return out;
 }
 
-/** Normalize user-typed/pasted codes: uppercase, strip non-alphabet chars. */
+/**
+ * Normalize a typed/pasted/shared code: uppercase and keep only A–Z and 0–9
+ * (drops spaces, dashes, and any `levellio://join/` URL wrapping). Letters are
+ * NOT dropped, so human-friendly word codes like "MALARIA" survive intact.
+ */
 export function normalizeInviteCode(raw: string): string {
-  return raw
+  // If a full share link was pasted, keep only the part after ".../join/".
+  const afterJoin = raw.replace(/^.*\bjoin\//i, '');
+  return afterJoin
     .toUpperCase()
-    .split('')
-    .filter((c) => INVITE_ALPHABET.includes(c))
-    .join('')
-    .slice(0, INVITE_CODE_LENGTH);
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, MAX_INVITE_CODE_LENGTH);
 }
 
 export function isValidInviteCode(raw: string): boolean {
-  return normalizeInviteCode(raw).length === INVITE_CODE_LENGTH;
+  const len = normalizeInviteCode(raw).length;
+  return len >= MIN_INVITE_CODE_LENGTH && len <= MAX_INVITE_CODE_LENGTH;
 }
 
 // --- Contribution math -------------------------------------------------------

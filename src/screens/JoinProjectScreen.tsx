@@ -59,7 +59,7 @@ export function JoinProjectScreen({ route, navigation }: Props) {
           style={styles.codeInput}
           autoCapitalize="characters"
           autoCorrect={false}
-          maxLength={6}
+          maxLength={16}
           accessibilityLabel="Invite code"
         />
 
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: TRACK,
     textAlign: 'center',
-    letterSpacing: 8,
+    letterSpacing: 4,
   },
   consent: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 16, padding: spacing.md },
   consentTitle: { ...typography.label, color: INK, fontWeight: '700' },
