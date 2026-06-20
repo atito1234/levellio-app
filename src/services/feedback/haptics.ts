@@ -31,6 +31,11 @@ const safe = (run: () => Promise<void>) => {
 };
 
 export const haptics = {
+  /** A light tick for micro-interactions (reactions, taps, selections). */
+  tap(enabled: boolean) {
+    if (!enabled || !Haptics) return;
+    safe(() => Haptics!.impactAsync(Haptics!.ImpactFeedbackStyle.Light));
+  },
   /** A gentle success tap — every habit completion. */
   success(enabled: boolean) {
     if (!enabled || !Haptics) return;

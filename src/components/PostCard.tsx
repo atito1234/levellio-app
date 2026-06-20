@@ -1,13 +1,19 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HeroAvatar } from '@/components/HeroAvatar';
 import { FollowButton } from '@/components/FollowButton';
+import { PressableScale } from '@/components/PressableScale';
+import { ReactionBurst } from '@/components/ReactionBurst';
+import { AnimatedCount } from '@/components/AnimatedCount';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
 import { useNotifications } from '@/state/NotificationsContext';
+import { useSettings } from '@/state/SettingsContext';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { haptics } from '@/services/feedback/haptics';
 import type { RootStackParamList } from '@/navigation/types';
 import { getBucketColor } from '@/lib/buckets';
 import {
@@ -36,17 +42,63 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { uid, setReaction } = useCommunity();
   const { notifyReaction } = useNotifications();
+  const { settings } = useSettings();
+  const reduced = useReducedMotion();
   const openProfile = () => navigation.navigate('Profile', { uid: post.authorUid });
   const mine = uid ? myReaction(post.reactions, uid) : null;
   const total = reactionTotal(post.reactions);
   const tops = topReactions(post.reactions);
   const projectColor = post.projectColorId ? getBucketColor(post.projectColorId).accent : VIOLET;
 
+  const [burst, setBurst] = useState<{ emoji: string; key: number } | null>(null);
+  const heart = useRef(new Animated.Value(0)).current;
+  const lastTap = useRef(0);
+  const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const react = (emoji: ReactionEmoji) => {
     // Tapping your current reaction clears it; otherwise set the new one.
     const clearing = mine === emoji;
     void setReaction(post.id, clearing ? null : emoji);
-    if (!clearing) notifyReaction(post, emoji);
+    if (!clearing) {
+      notifyReaction(post, emoji);
+      setBurst({ emoji, key: Date.now() });
+      haptics.tap(settings.hapticsEnabled);
+    }
+  };
+
+  const playHeart = () => {
+    if (reduced) return;
+    heart.setValue(0);
+    Animated.timing(heart, { toValue: 1, duration: 180, useNativeDriver: true }).start(() => {
+      Animated.timing(heart, { toValue: 0, duration: 400, delay: 300, useNativeDriver: true }).start();
+    });
+  };
+
+  const likeViaDoubleTap = () => {
+    if (mine !== '❤️') {
+      void setReaction(post.id, '❤️');
+      notifyReaction(post, '❤️');
+      setBurst({ emoji: '❤️', key: Date.now() });
+    }
+    playHeart();
+    haptics.success(settings.hapticsEnabled);
+  };
+
+  // Single tap opens the thread; double tap ❤️-likes (Instagram-style).
+  const onBodyTap = () => {
+    const now = Date.now();
+    if (now - lastTap.current < 250) {
+      if (openTimer.current) clearTimeout(openTimer.current);
+      openTimer.current = null;
+      lastTap.current = 0;
+      likeViaDoubleTap();
+    } else {
+      lastTap.current = now;
+      openTimer.current = setTimeout(() => {
+        openTimer.current = null;
+        onOpen(post.id);
+      }, 250);
+    }
   };
 
   return (
@@ -79,14 +131,21 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
       ) : null}
 
       {post.text.length > 0 && (
-        <Pressable onPress={() => onOpen(post.id)} accessibilityRole="button" accessibilityLabel={t('feed:post.openA11y', { name: post.displayName })}>
+        <Pressable onPress={onBodyTap} accessibilityRole="button" accessibilityLabel={t('feed:post.openA11y', { name: post.displayName })}>
           <Text style={styles.body}>{post.text}</Text>
         </Pressable>
       )}
 
       {(total > 0 || post.commentCount > 0) && (
         <View style={styles.tally}>
-          <Text style={styles.tallyText}>{total > 0 ? `${tops.join('')} ${total}` : ''}</Text>
+          {total > 0 ? (
+            <View style={styles.tallyLeft}>
+              <Text style={styles.tallyText}>{tops.join('')} </Text>
+              <AnimatedCount value={total} style={styles.tallyText} />
+            </View>
+          ) : (
+            <View />
+          )}
           {post.commentCount > 0 && (
             <Pressable onPress={() => onOpen(post.id)} accessibilityRole="button">
               <Text style={styles.tallyText}>{t(post.commentCount === 1 ? 'feed:post.comments_one' : 'feed:post.comments_other', { count: post.commentCount })}</Text>
@@ -97,10 +156,11 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
 
       <View style={styles.actions}>
         <View style={styles.reactBar}>
+          {burst && <ReactionBurst key={burst.key} emoji={burst.emoji} />}
           {REACTIONS.map((emoji) => {
             const on = mine === emoji;
             return (
-              <Pressable
+              <PressableScale
                 key={emoji}
                 onPress={() => react(emoji)}
                 accessibilityRole="button"
@@ -110,14 +170,25 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
                 hitSlop={6}
               >
                 <Text style={styles.reactEmoji}>{emoji}</Text>
-              </Pressable>
+              </PressableScale>
             );
           })}
         </View>
-        <Pressable onPress={() => onOpen(post.id)} accessibilityRole="button" accessibilityLabel={t('common:action.comment')} style={styles.commentBtn}>
+        <PressableScale onPress={() => onOpen(post.id)} accessibilityRole="button" accessibilityLabel={t('common:action.comment')} style={styles.commentBtn}>
           <Text style={styles.commentText}>{t('feed:post.commentBtn')}</Text>
-        </Pressable>
+        </PressableScale>
       </View>
+
+      {/* Double-tap ❤️ flourish. */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.heart,
+          { opacity: heart, transform: [{ scale: heart.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1.4] }) }] },
+        ]}
+      >
+        <Text style={styles.heartText}>❤️</Text>
+      </Animated.View>
     </View>
   );
 }
@@ -135,9 +206,12 @@ const styles = StyleSheet.create({
   askText: { ...typography.caption, fontWeight: '800', color: '#8A5A0A' },
   body: { ...typography.body, color: INK },
   tally: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 2 },
+  tallyLeft: { flexDirection: 'row', alignItems: 'center' },
   tallyText: { ...typography.caption, color: MUTED },
   actions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: TRACK, paddingTop: spacing.sm },
   reactBar: { flexDirection: 'row', gap: 4 },
+  heart: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
+  heartText: { fontSize: 96 },
   reactBtn: { width: 40, height: 32, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   reactBtnOn: { backgroundColor: '#EDE9FE' },
   reactEmoji: { fontSize: 18 },

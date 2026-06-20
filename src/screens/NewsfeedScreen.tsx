@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HeroAvatar, PostCard, ScreenContainer, StoriesRail } from '@/components';
+import { HeroAvatar, PostCard, PressableScale, ScreenContainer, StoriesRail } from '@/components';
 import { spacing, typography } from '@/theme';
+import { durations, springs } from '@/theme/motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useCommunity } from '@/state/CommunityContext';
 import { useNotifications } from '@/state/NotificationsContext';
 import { useMessaging } from '@/state/MessagingContext';
@@ -32,8 +34,20 @@ export function NewsfeedScreen() {
   const { unreadCount } = useNotifications();
   const { unreadCount: msgUnread } = useMessaging();
   const { character } = useGame();
+  const reduced = useReducedMotion();
   const [scope, setScope] = useState<ScopeKey>('all');
   const [posts, setPosts] = useState<Post[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Sliding scope-tab indicator.
+  const [tabsW, setTabsW] = useState(0);
+  const tabX = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const to = scope === 'all' ? 0 : 1;
+    if (reduced) tabX.setValue(to);
+    else Animated.spring(tabX, { toValue: to, ...springs.gentle }).start();
+  }, [scope, reduced, tabX]);
+  const tabHalf = tabsW > 0 ? (tabsW - 8) / 2 : 0;
 
   const feedScope: FeedScope = scope;
   useEffect(() => {
@@ -42,34 +56,40 @@ export function NewsfeedScreen() {
     return unsub;
   }, [signedIn, allowed, feedScope, subscribeFeed]);
 
+  // The feed is realtime; pull-to-refresh is a tactile reassurance beat.
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 700);
+  }, []);
+
   const header = useMemo(
     () => (
       <View style={styles.headerRow}>
         <Text style={styles.title}>{t('feed:newsfeed.title')}</Text>
         <View style={styles.headerActions}>
-          <Pressable onPress={() => navigation.navigate('People')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.peopleA11y')} style={styles.peopleBtn}>
+          <PressableScale onPress={() => navigation.navigate('People')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.peopleA11y')} style={styles.peopleBtn}>
             <Text style={styles.peopleText}>{t('feed:newsfeed.people')}</Text>
-          </Pressable>
-          <Pressable onPress={() => navigation.navigate('Notifications')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.notificationsA11y')} style={styles.bellBtn}>
+          </PressableScale>
+          <PressableScale onPress={() => navigation.navigate('Notifications')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.notificationsA11y')} style={styles.bellBtn}>
             <Text style={styles.bellIcon}>🔔</Text>
             {unreadCount > 0 && (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
               </View>
             )}
-          </Pressable>
-          <Pressable onPress={() => navigation.navigate('Inbox')} accessibilityRole="button" accessibilityLabel={t('messaging:a11y')} style={styles.bellBtn}>
+          </PressableScale>
+          <PressableScale onPress={() => navigation.navigate('Inbox')} accessibilityRole="button" accessibilityLabel={t('messaging:a11y')} style={styles.bellBtn}>
             <Text style={styles.bellIcon}>💬</Text>
             {msgUnread > 0 && (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{msgUnread > 9 ? '9+' : msgUnread}</Text>
               </View>
             )}
-          </Pressable>
+          </PressableScale>
           {uid && (
-            <Pressable onPress={() => navigation.navigate('Profile', { uid })} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.meA11y')} style={styles.meBtn}>
+            <PressableScale onPress={() => navigation.navigate('Profile', { uid })} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.meA11y')} style={styles.meBtn}>
               <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={32} />
-            </Pressable>
+            </PressableScale>
           )}
         </View>
       </View>
@@ -111,31 +131,40 @@ export function NewsfeedScreen() {
 
   return (
     <ScreenContainer backgroundColor={BG} noPadding edges={['top', 'left', 'right']}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scroll}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={VIOLET} colors={[VIOLET]} />}
+      >
         {header}
 
         {/* Stories rail (Instagram-style). "Add" is gated until media is enabled. */}
         <StoriesRail />
 
         {/* Search pill — opens discovery (LinkedIn-style). */}
-        <Pressable onPress={() => navigation.navigate('Discover')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.searchA11y')} style={styles.searchPill}>
+        <PressableScale onPress={() => navigation.navigate('Discover')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.searchA11y')} style={styles.searchPill}>
           <Text style={styles.searchIcon}>🔍</Text>
           <Text style={styles.searchText}>{t('feed:newsfeed.searchPlaceholder')}</Text>
-        </Pressable>
+        </PressableScale>
 
         {/* Facebook-style composer — one tap to share. */}
-        <Pressable onPress={() => navigation.navigate('PostComposer')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.composerA11y')} style={styles.composer}>
+        <PressableScale onPress={() => navigation.navigate('PostComposer')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.composerA11y')} style={styles.composer}>
           <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={40} />
           <Text style={styles.composerHint}>{t('feed:newsfeed.composerHint')}</Text>
           <Text style={styles.composerIcon}>✏️</Text>
-        </Pressable>
+        </PressableScale>
 
-        {/* Scope tabs. */}
-        <View style={styles.tabs}>
+        {/* Scope tabs with a sliding indicator. */}
+        <View style={styles.tabs} onLayout={(e) => setTabsW(e.nativeEvent.layout.width)}>
+          {tabHalf > 0 && (
+            <Animated.View
+              style={[styles.tabIndicator, { width: tabHalf, transform: [{ translateX: tabX.interpolate({ inputRange: [0, 1], outputRange: [0, tabHalf] }) }] }]}
+            />
+          )}
           {(['all', 'network'] as ScopeKey[]).map((s) => {
             const on = scope === s;
             return (
-              <Pressable key={s} onPress={() => setScope(s)} accessibilityRole="tab" accessibilityState={{ selected: on }} style={[styles.tab, on && styles.tabOn]}>
+              <Pressable key={s} onPress={() => setScope(s)} accessibilityRole="tab" accessibilityState={{ selected: on }} style={styles.tab}>
                 <Text style={[styles.tabText, on && styles.tabTextOn]}>{t(s === 'all' ? 'feed:scope.all' : 'feed:scope.network')}</Text>
               </Pressable>
             );
@@ -150,14 +179,38 @@ export function NewsfeedScreen() {
           </Text>
         ) : (
           <View style={styles.list}>
-            {posts.map((p) => (
-              <PostCard key={p.id} post={p} onOpen={(postId) => navigation.navigate('PostDetail', { postId })} />
+            {posts.map((p, i) => (
+              <FeedItem key={p.id} index={i}>
+                <PostCard post={p} onOpen={(postId) => navigation.navigate('PostDetail', { postId })} />
+              </FeedItem>
             ))}
           </View>
         )}
         <View style={{ height: spacing.xl }} />
       </ScrollView>
     </ScreenContainer>
+  );
+}
+
+/** Fades + lifts a post into place on first mount (staggered; snaps when reduced). */
+function FeedItem({ index, children }: { index: number; children: React.ReactNode }) {
+  const reduced = useReducedMotion();
+  const v = useRef(new Animated.Value(reduced ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduced) return;
+    Animated.timing(v, {
+      toValue: 1,
+      duration: durations.slow,
+      delay: Math.min(index, 8) * 55,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <Animated.View style={{ opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }}>
+      {children}
+    </Animated.View>
   );
 }
 
@@ -181,9 +234,9 @@ const styles = StyleSheet.create({
   composerHint: { ...typography.body, color: MUTED, flex: 1 },
   composerIcon: { fontSize: 18 },
 
-  tabs: { flexDirection: 'row', backgroundColor: '#ECEAE4', borderRadius: 999, padding: 4, gap: 4 },
+  tabs: { flexDirection: 'row', backgroundColor: '#ECEAE4', borderRadius: 999, padding: 4 },
+  tabIndicator: { position: 'absolute', top: 4, bottom: 4, left: 4, backgroundColor: CARD, borderRadius: 999 },
   tab: { flex: 1, paddingVertical: spacing.sm, borderRadius: 999, alignItems: 'center' },
-  tabOn: { backgroundColor: CARD },
   tabText: { ...typography.label, color: MUTED, fontWeight: '700' },
   tabTextOn: { color: VIOLET },
 
