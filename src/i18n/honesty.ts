@@ -9,7 +9,7 @@ import { SUPPORTED_LOCALES, type SupportedLocale } from './config';
 import { resources } from './resources';
 
 /** Namespaces whose copy must never over-claim an unshipped feature. */
-export const HONESTY_NAMESPACES = ['paywall', 'settings'] as const;
+export const HONESTY_NAMESPACES = ['paywall', 'settings', 'ai'] as const;
 
 /** Per-locale translations of the key over-claims, so they can't sneak back in. */
 export const FORBIDDEN_BY_LOCALE: Record<SupportedLocale, readonly string[]> = {

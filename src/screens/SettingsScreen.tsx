@@ -238,6 +238,7 @@ export function SettingsScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{SETTINGS_COPY.aiSectionTitle}</Text>
           <Text style={styles.note}>{SETTINGS_COPY.aiSectionNote}</Text>
+          <PrimaryButton label={t('ai:learnMore')} variant="ghost" onPress={() => navigation.navigate('AISetup')} />
 
           <ChipSelector
             label="AI mode"
