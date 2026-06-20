@@ -5,6 +5,7 @@ import {
   Alert,
   Linking,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -101,11 +102,26 @@ export function SettingsScreen() {
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | undefined>();
 
-  const confirmSignOut = () =>
-    Alert.alert('Sign out?', 'You can sign back in anytime.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign out', style: 'destructive', onPress: () => void signOut() },
-    ]);
+  const confirmSignOut = () => {
+  const doSignOut = () =>
+    void signOut().then(() => {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Onboarding' }],
+      });
+    });
+
+  if (Platform.OS === 'web') {
+    const ok = window.confirm('Sign out? You can sign back in anytime.');
+    if (ok) doSignOut();
+    return;
+  }
+
+  Alert.alert('Sign out?', 'You can sign back in anytime.', [
+    { text: 'Cancel', style: 'cancel' },
+    { text: 'Sign out', style: 'destructive', onPress: doSignOut },
+  ]);
+};
 
   const runDelete = async () => {
     setDeleteBusy(true);
