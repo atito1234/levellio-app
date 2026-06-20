@@ -3,7 +3,9 @@
     "title": "Idioma",
     "subtitle": "Elige el idioma de la app",
     "system": "Predeterminado del sistema",
-    "draftBadge": "Borrador"
+    "draftBadge": "Borrador",
+    "current": "Actual: {{lang}}",
+    "switchTo": "Cambiar a"
   },
   "plus": {
     "title": "Levellio Plus",

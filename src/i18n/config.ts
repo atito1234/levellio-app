@@ -13,6 +13,13 @@
 export const SUPPORTED_LOCALES = ['en', 'fr', 'es', 'ht'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
+/**
+ * Languages OFFERED in the UI language picker + eligible for device auto-detect.
+ * Haitian Creole is intentionally excluded for now (experimental, filled by an
+ * intern later) but its code/resources stay in SUPPORTED_LOCALES.
+ */
+export const OFFERED_LOCALES = ['en', 'fr', 'es'] as const;
+
 /** A user's stored preference: an explicit language or "follow the device". */
 export type LocaleSetting = 'system' | SupportedLocale;
 
@@ -49,6 +56,8 @@ export function isSupportedLocale(value: unknown): value is SupportedLocale {
  */
 export function resolveLocale(setting: LocaleSetting, deviceLocale?: string | null): SupportedLocale {
   if (setting !== 'system') return setting;
-  const base = (deviceLocale ?? '').toLowerCase().split('-')[0];
-  return isSupportedLocale(base) ? base : DEFAULT_LOCALE;
+  const base = (deviceLocale ?? '').toLowerCase().split('-')[0] ?? '';
+  // Auto-detect only into an OFFERED language (so e.g. a Creole device starts in
+  // English and can still switch); other devices fall back to English.
+  return (OFFERED_LOCALES as readonly string[]).includes(base) ? (base as SupportedLocale) : DEFAULT_LOCALE;
 }

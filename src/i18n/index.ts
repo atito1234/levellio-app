@@ -24,6 +24,9 @@ export function initI18n(initialLocale: SupportedLocale = DEFAULT_LOCALE) {
     ns: NAMESPACES as unknown as string[],
     defaultNS: 'common',
     returnNull: false,
+    // Hermes lacks Intl.PluralRules; use the v3 plural format (we use manual
+    // _one/_other keys anyway) so i18next doesn't log a console error.
+    compatibilityJSON: 'v3',
     // Blank values (e.g. experimental Haitian Creole) fall back to English.
     returnEmptyString: false,
     interpolation: { escapeValue: false }, // React already escapes

@@ -42,8 +42,8 @@ import type { HeroPresentation } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 import {
   LOCALE_LABELS,
-  LOCALE_STATUS,
-  SUPPORTED_LOCALES,
+  OFFERED_LOCALES,
+  isSupportedLocale,
   type LocaleSetting,
 } from '@/i18n/config';
 import { COSMETIC_THEMES, getTheme } from '@/data/cosmetics';
@@ -71,7 +71,8 @@ const PRESENTATION_OPTIONS: ChipOption<HeroPresentation>[] = [
 
 export function SettingsScreen() {
   const navigation = useNavigation<Nav>();
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
+  const activeLocale = isSupportedLocale(i18n.language) ? i18n.language : 'en';
   const { character, setPresentation, setName } = useGame();
   const [nameDraft, setNameDraft] = useState(character?.name ?? '');
   const { account, isReal, signOut, deleteAccount } = useAuth();
@@ -87,10 +88,11 @@ export function SettingsScreen() {
     void update({ cosmeticThemeId: id });
   };
 
-  // Auto-detected on first run, so no redundant "System default" — just the languages.
-  const localeOptions: ChipOption<LocaleSetting>[] = SUPPORTED_LOCALES.map((l) => ({
+  // Only the languages you can switch TO — the active one is hidden (shown as a
+  // "current" line below), and Creole is not offered yet.
+  const localeOptions: ChipOption<LocaleSetting>[] = OFFERED_LOCALES.filter((l) => l !== activeLocale).map((l) => ({
     value: l as LocaleSetting,
-    label: LOCALE_STATUS[l] === 'draft' ? `${LOCALE_LABELS[l]} · ${t('language.draftBadge')}` : LOCALE_LABELS[l],
+    label: LOCALE_LABELS[l],
   }));
 
   const [keySaved, setKeySaved] = useState(false);
@@ -183,13 +185,15 @@ export function SettingsScreen() {
         {/* Language */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{t('language.title')}</Text>
-          <Text style={styles.note}>{t('language.subtitle')}</Text>
-          <ChipSelector
-            label={t('language.title')}
-            options={localeOptions}
-            selected={settings.locale}
-            onSelect={(locale) => update({ locale })}
-          />
+          <Text style={styles.note}>{t('language.current', { lang: LOCALE_LABELS[activeLocale] })}</Text>
+          {localeOptions.length > 0 && (
+            <ChipSelector
+              label={t('language.switchTo')}
+              options={localeOptions}
+              selected={settings.locale}
+              onSelect={(locale) => update({ locale })}
+            />
+          )}
         </View>
 
         {/* Levellio Plus — founding member during the beta */}

@@ -3,7 +3,9 @@
     "title": "Langue",
     "subtitle": "Choisissez la langue de l'application",
     "system": "Paramètre du système",
-    "draftBadge": "Brouillon"
+    "draftBadge": "Brouillon",
+    "current": "Actuel : {{lang}}",
+    "switchTo": "Changer pour"
   },
   "plus": {
     "title": "Levellio Plus",
