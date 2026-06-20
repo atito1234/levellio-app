@@ -167,11 +167,14 @@ export function ProfileScreen({ route, navigation }: Props) {
 function EditProfileButton() {
   const { t } = useTranslation(['profile', 'common']);
   const { settings, update } = useSettings();
+  const { character, setName } = useGame();
   const [open, setOpen] = useState(false);
+  const [name, setNameDraft] = useState(character?.name ?? '');
   const [headline, setHeadline] = useState(settings.profileHeadline ?? '');
   const [country, setCountry] = useState(settings.profileCountry ?? '');
 
   const save = async () => {
+    if (name.trim() && name.trim() !== character?.name) await setName(name);
     await update({ profileHeadline: headline.trim(), profileCountry: country.trim() });
     setOpen(false);
   };
@@ -185,6 +188,13 @@ function EditProfileButton() {
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <Text style={styles.cardTitle}>{t('profile:edit')}</Text>
+            <TextField
+              label={t('profile:editName')}
+              value={name}
+              onChangeText={setNameDraft}
+              placeholder={t('profile:namePlaceholder')}
+              maxLength={40}
+            />
             <TextField
               label={t('profile:editHeadline')}
               value={headline}

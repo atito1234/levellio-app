@@ -24,6 +24,8 @@ export function initI18n(initialLocale: SupportedLocale = DEFAULT_LOCALE) {
     ns: NAMESPACES as unknown as string[],
     defaultNS: 'common',
     returnNull: false,
+    // Blank values (e.g. experimental Haitian Creole) fall back to English.
+    returnEmptyString: false,
     interpolation: { escapeValue: false }, // React already escapes
   });
   return i18n;

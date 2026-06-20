@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
@@ -30,7 +31,7 @@ import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
 import { effectivePlan, goalDayProgress, goalFocusPool, plannedOpen, planProgress } from '@/lib/plan';
-import { CAPACITIES, getCapacity } from '@/lib/compounding';
+import { CAPACITIES } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { isValidScheduleMinutes, minutesToLabel } from '@/lib/schedule';
 import { dayKey } from '@/lib/dates';
@@ -65,6 +66,8 @@ const SWIPE_THRESHOLD = 56;
  */
 export function DashboardScreen() {
   const navigation = useNavigation<Nav>();
+  const { t } = useTranslation(['dashboard', 'capacities']);
+  const capName = (id: string) => t(`capacities:${id}`);
   const { character, quests, suggestQuest, reorderQuests, status } = useGame();
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
@@ -249,8 +252,8 @@ export function DashboardScreen() {
   }
 
   const hour = new Date().getHours();
-  const partOfDay = hour < 12 ? 'Morning' : hour < 18 ? 'Afternoon' : 'Evening';
-  const name = character.name?.trim() || 'there';
+  const partOfDay = t(`dashboard:greeting.${hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'}`);
+  const name = character.name?.trim() || t('dashboard:greeting.fallbackName');
   const heroDone = progress.pct >= 100; // von Restorff: the single gold win.
   const offset = fill.interpolate({ inputRange: [0, 1], outputRange: [HC, 0] });
 
@@ -274,7 +277,7 @@ export function DashboardScreen() {
           <Pressable
             onPress={() => navigation.navigate('Main', { screen: 'Character' })}
             accessibilityRole="button"
-            accessibilityLabel="Open your hero"
+            accessibilityLabel={t('dashboard:openHeroA11y')}
           >
             <HeroAvatar presentation={character.presentation} tier={character.tier} kitId={character.kitId} size={52} />
           </Pressable>
@@ -313,18 +316,18 @@ export function DashboardScreen() {
           <Pressable
             onPress={() => navigation.navigate('PostComposer')}
             accessibilityRole="button"
-            accessibilityLabel="Share an update with your community"
+            accessibilityLabel={t('dashboard:share.a11y')}
             style={styles.homeComposer}
           >
             <HeroAvatar presentation={character.presentation} tier={character.tier} kitId={character.kitId} size={36} />
-            <Text style={styles.homeComposerHint}>Share an update…</Text>
+            <Text style={styles.homeComposerHint}>{t('dashboard:share.hint')}</Text>
             <Text style={styles.homeComposerIcon}>✏️</Text>
           </Pressable>
         )}
 
         {/* STEP 1 — pick a goal. It governs the focus below and tints it. */}
         {goals.length > 0 && (
-          <Text style={styles.stepHint}>{gated ? 'STEP 1 · Pick a goal to begin' : 'STEP 1 · Your goal'}</Text>
+          <Text style={styles.stepHint}>{gated ? t('dashboard:step1Pick') : t('dashboard:step1')}</Text>
         )}
         <GoalsStrip
           goals={goals}
@@ -347,7 +350,7 @@ export function DashboardScreen() {
         {/* Everything below is governed by the chosen goal — faded until picked. */}
         <View style={[styles.gatedWrap, gated && styles.gatedOff]} pointerEvents={gated ? 'none' : 'auto'}>
         {/* STEP 2 — once a goal is chosen but empty, point to the mic Add button. */}
-        {onboardStep === 2 && <Text style={styles.stepHint}>STEP 2 · Tap 🎙️ to add your activities</Text>}
+        {onboardStep === 2 && <Text style={styles.stepHint}>{t('dashboard:step2')}</Text>}
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}
         <View style={styles.billboard} {...(canBrowse && !gated ? pan.panHandlers : {})}>
@@ -358,7 +361,7 @@ export function DashboardScreen() {
               canBrowse && { transform: [{ translateX: cardX }, { rotate: cardRotate }], opacity: cardOpacity },
             ]}
           >
-          <Text style={styles.billboardKicker}>{selectedGoal ? `STEP 2 · ${selectedGoal.title.toUpperCase()}` : 'YOUR FOCUS RIGHT NOW'}</Text>
+          <Text style={styles.billboardKicker}>{selectedGoal ? selectedGoal.title.toUpperCase() : t('dashboard:focusKicker')}</Text>
           <View style={styles.ringStage}>
             {/* subtle glassmorphism glow behind the ring */}
             <View style={[styles.glow, { backgroundColor: heroDone ? GOLD : focusAccent }]} pointerEvents="none" />
@@ -385,7 +388,7 @@ export function DashboardScreen() {
                 </Text>
               </View>
               <Text style={styles.ringSub}>
-                {progress.done} of {progress.total} today
+                {t('dashboard:ringSub', { done: progress.done, total: progress.total })}
               </Text>
             </View>
           </View>
@@ -425,7 +428,7 @@ export function DashboardScreen() {
                 accessibilityLabel={`See how ${focus.title} connects`}
               >
                 <Text style={styles.focusFeeds}>
-                  Strengthens {rippleForQuest(focus).slice(0, 2).map((d) => getCapacity(d.capacityId).name).join(' · ')}
+                  {t('dashboard:strengthens', { caps: rippleForQuest(focus).slice(0, 2).map((d) => capName(d.capacityId)).join(' · ') })}
                   {'  '}🔗
                 </Text>
               </Pressable>
@@ -433,10 +436,10 @@ export function DashboardScreen() {
               <Pressable
                 onPress={() => openHabit(focus.id)}
                 accessibilityRole="button"
-                accessibilityLabel={`Do it now: ${focus.title}`}
+                accessibilityLabel={`${t('dashboard:doItNow')}: ${focus.title}`}
                 style={styles.primaryBtn}
               >
-                <Text style={styles.primaryBtnText}>Do it now</Text>
+                <Text style={styles.primaryBtnText}>{t('dashboard:doItNow')}</Text>
               </Pressable>
               {selectedGoal && (
                 <Pressable
@@ -446,7 +449,7 @@ export function DashboardScreen() {
                   style={styles.focusBtn}
                   hitSlop={8}
                 >
-                  <Text style={[styles.focusBtnText, { color: focusAccent }]}>⚔️ Prepare your war strategy</Text>
+                  <Text style={[styles.focusBtnText, { color: focusAccent }]}>{t('dashboard:warStrategy')}</Text>
                 </Pressable>
               )}
 
@@ -461,65 +464,65 @@ export function DashboardScreen() {
                     hitSlop={8}
                     style={safeIndex === 0 && styles.navDisabled}
                   >
-                    <Text style={styles.navBtn}>⤴ Do next</Text>
+                    <Text style={styles.navBtn}>{t('dashboard:doNext')}</Text>
                   </Pressable>
                   <Text style={styles.navPos}>
-                    {safeIndex + 1} of {openHabits.length}
+                    {t('dashboard:navPos', { index: safeIndex + 1, total: openHabits.length })}
                   </Text>
-                  <Pressable onPress={goNext} accessibilityRole="button" accessibilityLabel="Next activity" hitSlop={8}>
-                    <Text style={styles.navBtn}>Next ›</Text>
+                  <Pressable onPress={goNext} accessibilityRole="button" accessibilityLabel={t('dashboard:next')} hitSlop={8}>
+                    <Text style={styles.navBtn}>{t('dashboard:next')}</Text>
                   </Pressable>
                 </View>
               )}
             </View>
           ) : selectedGoal && !goalHasActivities ? (
             <>
-              <Text style={styles.focusName}>No activities yet</Text>
+              <Text style={styles.focusName}>{t('dashboard:noActivities')}</Text>
               <Pressable
                 onPress={() => setAddOpen(true)}
                 accessibilityRole="button"
-                accessibilityLabel="Add activities to this goal"
+                accessibilityLabel={t('dashboard:addActivities')}
                 style={styles.primaryBtn}
               >
-                <Text style={styles.primaryBtnText}>＋ Add activities</Text>
+                <Text style={styles.primaryBtnText}>{t('dashboard:addActivities')}</Text>
               </Pressable>
             </>
           ) : quests.length === 0 ? (
             <>
-              <Text style={styles.focusName}>Add your first habit</Text>
+              <Text style={styles.focusName}>{t('dashboard:addFirstHabit')}</Text>
               <Pressable
                 onPress={() => setAddOpen(true)}
                 accessibilityRole="button"
-                accessibilityLabel="Add your first habit"
+                accessibilityLabel={t('dashboard:addFirstHabit')}
                 style={styles.primaryBtn}
               >
-                <Text style={styles.primaryBtnText}>＋ Add a habit</Text>
+                <Text style={styles.primaryBtnText}>{t('dashboard:addHabit')}</Text>
               </Pressable>
             </>
           ) : progress.total > 0 ? (
-            <Text style={styles.allDone}>{selectedGoal ? 'This goal is done for today 🎉' : 'All planned done 🎉'}</Text>
+            <Text style={styles.allDone}>{selectedGoal ? t('dashboard:goalDoneToday') : t('dashboard:allPlannedDone')}</Text>
           ) : selectedGoal ? (
             <>
-              <Text style={styles.focusName}>Nothing planned for this goal yet</Text>
+              <Text style={styles.focusName}>{t('dashboard:nothingForGoal')}</Text>
               <Pressable
                 onPress={() => navigation.navigate('GoalFocus', { goalId: selectedGoal.id })}
                 accessibilityRole="button"
-                accessibilityLabel="Edit this goal's activities"
+                accessibilityLabel={t('dashboard:editActivities')}
                 style={styles.primaryBtn}
               >
-                <Text style={styles.primaryBtnText}>✎ Edit activities</Text>
+                <Text style={styles.primaryBtnText}>{t('dashboard:editActivities')}</Text>
               </Pressable>
             </>
           ) : (
             <>
-              <Text style={styles.focusName}>Nothing planned yet</Text>
+              <Text style={styles.focusName}>{t('dashboard:nothingPlanned')}</Text>
               <Pressable
                 onPress={() => navigation.navigate('Plan')}
                 accessibilityRole="button"
-                accessibilityLabel="Schedule your habits"
+                accessibilityLabel={t('dashboard:scheduleHabits')}
                 style={styles.primaryBtn}
               >
-                <Text style={styles.primaryBtnText}>🗓 Schedule your habits</Text>
+                <Text style={styles.primaryBtnText}>{t('dashboard:scheduleHabits')}</Text>
               </Pressable>
             </>
           )}
@@ -528,15 +531,15 @@ export function DashboardScreen() {
           {canBrowse && (
             <>
               <Animated.View pointerEvents="none" style={[styles.stamp, styles.stampLeft, { opacity: stampNextOpacity }]}>
-                <Text style={styles.stampNextText}>‹ NEXT</Text>
+                <Text style={styles.stampNextText}>{t('dashboard:stampNext')}</Text>
               </Animated.View>
               <Animated.View pointerEvents="none" style={[styles.stamp, styles.stampRight, { opacity: stampDoOpacity }]}>
-                <Text style={styles.stampDoText}>DO NEXT ⤴</Text>
+                <Text style={styles.stampDoText}>{t('dashboard:stampDo')}</Text>
               </Animated.View>
             </>
           )}
           <Animated.View pointerEvents="none" style={[styles.flash, { opacity: flashOpacity, transform: [{ scale: flashScale }] }]}>
-            <Text style={styles.flashText}>Up next! ⤴</Text>
+            <Text style={styles.flashText}>{t('dashboard:upNextFlash')}</Text>
           </Animated.View>
          </View>
         </View>
@@ -544,7 +547,7 @@ export function DashboardScreen() {
         {/* Up next today — the rest of the plan, one tap to bring it forward. */}
         {openHabits.length > 1 && (
           <View style={styles.upNext}>
-            <Text style={styles.upNextLabel}>Up next today</Text>
+            <Text style={styles.upNextLabel}>{t('dashboard:upNextToday')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.upNextRow}>
               {openHabits.map((q, i) =>
                 i === safeIndex ? null : (
@@ -569,19 +572,19 @@ export function DashboardScreen() {
         )}
 
         {/* STEP 3 — activities exist; guide the user to curate today's plan. */}
-        {onboardStep === 3 && <Text style={styles.stepHint}>STEP 3 · Schedule your habits</Text>}
+        {onboardStep === 3 && <Text style={styles.stepHint}>{t('dashboard:step3')}</Text>}
         {/* Plan CTA — the one place to curate today/tomorrow (declutters home). */}
         <Pressable
           onPress={() => navigation.navigate('Plan')}
           accessibilityRole="button"
-          accessibilityLabel="Schedule your habits"
-          accessibilityHint="Open the calendar to schedule habits on any day"
+          accessibilityLabel={t('dashboard:scheduleHabits')}
+          accessibilityHint={t('dashboard:scheduleSubEmpty')}
           style={[styles.planCta, onboardStep === 3 && styles.planCtaHi]}
         >
           <View style={styles.planCtaMain}>
-            <Text style={styles.planCtaTitle}>🗓 Schedule your habits</Text>
+            <Text style={styles.planCtaTitle}>{t('dashboard:scheduleHabits')}</Text>
             <Text style={styles.planCtaSub}>
-              {plan === undefined ? 'Tap to schedule habits across your calendar' : `${progress.total} planned today`}
+              {plan === undefined ? t('dashboard:scheduleSubEmpty') : t('dashboard:scheduleSubCount', { count: progress.total })}
             </Text>
           </View>
           <Text style={styles.planCtaChevron}>›</Text>
@@ -589,22 +592,22 @@ export function DashboardScreen() {
 
         {/* Quick actions — discovery/nav only; the 🎙️ button is the one way to add. */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
-          <QuickChip label="📓 Journal" onPress={() => navigation.navigate('Journal')} />
-          <QuickChip label="📚 Library" onPress={() => navigation.navigate('HabitLibrary')} />
-          <QuickChip label="🗂 Buckets" onPress={() => navigation.navigate('Organize')} />
-          <QuickChip label="🔗 Connections" onPress={() => navigation.navigate('Connections')} />
-          <QuickChip label={suggesting ? '…' : '✨ Suggest'} onPress={handleSuggest} />
+          <QuickChip label={t('dashboard:chips.journal')} onPress={() => navigation.navigate('Journal')} />
+          <QuickChip label={t('dashboard:chips.library')} onPress={() => navigation.navigate('HabitLibrary')} />
+          <QuickChip label={t('dashboard:chips.buckets')} onPress={() => navigation.navigate('Organize')} />
+          <QuickChip label={t('dashboard:chips.connections')} onPress={() => navigation.navigate('Connections')} />
+          <QuickChip label={suggesting ? '…' : t('dashboard:chips.suggest')} onPress={handleSuggest} />
         </ScrollView>
 
         {/* Your capacities — the shared rings every completion feeds (real data). */}
         <View style={styles.capHead}>
-          <Text style={styles.railLabel}>Your capacities · last 7 days</Text>
+          <Text style={styles.railLabel}>{t('dashboard:capacitiesTitle')}</Text>
           <Pressable
             onPress={() => navigation.navigate('Progress')}
             accessibilityRole="button"
-            accessibilityLabel="See your progress"
+            accessibilityLabel={t('dashboard:progress')}
           >
-            <Text style={styles.capLink}>Progress ›</Text>
+            <Text style={styles.capLink}>{t('dashboard:progress')}</Text>
           </Pressable>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
@@ -615,7 +618,7 @@ export function DashboardScreen() {
                 key={cap.id}
                 onPress={() => navigation.navigate('CapacityFocus', { capacityId: cap.id })}
                 accessibilityRole="button"
-                accessibilityLabel={`${cap.name} ${lvl} percent. See habits that strengthen it`}
+                accessibilityLabel={`${capName(cap.id)} ${lvl}%`}
                 style={styles.capCell}
               >
                 <View style={styles.capRingWrap}>
@@ -624,7 +627,7 @@ export function DashboardScreen() {
                     <Text style={styles.capRingPct}>{lvl}%</Text>
                   </View>
                 </View>
-                <Text style={styles.capCellName}>{cap.name}</Text>
+                <Text style={styles.capCellName}>{capName(cap.id)}</Text>
               </Pressable>
             );
           })}
@@ -670,19 +673,19 @@ function GoalsStrip({
   onManage: (id: string) => void;
   onNew: () => void;
 }) {
+  const { t } = useTranslation('dashboard');
   if (goals.length === 0) {
     return (
       <Pressable
         onPress={onNew}
         accessibilityRole="button"
-        accessibilityLabel="Set a goal"
-        accessibilityHint="Create a life goal your habits build toward"
+        accessibilityLabel={t('setGoalA11y')}
         style={styles.goalEmpty}
       >
         <Text style={styles.goalEmojiLg}>🎯</Text>
         <View style={{ flex: 1 }}>
-          <Text style={styles.goalEmptyTitle}>What do you want to build toward?</Text>
-          <Text style={styles.goalEmptySub}>Set a goal — your habits do the rest</Text>
+          <Text style={styles.goalEmptyTitle}>{t('goalsEmptyTitle')}</Text>
+          <Text style={styles.goalEmptySub}>{t('goalsEmptySub')}</Text>
         </View>
         <Text style={styles.goalChevron}>›</Text>
       </Pressable>
@@ -694,7 +697,7 @@ function GoalsStrip({
     <View style={styles.goalsWrap}>
       {projectGoals.length > 0 && (
         <>
-          <Text style={styles.goalsRowLabel}>🤝 PROJECT GOALS</Text>
+          <Text style={styles.goalsRowLabel}>{t('projectGoals')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalsRow}>
             {projectGoals.map((g) => (
               <GoalCard key={g.id} goal={g} selected={g.id === selectedId} onPress={() => onSelect(g.id)} />
@@ -702,20 +705,20 @@ function GoalsStrip({
           </ScrollView>
         </>
       )}
-      {projectGoals.length > 0 && <Text style={styles.goalsRowLabel}>YOUR GOALS</Text>}
+      {projectGoals.length > 0 && <Text style={styles.goalsRowLabel}>{t('yourGoals')}</Text>}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalsRow}>
         {personalGoals.map((g) => (
           <GoalCard key={g.id} goal={g} selected={g.id === selectedId} onPress={() => onSelect(g.id)} />
         ))}
-        <Pressable onPress={onNew} accessibilityRole="button" accessibilityLabel="New goal" style={styles.goalNew}>
+        <Pressable onPress={onNew} accessibilityRole="button" accessibilityLabel={t('newGoal')} style={styles.goalNew}>
           <Text style={styles.goalNewPlus}>＋</Text>
-          <Text style={styles.goalNewText}>New goal</Text>
+          <Text style={styles.goalNewText}>{t('newGoal')}</Text>
         </Pressable>
       </ScrollView>
       {selectedId && (
-        <Pressable onPress={() => onManage(selectedId)} accessibilityRole="button" accessibilityLabel="Edit this goal's activities" style={styles.manageRow} hitSlop={8}>
-          <Text style={styles.manageText}>✎ Edit activities</Text>
-          <Text style={styles.manageHint}>· tap the goal again to switch</Text>
+        <Pressable onPress={() => onManage(selectedId)} accessibilityRole="button" accessibilityLabel={t('editActivities')} style={styles.manageRow} hitSlop={8}>
+          <Text style={styles.manageText}>{t('editActivities')}</Text>
+          <Text style={styles.manageHint}>{t('tapToSwitch')}</Text>
         </Pressable>
       )}
     </View>
@@ -723,6 +726,7 @@ function GoalsStrip({
 }
 
 function GoalCard({ goal, selected, onPress }: { goal: Goal; selected: boolean; onPress: () => void }) {
+  const { t } = useTranslation('dashboard');
   const { projectActivityIds } = useProjects();
   const progress = useGoalProgress(goal, projectActivityIds);
   const c = goalColor(goal);
@@ -742,7 +746,7 @@ function GoalCard({ goal, selected, onPress }: { goal: Goal; selected: boolean; 
         <View style={[styles.goalBarFill, { backgroundColor: c.accent, width: `${Math.max(3, progress.weeklyConsistencyPct)}%` }]} />
       </View>
       <Text style={styles.goalMeta}>
-        {progress.doneTodayInGoal}/{progress.plannedTodayInGoal} today
+        {t('todayCount', { done: progress.doneTodayInGoal, total: progress.plannedTodayInGoal })}
       </Text>
     </Pressable>
   );

@@ -34,8 +34,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    settingsStore.load().then((loaded) => {
+    settingsStore.load().then(async (loaded) => {
       if (!active) return;
+      // First run: lock in the device's language so the picker shows a concrete
+      // choice (no redundant "system" option) and the app matches the phone.
+      if (loaded.locale === 'system') {
+        const device = Localization.getLocales()[0]?.languageCode ?? null;
+        const next = await settingsStore.update({ locale: resolveLocale('system', device) });
+        if (!active) return;
+        applyLocale(next);
+        setSettings(next);
+        return;
+      }
       applyLocale(loaded);
       setSettings(loaded);
     });

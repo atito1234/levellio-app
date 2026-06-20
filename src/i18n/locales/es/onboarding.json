@@ -22,6 +22,8 @@
     "badge": "TU HÉROE",
     "title": "Elige tu héroe",
     "subtitle": "El mismo espíritu heroico — elige el aspecto que sientas tuyo. Cámbialo cuando quieras.",
+    "nameLabel": "¿Cómo te llamamos?",
+    "namePlaceholder": "Tu nombre",
     "female": "Mujer",
     "male": "Hombre",
     "neutral": "Neutral"

@@ -3,6 +3,8 @@
   "loading": "Loading profile…",
   "notFound": "This profile isn't available yet.",
   "edit": "Edit profile",
+  "editName": "Your name",
+  "namePlaceholder": "What should we call you?",
   "editHeadline": "Headline",
   "editCountry": "Location",
   "headlinePlaceholder": "Add a headline (e.g. Building better mornings)",

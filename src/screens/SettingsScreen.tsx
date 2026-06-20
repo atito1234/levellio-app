@@ -73,7 +73,8 @@ const PRESENTATION_OPTIONS: ChipOption<HeroPresentation>[] = [
 export function SettingsScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation('settings');
-  const { character, setPresentation } = useGame();
+  const { character, setPresentation, setName } = useGame();
+  const [nameDraft, setNameDraft] = useState(character?.name ?? '');
   const { account, isReal, signOut, deleteAccount } = useAuth();
   const { settings, ready, update } = useSettings();
   const entitlements = useEntitlements();
@@ -87,13 +88,11 @@ export function SettingsScreen() {
     void update({ cosmeticThemeId: id });
   };
 
-  const localeOptions: ChipOption<LocaleSetting>[] = [
-    { value: 'system', label: t('language.system') },
-    ...SUPPORTED_LOCALES.map((l) => ({
-      value: l as LocaleSetting,
-      label: LOCALE_STATUS[l] === 'draft' ? `${LOCALE_LABELS[l]} · ${t('language.draftBadge')}` : LOCALE_LABELS[l],
-    })),
-  ];
+  // Auto-detected on first run, so no redundant "System default" — just the languages.
+  const localeOptions: ChipOption<LocaleSetting>[] = SUPPORTED_LOCALES.map((l) => ({
+    value: l as LocaleSetting,
+    label: LOCALE_STATUS[l] === 'draft' ? `${LOCALE_LABELS[l]} · ${t('language.draftBadge')}` : LOCALE_LABELS[l],
+  }));
 
   const [keySaved, setKeySaved] = useState(false);
   const [keyInput, setKeyInput] = useState('');
@@ -307,9 +306,19 @@ export function SettingsScreen() {
         {/* Hero presentation (free) */}
         {character && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Your Hero</Text>
+            <Text style={styles.cardTitle}>{t('hero.title')}</Text>
+            <TextField
+              label={t('hero.nameLabel')}
+              value={nameDraft}
+              onChangeText={setNameDraft}
+              placeholder={t('hero.namePlaceholder')}
+              maxLength={40}
+              onEndEditing={() => {
+                if (nameDraft.trim() && nameDraft.trim() !== character.name) void setName(nameDraft);
+              }}
+            />
             <ChipSelector
-              label="Presentation"
+              label={t('hero.presentation')}
               options={PRESENTATION_OPTIONS}
               selected={character.presentation}
               onSelect={(p) => setPresentation(p)}
