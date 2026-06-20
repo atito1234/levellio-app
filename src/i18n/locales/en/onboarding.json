@@ -22,6 +22,8 @@
     "badge": "YOUR HERO",
     "title": "Choose your hero",
     "subtitle": "Same heroic spirit — pick the look that feels like you. Change it anytime.",
+    "nameLabel": "What should we call you?",
+    "namePlaceholder": "Your name",
     "female": "Female",
     "male": "Male",
     "neutral": "Neutral"

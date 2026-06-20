@@ -96,6 +96,8 @@ interface GameContextValue extends GameState {
   addLibraryHabit: (habit: LibraryHabit) => Promise<Quest | null>;
   /** Update the hero presentation (female / male / neutral) and persist. */
   setPresentation: (presentation: HeroPresentation) => Promise<void>;
+  /** Set the user's display name and persist. */
+  setName: (name: string) => Promise<void>;
   /** Select a World Cup nation kit (or NO_KIT_ID for the classic look) and persist. */
   setKit: (kitId: string) => Promise<void>;
   /** Replace the quest order (e.g. re-prioritizing the focus) and persist. */
@@ -318,6 +320,19 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const setName = useCallback(
+    async (name: string): Promise<void> => {
+      const s = stateRef.current;
+      if (!s.user || !s.character) return;
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      const next: Character = { ...s.character, name: trimmed };
+      dispatch({ type: 'update', payload: { character: next, quests: questsRef.current } });
+      await backend.saveCharacter(s.user.uid, next);
+    },
+    [],
+  );
+
   const setKit = useCallback(
     async (kitId: string): Promise<void> => {
       const s = stateRef.current;
@@ -343,6 +358,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       setRecurrence,
       addLibraryHabit,
       setPresentation,
+      setName,
       setKit,
       reorderQuests,
     }),
@@ -358,6 +374,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       setRecurrence,
       addLibraryHabit,
       setPresentation,
+      setName,
       setKit,
       reorderQuests,
     ],

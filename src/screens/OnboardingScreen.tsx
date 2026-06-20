@@ -10,6 +10,7 @@ import {
   PressableScale,
   PrimaryButton,
   ScreenContainer,
+  TextField,
   Wisp,
 } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
@@ -34,9 +35,10 @@ const PRESENTATIONS: HeroPresentation[] = ['female', 'male', 'neutral'];
 export function OnboardingScreen({ navigation }: Props) {
   const { t } = useTranslation('onboarding');
   const reduced = useReducedMotion();
-  const { startGame } = useGame();
+  const { startGame, setName } = useGame();
   const [step, setStep] = useState(0);
   const [presentation, setPresentation] = useState<HeroPresentation>('neutral');
+  const [heroName, setHeroName] = useState('');
   const [busy, setBusy] = useState(false);
 
   const lastIndex = SLIDES.length; // the choice step
@@ -61,6 +63,7 @@ export function OnboardingScreen({ navigation }: Props) {
     try {
       setBusy(true);
       await startGame(presentation);
+      if (heroName.trim()) await setName(heroName);
       navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } finally {
       setBusy(false);
@@ -85,6 +88,16 @@ export function OnboardingScreen({ navigation }: Props) {
             <Text style={[styles.badge, { color: colors.violetDeep }]}>{t('choose.badge')}</Text>
             <Text style={styles.title}>{t('choose.title')}</Text>
             <Text style={styles.subtitle}>{t('choose.subtitle')}</Text>
+            <View style={styles.nameField}>
+              <TextField
+                label={t('choose.nameLabel')}
+                value={heroName}
+                onChangeText={setHeroName}
+                placeholder={t('choose.namePlaceholder')}
+                maxLength={40}
+                returnKeyType="done"
+              />
+            </View>
             <View style={styles.options}>
               {PRESENTATIONS.map((p) => {
                 const selected = presentation === p;
@@ -166,6 +179,7 @@ const styles = StyleSheet.create({
   title: { ...typography.heading, color: colors.textPrimary, textAlign: 'center' },
   subtitle: { ...typography.body, color: colors.textSecondary, textAlign: 'center', paddingHorizontal: spacing.sm },
   choiceWrap: { gap: spacing.md, alignItems: 'center' },
+  nameField: { alignSelf: 'stretch', marginTop: spacing.sm },
   options: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
   option: { alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderRadius: radii.lg, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface, minWidth: 96 },
   optionSelected: { borderColor: colors.identity, backgroundColor: colors.violetSoft },

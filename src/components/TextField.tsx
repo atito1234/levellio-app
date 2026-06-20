@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { colors, radii, spacing, typography } from '@/theme';
 
-interface TextFieldProps extends Pick<TextInputProps, 'autoCapitalize' | 'autoCorrect' | 'secureTextEntry' | 'keyboardType' | 'multiline'> {
+interface TextFieldProps extends Pick<TextInputProps, 'autoCapitalize' | 'autoCorrect' | 'secureTextEntry' | 'keyboardType' | 'multiline' | 'onEndEditing' | 'onBlur' | 'returnKeyType'> {
   label: string;
   value: string;
   onChangeText: (text: string) => void;

@@ -3,6 +3,8 @@
   "loading": "Chargement du profil…",
   "notFound": "Ce profil n'est pas encore disponible.",
   "edit": "Modifier le profil",
+  "editName": "Votre nom",
+  "namePlaceholder": "Comment doit-on vous appeler ?",
   "editHeadline": "Titre",
   "editCountry": "Lieu",
   "headlinePlaceholder": "Ajoutez un titre (ex. Construire de meilleures matinées)",

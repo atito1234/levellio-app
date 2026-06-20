@@ -13,5 +13,11 @@
   "themes": {
     "title": "Thème",
     "subtitle": "Personnalisez votre couleur d'accent"
+  },
+  "hero": {
+    "title": "Votre héros",
+    "nameLabel": "Votre nom",
+    "namePlaceholder": "Comment doit-on vous appeler ?",
+    "presentation": "Présentation"
   }
 }
