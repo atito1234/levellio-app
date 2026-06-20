@@ -6,8 +6,13 @@ import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useProjects } from '@/state/ProjectsContext';
+import { useEntitlements } from '@/state/SubscriptionContext';
+import { canUseProjectsUnlimited } from '@/services/monetization';
 import { projectColor, type Project } from '@/lib/projects';
 import type { RootStackParamList } from '@/navigation/types';
+
+/** Free members can create one project; Plus unlocks unlimited. Joining is always free. */
+const FREE_OWNED_PROJECT_CAP = 1;
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -21,6 +26,12 @@ export function ProjectsCatalogScreen() {
   const navigation = useNavigation<Nav>();
   const { account } = useAuth();
   const { signedIn, isShared, featured, myProjects, refresh } = useProjects();
+  const entitlements = useEntitlements();
+
+  const ownedCount = account?.uid ? myProjects.filter((p) => p.ownerUid === account.uid).length : 0;
+  const canCreate = canUseProjectsUnlimited(entitlements) || ownedCount < FREE_OWNED_PROJECT_CAP;
+  const onCreate = () =>
+    canCreate ? navigation.navigate('ProjectEditor') : navigation.navigate('Paywall');
 
   useFocusEffect(
     useCallback(() => {
@@ -76,8 +87,8 @@ export function ProjectsCatalogScreen() {
         </View>
 
         <View style={styles.actions}>
-          <Pressable onPress={() => navigation.navigate('ProjectEditor')} accessibilityRole="button" style={styles.actionBtn}>
-            <Text style={styles.actionText}>+ Create</Text>
+          <Pressable onPress={onCreate} accessibilityRole="button" style={styles.actionBtn}>
+            <Text style={styles.actionText}>{canCreate ? '+ Create' : '+ Create (Plus)'}</Text>
           </Pressable>
           <Pressable onPress={() => navigation.navigate('JoinProject', {})} accessibilityRole="button" style={[styles.actionBtn, styles.actionGhost]}>
             <Text style={[styles.actionText, { color: VIOLET }]}>Join with code</Text>

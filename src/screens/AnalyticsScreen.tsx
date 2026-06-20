@@ -14,12 +14,15 @@ import {
   daysAccomplished,
   directionVerdict,
   longestDayStreak,
+  nextLockedTier,
   ratingStats,
   weekCells,
   INSIGHT_TIERS,
   type DirectionTone,
   type InsightTier,
 } from '@/lib/heroAnalytics';
+import { useEntitlements } from '@/state/SubscriptionContext';
+import { canUseAdvancedInsights } from '@/services/monetization';
 import { confidenceLabel } from '@/lib/metrics/confidence';
 import { activityDayCells, activityJourney, automaticityCurve, JOURNEY_MARKERS, type JourneyStatus } from '@/lib/journey';
 import { CATEGORY_META, resolveCategory } from '@/lib/categories';
@@ -70,6 +73,8 @@ export function AnalyticsScreen({ navigation }: Props) {
   const { character } = useGame();
   const { goals } = useGoals();
   const { events, ready } = useActivityLog();
+  const entitlements = useEntitlements();
+  const advancedInsights = canUseAdvancedInsights(entitlements);
 
   const data = useMemo<ScreenData>(() => {
     const sessions = sessionsOf(events);
@@ -124,6 +129,9 @@ export function AnalyticsScreen({ navigation }: Props) {
               <Text style={[styles.verdictLabel, { color: tone.accent }]}>{direction.label}</Text>
               <Text style={styles.verdictReason}>{direction.reason}</Text>
             </View>
+
+            {/* Plus: a forward-looking forecast (additive — free insights unchanged). */}
+            <ForecastCard data={data} entitled={advancedInsights} onUnlock={() => navigation.navigate('Paywall')} />
 
             {/* This week + the headline counters. */}
             <View style={styles.weekCard}>
@@ -274,6 +282,53 @@ function feelWord(avg: number): string {
   return 'like a grind';
 }
 
+/** Plus forecast — projects when the next insight + automaticity land at current pace. */
+function ForecastCard({ data, entitled, onUnlock }: { data: ScreenData; entitled: boolean; onUnlock: () => void }) {
+  const perDay = data.activeThisWeek / 7;
+  const eta = (need: number): number | null => (need <= 0 ? 0 : perDay > 0 ? Math.ceil(need / perDay) : null);
+
+  if (!entitled) {
+    return (
+      <Pressable onPress={onUnlock} accessibilityRole="button" style={[styles.forecastCard, styles.forecastLocked]}>
+        <View style={styles.insightHead}>
+          <Text style={styles.insightIcon}>🔮</Text>
+          <Text style={styles.insightTitle}>Forecast</Text>
+          <Text style={styles.plusTag}>✦ Plus</Text>
+        </View>
+        <Text style={styles.insightBody}>See when your next insight, streaks, and automaticity will land at your current pace.</Text>
+        <Text style={styles.forecastCta}>Unlock with Levellio Plus ›</Text>
+      </Pressable>
+    );
+  }
+
+  const next = nextLockedTier(data.daysDone);
+  const nextEta = next ? eta(next.unlockDays - data.daysDone) : null;
+  const autoEta = eta(66 - data.longest);
+
+  return (
+    <View style={[styles.forecastCard, { borderColor: VIOLET }]}>
+      <View style={styles.insightHead}>
+        <Text style={styles.insightIcon}>🔮</Text>
+        <Text style={styles.insightTitle}>Your forecast</Text>
+        <Text style={styles.plusTag}>✦ Plus</Text>
+      </View>
+      {next ? (
+        <Text style={styles.insightBody}>
+          At your current pace you’ll unlock <Text style={styles.bodyStrong}>{next.title}</Text>{' '}
+          {nextEta != null ? (nextEta === 0 ? 'any day now' : `in about ${nextEta} ${nextEta === 1 ? 'day' : 'days'}`) : 'as you keep showing up'}.
+        </Text>
+      ) : (
+        <Text style={styles.insightBody}>Every insight tier is unlocked — you’re in rare air. 🛡️</Text>
+      )}
+      <Text style={styles.insightBody}>
+        Automaticity (~66 days){' '}
+        {autoEta != null ? (autoEta === 0 ? 'is within reach' : `is about ${autoEta} active ${autoEta === 1 ? 'day' : 'days'} away`) : 'builds with each active day'}{' '}
+        at {Math.round(perDay * 7)} active {Math.round(perDay * 7) === 1 ? 'day' : 'days'}/week.
+      </Text>
+    </View>
+  );
+}
+
 function Counter({ value, label, tint = INK }: { value: string; label: string; tint?: string }) {
   return (
     <View style={styles.counter}>
@@ -421,6 +476,11 @@ const styles = StyleSheet.create({
   counter: { alignItems: 'center', flex: 1, gap: 2 },
   counterValue: { ...typography.heading, fontWeight: '800' },
   counterLabel: { ...typography.caption, color: MUTED, textAlign: 'center' },
+
+  forecastCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, borderWidth: 2, borderColor: VIOLET_SOFT, ...cardShadow },
+  forecastLocked: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET_SOFT },
+  forecastCta: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  plusTag: { ...typography.caption, color: VIOLET, fontWeight: '800' },
 
   nextCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, ...cardShadow },
   nextText: { ...typography.body, color: INK },

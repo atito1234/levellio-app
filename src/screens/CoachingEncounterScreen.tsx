@@ -13,6 +13,7 @@ import { getDragon } from '@/data/dragons';
 import { buildEngine, generateCoaching } from '@/services/ai';
 import { getByoApiKey } from '@/services/security/secureKeyStore';
 import { canUse } from '@/services/monetization/entitlements';
+import { useEntitlements } from '@/state/SubscriptionContext';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CoachingEncounter'>;
@@ -40,6 +41,7 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
   const { goals } = useGoals();
   const { entriesForDragon } = useJournal();
   const { settings } = useSettings();
+  const entitlements = useEntitlements();
 
   const dragon = getDragon(dragonId, dragonName);
   const quest = questId ? quests.find((q) => q.id === questId) : undefined;
@@ -61,7 +63,8 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
   // cloud), enrich it; it always falls back to curated, so the UI never waits.
   const curated = useMemo(() => buildCoaching(coachCtx), [coachCtx]);
   const [plan, setPlan] = useState(curated);
-  const entitled = canUse('cloud-ai-managed', { isPremium: settings.isPremium }) && settings.aiMode === 'cloud';
+  // AI Coach is a Plus perk: enrich the curated coaching with the user's cloud AI.
+  const entitled = canUse('ai-coach', entitlements) && settings.aiMode === 'cloud';
 
   useEffect(() => {
     setPlan(curated);

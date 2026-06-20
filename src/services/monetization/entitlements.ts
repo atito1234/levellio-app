@@ -44,3 +44,6 @@ export const canUseManagedCloudAI = (e: Entitlements): boolean => canUse('cloud-
 export const canUseCosmetics = (e: Entitlements): boolean => canUse('cosmetics', e);
 export const canUseCloudSync = (e: Entitlements): boolean => canUse('cloud-sync', e);
 export const canUsePlusBadge = (e: Entitlements): boolean => canUse('plus-badge', e);
+export const canUseAdvancedInsights = (e: Entitlements): boolean => canUse('advanced-insights', e);
+export const canUseAiCoach = (e: Entitlements): boolean => canUse('ai-coach', e);
+export const canUseProjectsUnlimited = (e: Entitlements): boolean => canUse('projects-unlimited', e);

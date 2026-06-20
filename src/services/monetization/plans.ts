@@ -72,6 +72,9 @@ export const PLAN_CONFIG: MonetizationConfig = {
       features: [
         'Premium themes & accent colors',
         'Founder badge & profile flair',
+        'AI Coach for your dragons & blockers',
+        'Forecast insights & predictions',
+        'Create unlimited community projects',
         'A share of Plus funds the Fort-Liberté projects',
         'More founder perks on the way',
       ],
