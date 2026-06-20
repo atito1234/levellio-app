@@ -46,6 +46,9 @@ import {
   SUPPORTED_LOCALES,
   type LocaleSetting,
 } from '@/i18n/config';
+import { COSMETIC_THEMES, getTheme } from '@/data/cosmetics';
+import { canUseCosmetics } from '@/services/monetization';
+import { useEntitlements } from '@/state/SubscriptionContext';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -72,6 +75,16 @@ export function SettingsScreen() {
   const { character, setPresentation } = useGame();
   const { account, isReal, signOut, deleteAccount } = useAuth();
   const { settings, ready, update } = useSettings();
+  const entitlements = useEntitlements();
+
+  const pickTheme = (id: string) => {
+    const theme = getTheme(id);
+    if (theme.premium && !canUseCosmetics(entitlements)) {
+      navigation.navigate('Paywall');
+      return;
+    }
+    void update({ cosmeticThemeId: id });
+  };
 
   const localeOptions: ChipOption<LocaleSetting>[] = [
     { value: 'system', label: t('language.system') },
@@ -178,6 +191,36 @@ export function SettingsScreen() {
             selected={settings.locale}
             onSelect={(locale) => update({ locale })}
           />
+        </View>
+
+        {/* Levellio Plus — founding member during the beta */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{t('plus.title')}</Text>
+          <Text style={styles.note}>{t('plus.founding')}</Text>
+          <PrimaryButton label={t('plus.cta')} variant="primary" onPress={() => navigation.navigate('Paywall')} />
+        </View>
+
+        {/* Theme / accent personalization (a Plus cosmetic) */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{t('themes.title')}</Text>
+          <Text style={styles.note}>{t('themes.subtitle')}</Text>
+          <View style={styles.swatchRow}>
+            {COSMETIC_THEMES.map((theme) => {
+              const on = settings.cosmeticThemeId === theme.id;
+              return (
+                <Pressable
+                  key={theme.id}
+                  onPress={() => pickTheme(theme.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={theme.name}
+                  accessibilityState={{ selected: on }}
+                  style={[styles.swatch, { backgroundColor: theme.accent }, on && styles.swatchOn]}
+                >
+                  {on && <Text style={styles.swatchCheck}>✓</Text>}
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         {/* Beta banner — honest, no charging */}
@@ -519,6 +562,10 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textMuted,
   },
+  swatchRow: { flexDirection: 'row', gap: spacing.md, flexWrap: 'wrap' },
+  swatch: { width: 40, height: 40, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'transparent' },
+  swatchOn: { borderColor: colors.textPrimary },
+  swatchCheck: { color: '#FFFFFF', fontWeight: '800' },
   statusPill: {
     alignSelf: 'flex-start',
     paddingHorizontal: spacing.md,

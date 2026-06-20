@@ -65,12 +65,17 @@ export const PLAN_CONFIG: MonetizationConfig = {
     },
     {
       id: 'premium',
-      name: 'Premium',
-      tagline: 'Coming soon — thanks for being an early beta member.',
-      price: { amount: null, currency: 'USD', period: 'month', label: 'Coming soon' },
-      // Deliberately empty: we will not list a perk until it actually ships.
-      features: [],
-      ctaLabel: 'Coming soon',
+      name: 'Levellio Plus',
+      tagline: 'Founding members get Plus free during the beta.',
+      price: { amount: 4.99, currency: 'USD', period: 'month', label: '$4.99 / mo' },
+      // Only list perks that actually ship today (honesty gate). Grows as we ship more.
+      features: [
+        'Premium themes & accent colors',
+        'Founder badge & profile flair',
+        'A share of Plus funds the Fort-Liberté projects',
+        'More founder perks on the way',
+      ],
+      ctaLabel: "You're a founding member",
       purchasable: false,
       highlighted: true,
     },

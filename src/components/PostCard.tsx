@@ -8,9 +8,11 @@ import { FollowButton } from '@/components/FollowButton';
 import { PressableScale } from '@/components/PressableScale';
 import { ReactionBurst } from '@/components/ReactionBurst';
 import { AnimatedCount } from '@/components/AnimatedCount';
+import { PlusBadge } from '@/components/PlusBadge';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
 import { useNotifications } from '@/state/NotificationsContext';
+import { useSubscription } from '@/state/SubscriptionContext';
 import { useSettings } from '@/state/SettingsContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { haptics } from '@/services/feedback/haptics';
@@ -42,6 +44,7 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { uid, setReaction } = useCommunity();
   const { notifyReaction } = useNotifications();
+  const { isFounding } = useSubscription();
   const { settings } = useSettings();
   const reduced = useReducedMotion();
   const openProfile = () => navigation.navigate('Profile', { uid: post.authorUid });
@@ -107,7 +110,10 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
         <Pressable onPress={openProfile} accessibilityRole="button" accessibilityLabel={t('feed:post.openProfileA11y', { name: post.displayName })} style={styles.headTap}>
           <HeroAvatar presentation={post.presentation ?? 'neutral'} tier="novice" size={40} />
           <View style={styles.headText}>
-            <Text style={styles.name} numberOfLines={1}>{post.displayName}</Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.name} numberOfLines={1}>{post.displayName}</Text>
+              {isFounding && <PlusBadge label={t('common:plusBadge')} small />}
+            </View>
             <Text style={styles.meta} numberOfLines={1}>
               {timeAgo(post.createdAt)}
               {post.projectTitle ? ` · ${post.projectTitle}` : ''}
@@ -198,7 +204,8 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   headTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   headText: { flex: 1 },
-  name: { ...typography.label, color: INK, fontWeight: '800' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  name: { ...typography.label, color: INK, fontWeight: '800', flexShrink: 1 },
   meta: { ...typography.caption, color: MUTED },
   contribBanner: { borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   contribText: { ...typography.caption, fontWeight: '800' },

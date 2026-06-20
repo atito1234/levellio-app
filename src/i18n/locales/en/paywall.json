@@ -14,5 +14,16 @@
     "Bring-your-own-key cloud AI (your key, never ours)"
   ],
   "disclosure": "Levellio is completely free during the beta. There is no payment, and the core habit tracking will always be free. Optional extras may arrive in a future update — and we will never charge you without asking first.",
-  "betaNotice": "You're an early beta member 💜 Premium isn't available yet — there's nothing to buy, and no payment will ever start here. Enjoy everything for free while we build."
+  "betaNotice": "You're an early beta member 💜 Premium isn't available yet — there's nothing to buy, and no payment will ever start here. Enjoy everything for free while we build.",
+  "plusTitle": "Levellio Plus",
+  "plusFeatures": [
+    "Premium themes & accent colors",
+    "Founder badge & profile flair",
+    "A share of Plus funds the Fort-Liberté projects",
+    "More founder perks on the way"
+  ],
+  "founding": "You're a founding member — Plus is on us during the beta 💜",
+  "impact": "A share of every Plus subscription funds the Fort-Liberté projects and gifts memberships.",
+  "priceFree": "Free for founding members",
+  "priceFuture": "then $4.99 / mo"
 }

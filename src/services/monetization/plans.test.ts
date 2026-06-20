@@ -13,11 +13,12 @@ describe('plan config (v1.0 beta)', () => {
     expect(free.features.length).toBeGreaterThanOrEqual(4);
   });
 
-  it('does NOT price or list any premium perk while in beta', () => {
+  it('lists real, shipped premium perks but is not purchasable in beta', () => {
     const premium = getPlan('premium');
-    expect(premium.price.amount).toBeNull();
-    // No perk is advertised until it actually ships.
-    expect(premium.features).toEqual([]);
+    // Plus now advertises perks that actually ship (cosmetics, founder flair, impact).
+    expect(premium.features.length).toBeGreaterThan(0);
+    // ...but there is still no charge path during the founding beta.
+    expect(premium.purchasable).toBe(false);
   });
 
   it('every plan has display copy', () => {

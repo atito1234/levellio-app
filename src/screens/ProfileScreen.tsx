@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   FollowButton,
   HeroAvatar,
+  PlusBadge,
   PostCard,
   PrimaryButton,
   ProjectBadge,
@@ -15,6 +16,7 @@ import {
 } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { useProfile, useMyUid } from '@/state/ProfileContext';
+import { useSubscription } from '@/state/SubscriptionContext';
 import { useGame } from '@/state/GameContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useCommunity } from '@/state/CommunityContext';
@@ -30,6 +32,7 @@ export function ProfileScreen({ route, navigation }: Props) {
   const { t } = useTranslation(['profile', 'common', 'messaging']);
   const myUid = useMyUid();
   const isMe = myUid === uid;
+  const { isFounding } = useSubscription();
   const { profile, loading } = useProfile(uid);
   const { character } = useGame();
   const { myProjects } = useProjects();
@@ -96,6 +99,7 @@ export function ProfileScreen({ route, navigation }: Props) {
             <View style={styles.tierChip}>
               <Text style={styles.tierChipText}>{tierLabel(profile.tier)}</Text>
             </View>
+            {isFounding && <PlusBadge label={t('common:plusBadge')} />}
             {profile.country ? <Text style={styles.country}>📍 {profile.country}</Text> : null}
           </View>
           {profile.headline ? <Text style={styles.headline}>{profile.headline}</Text> : null}

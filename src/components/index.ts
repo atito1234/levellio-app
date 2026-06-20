@@ -27,6 +27,7 @@ export { StoriesRail } from './StoriesRail';
 export { PressableScale } from './PressableScale';
 export { ReactionBurst } from './ReactionBurst';
 export { AnimatedCount } from './AnimatedCount';
+export { PlusBadge } from './PlusBadge';
 export { RatingPrompt } from './RatingPrompt';
 export { AddActivityFab } from './AddActivityFab';
 export { AddActivitySheet } from './AddActivitySheet';

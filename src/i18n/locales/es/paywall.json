@@ -14,5 +14,16 @@
     "IA en la nube con tu propia clave (tu clave, nunca la nuestra)"
   ],
   "disclosure": "Levellio es totalmente gratis durante la beta. No hay ningún pago, y el seguimiento básico de hábitos siempre será gratis. Pueden llegar extras opcionales en una futura actualización — y nunca te cobraremos sin preguntarte primero.",
-  "betaNotice": "Eres un miembro beta temprano 💜 Premium aún no está disponible — no hay nada que comprar, y aquí nunca se iniciará ningún pago. Disfruta de todo gratis mientras lo construimos."
+  "betaNotice": "Eres un miembro beta temprano 💜 Premium aún no está disponible — no hay nada que comprar, y aquí nunca se iniciará ningún pago. Disfruta de todo gratis mientras lo construimos.",
+  "plusTitle": "Levellio Plus",
+  "plusFeatures": [
+    "Temas premium y colores de acento",
+    "Insignia de fundador y detalles de perfil",
+    "Una parte de Plus financia los proyectos de Fort-Liberté",
+    "Más beneficios de fundador en camino"
+  ],
+  "founding": "Eres un miembro fundador — Plus es gratis durante la beta 💜",
+  "impact": "Una parte de cada suscripción Plus financia los proyectos de Fort-Liberté y regala membresías.",
+  "priceFree": "Gratis para miembros fundadores",
+  "priceFuture": "luego $4.99 / mes"
 }
