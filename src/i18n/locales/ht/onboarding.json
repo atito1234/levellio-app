@@ -1,0 +1,29 @@
+{
+  "skip": "Sote",
+  "back": "Tounen",
+  "continue": "Kontinye",
+  "begin": "Kòmanse vwayaj ou",
+  "launch": {
+    "badge": "TOUT MOUN ABò",
+    "title": "Lavi ou vin yon gwo avanti",
+    "body": "Mare senti ou. Abitid, objektif, ak woutin ou yo vin keyès ki bay ewo ou pouvwa — epi mennen ou kote ou vrèman vle ale."
+  },
+  "dragons": {
+    "badge": "AFWONTE DRAGON OU YO",
+    "title": "Bat dragon ki nan wout ou",
+    "body": "Pwokrastinasyon, dout, distraksyon — bay yo non, epi bat yo ak batay konsantrasyon ak yon antrenè bò kote ou."
+  },
+  "grow": {
+    "badge": "MONTE",
+    "title": "Soti Novis rive Limyè",
+    "body": "Genyen XP, kenbe seri ou, epi gade Wisp ou evolye soti nan yon Etensèl rive yon Fenix."
+  },
+  "choose": {
+    "badge": "EWO OU",
+    "title": "Chwazi ewo ou",
+    "subtitle": "Menm lespri ewoyik — chwazi aparans ki sanble ak ou. Ou ka chanje l nenpòt lè.",
+    "female": "Fi",
+    "male": "Gason",
+    "neutral": "Net"
+  }
+}

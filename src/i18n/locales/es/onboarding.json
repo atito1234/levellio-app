@@ -1,0 +1,29 @@
+{
+  "skip": "Omitir",
+  "back": "Atrás",
+  "continue": "Continuar",
+  "begin": "Comienza tu aventura",
+  "launch": {
+    "badge": "A BORDO",
+    "title": "Tu vida se vuelve una misión épica",
+    "body": "Abróchate el cinturón. Tus hábitos, metas y rutinas se convierten en misiones que potencian a tu héroe — y te llevan hacia lo que de verdad deseas."
+  },
+  "dragons": {
+    "badge": "ENFRENTA TUS DRAGONES",
+    "title": "Vence a los dragones en tu camino",
+    "body": "Procrastinación, duda, distracción — ponles nombre y véncelos con batallas de enfoque y un coach a tu lado."
+  },
+  "grow": {
+    "badge": "ASCIENDE",
+    "title": "De Novato a Luminaria",
+    "body": "Gana XP, mantén tu racha y mira a tu Wisp evolucionar de una Chispa a un Fenixito."
+  },
+  "choose": {
+    "badge": "TU HÉROE",
+    "title": "Elige tu héroe",
+    "subtitle": "El mismo espíritu heroico — elige el aspecto que sientas tuyo. Cámbialo cuando quieras.",
+    "female": "Mujer",
+    "male": "Hombre",
+    "neutral": "Neutral"
+  }
+}

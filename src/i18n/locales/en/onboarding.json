@@ -1,0 +1,29 @@
+{
+  "skip": "Skip",
+  "back": "Back",
+  "continue": "Continue",
+  "begin": "Begin your journey",
+  "launch": {
+    "badge": "ALL ABOARD",
+    "title": "Your life becomes an epic quest",
+    "body": "Strap in. Your habits, goals, and routines turn into quests that power up your hero — and carry you toward what you truly want."
+  },
+  "dragons": {
+    "badge": "FACE YOUR DRAGONS",
+    "title": "Conquer the dragons in your way",
+    "body": "Procrastination, doubt, distraction — name them, then beat them with focus battles and a coach at your side."
+  },
+  "grow": {
+    "badge": "RISE",
+    "title": "From Novice to Luminary",
+    "body": "Earn XP, keep your streak alive, and watch your Wisp evolve from a Spark into a Phoenixling."
+  },
+  "choose": {
+    "badge": "YOUR HERO",
+    "title": "Choose your hero",
+    "subtitle": "Same heroic spirit — pick the look that feels like you. Change it anytime.",
+    "female": "Female",
+    "male": "Male",
+    "neutral": "Neutral"
+  }
+}

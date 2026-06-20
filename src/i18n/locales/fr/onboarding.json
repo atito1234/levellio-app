@@ -1,0 +1,29 @@
+{
+  "skip": "Passer",
+  "back": "Retour",
+  "continue": "Continuer",
+  "begin": "Commencez votre aventure",
+  "launch": {
+    "badge": "EMBARQUEMENT",
+    "title": "Votre vie devient une quête épique",
+    "body": "Attachez votre ceinture. Vos habitudes, objectifs et routines deviennent des quêtes qui font monter votre héros — vers ce que vous désirez vraiment."
+  },
+  "dragons": {
+    "badge": "AFFRONTEZ VOS DRAGONS",
+    "title": "Vainquez les dragons sur votre route",
+    "body": "Procrastination, doute, distraction — nommez-les, puis battez-les avec des batailles de concentration et un coach à vos côtés."
+  },
+  "grow": {
+    "badge": "ÉLEVEZ-VOUS",
+    "title": "De Novice à Luminaire",
+    "body": "Gagnez de l'XP, gardez votre série, et regardez votre Wisp évoluer d'une Étincelle en Phénixonnet."
+  },
+  "choose": {
+    "badge": "VOTRE HÉROS",
+    "title": "Choisissez votre héros",
+    "subtitle": "Même esprit héroïque — choisissez le look qui vous ressemble. Modifiable à tout moment.",
+    "female": "Femme",
+    "male": "Homme",
+    "neutral": "Neutre"
+  }
+}
