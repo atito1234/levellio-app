@@ -104,6 +104,8 @@ export type RootStackParamList = {
   Inbox: undefined;
   /** A 1:1 chat with another user. */
   Chat: { uid: string; displayName?: string; presentation?: import('@/types').HeroPresentation };
+  /** Explainer for Levellio's AI options + running a model on-device. */
+  AISetup: undefined;
 };
 
 declare global {

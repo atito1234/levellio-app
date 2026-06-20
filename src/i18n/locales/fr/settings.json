@@ -4,5 +4,14 @@
     "subtitle": "Choisissez la langue de l'application",
     "system": "Paramètre du système",
     "draftBadge": "Brouillon"
+  },
+  "plus": {
+    "title": "Levellio Plus",
+    "founding": "Vous êtes un membre fondateur — Plus est offert pendant la bêta 💜",
+    "cta": "Voir Levellio Plus"
+  },
+  "themes": {
+    "title": "Thème",
+    "subtitle": "Personnalisez votre couleur d'accent"
   }
 }

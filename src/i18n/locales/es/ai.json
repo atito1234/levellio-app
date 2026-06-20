@@ -1,0 +1,24 @@
+{
+  "title": "La IA en Levellio",
+  "intro": "Levellio funciona completamente sin IA. Cuando quieras un impulso, siempre tienes el control — y tus datos son tuyos.",
+  "onDevice": {
+    "title": "En el dispositivo · predeterminado",
+    "body": "Funciona totalmente en tu teléfono — instantáneo, privado, sin cuenta ni internet. Personaliza las misiones con un asistente ligero en el dispositivo (no un modelo grande), así que es rápido y totalmente privado."
+  },
+  "cloud": {
+    "title": "Nube · tu propia clave",
+    "body": "¿Quieres sugerencias más ricas? Añade tu propia clave de Gemini, OpenAI o Anthropic en Ajustes. Tú aportas la clave; nunca la vemos — se guarda solo en el llavero seguro de tu teléfono."
+  },
+  "coach": {
+    "title": "Coach de IA · Plus",
+    "body": "Los miembros Plus pueden dejar que la IA enriquezca el coaching “Enfrenta a tu dragón” con tu clave de la nube. El coaching curado siempre es gratis."
+  },
+  "local": {
+    "title": "Avanzado · ejecuta un modelo en tu teléfono",
+    "body": "Los usuarios avanzados pueden descargar un modelo abierto como Gemma en Google AI Edge Gallery y ejecutarlo de forma privada en el dispositivo. Si alojas un servidor local compatible con OpenAI, puedes apuntar ahí el endpoint de clave personalizada. Es una configuración opcional fuera de la app.",
+    "steps": "1. Instala Google AI Edge Gallery   2. Descarga un modelo (ej. Gemma)   3. Chatea en privado en el dispositivo — nada sale de tu teléfono."
+  },
+  "ctaSettings": "Elige tu IA en Ajustes",
+  "ctaGallery": "Abrir Google AI Edge Gallery",
+  "learnMore": "Cómo funciona la IA"
+}

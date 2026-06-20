@@ -7,6 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { colors, radii, spacing, typography } from '@/theme';
+import { useAccent } from '@/state/AccentContext';
 
 type Variant = 'primary' | 'action' | 'reward' | 'ghost';
 
@@ -34,21 +35,23 @@ export function PrimaryButton({
   style,
 }: PrimaryButtonProps) {
   const isGhost = variant === 'ghost';
+  // The primary/ghost brand color follows the user's accent theme (Plus cosmetic).
+  const accent = useAccent();
   const bg =
     variant === 'action'
       ? colors.action
       : variant === 'reward'
         ? colors.reward
         : variant === 'primary'
-          ? colors.identity
+          ? accent
           : 'transparent';
-  // Bright teal/gold fills need dark text for WCAG AA; violet takes white;
-  // ghost uses brand violet on a light surface.
+  // Bright teal/gold fills need dark text for WCAG AA; accent takes white;
+  // ghost uses the accent on a light surface.
   const textColor =
     variant === 'action' || variant === 'reward'
       ? colors.textPrimary
       : isGhost
-        ? colors.identity
+        ? accent
         : colors.textOnBrand;
 
   return (
@@ -61,7 +64,7 @@ export function PrimaryButton({
       style={({ pressed }) => [
         styles.base,
         { backgroundColor: bg },
-        isGhost && styles.ghost,
+        isGhost && [styles.ghost, { borderColor: accent }],
         (disabled || loading) && styles.disabled,
         pressed && !disabled && styles.pressed,
         style,

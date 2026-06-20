@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { getSubscriptionService } from '@/services/subscription';
 import type { Entitlements } from '@/services/monetization';
+import { FOUNDING_FREE } from '@/config/features';
 import { useSettings } from '@/state/SettingsContext';
 import { useAuth } from '@/state/AuthContext';
 
@@ -15,6 +16,8 @@ interface SubscriptionContextValue {
   entitlements: Entitlements;
   /** True only when a real billing backend is active. */
   isReal: boolean;
+  /** True while everyone gets Plus free as a founding member (the beta). */
+  isFounding: boolean;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
@@ -42,8 +45,11 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 
   const value = useMemo<SubscriptionContextValue>(
     () => ({
-      entitlements: { isPremium: servicePremium || settings.isPremium },
+      // Founding members get Plus free during the beta; otherwise resolve from the
+      // subscription service, with the local settings flag as a dev override.
+      entitlements: { isPremium: FOUNDING_FREE || servicePremium || settings.isPremium },
       isReal: service.isReal,
+      isFounding: FOUNDING_FREE,
     }),
     [servicePremium, settings.isPremium, service.isReal],
   );

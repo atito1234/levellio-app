@@ -1,64 +1,61 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, PrimaryButton, HeroAvatar } from '@/components';
+import {
+  AnimatedHero,
+  ConfettiBurst,
+  DragonSprite,
+  HeroAvatar,
+  PressableScale,
+  PrimaryButton,
+  ScreenContainer,
+  Wisp,
+} from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
+import { durations } from '@/theme/motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useGame } from '@/state/GameContext';
 import type { RootStackParamList } from '@/navigation/types';
 import type { HeroPresentation } from '@/types';
-import { useGame } from '@/state/GameContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
+type SlideKey = 'launch' | 'dragons' | 'grow';
 
-interface Slide {
-  badge: string;
-  title: string;
-  body: string;
-  accent: string;
-}
-
-const SLIDES: Slide[] = [
-  {
-    badge: 'WELCOME',
-    title: 'Turn real life into an epic quest',
-    body: 'Habits, routines, and goals become quests that level up your hero — from idea to lasting change.',
-    accent: colors.identity,
-  },
-  {
-    badge: 'HOW IT WORKS',
-    title: 'Complete quests, earn XP',
-    body: 'Easy, medium, and hard quests award XP. Keep a streak to multiply your rewards up to +100%.',
-    accent: colors.action,
-  },
-  {
-    badge: 'GROW',
-    title: 'Rise from Novice to Luminary',
-    body: 'Level up your hero and evolve your Wisp companion from a Spark into a Phoenixling.',
-    accent: colors.reward,
-  },
+const SLIDES: { key: SlideKey; accent: string; deep: string }[] = [
+  { key: 'launch', accent: colors.identity, deep: colors.violetDeep },
+  { key: 'dragons', accent: '#C0202C', deep: '#7A1620' },
+  { key: 'grow', accent: colors.action, deep: colors.tealDeep },
 ];
 
-const PRESENTATIONS: { id: HeroPresentation; label: string }[] = [
-  { id: 'female', label: 'Female' },
-  { id: 'male', label: 'Male' },
-  { id: 'neutral', label: 'Neutral' },
-];
+const PRESENTATIONS: HeroPresentation[] = ['female', 'male', 'neutral'];
 
-/**
- * Day-4 onboarding flow: 3 value-prop slides, then a hero presentation choice.
- * On finish, signs in (mock backend), persists the choice, and enters the app.
- */
+/** A cinematic first-run: board the ship, face your dragons, rise — then choose your hero. */
 export function OnboardingScreen({ navigation }: Props) {
+  const { t } = useTranslation('onboarding');
+  const reduced = useReducedMotion();
   const { startGame } = useGame();
   const [step, setStep] = useState(0);
   const [presentation, setPresentation] = useState<HeroPresentation>('neutral');
   const [busy, setBusy] = useState(false);
 
-  const isChoiceStep = step === SLIDES.length;
-  const lastIndex = SLIDES.length; // choice step index
+  const lastIndex = SLIDES.length; // the choice step
+  const isChoice = step === lastIndex;
   const progress = (step + 1) / (SLIDES.length + 1);
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, lastIndex));
-  const handleBack = () => setStep((s) => Math.max(s - 1, 0));
+  // Cross-fade + lift between steps.
+  const anim = useRef(new Animated.Value(1)).current;
+  const go = (next: number) => {
+    if (reduced) {
+      setStep(next);
+      return;
+    }
+    Animated.timing(anim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
+      setStep(next);
+      anim.setValue(0);
+      Animated.timing(anim, { toValue: 1, duration: durations.slow, useNativeDriver: true }).start();
+    });
+  };
 
   const handleBegin = async () => {
     try {
@@ -71,230 +68,113 @@ export function OnboardingScreen({ navigation }: Props) {
   };
 
   const slide = SLIDES[Math.min(step, SLIDES.length - 1)]!;
+  const animStyle = {
+    opacity: anim,
+    transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }],
+  };
 
   return (
     <ScreenContainer>
-      {/* Progress bar */}
       <View style={styles.progressTrack} accessibilityRole="progressbar">
-        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+        <View style={[styles.progressFill, { width: `${progress * 100}%`, backgroundColor: isChoice ? colors.identity : slide.accent }]} />
       </View>
 
       <View style={styles.body}>
-        {isChoiceStep ? (
-          <View style={styles.choiceWrap}>
-            <Text style={styles.badge}>YOUR HERO</Text>
-            <Text style={styles.title}>Choose your hero</Text>
-            <Text style={styles.subtitle}>
-              Same heroic silhouette — pick the presentation that feels like you. You can change this
-              anytime.
-            </Text>
-
+        {isChoice ? (
+          <Animated.View style={[styles.choiceWrap, animStyle]}>
+            <Text style={[styles.badge, { color: colors.violetDeep }]}>{t('choose.badge')}</Text>
+            <Text style={styles.title}>{t('choose.title')}</Text>
+            <Text style={styles.subtitle}>{t('choose.subtitle')}</Text>
             <View style={styles.options}>
               {PRESENTATIONS.map((p) => {
-                const selected = presentation === p.id;
+                const selected = presentation === p;
                 return (
-                  <Pressable
-                    key={p.id}
+                  <PressableScale
+                    key={p}
                     accessibilityRole="radio"
                     accessibilityState={{ selected }}
-                    accessibilityLabel={`Hero presentation: ${p.label}`}
-                    onPress={() => setPresentation(p.id)}
+                    accessibilityLabel={t(`choose.${p}`)}
+                    onPress={() => setPresentation(p)}
                     style={[styles.option, selected && styles.optionSelected]}
                   >
-                    <View style={[styles.avatar, selected && styles.avatarSelected]}>
-                      <HeroAvatar presentation={p.id} tier="novice" size={52} />
-                    </View>
-                    <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>
-                      {p.label}
-                    </Text>
-                  </Pressable>
+                    <HeroAvatar presentation={p} tier="pathfinder" size={64} />
+                    <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>{t(`choose.${p}`)}</Text>
+                  </PressableScale>
                 );
               })}
             </View>
-          </View>
+          </Animated.View>
         ) : (
-          <View style={styles.slide}>
-            <View
-              style={[styles.hero, { backgroundColor: slide.accent }]}
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-            >
-              <Text style={styles.heroGlyph}>{['✦', '⚔', '✺'][step] ?? '✦'}</Text>
+          <Animated.View style={[styles.slide, animStyle]}>
+            <View style={[styles.stage, { backgroundColor: slide.deep }]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <View style={[styles.halo, { backgroundColor: slide.accent }]} />
+              {slide.key === 'launch' && <AnimatedHero presentation={presentation} tier="luminary" size={184} />}
+              {slide.key === 'dragons' && <DragonSprite colorId="violet" size={168} />}
+              {slide.key === 'grow' && <Wisp stage="phoenixling" size={132} />}
             </View>
-            <Text style={styles.badge}>{slide.badge}</Text>
-            <Text style={styles.title}>{slide.title}</Text>
-            <Text style={styles.subtitle}>{slide.body}</Text>
-          </View>
+            <Text style={[styles.badge, { color: slide.accent }]}>{t(`${slide.key}.badge`)}</Text>
+            <Text style={styles.title}>{t(`${slide.key}.title`)}</Text>
+            <Text style={styles.subtitle}>{t(`${slide.key}.body`)}</Text>
+          </Animated.View>
         )}
       </View>
 
-      {/* Dots */}
       <View style={styles.dots} accessibilityElementsHidden>
         {Array.from({ length: SLIDES.length + 1 }).map((_, i) => (
-          <View
-            key={i}
-            style={[styles.dot, i === step && styles.dotActive, { width: i === step ? 24 : 8 }]}
-          />
+          <View key={i} style={[styles.dot, i === step && styles.dotActive, { width: i === step ? 24 : 8 }]} />
         ))}
       </View>
 
-      {/* Controls */}
       <View style={styles.controls}>
-        {isChoiceStep ? (
-          <PrimaryButton
-            label="Begin your journey"
-            variant="action"
-            onPress={handleBegin}
-            loading={busy}
-          />
+        {isChoice ? (
+          <PrimaryButton label={t('begin')} variant="action" onPress={() => void handleBegin()} loading={busy} />
         ) : (
-          <PrimaryButton label="Continue" onPress={handleNext} />
+          <PrimaryButton label={t('continue')} onPress={() => go(Math.min(step + 1, lastIndex))} />
         )}
-
-        {step > 0 ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-            onPress={handleBack}
-            style={styles.backBtn}
-          >
-            <Text style={styles.backText}>Back</Text>
-          </Pressable>
-        ) : (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Skip onboarding"
-            onPress={() => setStep(lastIndex)}
-            style={styles.backBtn}
-          >
-            <Text style={styles.backText}>Skip</Text>
-          </Pressable>
-        )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={step > 0 ? t('back') : t('skip')}
+          onPress={() => (step > 0 ? go(Math.max(step - 1, 0)) : go(lastIndex))}
+          style={styles.backBtn}
+        >
+          <Text style={styles.backText}>{step > 0 ? t('back') : t('skip')}</Text>
+        </Pressable>
       </View>
+
+      {/* Launch flourish while entering the app. */}
+      {busy && !reduced && <ConfettiBurst count={28} />}
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  progressTrack: {
-    height: 6,
-    borderRadius: radii.pill,
-    backgroundColor: colors.violetSoft,
-    overflow: 'hidden',
-    marginTop: spacing.md,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: radii.pill,
-    backgroundColor: colors.identity,
-  },
-  body: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  slide: {
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  hero: {
-    width: 180,
-    height: 180,
+  progressTrack: { height: 6, borderRadius: radii.pill, backgroundColor: colors.violetSoft, overflow: 'hidden', marginTop: spacing.md },
+  progressFill: { height: '100%', borderRadius: radii.pill },
+  body: { flex: 1, justifyContent: 'center' },
+  slide: { alignItems: 'center', gap: spacing.md },
+  stage: {
+    width: 240,
+    height: 240,
     borderRadius: radii.xl,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
+    overflow: 'hidden',
   },
-  heroGlyph: {
-    fontSize: 72,
-    color: colors.textOnBrand,
-  },
-  badge: {
-    ...typography.label,
-    letterSpacing: 1.5,
-    // violetDeep ink for AA contrast on the light surface.
-    color: colors.violetDeep,
-  },
-  title: {
-    ...typography.heading,
-    color: colors.textPrimary,
-    textAlign: 'center',
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: spacing.sm,
-  },
-  choiceWrap: {
-    gap: spacing.md,
-    alignItems: 'center',
-  },
-  options: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: spacing.lg,
-  },
-  option: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radii.lg,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    minWidth: 96,
-  },
-  optionSelected: {
-    borderColor: colors.identity,
-    backgroundColor: colors.violetSoft,
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: radii.pill,
-    backgroundColor: colors.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarSelected: {
-    backgroundColor: colors.identity,
-  },
-  avatarGlyph: {
-    fontSize: 24,
-    color: colors.textOnBrand,
-  },
-  optionLabel: {
-    ...typography.label,
-    color: colors.textSecondary,
-  },
-  optionLabelSelected: {
-    color: colors.violetDeep,
-  },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    marginVertical: spacing.lg,
-  },
-  dot: {
-    height: 8,
-    borderRadius: radii.pill,
-    backgroundColor: colors.violetMuted,
-  },
-  dotActive: {
-    backgroundColor: colors.identity,
-  },
-  controls: {
-    gap: spacing.sm,
-    paddingBottom: spacing.md,
-  },
-  backBtn: {
-    alignSelf: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  backText: {
-    ...typography.label,
-    color: colors.textMuted,
-  },
+  halo: { position: 'absolute', width: 150, height: 150, borderRadius: 999, opacity: 0.45 },
+  badge: { ...typography.label, letterSpacing: 1.5 },
+  title: { ...typography.heading, color: colors.textPrimary, textAlign: 'center' },
+  subtitle: { ...typography.body, color: colors.textSecondary, textAlign: 'center', paddingHorizontal: spacing.sm },
+  choiceWrap: { gap: spacing.md, alignItems: 'center' },
+  options: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg },
+  option: { alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderRadius: radii.lg, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface, minWidth: 96 },
+  optionSelected: { borderColor: colors.identity, backgroundColor: colors.violetSoft },
+  optionLabel: { ...typography.label, color: colors.textSecondary },
+  optionLabelSelected: { color: colors.violetDeep },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: spacing.xs, marginVertical: spacing.lg },
+  dot: { height: 8, borderRadius: radii.pill, backgroundColor: colors.violetMuted },
+  dotActive: { backgroundColor: colors.identity },
+  controls: { gap: spacing.sm, paddingBottom: spacing.md },
+  backBtn: { alignSelf: 'center', paddingVertical: spacing.sm, paddingHorizontal: spacing.lg },
+  backText: { ...typography.label, color: colors.textMuted },
 });

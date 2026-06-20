@@ -8,5 +8,9 @@ export {
   canUseManagedCloudAI,
   canUseCosmetics,
   canUseCloudSync,
+  canUsePlusBadge,
+  canUseAdvancedInsights,
+  canUseAiCoach,
+  canUseProjectsUnlimited,
 } from './entitlements';
 export type { Feature, FreeFeature, PremiumFeature, Entitlements } from './entitlements';

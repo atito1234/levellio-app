@@ -1,0 +1,24 @@
+{
+  "title": "AI in Levellio",
+  "intro": "Levellio works fully without AI. When you want a boost you're always in control — and your data stays yours.",
+  "onDevice": {
+    "title": "On-device · default",
+    "body": "Works entirely on your phone — instant, private, no account or internet needed. It personalizes quests with a lightweight on-device helper (not a large model), so it stays fast and fully private."
+  },
+  "cloud": {
+    "title": "Cloud · your own key",
+    "body": "Want richer suggestions? Add your own Gemini, OpenAI, or Anthropic key in Settings. You provide the key; we never see it — it's stored only in your phone's secure keychain."
+  },
+  "coach": {
+    "title": "AI Coach · Plus",
+    "body": "Plus members can let AI enrich the “Confront your dragon” coaching using your cloud key. The curated coaching is always free."
+  },
+  "local": {
+    "title": "Advanced · run a model on your phone",
+    "body": "Power users can download an open model like Gemma in Google AI Edge Gallery and run it privately on your device. If you host a local OpenAI-compatible server, you can point the custom key endpoint at it. This is an optional setup outside the app.",
+    "steps": "1. Install Google AI Edge Gallery   2. Download a model (e.g. Gemma)   3. Chat privately on-device — nothing leaves your phone."
+  },
+  "ctaSettings": "Choose your AI in Settings",
+  "ctaGallery": "Open Google AI Edge Gallery",
+  "learnMore": "How AI works"
+}

@@ -12,6 +12,10 @@ describe('EN paywall copy matches the honesty-gated config', () => {
     expect(en.freeFeatures).toEqual(getPlan('free').features);
   });
 
+  it('plus features match PLAN_CONFIG', () => {
+    expect(en.plusFeatures).toEqual(getPlan('premium').features);
+  });
+
   it('free tagline matches PLAN_CONFIG', () => {
     expect(en.freeTagline).toBe(getPlan('free').tagline);
   });

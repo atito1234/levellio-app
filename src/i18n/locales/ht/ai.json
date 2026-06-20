@@ -1,0 +1,24 @@
+{
+  "title": "IA nan Levellio",
+  "intro": "Levellio mache nèt san IA. Lè ou vle yon koutmen, se ou ki kontwole — epi done ou rete pou ou.",
+  "onDevice": {
+    "title": "Sou aparèy la · default",
+    "body": "Li mache nèt sou telefòn ou — rapid, prive, san kont ni entènèt. Li pèsonalize keyès yo ak yon ti asistan sou aparèy la (pa yon gwo modèl), kidonk li rapid epi totalman prive."
+  },
+  "cloud": {
+    "title": "Nway · pwòp kle ou",
+    "body": "Ou vle pi bon sijesyon? Mete pwòp kle Gemini, OpenAI, oswa Anthropic ou nan Paramèt. Se ou ki bay kle a; nou pa janm wè l — li sere sèlman nan kle sekirite telefòn ou."
+  },
+  "coach": {
+    "title": "Antrenè IA · Plus",
+    "body": "Manm Plus yo ka kite IA anrichi kòdjòl “Afwonte dragon ou” ak kle nway ou. Kòdjòl ki pare a toujou gratis."
+  },
+  "local": {
+    "title": "Avanse · fè yon modèl mache sou telefòn ou",
+    "body": "Itilizatè avanse yo ka telechaje yon modèl ouvè tankou Gemma nan Google AI Edge Gallery epi fè l mache an prive sou aparèy la. Si ou gen yon sèvè lokal konpatib ak OpenAI, ou ka pwente endpoint kle pèsonalize a sou li. Sa a se yon konfigirasyon opsyonèl andeyò aplikasyon an.",
+    "steps": "1. Enstale Google AI Edge Gallery   2. Telechaje yon modèl (egz. Gemma)   3. Pale an prive sou aparèy la — anyen pa kite telefòn ou."
+  },
+  "ctaSettings": "Chwazi IA ou nan Paramèt",
+  "ctaGallery": "Louvri Google AI Edge Gallery",
+  "learnMore": "Kijan IA a mache"
+}

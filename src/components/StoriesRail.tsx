@@ -1,10 +1,12 @@
-import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Alert, Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 import { HeroAvatar } from '@/components/HeroAvatar';
+import { PressableScale } from '@/components/PressableScale';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useStories } from '@/state/StoriesContext';
 import { useGame } from '@/state/GameContext';
@@ -20,8 +22,23 @@ export function StoriesRail() {
   const navigation = useNavigation<Nav>();
   const { groups, myUid, addStory } = useStories();
   const { character } = useGame();
+  const reduced = useReducedMotion();
 
   const others = groups.filter((g) => g.uid !== myUid);
+
+  // Gentle looping pulse on the "+" to invite the first story.
+  const pulse = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (reduced) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 900, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 900, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [reduced, pulse]);
 
   const onAdd = async () => {
     if (!MEDIA_UPLOADS_ENABLED) {
@@ -40,23 +57,28 @@ export function StoriesRail() {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
       {/* Add to your story (disabled until media is enabled). */}
-      <Pressable onPress={() => void onAdd()} accessibilityRole="button" accessibilityLabel={t('stories:addYourStory')} style={styles.tile}>
+      <PressableScale onPress={() => void onAdd()} accessibilityRole="button" accessibilityLabel={t('stories:addYourStory')} style={styles.tile}>
         <View style={[styles.ring, !MEDIA_UPLOADS_ENABLED && styles.ringMuted]}>
           <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={56} />
-          <View style={styles.plus}>
+          <Animated.View
+            style={[
+              styles.plus,
+              { transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.18] }) }] },
+            ]}
+          >
             <Text style={styles.plusText}>+</Text>
-          </View>
+          </Animated.View>
         </View>
         <Text style={styles.label} numberOfLines={1}>{t('stories:yourStory')}</Text>
-      </Pressable>
+      </PressableScale>
 
       {others.map((g) => (
-        <Pressable key={g.uid} onPress={() => navigation.navigate('StoryViewer', { uid: g.uid })} accessibilityRole="button" style={styles.tile}>
+        <PressableScale key={g.uid} onPress={() => navigation.navigate('StoryViewer', { uid: g.uid })} accessibilityRole="button" style={styles.tile}>
           <View style={[styles.ring, styles.ringActive]}>
             <HeroAvatar presentation={g.presentation ?? 'neutral'} tier="novice" size={56} />
           </View>
           <Text style={styles.label} numberOfLines={1}>{g.displayName}</Text>
-        </Pressable>
+        </PressableScale>
       ))}
     </ScrollView>
   );

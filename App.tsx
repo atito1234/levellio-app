@@ -13,6 +13,7 @@ import { ProjectsProvider } from '@/state/ProjectsContext';
 import { CommunityProvider } from '@/state/CommunityContext';
 import { SettingsProvider } from '@/state/SettingsContext';
 import { SubscriptionProvider } from '@/state/SubscriptionContext';
+import { AccentProvider } from '@/state/AccentContext';
 import { ProfileProvider } from '@/state/ProfileContext';
 import { NotificationsProvider } from '@/state/NotificationsContext';
 import { StoriesProvider } from '@/state/StoriesContext';
@@ -35,6 +36,7 @@ export default function App() {
       <SettingsProvider>
         <AuthProvider>
         <SubscriptionProvider>
+        <AccentProvider>
         <GameProvider>
           <BucketsProvider>
             <CapacitiesProvider>
@@ -68,6 +70,7 @@ export default function App() {
             </CapacitiesProvider>
           </BucketsProvider>
         </GameProvider>
+        </AccentProvider>
         </SubscriptionProvider>
         </AuthProvider>
       </SettingsProvider>

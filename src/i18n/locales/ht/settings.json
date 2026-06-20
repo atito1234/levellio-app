@@ -4,5 +4,14 @@
     "subtitle": "Chwazi lang aplikasyon an",
     "system": "Default sistèm nan",
     "draftBadge": "Bouyon"
+  },
+  "plus": {
+    "title": "Levellio Plus",
+    "founding": "Ou se yon manm fondatè — Plus gratis pandan bèta a 💜",
+    "cta": "Wè Levellio Plus"
+  },
+  "themes": {
+    "title": "Tèm",
+    "subtitle": "Pèsonalize koulè aksan ou"
   }
 }

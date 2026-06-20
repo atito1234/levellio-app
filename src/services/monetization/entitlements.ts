@@ -11,7 +11,16 @@ export const FREE_FEATURES = [
   'on-device-ai',
 ] as const;
 
-export const PREMIUM_FEATURES = ['cloud-ai-managed', 'cosmetics', 'cloud-sync'] as const;
+export const PREMIUM_FEATURES = [
+  'cosmetics',
+  'plus-badge',
+  // Reserved for upcoming Plus perks (not yet listed in user-facing copy):
+  'advanced-insights',
+  'projects-unlimited',
+  'ai-coach',
+  'cloud-ai-managed',
+  'cloud-sync',
+] as const;
 
 export type FreeFeature = (typeof FREE_FEATURES)[number];
 export type PremiumFeature = (typeof PREMIUM_FEATURES)[number];
@@ -34,3 +43,7 @@ export function canUse(feature: Feature, entitlements: Entitlements): boolean {
 export const canUseManagedCloudAI = (e: Entitlements): boolean => canUse('cloud-ai-managed', e);
 export const canUseCosmetics = (e: Entitlements): boolean => canUse('cosmetics', e);
 export const canUseCloudSync = (e: Entitlements): boolean => canUse('cloud-sync', e);
+export const canUsePlusBadge = (e: Entitlements): boolean => canUse('plus-badge', e);
+export const canUseAdvancedInsights = (e: Entitlements): boolean => canUse('advanced-insights', e);
+export const canUseAiCoach = (e: Entitlements): boolean => canUse('ai-coach', e);
+export const canUseProjectsUnlimited = (e: Entitlements): boolean => canUse('projects-unlimited', e);
