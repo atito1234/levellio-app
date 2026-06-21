@@ -144,6 +144,28 @@
     "yoursEdit": "✓ Yours · Edit",
     "addToActivities": "＋ Add to my activities"
   },
+  "contributionMode": {
+    "title": "How did you do this?",
+    "sub": "Both count toward the project — this just shows how.",
+    "detecting": "Checking your location…",
+    "onsiteTitle": "On-site",
+    "onsiteBody": "On the ground, at the project.",
+    "remoteTitle": "From anywhere",
+    "remoteBody": "For my own goal — it still helps.",
+    "suggested": "  · suggested",
+    "suggestedA11y": ". Suggested.",
+    "cancel": "Cancel"
+  },
+  "moveToBucket": {
+    "closeA11y": "Close move to bucket",
+    "title": "Move to bucket",
+    "unfiled": "Unfiled",
+    "bucketSuffix": " bucket",
+    "selectedSuffix": ", selected"
+  },
+  "badge": {
+    "supportsA11y": "Supports {{projects}}"
+  },
   "join": {
     "title": "Join a project",
     "close": "Close",

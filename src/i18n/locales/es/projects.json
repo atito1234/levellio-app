@@ -144,6 +144,28 @@
     "yoursEdit": "✓ Tuya · Editar",
     "addToActivities": "＋ Añadir a mis actividades"
   },
+  "contributionMode": {
+    "title": "¿Cómo lo hiciste?",
+    "sub": "Ambas cuentan para el proyecto — esto solo indica cómo.",
+    "detecting": "Comprobando tu ubicación…",
+    "onsiteTitle": "En el sitio",
+    "onsiteBody": "Sobre el terreno, en el proyecto.",
+    "remoteTitle": "Desde cualquier lugar",
+    "remoteBody": "Para mi propia meta — igual ayuda.",
+    "suggested": "  · sugerido",
+    "suggestedA11y": ". Sugerido.",
+    "cancel": "Cancelar"
+  },
+  "moveToBucket": {
+    "closeA11y": "Cerrar mover a grupo",
+    "title": "Mover a grupo",
+    "unfiled": "Sin clasificar",
+    "bucketSuffix": " grupo",
+    "selectedSuffix": ", seleccionado"
+  },
+  "badge": {
+    "supportsA11y": "Apoya {{projects}}"
+  },
   "join": {
     "title": "Unirse a un proyecto",
     "close": "Cerrar",

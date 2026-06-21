@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography } from '@/theme';
-import { addMonths, buildMonthMatrix, monthLabel, monthOf, WEEKDAY_LABELS, type MonthRef } from '@/lib/calendar';
+import { addMonths, buildMonthMatrix, monthLabel, monthOf, type MonthRef } from '@/lib/calendar';
 import { daySchedule, dayCategoryColors } from '@/lib/scheduleCalendar';
 import type { Quest } from '@/types';
 
@@ -34,6 +35,8 @@ export function MonthCalendar({
   /** When provided, days are tappable to select them. */
   onSelectDay?: (k: string) => void;
 }) {
+  const { t, i18n } = useTranslation('scheduler');
+  const weekShort = t('common:weekdaysShort', { returnObjects: true }) as string[];
   const [monthRef, setMonthRef] = useState<MonthRef>(() => monthOf(new Date(selected ?? todayKey)));
   const weeks = useMemo(() => buildMonthMatrix(monthRef), [monthRef]);
   const summaryFor = (k: string) => daySchedule(k, quests, getPlan(k), doneByDay.get(k) ?? EMPTY);
@@ -41,16 +44,16 @@ export function MonthCalendar({
   return (
     <View style={styles.calCard}>
       <View style={styles.calHead}>
-        <Pressable onPress={() => setMonthRef((r) => addMonths(r, -1))} accessibilityRole="button" accessibilityLabel="Previous month" hitSlop={10}>
+        <Pressable onPress={() => setMonthRef((r) => addMonths(r, -1))} accessibilityRole="button" accessibilityLabel={t('prevMonth')} hitSlop={10}>
           <Text style={styles.nav}>‹</Text>
         </Pressable>
-        <Text style={styles.month}>{monthLabel(monthRef)}</Text>
-        <Pressable onPress={() => setMonthRef((r) => addMonths(r, 1))} accessibilityRole="button" accessibilityLabel="Next month" hitSlop={10}>
+        <Text style={styles.month}>{monthLabel(monthRef, i18n.language)}</Text>
+        <Pressable onPress={() => setMonthRef((r) => addMonths(r, 1))} accessibilityRole="button" accessibilityLabel={t('nextMonth')} hitSlop={10}>
           <Text style={styles.nav}>›</Text>
         </Pressable>
       </View>
       <View style={styles.weekRow}>
-        {WEEKDAY_LABELS.map((d, i) => (
+        {weekShort.map((d, i) => (
           <Text key={i} style={styles.weekday}>{d}</Text>
         ))}
       </View>
@@ -82,7 +85,7 @@ export function MonthCalendar({
                   onPress={() => onSelectDay(key)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: on }}
-                  accessibilityLabel={`${key}, ${s.count} scheduled`}
+                  accessibilityLabel={t('dayScheduledA11y', { day: key, count: s.count })}
                   style={[styles.cell, styles.day, on && styles.dayOn, isToday && !on && styles.dayToday]}
                 >
                   {body}
