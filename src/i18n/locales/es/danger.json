@@ -1,0 +1,23 @@
+{
+  "title": "Zona de peligro",
+  "note": "Elimina tu programación y datos. Elige un alcance, luego un nivel. Todo aquí es permanente y",
+  "cannotUndo": "no se puede deshacer",
+  "scope": "ALCANCE",
+  "allDays": "Todos los días",
+  "allDaysLower": "todos los días",
+  "targeting": "Objetivo: {{scope}}",
+  "clearSchedule": { "label": "Borrar programación", "sub": "Desprograma hábitos — hábitos y repeticiones quedan" },
+  "clearRules": { "label": "Borrar programación + reglas de repetición", "sub": "También detiene repeticiones — hábitos quedan" },
+  "deleteAll": { "label": "Eliminar todo", "sub": "Hábitos + todo el historial, permanentemente" },
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "clearScheduleTitle": "¿Borrar programación?",
+  "clearScheduleMsg": "Elimina los hábitos programados para {{scope}}. Tus hábitos y reglas de repetición quedan. Esto no se puede deshacer.",
+  "clearRulesTitle": "¿Borrar programación + reglas de repetición?",
+  "clearRulesMsg": "Elimina los hábitos programados Y detiene las repeticiones para {{scope}} en toda la app. Los hábitos quedan. Esto no se puede deshacer.",
+  "deleteAllTitle": "¿Eliminar todo?",
+  "deleteAllMsg": "Elimina permanentemente los hábitos para {{scope}} Y su historial de sesiones/análisis. Esto no se puede deshacer.",
+  "scheduleCleared": "Programación borrada para {{scope}}.",
+  "rulesCleared": "Programación y reglas de repetición borradas para {{scope}}.",
+  "deletedAll": "Todo eliminado para {{scope}}."
+}

@@ -20,6 +20,72 @@
     "title": "Your Hero",
     "nameLabel": "Your name",
     "namePlaceholder": "What should we call you?",
-    "presentation": "Presentation"
+    "presentation": "Presentation",
+    "female": "Female",
+    "male": "Male",
+    "neutral": "Neutral"
+  },
+  "account": {
+    "title": "Account",
+    "signedIn": "Signed in.",
+    "signedInAs": "Signed in as {{email}}.",
+    "signOut": "Sign out",
+    "signOutConfirmTitle": "Sign out?",
+    "signOutConfirmBody": "You can sign back in anytime.",
+    "cancel": "Cancel",
+    "delete": "Delete account",
+    "deleteHelp": "Permanently deletes your account and your community + project data (memberships, contributions, posts, comments, reactions, follows). This can't be undone.",
+    "deleteConfirmTitle": "Delete your account?",
+    "deleteConfirmBody": "This permanently removes your account and your community + project data. It can't be undone.",
+    "confirmPassword": "Confirm your password",
+    "passwordPlaceholder": "Your password",
+    "deleteForever": "Delete forever",
+    "deleteFailed": "Could not delete your account. Please try again."
+  },
+  "beta": {
+    "title": "You're an early beta member 💜",
+    "note": "Levellio is completely free during the beta. There is nothing to buy, and no payment will ever start without your consent.",
+    "cta": "About Premium (coming soon)"
+  },
+  "ai": {
+    "title": "AI Quest Suggestions",
+    "note": "Levellio is fully usable without AI. On-device mode needs no key and no network. Cloud mode uses your own API key, which we never see.",
+    "mode": "AI mode",
+    "onDevice": "🔒 On-device (Free)",
+    "cloud": "☁️ Cloud · your key (Free)",
+    "provider": "Provider",
+    "keySaved": "✓ API key saved",
+    "noKey": "No API key set",
+    "yourKey": "Your API key",
+    "keyPlaceholder": "Paste your provider API key",
+    "keyHelper": "Stored only in your device's secure keychain. Never logged or uploaded.",
+    "saveKey": "Save key",
+    "clearKey": "Clear key",
+    "onDeviceHelp": "Runs privately on your device. No key or network required.",
+    "noKeyHelp": "Prefer not to manage a key? On-device mode works with no key at all."
+  },
+  "community": {
+    "title": "Community & feedback",
+    "note": "Community Projects let you build habits together toward a shared, real-world goal. These controls are yours — turn them on when you want them.",
+    "haptics": "Haptic feedback",
+    "showWorld": "Show World Projects on Today",
+    "notifyWorld": "Notify me about world milestones",
+    "prepGoals": "Prep goals feed project progress",
+    "prepHelp": "When you pick a personal goal to \"prepare\" for a project goal: ON makes its habits count toward the project goal's progress; OFF just shows it as a reminder."
+  },
+  "insights": {
+    "title": "Habit insights",
+    "note": "Levellio keeps simple notes on your device about how your habits form, so a future update can show you insights. Nothing is uploaded — no analytics, no accounts. You choose exactly what's recorded.",
+    "recordProvenance": "Remember how buckets are formed",
+    "recordContribution": "Track which activities build which buckets",
+    "includeContext": "Include activity details (category, difficulty, XP)",
+    "includeSourceActivities": "Include which activities inspired a bucket",
+    "includeTimestamps": "Keep exact timestamps",
+    "recordSession": "Record activity sessions (duration, time of day)",
+    "includeLocation": "Capture location & speed (needs permission)"
+  },
+  "about": {
+    "title": "About & Legal",
+    "contact": "Contact support"
   }
 }

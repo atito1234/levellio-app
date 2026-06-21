@@ -20,6 +20,72 @@
     "title": "Votre héros",
     "nameLabel": "Votre nom",
     "namePlaceholder": "Comment doit-on vous appeler ?",
-    "presentation": "Présentation"
+    "presentation": "Présentation",
+    "female": "Femme",
+    "male": "Homme",
+    "neutral": "Neutre"
+  },
+  "account": {
+    "title": "Compte",
+    "signedIn": "Connecté.",
+    "signedInAs": "Connecté en tant que {{email}}.",
+    "signOut": "Se déconnecter",
+    "signOutConfirmTitle": "Se déconnecter ?",
+    "signOutConfirmBody": "Vous pouvez vous reconnecter à tout moment.",
+    "cancel": "Annuler",
+    "delete": "Supprimer le compte",
+    "deleteHelp": "Supprime définitivement votre compte et vos données communauté + projets (adhésions, contributions, publications, commentaires, réactions, abonnements). Irréversible.",
+    "deleteConfirmTitle": "Supprimer votre compte ?",
+    "deleteConfirmBody": "Ceci supprime définitivement votre compte et vos données communauté + projets. Irréversible.",
+    "confirmPassword": "Confirmez votre mot de passe",
+    "passwordPlaceholder": "Votre mot de passe",
+    "deleteForever": "Supprimer définitivement",
+    "deleteFailed": "Impossible de supprimer votre compte. Veuillez réessayer."
+  },
+  "beta": {
+    "title": "Vous êtes un membre bêta de la première heure 💜",
+    "note": "Levellio est entièrement gratuit pendant la bêta. Il n'y a rien à acheter, et aucun paiement ne démarrera sans votre consentement.",
+    "cta": "À propos de Premium (bientôt)"
+  },
+  "ai": {
+    "title": "Suggestions de quêtes par IA",
+    "note": "Levellio est entièrement utilisable sans IA. Le mode sur l'appareil ne nécessite ni clé ni réseau. Le mode cloud utilise votre propre clé API, que nous ne voyons jamais.",
+    "mode": "Mode IA",
+    "onDevice": "🔒 Sur l'appareil (Gratuit)",
+    "cloud": "☁️ Cloud · votre clé (Gratuit)",
+    "provider": "Fournisseur",
+    "keySaved": "✓ Clé API enregistrée",
+    "noKey": "Aucune clé API définie",
+    "yourKey": "Votre clé API",
+    "keyPlaceholder": "Collez la clé API de votre fournisseur",
+    "keyHelper": "Stockée uniquement dans le trousseau sécurisé de votre appareil. Jamais journalisée ni téléversée.",
+    "saveKey": "Enregistrer la clé",
+    "clearKey": "Effacer la clé",
+    "onDeviceHelp": "Fonctionne en privé sur votre appareil. Aucune clé ni réseau requis.",
+    "noKeyHelp": "Vous préférez ne pas gérer de clé ? Le mode sur l'appareil fonctionne sans aucune clé."
+  },
+  "community": {
+    "title": "Communauté et retours",
+    "note": "Les Projets communautaires vous permettent de bâtir des habitudes ensemble vers un objectif concret partagé. Ces réglages vous appartiennent — activez-les quand vous voulez.",
+    "haptics": "Retour haptique",
+    "showWorld": "Afficher les Projets du monde sur Aujourd'hui",
+    "notifyWorld": "M'avertir des jalons mondiaux",
+    "prepGoals": "Les objectifs de prépa nourrissent le projet",
+    "prepHelp": "Quand vous choisissez un objectif personnel pour « préparer » un objectif de projet : ON fait compter ses habitudes dans la progression du projet ; OFF l'affiche seulement comme un rappel."
+  },
+  "insights": {
+    "title": "Analyses d'habitudes",
+    "note": "Levellio garde de simples notes sur votre appareil sur la formation de vos habitudes, pour qu'une future mise à jour puisse vous montrer des analyses. Rien n'est téléversé — pas d'analytique, pas de comptes. Vous choisissez exactement ce qui est enregistré.",
+    "recordProvenance": "Se souvenir comment les groupes se forment",
+    "recordContribution": "Suivre quelles activités construisent quels groupes",
+    "includeContext": "Inclure les détails d'activité (catégorie, difficulté, XP)",
+    "includeSourceActivities": "Inclure les activités qui ont inspiré un groupe",
+    "includeTimestamps": "Conserver les horodatages exacts",
+    "recordSession": "Enregistrer les séances (durée, moment de la journée)",
+    "includeLocation": "Capturer la position et la vitesse (autorisation requise)"
+  },
+  "about": {
+    "title": "À propos et mentions légales",
+    "contact": "Contacter le support"
   }
 }

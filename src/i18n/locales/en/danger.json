@@ -1,0 +1,23 @@
+{
+  "title": "Danger zone",
+  "note": "Delete your scheduling and data. Choose a scope, then a level. Everything here is permanent and",
+  "cannotUndo": "cannot be undone",
+  "scope": "SCOPE",
+  "allDays": "All days",
+  "allDaysLower": "all days",
+  "targeting": "Targeting: {{scope}}",
+  "clearSchedule": { "label": "Clear schedule", "sub": "Unschedule habits — habits & repeats stay" },
+  "clearRules": { "label": "Clear schedule + repeat rules", "sub": "Also stop repeats — habits stay" },
+  "deleteAll": { "label": "Delete everything", "sub": "Habits + all history, permanently" },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "clearScheduleTitle": "Clear schedule?",
+  "clearScheduleMsg": "Removes planned habits for {{scope}}. Your habits and repeat rules stay. This cannot be undone.",
+  "clearRulesTitle": "Clear schedule + repeat rules?",
+  "clearRulesMsg": "Removes planned habits AND stops repeats for {{scope}} across the whole app. Habits themselves stay. This cannot be undone.",
+  "deleteAllTitle": "Delete everything?",
+  "deleteAllMsg": "Permanently deletes the habits for {{scope}} AND their session/analytics history. This cannot be undone.",
+  "scheduleCleared": "Schedule cleared for {{scope}}.",
+  "rulesCleared": "Schedule and repeat rules cleared for {{scope}}.",
+  "deletedAll": "Deleted everything for {{scope}}."
+}
