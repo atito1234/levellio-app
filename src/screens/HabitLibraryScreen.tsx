@@ -20,11 +20,16 @@ export function HabitLibraryScreen({ navigation }: Props) {
   const [addedIds, setAddedIds] = useState<string[]>([]);
   const sections = libraryByCategory();
 
+  // Localized habit title (falls back to the stored English when untranslated).
+  const habitTitle = (h: LibraryHabit) => t(`habits:${h.id}`, { defaultValue: h.title });
+
   const handleAdd = async (habit: LibraryHabit) => {
+    const title = habitTitle(habit);
     // Guard against piling up the same daily activity.
-    if (findDuplicateActivity(quests, habit.title)) return;
+    if (findDuplicateActivity(quests, title)) return;
     setAddedIds((prev) => [...prev, habit.id]);
-    await addLibraryHabit(habit);
+    // Store the title in the user's current language so it reads consistently app-wide.
+    await addLibraryHabit({ ...habit, title });
   };
 
   return (
@@ -42,11 +47,11 @@ export function HabitLibraryScreen({ navigation }: Props) {
             </Text>
             {section.habits.map((habit) => {
               // "Added" if added this session OR already on the user's list.
-              const added = addedIds.includes(habit.id) || findDuplicateActivity(quests, habit.title) !== undefined;
+              const added = addedIds.includes(habit.id) || findDuplicateActivity(quests, habitTitle(habit)) !== undefined;
               return (
                 <View key={habit.id} style={styles.row}>
                   <View style={styles.info}>
-                    <Text style={styles.title}>{habit.title}</Text>
+                    <Text style={styles.title}>{habitTitle(habit)}</Text>
                     <View style={styles.meta}>
                       <DifficultyBadge difficulty={habit.difficulty} />
                       <Text style={styles.xp}>+{QUEST_XP[habit.difficulty]} XP</Text>
@@ -55,7 +60,7 @@ export function HabitLibraryScreen({ navigation }: Props) {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={
-                      added ? t('library.addedA11y', { title: habit.title }) : t('library.addA11y', { title: habit.title })
+                      added ? t('library.addedA11y', { title: habitTitle(habit) }) : t('library.addA11y', { title: habitTitle(habit) })
                     }
                     accessibilityState={{ disabled: added }}
                     disabled={added}

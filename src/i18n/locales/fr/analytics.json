@@ -1,0 +1,103 @@
+{
+  "a11yBack": "Retour",
+  "kicker": "TES STATISTIQUES",
+  "title": "Sur la bonne voie ?",
+  "loading": "Lecture de ton parcours…",
+  "week": {
+    "title": "Cette semaine",
+    "count": "{{done}}/7 jours",
+    "a11yActive": "{{day}} actif",
+    "a11yRest": "{{day}} repos"
+  },
+  "counter": {
+    "daysAccomplished": "jours accomplis",
+    "dayStreak": "jours de série",
+    "activities": "activités"
+  },
+  "feel": {
+    "title": "Le ressenti",
+    "average": "{{value}}/5",
+    "body_one": "Sur {{count}} séance notée, tes habitudes te semblent {{word}}{{trend}}{{best}}",
+    "body_other": "Sur {{count}} séances notées, tes habitudes te semblent {{word}}{{trend}}{{best}}",
+    "trendUp": " — et en hausse ces derniers temps.",
+    "trendDown": " — un peu en baisse ces derniers temps.",
+    "trendFlat": ".",
+    "best": " Tu notes {{title}} le plus haut.",
+    "wordExcellent": "excellentes",
+    "wordGood": "bonnes",
+    "wordOkay": "correctes",
+    "wordGrind": "comme une corvée"
+  },
+  "confidence": {
+    "sub": "Chaque analyse est affichée — la fiabilité grandit à mesure que tes jours s’accumulent ({{days}} pour l’instant)."
+  },
+  "sections": {
+    "data": "CE QUE DISENT TES DONNÉES",
+    "repetition": "DE LA RÉPÉTITION À L’HABITUDE",
+    "ring": "POURQUOI L’ANNEAU FONCTIONNE"
+  },
+  "status": {
+    "graduated": "🏅 Habitude débloquée",
+    "solidified": "🌱 Bien ancrée",
+    "building": "En construction",
+    "new": "Tout juste commencé"
+  },
+  "journey": {
+    "a11y": "Parcours de {{title}}. {{status}}. Voir les détails",
+    "dayInRow": "Jour {{days}} d’affilée",
+    "startAgain": "Recommence aujourd’hui",
+    "runsOnOwn": "tourne tout seul",
+    "towardAutomatic": "{{value}}% vers l’automatisme",
+    "view": "voir ›"
+  },
+  "forecast": {
+    "title": "Prévision",
+    "yourTitle": "Ta prévision",
+    "plusTag": "✦ Plus",
+    "lockedBody": "Découvre quand ta prochaine analyse, tes séries et l’automatisme arriveront à ton rythme actuel.",
+    "cta": "Débloque avec Levellio Plus ›",
+    "nextUnlockPrefix": "À ton rythme actuel, tu débloqueras ",
+    "etaSoon": "d’un jour à l’autre",
+    "eta_one": "dans environ {{count}} jour",
+    "eta_other": "dans environ {{count}} jours",
+    "etaKeepGoing": "à force de continuer",
+    "allUnlocked": "Tous les paliers d’analyse sont débloqués — tu joues dans la cour des grands. 🛡️",
+    "autoPrefix": "L’automatisme (~66 jours) ",
+    "autoWithinReach": "est à portée de main",
+    "autoAway_one": "est à environ {{count}} jour actif",
+    "autoAway_other": "est à environ {{count}} jours actifs",
+    "autoBuilds": "se construit à chaque jour actif",
+    "autoPace_one": " à {{count}} jour actif/semaine.",
+    "autoPace_other": " à {{count}} jours actifs/semaine."
+  },
+  "insight": {
+    "streakActive": "Tu es sur une série de {{streak}} jours. Ta plus longue série jusqu’ici est de {{longest}}.",
+    "streakReset": "Ta série est repartie à zéro — ta plus longue série était de {{longest}}. Une victoire aujourd’hui lance la suivante.",
+    "days_one": "{{count}} jour",
+    "days_other": "{{count}} jours",
+    "rhythmEmpty": "Continue à enregistrer avec le minuteur pour révéler ton meilleur jour et ta meilleure heure.",
+    "rhythmDayTime": "Tu te montres surtout le {{day}}, vers {{hour}}. Empile de nouvelles habitudes là — l’élan est de ton côté.",
+    "rhythmDay": "Tu te montres surtout le {{day}}. Empile de nouvelles habitudes là — l’élan est de ton côté.",
+    "rhythmTime": "Tu te montres surtout vers {{hour}}. Empile de nouvelles habitudes là — l’élan est de ton côté.",
+    "anchorEmpty": "Termine quelques séances pour trouver ton habitude d’ancrage.",
+    "anchor_one": "{{title}} est ton ancrage — {{count}} séance enregistrée. Les habitudes d’ancrage facilitent le reste.",
+    "anchor_other": "{{title}} est ton ancrage — {{count}} séances enregistrées. Les habitudes d’ancrage facilitent le reste.",
+    "mixEmpty": "À mesure que tu enregistres dans différents domaines, ton focus apparaîtra ici.",
+    "mixIntro_one": "L’essentiel de ton énergie va à {{label}} ({{count}} séance).",
+    "mixIntro_other": "L’essentiel de ton énergie va à {{label}} ({{count}} séances).",
+    "mixGoal": " Ça nourrit directement ton objectif « {{goal}} ».",
+    "mixNoGoal": " Relie-le à un objectif pour qu’il compte double.",
+    "resilienceIntro": "Ta plus longue série sans interruption est de {{longest}} jours. ",
+    "resilienceAtBest": "Tu es à ton meilleur niveau en ce moment — protège la série.",
+    "resilienceComeback_one": "Tu l’as déjà fait, donc tu peux recommencer — tu en es à {{count}} jour maintenant.",
+    "resilienceComeback_other": "Tu l’as déjà fait, donc tu peux recommencer — tu en es à {{count}} jours maintenant.",
+    "automaticTop_one": "{{title}}, c’est {{count}} jour d’affilée. ",
+    "automaticTop_other": "{{title}}, c’est {{count}} jours d’affilée. ",
+    "automaticNone": "Les habitudes deviennent automatiques avec la répétition. ",
+    "automaticScience": "La recherche suggère que l’automatisme s’installe en moyenne vers 66 jours — mais tu le sentiras avant tout chiffre."
+  },
+  "fullLink": {
+    "a11y": "Voir toutes les analyses d’activité",
+    "text": "📊 Voir toutes les analyses d’activité ›"
+  }
+}

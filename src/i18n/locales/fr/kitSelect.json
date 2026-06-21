@@ -1,0 +1,9 @@
+{
+  "title": "Choisis ton maillot",
+  "note": "Coloris de nations originaux — choisis-en un pour le porter partout où ton héros apparaît.",
+  "classic": "Classique",
+  "classicA11y": "Look classique, sans maillot",
+  "classicA11ySelected": "Look classique, sans maillot, sélectionné",
+  "kitA11y": "{{colorway}}, maillot {{pattern}}",
+  "kitA11ySelected": "{{colorway}}, maillot {{pattern}}, sélectionné"
+}

@@ -1,0 +1,19 @@
+{
+  "back": "Back",
+  "titleFocus": "How this connects",
+  "title": "How your actions connect",
+  "helperFocus": "{{title}} strengthens {{capacities}}. Tap any action to explore.",
+  "helper": "Tap any action to see everything it strengthens.",
+  "capacityLevelA11y": "{{name}} {{level}} percent",
+  "capacityLevelPlusA11y": "{{name}} {{level}} percent, plus {{delta}}",
+  "actionStrengthensA11y": "{{action}} — strengthens {{capacities}}",
+  "legendLight": "light contribution",
+  "legendStrong": "strong contribution",
+  "footnoteSelected": "{{action}} strengthens {{capacities}}.",
+  "footnoteFocus": "Highlighted rings are what this activity builds — and the actions that share them.",
+  "footnote": "Thicker lines mean a stronger effect.",
+  "action_water": "Water",
+  "action_walk": "Walk",
+  "action_breathe": "Breathe",
+  "action_sleep-early": "Sleep early"
+}

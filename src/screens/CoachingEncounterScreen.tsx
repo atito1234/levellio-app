@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, DragonSprite } from '@/components';
@@ -36,6 +37,7 @@ const shadow = {
 } as const;
 
 export function CoachingEncounterScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('coaching');
   const { dragonId = 'procrastination', dragonName, questId, minutesAvailable, blockerId } = route.params ?? {};
   const { quests } = useGame();
   const { goals } = useGoals();
@@ -44,6 +46,7 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
   const entitlements = useEntitlements();
 
   const dragon = getDragon(dragonId, dragonName);
+  const dragonDisplayName = t('dragons:' + dragon.id + '.name', { defaultValue: dragon.name });
   const quest = questId ? quests.find((q) => q.id === questId) : undefined;
   const recentMood = entriesForDragon(dragonId)[0]?.mood;
 
@@ -93,20 +96,20 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
   const journalThis = () =>
     navigation.navigate('JournalComposer', {
       dragonId,
-      dragonName: dragon.name,
+      dragonName: dragonDisplayName,
       ...(questId ? { questIds: [questId] } : {}),
       ...(plan.context ? { prompt: plan.context.prompt } : {}),
-      teaching: `Try: ${tactic.name} — ${tactic.how}${plan.context ? `\n\n${plan.context.teaching}` : ''}`,
+      teaching: `${t('journalTeaching', { name: tactic.name, how: tactic.how })}${plan.context ? `\n\n${plan.context.teaching}` : ''}`,
     });
 
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Close" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('close')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          Confront your dragon
+          {t('title')}
         </Text>
         <View style={styles.chevronSpacer} />
       </View>
@@ -117,16 +120,16 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
           <DragonSprite colorId={dragon.colorId} size={76} />
           <View style={styles.dragonHeadText}>
             <Text style={styles.dragonName} numberOfLines={1}>
-              {dragon.name}
+              {dragonDisplayName}
             </Text>
-            <Text style={styles.blockerLabel}>This sounds like: {plan.blocker.label}</Text>
+            <Text style={styles.blockerLabel}>{t('thisSoundsLike', { label: plan.blocker.label })}</Text>
             <Text style={styles.blockerTell}>“{plan.blocker.tell}”</Text>
           </View>
         </View>
 
         {!revealed ? (
           <View style={[styles.qCard, shadow]}>
-            <Text style={styles.qKicker}>THINK IT THROUGH · {qIndex + 1}/{total}</Text>
+            <Text style={styles.qKicker}>{t('thinkItThrough', { current: qIndex + 1, total })}</Text>
             <Text style={styles.qText}>{question?.text}</Text>
             {question?.followUp && <Text style={styles.qFollow}>{question.followUp}</Text>}
             <View style={styles.dots}>
@@ -137,21 +140,21 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
             <Pressable
               onPress={() => (qIndex < total - 1 ? setQIndex((i) => i + 1) : setRevealed(true))}
               accessibilityRole="button"
-              accessibilityLabel={qIndex < total - 1 ? 'Next question' : 'See the tactic'}
+              accessibilityLabel={qIndex < total - 1 ? t('nextQuestionA11y') : t('seeTacticA11y')}
               style={styles.nextBtn}
             >
-              <Text style={styles.nextText}>{qIndex < total - 1 ? 'Next ›' : 'See a tactic ›'}</Text>
+              <Text style={styles.nextText}>{qIndex < total - 1 ? t('next') : t('seeATactic')}</Text>
             </Pressable>
           </View>
         ) : (
           <View style={[styles.tacticCard, shadow]}>
-            <Text style={styles.qKicker}>TRY THIS</Text>
+            <Text style={styles.qKicker}>{t('tryThis')}</Text>
             <Text style={styles.tacticName}>{tactic.name}</Text>
             <Text style={styles.tacticHow}>{tactic.how}</Text>
-            <Text style={styles.evidence}>🧠 {evidence.principle} ({evidence.source})</Text>
+            <Text style={styles.evidence}>{t('evidence', { principle: evidence.principle, source: evidence.source })}</Text>
             {allTactics.length > 1 && (
-              <Pressable onPress={() => setTIndex((i) => i + 1)} accessibilityRole="button" accessibilityLabel="Try a different tactic" hitSlop={8}>
-                <Text style={styles.altLink}>Try a different tactic ›</Text>
+              <Pressable onPress={() => setTIndex((i) => i + 1)} accessibilityRole="button" accessibilityLabel={t('differentTacticA11y')} hitSlop={8}>
+                <Text style={styles.altLink}>{t('differentTactic')}</Text>
               </Pressable>
             )}
           </View>
@@ -159,11 +162,11 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
       </ScrollView>
 
       <View style={styles.actions}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="I'm ready, back to it" style={styles.cta}>
-          <Text style={styles.ctaText}>⚔️ I’m ready — back to it</Text>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('readyA11y')} style={styles.cta}>
+          <Text style={styles.ctaText}>{t('ready')}</Text>
         </Pressable>
-        <Pressable onPress={journalThis} accessibilityRole="button" accessibilityLabel="Journal this" style={styles.secondary}>
-          <Text style={styles.secondaryText}>📓 Journal this</Text>
+        <Pressable onPress={journalThis} accessibilityRole="button" accessibilityLabel={t('journalThisA11y')} style={styles.secondary}>
+          <Text style={styles.secondaryText}>{t('journalThis')}</Text>
         </Pressable>
       </View>
     </ScreenContainer>

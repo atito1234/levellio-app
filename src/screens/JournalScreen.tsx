@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, HeroAvatar } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -18,18 +20,19 @@ const VIOLET_SOFT = '#EDE9FE';
 const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
-function relativeTime(ms: number): string {
+function relativeTime(ms: number, translate: TFunction): string {
   const diff = Date.now() - ms;
   const min = Math.floor(diff / 60000);
-  if (min < 1) return 'just now';
-  if (min < 60) return `${min}m`;
+  if (min < 1) return translate('time.justNow');
+  if (min < 60) return translate('time.minutes', { n: min });
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h`;
+  if (hr < 24) return translate('time.hours', { n: hr });
   const d = Math.floor(hr / 24);
-  return `${d}d`;
+  return translate('time.days', { n: d });
 }
 
 export function JournalScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('journal');
   const dragonId = route.params?.dragonId;
   const { character } = useGame();
   const { entries } = useJournal();
@@ -42,21 +45,21 @@ export function JournalScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('list.a11yBack')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          Battle journal
+          {t('list.title')}
         </Text>
-        <Pressable onPress={() => navigation.navigate('JournalComposer')} accessibilityRole="button" accessibilityLabel="New reflection" hitSlop={12}>
+        <Pressable onPress={() => navigation.navigate('JournalComposer')} accessibilityRole="button" accessibilityLabel={t('list.a11yNew')} hitSlop={12}>
           <Text style={styles.new}>＋</Text>
         </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Text style={styles.banner}>🔒 Private to you for now — sharing & reactions from others arrive with the community update.</Text>
+        <Text style={styles.banner}>{t('list.banner')}</Text>
         {list.length === 0 ? (
-          <Text style={styles.empty}>No reflections yet. Name what’s stopping you — that’s the first blow.</Text>
+          <Text style={styles.empty}>{t('list.empty')}</Text>
         ) : (
           list.map((e) => <EntryCard key={e.id} entry={e} presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} />)
         )}
@@ -76,10 +79,13 @@ function EntryCard({
   tier: 'novice' | 'pathfinder' | 'luminary';
   kitId?: string;
 }) {
+  const { t } = useTranslation('journal');
   const { addFollowUp } = useJournal();
   const [note, setNote] = useState('');
   const aud = audienceMeta(entry.audience);
+  const audLabel = t(`audience.${entry.audience}.label`);
   const mood = moodMeta(entry.mood);
+  const moodLabel = entry.mood ? t(`mood.${entry.mood}`) : '';
 
   const send = async () => {
     if (note.trim().length === 0) return;
@@ -92,9 +98,9 @@ function EntryCard({
       <View style={styles.cardHead}>
         <HeroAvatar presentation={presentation} tier={tier} kitId={kitId} size={40} />
         <View style={{ flex: 1 }}>
-          <Text style={styles.you}>You</Text>
+          <Text style={styles.you}>{t('card.you')}</Text>
           <Text style={styles.meta}>
-            {aud.icon} {aud.label} · {relativeTime(entry.createdAt)}
+            {aud.icon} {audLabel} · {relativeTime(entry.createdAt, t)}
             {entry.dragonName ? ` · ${entry.dragonName}` : ''}
           </Text>
         </View>
@@ -104,16 +110,16 @@ function EntryCard({
 
       {entry.media &&
         (entry.media.type === 'image' ? (
-          <Image source={{ uri: entry.media.uri }} style={styles.media} accessibilityLabel="Attached photo" />
+          <Image source={{ uri: entry.media.uri }} style={styles.media} accessibilityLabel={t('card.a11yPhoto')} />
         ) : (
           <View style={styles.videoTile}>
-            <Text style={styles.videoTileText}>🎥 Video attached</Text>
+            <Text style={styles.videoTileText}>{t('card.videoAttached')}</Text>
           </View>
         ))}
 
       {mood && (
         <View style={styles.moodRow}>
-          <Text style={styles.moodChip}>{mood.emoji} {mood.label}</Text>
+          <Text style={styles.moodChip}>{mood.emoji} {moodLabel}</Text>
         </View>
       )}
 
@@ -122,7 +128,7 @@ function EntryCard({
           {entry.followUps.map((f) => (
             <View key={f.id} style={styles.note}>
               <Text style={styles.noteText}>{f.text}</Text>
-              <Text style={styles.noteTime}>{relativeTime(f.createdAt)}</Text>
+              <Text style={styles.noteTime}>{relativeTime(f.createdAt, t)}</Text>
             </View>
           ))}
         </View>
@@ -132,13 +138,13 @@ function EntryCard({
         <TextInput
           value={note}
           onChangeText={setNote}
-          placeholder="Add a follow-up note…"
+          placeholder={t('card.notePlaceholder')}
           placeholderTextColor={MUTED}
           style={styles.noteInput}
-          accessibilityLabel="Add a follow-up note"
+          accessibilityLabel={t('card.a11yAddNote')}
         />
-        <Pressable onPress={() => void send()} disabled={note.trim().length === 0} accessibilityRole="button" accessibilityLabel="Save note" style={styles.noteSend}>
-          <Text style={[styles.noteSendText, note.trim().length === 0 && styles.noteSendOff]}>Note</Text>
+        <Pressable onPress={() => void send()} disabled={note.trim().length === 0} accessibilityRole="button" accessibilityLabel={t('card.a11ySaveNote')} style={styles.noteSend}>
+          <Text style={[styles.noteSendText, note.trim().length === 0 && styles.noteSendOff]}>{t('card.noteButton')}</Text>
         </Pressable>
       </View>
     </View>

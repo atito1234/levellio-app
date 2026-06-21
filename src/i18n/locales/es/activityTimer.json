@@ -1,0 +1,22 @@
+{
+  "unavailable": "Esta actividad ya no está disponible.",
+  "goBack": "Volver",
+  "back": "Volver",
+  "inFocus": "EN CONCENTRACIÓN",
+  "focusSession": "SESIÓN DE CONCENTRACIÓN",
+  "remainingA11y": "{{time}} restante",
+  "logged": "Registrado",
+  "inProgress": "en curso",
+  "ready": "listo",
+  "done": "Listo",
+  "doneRingsMoved": "Listo — anillos actualizados ✓",
+  "pause": "Pausar",
+  "resume": "Reanudar",
+  "start": "Empezar",
+  "pauseTimerA11y": "Pausar el temporizador",
+  "startTimerA11y": "Iniciar el temporizador",
+  "finishAndLog": "Terminar y registrar",
+  "finishAndLogA11y": "Terminar y registrar ahora",
+  "justLogIt": "Solo registrar",
+  "justLogItA11y": "Registrar sin cronometrar"
+}

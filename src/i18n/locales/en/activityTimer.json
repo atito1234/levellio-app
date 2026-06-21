@@ -1,0 +1,22 @@
+{
+  "unavailable": "This activity is no longer available.",
+  "goBack": "Go back",
+  "back": "Back",
+  "inFocus": "IN FOCUS",
+  "focusSession": "FOCUS SESSION",
+  "remainingA11y": "{{time}} remaining",
+  "logged": "Logged",
+  "inProgress": "in progress",
+  "ready": "ready",
+  "done": "Done",
+  "doneRingsMoved": "Done — rings moved ✓",
+  "pause": "Pause",
+  "resume": "Resume",
+  "start": "Start",
+  "pauseTimerA11y": "Pause timer",
+  "startTimerA11y": "Start timer",
+  "finishAndLog": "Finish & log",
+  "finishAndLogA11y": "Finish and log now",
+  "justLogIt": "Just log it",
+  "justLogItA11y": "Log without timing"
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PrimaryButton, ScreenContainer } from '@/components';
 import { KitJersey } from '@/components/kitGraphics';
@@ -17,6 +18,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'KitSelect'>;
 
 /** Pick a World Cup nation kit (or the classic look) for the hero avatar. */
 export function KitSelectScreen({ navigation }: Props) {
+  const { t } = useTranslation('kitSelect');
   const { character, setKit } = useGame();
   const currentId = character?.kitId ?? NO_KIT_ID;
 
@@ -24,12 +26,12 @@ export function KitSelectScreen({ navigation }: Props) {
     <ScreenContainer>
       <View style={styles.header}>
         <Text style={styles.title} accessibilityRole="header">
-          Choose your kit
+          {t('title')}
         </Text>
-        <PrimaryButton label="Close" variant="ghost" onPress={() => navigation.goBack()} />
+        <PrimaryButton label={t('common:action.close')} variant="ghost" onPress={() => navigation.goBack()} />
       </View>
       <Text style={styles.note}>
-        Original nation colorways — pick one to wear it everywhere your hero appears.
+        {t('note')}
       </Text>
 
       <ScrollView showsVerticalScrollIndicator contentContainerStyle={styles.grid}>
@@ -84,11 +86,12 @@ function Cell({
 }
 
 function ClassicCell({ selected, onPress }: { selected: boolean; onPress: () => void }) {
+  const { t } = useTranslation('kitSelect');
   return (
     <Cell
       selected={selected}
-      label="Classic"
-      a11yLabel={`Classic look, no kit${selected ? ', selected' : ''}`}
+      label={t('classic')}
+      a11yLabel={selected ? t('classicA11ySelected') : t('classicA11y')}
       onPress={onPress}
     >
       <View style={styles.classicSwatch} />
@@ -97,11 +100,15 @@ function ClassicCell({ selected, onPress }: { selected: boolean; onPress: () => 
 }
 
 function KitCell({ kit, selected, onPress }: { kit: WorldCupKit; selected: boolean; onPress: () => void }) {
+  const { t } = useTranslation('kitSelect');
+  // kitColorway() is generated in the lib (English color naming) — kept as-is.
+  const colorway = kitColorway(kit);
+  const a11yKey = selected ? 'kitA11ySelected' : 'kitA11y';
   return (
     <Cell
       selected={selected}
-      label={kit.nationName}
-      a11yLabel={`${kitColorway(kit)}, ${kit.pattern} kit${selected ? ', selected' : ''}`}
+      label={t(`kits:${kit.id}.name`, { defaultValue: kit.nationName })}
+      a11yLabel={t(a11yKey, { colorway, pattern: kit.pattern })}
       onPress={onPress}
     >
       <KitJersey kit={kit} size={52} />

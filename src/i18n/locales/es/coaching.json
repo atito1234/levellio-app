@@ -1,0 +1,19 @@
+{
+  "close": "Cerrar",
+  "title": "Enfréntate a tu dragón",
+  "thisSoundsLike": "Esto suena a: {{label}}",
+  "thinkItThrough": "PIÉNSALO BIEN · {{current}}/{{total}}",
+  "nextQuestionA11y": "Siguiente pregunta",
+  "seeTacticA11y": "Ver la táctica",
+  "next": "Siguiente ›",
+  "seeATactic": "Ver una táctica ›",
+  "tryThis": "PRUEBA ESTO",
+  "evidence": "🧠 {{principle}} ({{source}})",
+  "differentTacticA11y": "Probar otra táctica",
+  "differentTactic": "Probar otra táctica ›",
+  "readyA11y": "Estoy listo, de vuelta a ello",
+  "ready": "⚔️ Estoy listo — de vuelta a ello",
+  "journalThisA11y": "Anotar esto en el diario",
+  "journalThis": "📓 Anotar esto",
+  "journalTeaching": "Prueba: {{name}} — {{how}}"
+}

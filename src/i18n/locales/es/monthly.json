@@ -1,0 +1,16 @@
+{
+  "a11yBack": "Atrás",
+  "title": "Tu progreso",
+  "a11yInsights": "Ver tus análisis de actividad",
+  "insightsLink": "Análisis ›",
+  "capacitiesNow": "CAPACIDADES AHORA",
+  "a11yCapacity": "{{name}} {{value}} por ciento",
+  "a11yPrevMonth": "Mes anterior",
+  "a11yNextMonth": "Mes siguiente",
+  "a11yDay_one": "{{date}}, {{count}} punto de capacidad. Ver las actividades de este día",
+  "a11yDay_other": "{{date}}, {{count}} puntos de capacidad. Ver las actividades de este día",
+  "legendLess": "Menos",
+  "legendMore": "Más",
+  "footnoteEarned": "{{points}} puntos de capacidad ganados este mes. Cada hábito completado se suma a los días que fortalece.",
+  "footnoteEmpty": "Completa hábitos para iluminar tu mes — cada uno añade puntos de capacidad a ese día."
+}

@@ -1,0 +1,56 @@
+{
+  "a11yBack": "Retour",
+  "kicker": "DE LA RÉPÉTITION À L’HABITUDE",
+  "activityFallback": "Activité",
+  "status": {
+    "graduated": "🏅 Habitude débloquée",
+    "solidified": "🌱 Bien ancrée",
+    "building": "En construction",
+    "new": "Tout juste commencé"
+  },
+  "loading": "Chargement de ton parcours…",
+  "emptyHistory": "Aucune répétition enregistrée. Fais-le une fois pour lancer le chemin — chaque parcours commence au jour un.",
+  "automatic": {
+    "title": "Vers l’automatisme",
+    "pct": "{{value}} %",
+    "dayMarker": "Jour {{n}}",
+    "graduated": "Ça tourne tout seul maintenant — automatisme atteint.",
+    "building": "Jour {{streak}} d’affilée. L’automatisme s’installe en moyenne vers ~{{days}} jours — tu le sentiras avant tout chiffre."
+  },
+  "consistency": {
+    "title": "Ta régularité",
+    "sub": "Jours faits par semaine — 8 dernières semaines"
+  },
+  "pastDays": {
+    "title": "Jours passés",
+    "closed": "{{done}}/{{total}} validés"
+  },
+  "stats": {
+    "dayStreak": "jours de série",
+    "daysClosed": "jours validés",
+    "daysOnPath": "jours sur le chemin"
+  },
+  "chain": {
+    "title": "Ta chaîne",
+    "sub": "Relie les activités que tu fais ensemble — elles alimentent la même onde.",
+    "empty": "Rien de relié pour l’instant.",
+    "a11yOpen": "Ouvrir le parcours de {{title}}",
+    "a11yUnlink": "Délier {{title}}",
+    "powers": "Ensemble vous alimentez : {{caps}}",
+    "a11yLinkAnother": "Relier une autre activité",
+    "linkButton": "＋ Relier une activité"
+  },
+  "actions": {
+    "a11yDoNow": "Fais-le maintenant",
+    "doNow": "Fais-le maintenant ›",
+    "a11yConnects": "Voir comment ça se connecte",
+    "connects": "🔗 Voir comment ça se connecte"
+  },
+  "picker": {
+    "title": "Relier une activité",
+    "a11yDone": "Terminé",
+    "done": "Terminé",
+    "empty": "Aucune autre activité à relier pour l’instant.",
+    "a11yLink": "Relier {{title}}"
+  }
+}

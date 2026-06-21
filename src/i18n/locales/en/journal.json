@@ -1,0 +1,62 @@
+{
+  "list": {
+    "title": "Battle journal",
+    "a11yBack": "Back",
+    "a11yNew": "New reflection",
+    "banner": "🔒 Private to you for now — sharing & reactions from others arrive with the community update.",
+    "empty": "No reflections yet. Name what’s stopping you — that’s the first blow."
+  },
+  "time": {
+    "justNow": "just now",
+    "minutes": "{{n}}m",
+    "hours": "{{n}}h",
+    "days": "{{n}}d"
+  },
+  "card": {
+    "you": "You",
+    "a11yPhoto": "Attached photo",
+    "videoAttached": "🎥 Video attached",
+    "notePlaceholder": "Add a follow-up note…",
+    "a11yAddNote": "Add a follow-up note",
+    "a11ySaveNote": "Save note",
+    "noteButton": "Note"
+  },
+  "composer": {
+    "a11yCancel": "Cancel",
+    "title": "Reflect",
+    "a11yPost": "Post reflection",
+    "post": "Post",
+    "you": "You",
+    "battling": "Battling {{name}}",
+    "battleReflection": "Battle reflection",
+    "teachingLabel": "🧠 WHY THIS MATTERS",
+    "inputPlaceholder": "What’s stopping you from this habit? Name the dragon…",
+    "a11yReflection": "Your reflection",
+    "a11yPhoto": "Attached photo",
+    "videoAttached": "🎥 Video attached",
+    "a11yRemoveMedia": "Remove media",
+    "a11yAddMedia": "Add photo or video",
+    "replaceMedia": "📷 Replace photo / video",
+    "addMedia": "📷 Add photo / video",
+    "feelLabel": "How does this make you feel?",
+    "audienceLabel": "Who can see this?",
+    "audienceNoteSuffix": "Sharing & reactions from others arrive with the community update.",
+    "permTitle": "Photos access needed",
+    "permBody": "Allow photo access in Settings to attach a photo or video.",
+    "mediaErrorTitle": "Couldn’t add media",
+    "mediaErrorBody": "Something went wrong picking that file."
+  },
+  "mood": {
+    "stuck": "Stuck",
+    "anxious": "Anxious",
+    "drained": "Drained",
+    "resisting": "Resisting",
+    "hopeful": "Hopeful",
+    "determined": "Determined"
+  },
+  "audience": {
+    "private": { "label": "Only me", "note": "Stays on your device." },
+    "circle": { "label": "Trusted circle", "note": "Shared with your circle when sharing arrives." },
+    "public": { "label": "Public", "note": "Shared publicly when sharing arrives." }
+  }
+}

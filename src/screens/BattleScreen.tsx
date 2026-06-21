@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst } from '@/components';
@@ -39,6 +40,7 @@ function coinsFor(completed: number): number {
 }
 
 export function BattleScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('battle');
   const { questIds, techniqueId, customMin, dragonId, dragonName } = route.params;
   const { quests, character } = useGame();
   const { recordVictory } = useBattles();
@@ -50,6 +52,9 @@ export function BattleScreen({ route, navigation }: Props) {
   const technique = getTechnique(techniqueId);
   const totalSec = useMemo(() => workSeconds(technique, customMin), [technique, customMin]);
   const dragon = useMemo(() => getDragon(dragonId, dragonName), [dragonId, dragonName]);
+  const dragonDisplayName = t('dragons:' + dragon.id + '.name', { defaultValue: dragon.name });
+  const dragonTaunt = t('dragons:' + dragon.id + '.taunt', { defaultValue: dragon.taunt });
+  const dragonVictory = t('dragons:' + dragon.id + '.victory', { defaultValue: dragon.victory });
   const accent = dragon.colorId === 'teal' ? TEAL : VIOLET;
   const battleQuests = useMemo(
     () => questIds.map((id) => quests.find((q) => q.id === id)).filter((q): q is NonNullable<typeof q> => !!q),
@@ -138,9 +143,9 @@ export function BattleScreen({ route, navigation }: Props) {
     return (
       <ScreenContainer backgroundColor={BG}>
         <View style={styles.center}>
-          <Text style={styles.sub}>These habits are no longer available.</Text>
+          <Text style={styles.sub}>{t('battle.noHabits')}</Text>
           <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" style={styles.secondaryBtn}>
-            <Text style={styles.secondaryText}>Go back</Text>
+            <Text style={styles.secondaryText}>{t('battle.goBack')}</Text>
           </Pressable>
         </View>
       </ScreenContainer>
@@ -169,8 +174,8 @@ export function BattleScreen({ route, navigation }: Props) {
       {won && timings.confetti && <ConfettiBurst />}
       <View style={styles.topbar}>
         {!won && (
-          <Pressable onPress={onRetreat} accessibilityRole="button" accessibilityLabel="Retreat" hitSlop={12}>
-            <Text style={styles.retreat}>Retreat</Text>
+          <Pressable onPress={onRetreat} accessibilityRole="button" accessibilityLabel={t('battle.retreatA11y')} hitSlop={12}>
+            <Text style={styles.retreat}>{t('battle.retreat')}</Text>
           </Pressable>
         )}
       </View>
@@ -180,29 +185,33 @@ export function BattleScreen({ route, navigation }: Props) {
           <>
             <DragonSprite colorId={dragon.colorId} slain size={150} />
             <Text style={[styles.victory, { color: GOLD }]} accessibilityRole="header" accessibilityLiveRegion="polite">
-              ⚔️ Victory!
+              {t('battle.victory')}
             </Text>
-            <Text style={styles.victoryLine}>{dragon.victory}</Text>
+            <Text style={styles.victoryLine}>{dragonVictory}</Text>
             <View style={styles.summary}>
               <Text style={styles.summaryText}>
-                {result!.completed}/{result!.selected} habit{result!.selected === 1 ? '' : 's'} done
-                {result!.totalXp > 0 ? ` · +${result!.totalXp} XP` : ''}
+                {t('battle.summary', {
+                  count: result!.selected,
+                  completed: result!.completed,
+                  selected: result!.selected,
+                  xp: result!.totalXp > 0 ? t('battle.summaryXp', { xp: result!.totalXp }) : '',
+                })}
               </Text>
-              <Text style={styles.summaryCoins}>🪙 +{result!.coins} coins</Text>
+              <Text style={styles.summaryCoins}>{t('battle.summaryCoins', { coins: result!.coins })}</Text>
             </View>
           </>
         ) : (
           <>
-            <Text style={styles.kicker}>{running ? 'IN BATTLE' : 'FACE YOUR DRAGON'}</Text>
+            <Text style={styles.kicker}>{running ? t('battle.inBattle') : t('battle.faceYourDragon')}</Text>
             <Animated.View style={{ transform: [{ translateX: swayX }] }}>
               <DragonSprite colorId={dragon.colorId} healthPct={state.dragonHealthPct} size={150} />
             </Animated.View>
-            <Text style={styles.dragonName}>{dragon.name}</Text>
-            <Text style={styles.taunt}>{dragon.taunt}</Text>
+            <Text style={styles.dragonName}>{dragonDisplayName}</Text>
+            <Text style={styles.taunt}>{dragonTaunt}</Text>
 
             <View
               style={styles.healthTrack}
-              accessibilityLabel={`Dragon health ${Math.round(state.dragonHealthPct)} percent`}
+              accessibilityLabel={t('battle.dragonHealthA11y', { pct: Math.round(state.dragonHealthPct) })}
             >
               <View style={[styles.healthFill, { width: `${Math.max(2, state.dragonHealthPct)}%`, backgroundColor: accent }]} />
             </View>
@@ -217,39 +226,39 @@ export function BattleScreen({ route, navigation }: Props) {
               />
             </View>
 
-            <Text style={styles.clock} accessibilityLabel={`${clock} ${totalSec === null ? 'elapsed' : 'remaining'}`}>
+            <Text style={styles.clock} accessibilityLabel={totalSec === null ? t('battle.clockElapsedA11y', { clock }) : t('battle.clockRemainingA11y', { clock })}>
               {clock}
             </Text>
             <Text style={styles.clockSub}>
               {technique.name}
-              {totalSec === null ? ' · count up' : ''}
+              {totalSec === null ? t('battle.countUp') : ''}
             </Text>
           </>
         )}
       </View>
 
       {won ? (
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Done" style={[styles.primaryBtn, { backgroundColor: accent }]}>
-          <Text style={styles.primaryText}>Done</Text>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('battle.doneA11y')} style={[styles.primaryBtn, { backgroundColor: accent }]}>
+          <Text style={styles.primaryText}>{t('battle.done')}</Text>
         </Pressable>
       ) : (
         <View style={styles.controls}>
           <Pressable
             onPress={running ? pause : start}
             accessibilityRole="button"
-            accessibilityLabel={running ? 'Pause' : elapsed > 0 ? 'Resume' : 'Start battle'}
+            accessibilityLabel={running ? t('battle.pauseA11y') : elapsed > 0 ? t('battle.resumeA11y') : t('battle.startBattleA11y')}
             style={[styles.primaryBtn, { backgroundColor: accent }]}
           >
-            <Text style={styles.primaryText}>{running ? 'Pause' : elapsed > 0 ? 'Resume' : 'Start'}</Text>
+            <Text style={styles.primaryText}>{running ? t('battle.pause') : elapsed > 0 ? t('battle.resume') : t('battle.start')}</Text>
           </Pressable>
           {elapsed > 0 && (
             <Pressable
               onPress={() => void winBattle()}
               accessibilityRole="button"
-              accessibilityLabel="Land the final blow and finish"
+              accessibilityLabel={t('battle.finishA11y')}
               style={styles.secondaryBtn}
             >
-              <Text style={styles.secondaryText}>⚔️ Finish — slay it</Text>
+              <Text style={styles.secondaryText}>{t('battle.finish')}</Text>
             </Pressable>
           )}
         </View>

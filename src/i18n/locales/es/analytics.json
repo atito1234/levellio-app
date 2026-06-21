@@ -1,0 +1,103 @@
+{
+  "a11yBack": "Atrás",
+  "kicker": "TUS ESTADÍSTICAS",
+  "title": "¿Vas por buen camino?",
+  "loading": "Leyendo tu recorrido…",
+  "week": {
+    "title": "Esta semana",
+    "count": "{{done}}/7 días",
+    "a11yActive": "{{day}} activo",
+    "a11yRest": "{{day}} descanso"
+  },
+  "counter": {
+    "daysAccomplished": "días cumplidos",
+    "dayStreak": "días de racha",
+    "activities": "actividades"
+  },
+  "feel": {
+    "title": "Cómo se siente",
+    "average": "{{value}}/5",
+    "body_one": "En {{count}} sesión valorada, tus hábitos se sienten {{word}}{{trend}}{{best}}",
+    "body_other": "En {{count}} sesiones valoradas, tus hábitos se sienten {{word}}{{trend}}{{best}}",
+    "trendUp": " — y al alza últimamente.",
+    "trendDown": " — bajando un poco últimamente.",
+    "trendFlat": ".",
+    "best": " Valoras {{title}} como lo más alto.",
+    "wordExcellent": "excelentes",
+    "wordGood": "bien",
+    "wordOkay": "regular",
+    "wordGrind": "como una carga"
+  },
+  "confidence": {
+    "sub": "Cada análisis se muestra — la confianza crece a medida que suman tus días ({{days}} hasta ahora)."
+  },
+  "sections": {
+    "data": "LO QUE DICEN TUS DATOS",
+    "repetition": "DE LA REPETICIÓN AL HÁBITO",
+    "ring": "POR QUÉ FUNCIONA EL ANILLO"
+  },
+  "status": {
+    "graduated": "🏅 Hábito desbloqueado",
+    "solidified": "🌱 Bien afianzado",
+    "building": "En construcción",
+    "new": "Recién empezado"
+  },
+  "journey": {
+    "a11y": "Recorrido de {{title}}. {{status}}. Ver detalles",
+    "dayInRow": "Día {{days}} seguido",
+    "startAgain": "Empieza de nuevo hoy",
+    "runsOnOwn": "funciona solo",
+    "towardAutomatic": "{{value}}% hacia lo automático",
+    "view": "ver ›"
+  },
+  "forecast": {
+    "title": "Pronóstico",
+    "yourTitle": "Tu pronóstico",
+    "plusTag": "✦ Plus",
+    "lockedBody": "Ve cuándo llegarán tu próximo análisis, tus rachas y el automatismo a tu ritmo actual.",
+    "cta": "Desbloquea con Levellio Plus ›",
+    "nextUnlockPrefix": "A tu ritmo actual desbloquearás ",
+    "etaSoon": "cualquier día",
+    "eta_one": "en unos {{count}} día",
+    "eta_other": "en unos {{count}} días",
+    "etaKeepGoing": "según sigas apareciendo",
+    "allUnlocked": "Todos los niveles de análisis están desbloqueados — estás en la élite. 🛡️",
+    "autoPrefix": "El automatismo (~66 días) ",
+    "autoWithinReach": "está al alcance",
+    "autoAway_one": "está a unos {{count}} día activo",
+    "autoAway_other": "está a unos {{count}} días activos",
+    "autoBuilds": "se construye con cada día activo",
+    "autoPace_one": " a {{count}} día activo/semana.",
+    "autoPace_other": " a {{count}} días activos/semana."
+  },
+  "insight": {
+    "streakActive": "Llevas una racha de {{streak}} días. Tu racha más larga hasta ahora es de {{longest}}.",
+    "streakReset": "Tu racha se reinició — tu racha más larga fue de {{longest}}. Una victoria hoy empieza la siguiente.",
+    "days_one": "{{count}} día",
+    "days_other": "{{count}} días",
+    "rhythmEmpty": "Sigue registrando con el temporizador para revelar tu mejor día y hora.",
+    "rhythmDayTime": "Apareces más los {{day}}, sobre las {{hour}}. Apila nuevos hábitos ahí — el impulso está de tu lado.",
+    "rhythmDay": "Apareces más los {{day}}. Apila nuevos hábitos ahí — el impulso está de tu lado.",
+    "rhythmTime": "Apareces más sobre las {{hour}}. Apila nuevos hábitos ahí — el impulso está de tu lado.",
+    "anchorEmpty": "Completa unas cuantas sesiones para encontrar tu hábito ancla.",
+    "anchor_one": "{{title}} es tu ancla — {{count}} sesión registrada. Los hábitos ancla hacen más fácil empezar el resto.",
+    "anchor_other": "{{title}} es tu ancla — {{count}} sesiones registradas. Los hábitos ancla hacen más fácil empezar el resto.",
+    "mixEmpty": "A medida que registres en distintas áreas, tu enfoque aparecerá aquí.",
+    "mixIntro_one": "La mayor parte de tu energía va a {{label}} ({{count}} sesión).",
+    "mixIntro_other": "La mayor parte de tu energía va a {{label}} ({{count}} sesiones).",
+    "mixGoal": " Eso alimenta directamente tu meta “{{goal}}”.",
+    "mixNoGoal": " Conéctalo a una meta para que cuente doble.",
+    "resilienceIntro": "Tu racha más larga sin interrupciones es de {{longest}} días. ",
+    "resilienceAtBest": "Estás en tu mejor momento ahora — protege la racha.",
+    "resilienceComeback_one": "Ya lo lograste antes, así que puedes hacerlo de nuevo — ya llevas {{count}} día.",
+    "resilienceComeback_other": "Ya lo lograste antes, así que puedes hacerlo de nuevo — ya llevas {{count}} días.",
+    "automaticTop_one": "{{title}} lleva {{count}} día seguido. ",
+    "automaticTop_other": "{{title}} lleva {{count}} días seguidos. ",
+    "automaticNone": "Los hábitos se vuelven automáticos con la repetición. ",
+    "automaticScience": "La investigación sugiere que el automatismo llega en promedio hacia los 66 días — pero lo sentirás antes de que lo diga cualquier número."
+  },
+  "fullLink": {
+    "a11y": "Ver todos los análisis de actividad",
+    "text": "📊 Ver todos los análisis de actividad ›"
+  }
+}

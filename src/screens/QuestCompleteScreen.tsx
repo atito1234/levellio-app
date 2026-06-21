@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Share, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -23,6 +24,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'QuestComplete'>;
  * Reduced motion gets a graceful static version (final values, no confetti).
  */
 export function QuestCompleteScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('questComplete');
   const reward = route.params?.reward;
   const { character } = useGame();
   const reduced = useReducedMotion();
@@ -73,24 +75,29 @@ export function QuestCompleteScreen({ route, navigation }: Props) {
     return (
       <ScreenContainer backgroundColor={colors.identity}>
         <View style={styles.center}>
-          <Text style={styles.kicker}>QUEST COMPLETE</Text>
-          <PrimaryButton label="Continue" variant="reward" onPress={() => navigation.goBack()} />
+          <Text style={styles.kicker}>{t('kicker')}</Text>
+          <PrimaryButton label={t('continue')} variant="reward" onPress={() => navigation.goBack()} />
         </View>
       </ScreenContainer>
     );
   }
 
   const barWidth = barAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
-  const xpA11y = `You earned ${reward.totalXp} XP${
-    reward.bonusXp > 0 ? `, including a ${reward.bonusXp} XP streak bonus` : ''
-  }${reward.leveledUp ? `, and reached level ${reward.newLevel}` : ''}`;
+  const xpA11y =
+    reward.bonusXp > 0 && reward.leveledUp
+      ? t('xpA11yBonusLevel', { xp: reward.totalXp, bonus: reward.bonusXp, level: reward.newLevel })
+      : reward.bonusXp > 0
+        ? t('xpA11yBonus', { xp: reward.totalXp, bonus: reward.bonusXp })
+        : reward.leveledUp
+          ? t('xpA11yLevel', { xp: reward.totalXp, level: reward.newLevel })
+          : t('xpA11y', { xp: reward.totalXp });
 
   const onShare = async () => {
     try {
       await Share.share({
-        message: `I just earned ${reward.totalXp} XP${
-          reward.leveledUp ? ` and reached level ${reward.newLevel}` : ''
-        } in Levellio! ⚔️✨ Turning real life into an epic quest.`,
+        message: reward.leveledUp
+          ? t('shareMessageLevel', { xp: reward.totalXp, level: reward.newLevel })
+          : t('shareMessage', { xp: reward.totalXp }),
       });
     } catch {
       // user dismissed the share sheet — no-op
@@ -102,7 +109,7 @@ export function QuestCompleteScreen({ route, navigation }: Props) {
       {timings.confetti && <ConfettiBurst />}
 
       <View style={styles.center} accessibilityLiveRegion="polite">
-        <Text style={styles.kicker}>QUEST COMPLETE</Text>
+        <Text style={styles.kicker}>{t('kicker')}</Text>
 
         {/* Hero + companion payoff */}
         <Animated.View style={[styles.heroWrap, { transform: [{ scale: heroScale }] }]}>
@@ -124,29 +131,29 @@ export function QuestCompleteScreen({ route, navigation }: Props) {
             +{displayXp}
           </Text>
           <Text style={styles.xpUnit} accessibilityElementsHidden>
-            XP
+            {t('unit')}
           </Text>
         </View>
         {reward.bonusXp > 0 && (
           <Text style={styles.bonus} accessibilityElementsHidden>
-            🔥 Includes +{reward.bonusXp} streak bonus
+            {t('streakBonus', { bonus: reward.bonusXp })}
           </Text>
         )}
 
         {/* Level-up flourish */}
         {reward.leveledUp && (
           <Animated.View
-            accessibilityLabel={`Level up! You reached level ${reward.newLevel}`}
+            accessibilityLabel={t('levelUpA11y', { level: reward.newLevel })}
             style={[styles.levelUp, { opacity: popAnim, transform: [{ scale: popAnim }] }]}
           >
-            <Text style={styles.levelUpText}>LEVEL UP!</Text>
-            <Text style={styles.levelUpSub}>Level {reward.newLevel}</Text>
+            <Text style={styles.levelUpText}>{t('levelUp')}</Text>
+            <Text style={styles.levelUpSub}>{t('level', { level: reward.newLevel })}</Text>
           </Animated.View>
         )}
 
         {/* Progress bar */}
         <View style={styles.progressWrap}>
-          <Text style={styles.progressLabel}>Level {character.level}</Text>
+          <Text style={styles.progressLabel}>{t('level', { level: character.level })}</Text>
           <View
             style={styles.track}
             accessibilityRole="progressbar"
@@ -155,14 +162,14 @@ export function QuestCompleteScreen({ route, navigation }: Props) {
             <Animated.View style={[styles.fill, { width: barWidth }]} />
           </View>
           <Text style={styles.progressXp}>
-            {character.xp} / {needed} XP
+            {t('progressXp', { current: character.xp, needed })}
           </Text>
         </View>
 
         <View style={styles.actions}>
-          <PrimaryButton label="Share" variant="action" onPress={onShare} style={styles.actionBtn} />
+          <PrimaryButton label={t('share')} variant="action" onPress={onShare} style={styles.actionBtn} />
           <PrimaryButton
-            label="Claim reward"
+            label={t('claimReward')}
             variant="reward"
             onPress={() => navigation.goBack()}
             style={styles.actionBtn}

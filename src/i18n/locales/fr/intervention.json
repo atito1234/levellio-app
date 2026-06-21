@@ -1,0 +1,10 @@
+{
+  "kicker": "UN INSTANT",
+  "cardA11y": "Réfléchis à deux fois avant de partir",
+  "leavingNow": "Tu pars déjà ? {{taunt}}",
+  "fallbackQuestion": "Qu’est-ce qui change dans cinq minutes et qui n’est pas vrai maintenant ?",
+  "faceIt": "🐉 Affronte-le",
+  "faceItA11y": "Affronte-le",
+  "leaveAnyway": "Partir quand même",
+  "leaveAnywayA11y": "Partir quand même"
+}

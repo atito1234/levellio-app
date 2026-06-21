@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PrimaryButton, ScreenContainer, TextField } from '@/components';
 import { BucketIcon } from '@/components/BucketIcon';
@@ -18,6 +19,7 @@ import type { RootStackParamList } from '@/navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'BucketEdit'>;
 
 export function BucketEditScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('bucketEdit');
   const { buckets, assignments, createBucket, renameBucket, restyleBucket, deleteBucket } = useBuckets();
   const editingId = route.params?.bucketId;
   const existing = editingId ? buckets.find((b) => b.id === editingId) : undefined;
@@ -55,9 +57,9 @@ export function BucketEditScreen({ route, navigation }: Props) {
     <ScreenContainer>
       <View style={styles.header}>
         <Text style={styles.title} accessibilityRole="header">
-          {existing ? 'Edit bucket' : 'New bucket'}
+          {existing ? t('titleEdit') : t('titleNew')}
         </Text>
-        <PrimaryButton label="Cancel" variant="ghost" onPress={() => navigation.goBack()} />
+        <PrimaryButton label={t('common:action.cancel')} variant="ghost" onPress={() => navigation.goBack()} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -67,24 +69,24 @@ export function BucketEditScreen({ route, navigation }: Props) {
             <BucketIcon iconId={iconId} size={32} tint={accent} />
           </View>
           <Text style={styles.previewName} numberOfLines={1}>
-            {name.trim() || 'Your bucket'}
+            {name.trim() || t('previewName')}
           </Text>
         </View>
 
         <TextField
-          label="Name"
+          label={t('nameLabel')}
           value={name}
-          onChangeText={(t) => {
-            setName(t);
+          onChangeText={(value) => {
+            setName(value);
             if (error) setError(undefined);
           }}
-          placeholder="e.g. Health, Work, Learning"
+          placeholder={t('namePlaceholder')}
           maxLength={40}
           error={error}
         />
 
-        <Text style={styles.sectionLabel}>Icon</Text>
-        <View style={styles.iconGrid} accessibilityRole="radiogroup" accessibilityLabel="Bucket icon">
+        <Text style={styles.sectionLabel}>{t('iconSection')}</Text>
+        <View style={styles.iconGrid} accessibilityRole="radiogroup" accessibilityLabel={t('iconGroupA11y')}>
           {BUCKET_ICONS.map((icon) => {
             const selected = icon.id === iconId;
             return (
@@ -93,7 +95,7 @@ export function BucketEditScreen({ route, navigation }: Props) {
                 onPress={() => setIconId(icon.id)}
                 accessibilityRole="radio"
                 accessibilityState={{ selected }}
-                accessibilityLabel={`${icon.name} icon`}
+                accessibilityLabel={t('iconA11y', { name: t(`kits:${icon.id}.name`, { defaultValue: icon.name }) })}
                 style={[styles.iconTile, selected && { borderColor: accent, backgroundColor: getBucketColor(colorId).soft }]}
               >
                 <BucketIcon iconId={icon.id} size={24} tint={selected ? accent : colors.textSecondary} />
@@ -102,8 +104,8 @@ export function BucketEditScreen({ route, navigation }: Props) {
           })}
         </View>
 
-        <Text style={styles.sectionLabel}>Color</Text>
-        <View style={styles.colorRow} accessibilityRole="radiogroup" accessibilityLabel="Bucket color">
+        <Text style={styles.sectionLabel}>{t('colorSection')}</Text>
+        <View style={styles.colorRow} accessibilityRole="radiogroup" accessibilityLabel={t('colorGroupA11y')}>
           {BUCKET_COLORS.map((c) => {
             const selected = c.id === colorId;
             return (
@@ -112,7 +114,7 @@ export function BucketEditScreen({ route, navigation }: Props) {
                 onPress={() => setColorId(c.id)}
                 accessibilityRole="radio"
                 accessibilityState={{ selected }}
-                accessibilityLabel={`${c.id} color`}
+                accessibilityLabel={t('colorA11y', { color: t(`colorName.${c.id}`, { defaultValue: c.id }) })}
                 style={[styles.colorDot, { backgroundColor: c.accent }, selected && styles.colorDotSelected]}
               >
                 {selected && <Text style={styles.colorCheck}>✓</Text>}
@@ -121,9 +123,9 @@ export function BucketEditScreen({ route, navigation }: Props) {
           })}
         </View>
 
-        <PrimaryButton label={existing ? 'Save changes' : 'Create bucket'} onPress={handleSave} />
+        <PrimaryButton label={existing ? t('saveChanges') : t('createBucket')} onPress={handleSave} />
         {existing && (
-          <PrimaryButton label="Delete bucket" variant="ghost" onPress={handleDelete} />
+          <PrimaryButton label={t('deleteBucket')} variant="ghost" onPress={handleDelete} />
         )}
       </ScrollView>
     </ScreenContainer>

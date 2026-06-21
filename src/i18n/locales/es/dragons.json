@@ -1,0 +1,44 @@
+{
+  "laziness": {
+    "name": "el Dragón de la Pereza",
+    "short": "Pereza",
+    "taunt": "«Lo harás mañana…»",
+    "victory": "Pereza derrotada — el impulso es tuyo."
+  },
+  "fear": {
+    "name": "el Dragón del Miedo",
+    "short": "Miedo",
+    "taunt": "«¿Y si fracasas?»",
+    "victory": "Miedo derrotado — avanzaste de todos modos."
+  },
+  "unworthiness": {
+    "name": "el Dragón de la Indignidad",
+    "short": "Indignidad",
+    "taunt": "«No eres lo bastante bueno para esto.»",
+    "victory": "Indignidad derrotada — te presentaste por ti mismo."
+  },
+  "tooold": {
+    "name": "el Dragón del «Demasiado Viejo»",
+    "short": "«Demasiado Viejo»",
+    "taunt": "«Es demasiado tarde para cambiar.»",
+    "victory": "«Demasiado Viejo» derrotado — hoy cuenta."
+  },
+  "procrastination": {
+    "name": "el Dragón de la Procrastinación",
+    "short": "Procrastinación",
+    "taunt": "«Solo cinco minutos más…»",
+    "victory": "Procrastinación derrotada — empezaste."
+  },
+  "doubt": {
+    "name": "el Dragón de la Duda",
+    "short": "Duda",
+    "taunt": "«Esto ni siquiera va a funcionar.»",
+    "victory": "Duda derrotada — pruebas en vez de opiniones."
+  },
+  "custom": {
+    "name": "tu Dragón",
+    "short": "Propio",
+    "taunt": "«No puedes vencerme.»",
+    "victory": "Dragón derrotado — bien luchado."
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -25,6 +26,7 @@ const R = (RING - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
 
 export function ActivityTimerScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('activityTimer');
   const { quests, character } = useGame();
   const complete = useCompleteActivity();
   const quest = quests.find((q) => q.id === route.params.questId);
@@ -97,9 +99,9 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
     return (
       <ScreenContainer backgroundColor={BG}>
         <View style={styles.center}>
-          <Text style={styles.sub}>This activity is no longer available.</Text>
+          <Text style={styles.sub}>{t('unavailable')}</Text>
           <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" style={styles.secondaryBtn}>
-            <Text style={styles.secondaryText}>Go back</Text>
+            <Text style={styles.secondaryText}>{t('goBack')}</Text>
           </Pressable>
         </View>
       </ScreenContainer>
@@ -114,13 +116,13 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.kicker}>{running ? 'IN FOCUS' : 'FOCUS SESSION'}</Text>
+        <Text style={styles.kicker}>{running ? t('inFocus') : t('focusSession')}</Text>
         {character && (
           <AnimatedHero
             presentation={character.presentation}
@@ -137,7 +139,7 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
           “{quote.text}”
         </Text>
 
-        <View style={styles.ringStage} accessibilityLabel={`${formatClock(remaining)} remaining`}>
+        <View style={styles.ringStage} accessibilityLabel={t('remainingA11y', { time: formatClock(remaining) })}>
           <Svg width={RING} height={RING} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
             <Circle cx={RING / 2} cy={RING / 2} r={R} stroke={TRACK} strokeWidth={STROKE} fill="none" />
             <G transform={`rotate(-90, ${RING / 2}, ${RING / 2})`}>
@@ -156,41 +158,41 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
           </Svg>
           <View style={styles.clockWrap} pointerEvents="none">
             <Text style={styles.clock}>{logged ? '✓' : formatClock(remaining)}</Text>
-            <Text style={styles.clockSub}>{logged ? 'Logged' : running ? 'in progress' : 'ready'}</Text>
+            <Text style={styles.clockSub}>{logged ? t('logged') : running ? t('inProgress') : t('ready')}</Text>
           </View>
         </View>
       </View>
 
       {logged ? (
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Done" style={[styles.primaryBtn, { backgroundColor: accent }]}>
-          <Text style={styles.primaryText}>Done — rings moved ✓</Text>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('done')} style={[styles.primaryBtn, { backgroundColor: accent }]}>
+          <Text style={styles.primaryText}>{t('doneRingsMoved')}</Text>
         </Pressable>
       ) : (
         <View style={styles.controls}>
           <Pressable
             onPress={running ? pause : start}
             accessibilityRole="button"
-            accessibilityLabel={running ? 'Pause timer' : 'Start timer'}
+            accessibilityLabel={running ? t('pauseTimerA11y') : t('startTimerA11y')}
             style={[styles.primaryBtn, { backgroundColor: accent }]}
           >
-            <Text style={styles.primaryText}>{running ? 'Pause' : remaining < totalSec ? 'Resume' : 'Start'}</Text>
+            <Text style={styles.primaryText}>{running ? t('pause') : remaining < totalSec ? t('resume') : t('start')}</Text>
           </Pressable>
           <View style={styles.secondaryRow}>
             <Pressable
               onPress={() => void finish(elapsed)}
               accessibilityRole="button"
-              accessibilityLabel="Finish and log now"
+              accessibilityLabel={t('finishAndLogA11y')}
               style={styles.secondaryBtn}
             >
-              <Text style={styles.secondaryText}>Finish &amp; log</Text>
+              <Text style={styles.secondaryText}>{t('finishAndLog')}</Text>
             </Pressable>
             <Pressable
               onPress={() => void finish(0)}
               accessibilityRole="button"
-              accessibilityLabel="Log without timing"
+              accessibilityLabel={t('justLogItA11y')}
               style={styles.secondaryBtn}
             >
-              <Text style={styles.secondaryText}>Just log it</Text>
+              <Text style={styles.secondaryText}>{t('justLogIt')}</Text>
             </Pressable>
           </View>
         </View>

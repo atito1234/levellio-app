@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors, spacing, typography } from '@/theme';
 import { minutesToLabel, minutesToParts, partsToMinutes, type Meridiem, type TimeParts } from '@/lib/schedule';
 
@@ -9,6 +10,7 @@ import { minutesToLabel, minutesToParts, partsToMinutes, type Meridiem, type Tim
  * Shared by the QuestEditor and the Add-activity sheet.
  */
 export function TimePicker({ minutes, onChange }: { minutes: number; onChange: (minutes: number) => void }) {
+  const { t } = useTranslation('timePicker');
   const parts = minutesToParts(minutes);
   const set = (next: TimeParts) => onChange(partsToMinutes(next));
   const bumpHour = (dir: 1 | -1) => set({ ...parts, hour12: ((parts.hour12 - 1 + dir + 12) % 12) + 1 });
@@ -18,12 +20,12 @@ export function TimePicker({ minutes, onChange }: { minutes: number; onChange: (
   return (
     <View style={styles.wrap}>
       <View style={styles.picker}>
-        <Stepper label="Hour" value={`${parts.hour12}`} unit="hour" onDown={() => bumpHour(-1)} onUp={() => bumpHour(1)} />
+        <Stepper label={t('hour')} value={`${parts.hour12}`} unit={t('unitHour')} onDown={() => bumpHour(-1)} onUp={() => bumpHour(1)} />
         <Text style={styles.colon}>:</Text>
         <Stepper
-          label="Minute"
+          label={t('minute')}
           value={`${parts.minute}`.padStart(2, '0')}
-          unit="minute"
+          unit={t('unitMinute')}
           onDown={() => bumpMinute(-1)}
           onUp={() => bumpMinute(1)}
         />
@@ -36,7 +38,7 @@ export function TimePicker({ minutes, onChange }: { minutes: number; onChange: (
                 onPress={() => setMeridiem(m)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: active }}
-                accessibilityLabel={m === 'AM' ? 'Morning' : 'Afternoon or evening'}
+                accessibilityLabel={m === 'AM' ? t('amA11y') : t('pmA11y')}
                 style={[styles.meridiemBtn, active && styles.meridiemBtnOn]}
               >
                 <Text style={[styles.meridiemText, active && styles.meridiemTextOn]}>{m}</Text>
@@ -46,7 +48,7 @@ export function TimePicker({ minutes, onChange }: { minutes: number; onChange: (
         </View>
       </View>
       <Text style={styles.scheduledFor} accessibilityLiveRegion="polite">
-        Scheduled for {minutesToLabel(minutes)}
+        {t('scheduledFor', { time: minutesToLabel(minutes) })}
       </Text>
     </View>
   );
@@ -66,15 +68,16 @@ function Stepper({
   onDown: () => void;
   onUp: () => void;
 }) {
+  const { t } = useTranslation('timePicker');
   return (
     <View style={styles.stepper}>
-      <Pressable onPress={onUp} accessibilityRole="button" accessibilityLabel={`Increase ${unit}`} hitSlop={8} style={styles.stepBtn}>
+      <Pressable onPress={onUp} accessibilityRole="button" accessibilityLabel={t('increaseA11y', { unit })} hitSlop={8} style={styles.stepBtn}>
         <Text style={styles.stepBtnText}>＋</Text>
       </Pressable>
-      <Text style={styles.stepValue} accessibilityLabel={`${label} ${value}`}>
+      <Text style={styles.stepValue} accessibilityLabel={t('valueA11y', { label, value })}>
         {value}
       </Text>
-      <Pressable onPress={onDown} accessibilityRole="button" accessibilityLabel={`Decrease ${unit}`} hitSlop={8} style={styles.stepBtn}>
+      <Pressable onPress={onDown} accessibilityRole="button" accessibilityLabel={t('decreaseA11y', { unit })} hitSlop={8} style={styles.stepBtn}>
         <Text style={styles.stepBtnText}>－</Text>
       </Pressable>
     </View>

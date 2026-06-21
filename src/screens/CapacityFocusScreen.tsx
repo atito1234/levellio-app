@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CapacityRing, ScreenContainer } from '@/components';
@@ -25,8 +26,10 @@ const VIOLET_SOFT = '#EDE9FE';
 const MUTED = '#5A5A72';
 
 export function CapacityFocusScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('capacityFocus');
   const capacityId = route.params.capacityId as CapacityId;
   const cap = getCapacity(capacityId);
+  const capName = t('capacities:' + capacityId);
   const { quests } = useGame();
   const { levels } = useCapacities();
   const { getPlan, togglePlanned } = usePlan();
@@ -42,7 +45,7 @@ export function CapacityFocusScreen({ route, navigation }: Props) {
     <Pressable
       onPress={() => navigation.navigate('Ripple', { questId: quest.id })}
       accessibilityRole="button"
-      accessibilityLabel={`${quest.title}${quest.completed ? ', done today' : ', do it now'}`}
+      accessibilityLabel={quest.completed ? t('doneTodayA11y', { title: quest.title }) : t('doItNowA11y', { title: quest.title })}
       style={styles.row}
     >
       <Text style={styles.rowIcon}>{CATEGORY_META[quest.category].icon}</Text>
@@ -50,9 +53,9 @@ export function CapacityFocusScreen({ route, navigation }: Props) {
         <Text style={styles.rowTitle} numberOfLines={1}>
           {quest.title}
         </Text>
-        {quest.scheduledTime !== undefined && <Text style={styles.rowTime}>⏰ {minutesToLabel(quest.scheduledTime)}</Text>}
+        {quest.scheduledTime !== undefined && <Text style={styles.rowTime}>{t('scheduledTime', { time: minutesToLabel(quest.scheduledTime) })}</Text>}
       </View>
-      <Text style={[styles.action, quest.completed && styles.actionDone]}>{quest.completed ? '✓ Done' : 'Do it ›'}</Text>
+      <Text style={[styles.action, quest.completed && styles.actionDone]}>{quest.completed ? t('done') : t('doIt')}</Text>
     </Pressable>
   );
 
@@ -60,7 +63,7 @@ export function CapacityFocusScreen({ route, navigation }: Props) {
     <Pressable
       onPress={() => void togglePlanned(todayK, quest.id)}
       accessibilityRole="button"
-      accessibilityLabel={`Add ${quest.title} to today's plan`}
+      accessibilityLabel={t('addToPlanA11y', { title: quest.title })}
       style={styles.row}
     >
       <Text style={styles.rowIcon}>{CATEGORY_META[quest.category].icon}</Text>
@@ -69,17 +72,17 @@ export function CapacityFocusScreen({ route, navigation }: Props) {
           {quest.title}
         </Text>
       </View>
-      <Text style={styles.addAction}>+ Add</Text>
+      <Text style={styles.addAction}>{t('add')}</Text>
     </Pressable>
   );
 
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
-        <Text style={styles.kicker}>CAPACITY</Text>
+        <Text style={styles.kicker}>{t('kicker')}</Text>
         <View style={styles.chevronSpacer} />
       </View>
 
@@ -91,20 +94,20 @@ export function CapacityFocusScreen({ route, navigation }: Props) {
           </View>
         </View>
         <Text style={styles.title} accessibilityRole="header">
-          {cap.name}
+          {capName}
         </Text>
-        <Text style={styles.sub}>Habits that strengthen {cap.name}</Text>
+        <Text style={styles.sub}>{t('habitsThatStrengthen', { name: capName })}</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {habits.length === 0 ? (
-          <Text style={styles.empty}>No habits feed this capacity yet. Add one that does to grow it.</Text>
+          <Text style={styles.empty}>{t('empty')}</Text>
         ) : (
           <>
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>IN TODAY’S PLAN</Text>
+              <Text style={styles.sectionLabel}>{t('inTodaysPlan')}</Text>
               {inPlan.length === 0 ? (
-                <Text style={styles.sectionHint}>None planned today — add one below to grow {cap.name}.</Text>
+                <Text style={styles.sectionHint}>{t('nonePlanned', { name: capName })}</Text>
               ) : (
                 <View style={styles.rows}>
                   {inPlan.map((q) => (
@@ -116,7 +119,7 @@ export function CapacityFocusScreen({ route, navigation }: Props) {
 
             {notPlanned.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>NOT PLANNED YET</Text>
+                <Text style={styles.sectionLabel}>{t('notPlannedYet')}</Text>
                 <View style={styles.rows}>
                   {notPlanned.map((q) => (
                     <AddRow key={q.id} quest={q} />

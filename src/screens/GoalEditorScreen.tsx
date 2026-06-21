@@ -47,10 +47,12 @@ export function GoalEditorScreen({ route, navigation }: Props) {
   const toggleCategory = (c: QuestCategory) =>
     setCategories((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
 
+  const templateTitle = (tpl: GoalTemplate) => t(`goalTemplates:${tpl.key}`, { defaultValue: tpl.title });
+
   const createFromTemplate = async (tpl: GoalTemplate) => {
     if (saving) return;
     setSaving(true);
-    await addGoal({ title: tpl.title, emoji: tpl.emoji, colorId: tpl.colorId, categories: tpl.categories });
+    await addGoal({ title: templateTitle(tpl), emoji: tpl.emoji, colorId: tpl.colorId, categories: tpl.categories });
     // Seed a few starter habits (deduped via the canonical create path).
     for (const id of tpl.suggestedHabitIds) {
       const habit = HABIT_LIBRARY.find((h) => h.id === id);
@@ -109,11 +111,11 @@ export function GoalEditorScreen({ route, navigation }: Props) {
                   key={tpl.key}
                   onPress={() => void createFromTemplate(tpl)}
                   accessibilityRole="button"
-                  accessibilityLabel={t('createA11y', { title: tpl.title })}
+                  accessibilityLabel={t('createA11y', { title: templateTitle(tpl) })}
                   style={styles.templateCard}
                 >
                   <Text style={styles.templateEmoji}>{tpl.emoji}</Text>
-                  <Text style={styles.templateTitle}>{tpl.title}</Text>
+                  <Text style={styles.templateTitle}>{templateTitle(tpl)}</Text>
                   <Text style={styles.templateAreas} numberOfLines={1}>
                     {tpl.categories.map((c) => t(`categories:${c}`)).join(' · ')}
                   </Text>

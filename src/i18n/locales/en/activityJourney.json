@@ -1,0 +1,56 @@
+{
+  "a11yBack": "Back",
+  "kicker": "FROM REPETITION TO HABIT",
+  "activityFallback": "Activity",
+  "status": {
+    "graduated": "🏅 Habit unlocked",
+    "solidified": "🌱 Locked in",
+    "building": "Building",
+    "new": "Just started"
+  },
+  "loading": "Loading your journey…",
+  "emptyHistory": "No reps logged yet. Do it once to start the path — every journey begins with day one.",
+  "automatic": {
+    "title": "Toward automatic",
+    "pct": "{{value}}%",
+    "dayMarker": "Day {{n}}",
+    "graduated": "This runs on its own now — automaticity reached.",
+    "building": "Day {{streak}} in a row. Automaticity averages ~{{days}} days — you’ll feel it before any number does."
+  },
+  "consistency": {
+    "title": "Your consistency",
+    "sub": "Days done per week — last 8 weeks"
+  },
+  "pastDays": {
+    "title": "Past days",
+    "closed": "{{done}}/{{total}} closed"
+  },
+  "stats": {
+    "dayStreak": "day streak",
+    "daysClosed": "days closed",
+    "daysOnPath": "days on the path"
+  },
+  "chain": {
+    "title": "Your chain",
+    "sub": "Link activities you do together — they power the same ripple.",
+    "empty": "Nothing linked yet.",
+    "a11yOpen": "Open {{title}} journey",
+    "a11yUnlink": "Unlink {{title}}",
+    "powers": "Together you power: {{caps}}",
+    "a11yLinkAnother": "Link another activity",
+    "linkButton": "＋ Link an activity"
+  },
+  "actions": {
+    "a11yDoNow": "Do it now",
+    "doNow": "Do it now ›",
+    "a11yConnects": "See how this connects",
+    "connects": "🔗 See how this connects"
+  },
+  "picker": {
+    "title": "Link an activity",
+    "a11yDone": "Done",
+    "done": "Done",
+    "empty": "No other activities to link yet.",
+    "a11yLink": "Link {{title}}"
+  }
+}

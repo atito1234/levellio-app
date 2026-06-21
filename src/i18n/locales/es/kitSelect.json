@@ -1,0 +1,9 @@
+{
+  "title": "Elige tu camiseta",
+  "note": "Combinaciones de colores de países originales — elige una para lucirla en cada lugar donde aparezca tu héroe.",
+  "classic": "Clásico",
+  "classicA11y": "Look clásico, sin camiseta",
+  "classicA11ySelected": "Look clásico, sin camiseta, seleccionado",
+  "kitA11y": "{{colorway}}, camiseta {{pattern}}",
+  "kitA11ySelected": "{{colorway}}, camiseta {{pattern}}, seleccionado"
+}

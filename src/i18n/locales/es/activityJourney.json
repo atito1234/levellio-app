@@ -1,0 +1,56 @@
+{
+  "a11yBack": "Atrás",
+  "kicker": "DE LA REPETICIÓN AL HÁBITO",
+  "activityFallback": "Actividad",
+  "status": {
+    "graduated": "🏅 Hábito desbloqueado",
+    "solidified": "🌱 Bien afianzado",
+    "building": "En construcción",
+    "new": "Recién empezado"
+  },
+  "loading": "Cargando tu recorrido…",
+  "emptyHistory": "Aún no hay repeticiones registradas. Hazlo una vez para empezar el camino — todo recorrido empieza en el día uno.",
+  "automatic": {
+    "title": "Hacia lo automático",
+    "pct": "{{value}}%",
+    "dayMarker": "Día {{n}}",
+    "graduated": "Ahora funciona solo — automatismo alcanzado.",
+    "building": "Día {{streak}} seguido. El automatismo llega en promedio hacia los ~{{days}} días — lo sentirás antes de que lo diga cualquier número."
+  },
+  "consistency": {
+    "title": "Tu constancia",
+    "sub": "Días hechos por semana — últimas 8 semanas"
+  },
+  "pastDays": {
+    "title": "Días pasados",
+    "closed": "{{done}}/{{total}} cerrados"
+  },
+  "stats": {
+    "dayStreak": "días de racha",
+    "daysClosed": "días cerrados",
+    "daysOnPath": "días en el camino"
+  },
+  "chain": {
+    "title": "Tu cadena",
+    "sub": "Vincula actividades que haces juntas — alimentan la misma onda.",
+    "empty": "Nada vinculado aún.",
+    "a11yOpen": "Abrir el recorrido de {{title}}",
+    "a11yUnlink": "Desvincular {{title}}",
+    "powers": "Juntas alimentáis: {{caps}}",
+    "a11yLinkAnother": "Vincular otra actividad",
+    "linkButton": "＋ Vincular una actividad"
+  },
+  "actions": {
+    "a11yDoNow": "Hazlo ahora",
+    "doNow": "Hazlo ahora ›",
+    "a11yConnects": "Ver cómo se conecta esto",
+    "connects": "🔗 Ver cómo se conecta esto"
+  },
+  "picker": {
+    "title": "Vincular una actividad",
+    "a11yDone": "Listo",
+    "done": "Listo",
+    "empty": "Aún no hay otras actividades para vincular.",
+    "a11yLink": "Vincular {{title}}"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "list": {
+    "title": "Diario de batalla",
+    "a11yBack": "Atrás",
+    "a11yNew": "Nueva reflexión",
+    "banner": "🔒 Privado para ti por ahora — compartir y las reacciones de otros llegan con la actualización de comunidad.",
+    "empty": "Aún no hay reflexiones. Nombra lo que te detiene — ese es el primer golpe."
+  },
+  "time": {
+    "justNow": "ahora mismo",
+    "minutes": "{{n}} min",
+    "hours": "{{n}} h",
+    "days": "{{n}} d"
+  },
+  "card": {
+    "you": "Tú",
+    "a11yPhoto": "Foto adjunta",
+    "videoAttached": "🎥 Vídeo adjunto",
+    "notePlaceholder": "Añade una nota de seguimiento…",
+    "a11yAddNote": "Añadir una nota de seguimiento",
+    "a11ySaveNote": "Guardar nota",
+    "noteButton": "Nota"
+  },
+  "composer": {
+    "a11yCancel": "Cancelar",
+    "title": "Reflexionar",
+    "a11yPost": "Publicar reflexión",
+    "post": "Publicar",
+    "you": "Tú",
+    "battling": "Luchando contra {{name}}",
+    "battleReflection": "Reflexión de batalla",
+    "teachingLabel": "🧠 POR QUÉ IMPORTA",
+    "inputPlaceholder": "¿Qué te detiene con este hábito? Nombra al dragón…",
+    "a11yReflection": "Tu reflexión",
+    "a11yPhoto": "Foto adjunta",
+    "videoAttached": "🎥 Vídeo adjunto",
+    "a11yRemoveMedia": "Quitar archivo",
+    "a11yAddMedia": "Añadir foto o vídeo",
+    "replaceMedia": "📷 Reemplazar foto / vídeo",
+    "addMedia": "📷 Añadir foto / vídeo",
+    "feelLabel": "¿Cómo te hace sentir esto?",
+    "audienceLabel": "¿Quién puede ver esto?",
+    "audienceNoteSuffix": "Compartir y las reacciones de otros llegan con la actualización de comunidad.",
+    "permTitle": "Se necesita acceso a las fotos",
+    "permBody": "Permite el acceso a las fotos en Ajustes para adjuntar una foto o un vídeo.",
+    "mediaErrorTitle": "No se pudo añadir el archivo",
+    "mediaErrorBody": "Algo salió mal al elegir ese archivo."
+  },
+  "mood": {
+    "stuck": "Atascado",
+    "anxious": "Ansioso",
+    "drained": "Agotado",
+    "resisting": "Resistiéndome",
+    "hopeful": "Esperanzado",
+    "determined": "Decidido"
+  },
+  "audience": {
+    "private": { "label": "Solo yo", "note": "Se queda en tu dispositivo." },
+    "circle": { "label": "Círculo de confianza", "note": "Se comparte con tu círculo cuando llegue el compartir." },
+    "public": { "label": "Público", "note": "Se comparte públicamente cuando llegue el compartir." }
+  }
+}

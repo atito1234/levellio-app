@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ConfettiBurst } from '@/components/ConfettiBurst';
 import { useMilestones } from '@/state/MilestonesContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -32,6 +33,7 @@ const KIND_EMOJI: Record<MilestoneKind, string> = {
  * Mounted once near the navigator so it can overlay any screen post-completion.
  */
 export function MilestoneCelebration() {
+  const { t } = useTranslation('milestone');
   const { queue, popQueue } = useMilestones();
   const reduced = useReducedMotion();
   const timings = getCelebrationTimings(reduced);
@@ -74,13 +76,17 @@ export function MilestoneCelebration() {
 
   return (
     <View style={styles.overlay} pointerEvents="box-none">
-      <Pressable style={styles.fill} onPress={popQueue} accessibilityRole="button" accessibilityLabel="Dismiss celebration">
+      <Pressable style={styles.fill} onPress={popQueue} accessibilityRole="button" accessibilityLabel={t('dismissA11y')}>
         {timings.confetti && <ConfettiBurst />}
         <Animated.View
           style={[styles.card, { borderColor, transform: [{ scale }] }]}
           accessible
           accessibilityLiveRegion="polite"
-          accessibilityLabel={`Milestone: ${current.label}${current.detail ? `. ${current.detail}` : ''}`}
+          accessibilityLabel={
+            current.detail
+              ? t('milestoneDetailA11y', { label: current.label, detail: current.detail })
+              : t('milestoneA11y', { label: current.label })
+          }
         >
           <Text style={styles.emoji}>{current.emoji ?? KIND_EMOJI[current.kind]}</Text>
           <Text style={styles.label}>{current.label}</Text>
@@ -111,25 +117,25 @@ export function MilestoneCelebration() {
                   )
                 }
                 accessibilityRole="button"
-                accessibilityLabel="Share your win with members"
+                accessibilityLabel={t('shareWinA11y')}
                 style={[styles.shareBtn, { backgroundColor: TEAL }]}
               >
-                <Text style={styles.shareBtnText}>📣 Share your win</Text>
+                <Text style={styles.shareBtnText}>{t('shareWin')}</Text>
               </Pressable>
               <View style={styles.quickRow}>
                 <Pressable onPress={() => go(() => navigationRef.navigate('Main', { screen: 'Feed' }))} accessibilityRole="button" style={styles.quickBtn}>
-                  <Text style={styles.quickText}>📰 Feed</Text>
+                  <Text style={styles.quickText}>{t('feed')}</Text>
                 </Pressable>
                 <Pressable onPress={() => go(() => navigationRef.navigate('Plan'))} accessibilityRole="button" style={styles.quickBtn}>
-                  <Text style={styles.quickText}>📅 Calendar</Text>
+                  <Text style={styles.quickText}>{t('calendar')}</Text>
                 </Pressable>
               </View>
               <Pressable onPress={popQueue} accessibilityRole="button" hitSlop={8}>
-                <Text style={styles.hint}>Done</Text>
+                <Text style={styles.hint}>{t('common:action.done')}</Text>
               </Pressable>
             </>
           ) : (
-            <Text style={styles.hint}>Tap to continue</Text>
+            <Text style={styles.hint}>{t('tapToContinue')}</Text>
           )}
         </Animated.View>
       </Pressable>

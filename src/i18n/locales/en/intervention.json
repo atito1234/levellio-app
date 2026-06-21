@@ -1,0 +1,10 @@
+{
+  "kicker": "HOLD ON",
+  "cardA11y": "Think twice before leaving",
+  "leavingNow": "Leaving now? {{taunt}}",
+  "fallbackQuestion": "What changes in five minutes that isn’t true right now?",
+  "faceIt": "🐉 Face it",
+  "faceItA11y": "Face it",
+  "leaveAnyway": "Leave anyway",
+  "leaveAnywayA11y": "Leave anyway"
+}

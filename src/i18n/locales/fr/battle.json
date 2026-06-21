@@ -1,0 +1,99 @@
+{
+  "setup": {
+    "close": "Fermer",
+    "warRoom": "Salle de guerre",
+    "coinsA11y": "{{coins}} pièces. C’est quoi les pièces ?",
+    "coinsPill": "🪙 {{coins}}",
+    "coinsAlertTitle": "🪙 Pièces",
+    "coinsAlertBody": "Tu as {{coins}}. Gagne une bataille pour récolter des pièces — davantage pour les blocs plus difficiles. Bientôt, tu pourras les dépenser dans l’Arsenal pour collectionner des gadgets de guerre.",
+    "reflectA11y": "Réfléchis à ton dragon",
+    "reflectKicker": "📓 RÉFLÉCHIS D’ABORD",
+    "pastReflectionsA11y": "Voir {{count}} réflexions passées",
+    "pastReflectionsLink": "{{n}} passées ›",
+    "defaultPrompt": "Qu’est-ce qui te bloque ? Nomme le dragon.",
+    "lastReflection": "Dernière : {{emoji}} {{text}}",
+    "reflectionSaved": "Réflexion enregistrée",
+    "addAnotherReflection": "Ajouter une autre réflexion ›",
+    "journalStopping": "Note ce qui te bloque dans le journal ›",
+    "confrontA11y": "Affronte {{name}}",
+    "confrontCta": "🐉 Affronte ton dragon — des questions + une tactique ›",
+    "yourDragon": "TON DRAGON",
+    "fightDragonA11y": "Combats {{name}}",
+    "nameOwnDragonA11y": "Nomme ton propre dragon",
+    "custom": "Perso",
+    "customDragonPlaceholder": "Nomme ton dragon (Sucre, Snooze, Doute de soi…)",
+    "customDragonNameA11y": "Nom du dragon personnalisé",
+    "yourWarGadget": "TON GADGET DE GUERRE",
+    "gadgetA11y": "{{tag}}, {{technique}}, {{duration}}",
+    "decreaseMinutesA11y": "Diminuer les minutes",
+    "increaseMinutesA11y": "Augmenter les minutes",
+    "minutes": "{{n}} min",
+    "missionsLabel": "MISSIONS ({{n}})",
+    "addMissionsA11y": "Ajouter des missions",
+    "addShort": "＋ Ajouter",
+    "emptyMissions": "Choisis les habitudes pour ce bloc ›",
+    "removeMissionA11y": "Retirer {{title}}",
+    "beginBattleA11y": "Commencer la bataille",
+    "beginBattle": "⚔️ Commencer la bataille",
+    "addMissionsTitle": "Ajouter des missions",
+    "doneA11y": "Terminé",
+    "done": "Terminé",
+    "customActivityPlaceholder": "＋ Saisis-en une perso (ex. œufs durs)",
+    "addCustomActivityA11y": "Ajouter une activité personnalisée",
+    "addActivityA11y": "Ajouter l’activité",
+    "add": "Ajouter",
+    "allIn": "Tout est ajouté. Saisis-en une perso ci-dessus.",
+    "addMissionA11y": "Ajouter {{title}}"
+  },
+  "gadgets": {
+    "openEnded": "sans limite",
+    "pomodoro": {
+      "tag": "Lame Sprint",
+      "why": "Des sprints de 25 minutes suivent le cycle de concentration naturel de ton cerveau ; la courte pause évite l’épuisement."
+    },
+    "deepwork": {
+      "tag": "Bouclier de Siège",
+      "why": "Des blocs plus longs de 52 minutes te permettent d’atteindre le flow, là où se fait le travail le plus profond ; 17 min te ressourcent."
+    },
+    "quick10": {
+      "tag": "Frappe Éclair",
+      "why": "Dix minutes valent mieux que zéro — un tout petit début désamorce la procrastination (le plus dur, c’est de commencer)."
+    },
+    "custom": {
+      "tag": "Montage Perso",
+      "why": "Ton rythme — choisis une durée à laquelle tu peux pleinement t’engager et que tu finiras."
+    },
+    "flowtime": {
+      "tag": "Sabre du Flow",
+      "why": "Aucune pression de l’horloge — travaille jusqu’à t’arrêter naturellement. Idéal pour l’élan créatif."
+    }
+  },
+  "battle": {
+    "noHabits": "Ces habitudes ne sont plus disponibles.",
+    "goBack": "Retour",
+    "retreatA11y": "Battre en retraite",
+    "retreat": "Retraite",
+    "victoryA11y": "Victoire",
+    "victory": "⚔️ Victoire !",
+    "summary_one": "{{completed}}/{{selected}} habitude faite{{xp}}",
+    "summary_other": "{{completed}}/{{selected}} habitudes faites{{xp}}",
+    "summaryXp": " · +{{xp}} XP",
+    "summaryCoins": "🪙 +{{coins}} pièces",
+    "inBattle": "EN BATAILLE",
+    "faceYourDragon": "AFFRONTE TON DRAGON",
+    "dragonHealthA11y": "Santé du dragon {{pct}} pour cent",
+    "clockElapsedA11y": "{{clock}} écoulé",
+    "clockRemainingA11y": "{{clock}} restant",
+    "countUp": " · décompte croissant",
+    "doneA11y": "Terminé",
+    "done": "Terminé",
+    "pauseA11y": "Pause",
+    "resumeA11y": "Reprendre",
+    "startBattleA11y": "Commencer la bataille",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "start": "Démarrer",
+    "finishA11y": "Porter le coup final et terminer",
+    "finish": "⚔️ Terminer — terrasse-le"
+  }
+}

@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { PrimaryButton, ScreenContainer } from '@/components';
@@ -26,6 +27,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 const SWIPE_THRESHOLD = 64;
 
 export function OrganizeScreen() {
+  const { t } = useTranslation('organize');
   const navigation = useNavigation<Nav>();
   const { quests } = useGame();
   const { buckets, counts, assignments, assignActivity, moveBucket } = useBuckets();
@@ -45,20 +47,20 @@ export function OrganizeScreen() {
     <ScreenContainer backgroundColor="#F7F6F2">
       <View style={styles.header}>
         <Text style={styles.title} accessibilityRole="header">
-          Organize
+          {t('title')}
         </Text>
-        <PrimaryButton label="Done" variant="ghost" onPress={() => navigation.goBack()} />
+        <PrimaryButton label={t('common:action.done')} variant="ghost" onPress={() => navigation.goBack()} />
       </View>
 
       {/* View-mode toggle (remembered) */}
       <View
         style={styles.toggle}
         accessibilityRole="radiogroup"
-        accessibilityLabel="Choose how to view your activities"
+        accessibilityLabel={t('viewToggleA11y')}
       >
-        <ToggleButton label="List" active={viewMode === 'list'} onPress={() => setView('list')} />
+        <ToggleButton label={t('viewList')} active={viewMode === 'list'} onPress={() => setView('list')} />
         <ToggleButton
-          label="Buckets"
+          label={t('viewBuckets')}
           active={viewMode === 'buckets'}
           onPress={() => setView('buckets')}
         />
@@ -103,12 +105,13 @@ export function OrganizeScreen() {
 }
 
 function ToggleButton({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  const { t } = useTranslation('organize');
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected: active }}
-      accessibilityLabel={`${label} view`}
+      accessibilityLabel={t('viewA11y', { label })}
       style={[styles.toggleBtn, active && styles.toggleBtnActive]}
     >
       <Text style={[styles.toggleText, active && styles.toggleTextActive]}>{label}</Text>
@@ -131,8 +134,9 @@ function ListView({
   onMove: (q: Quest) => void;
   onUnfile: (q: Quest) => void;
 }) {
+  const { t } = useTranslation('organize');
   if (quests.length === 0) {
-    return <Text style={styles.empty}>No activities yet. Create a quest first, then file it here.</Text>;
+    return <Text style={styles.empty}>{t('emptyList')}</Text>;
   }
   return (
     <View style={styles.list}>
@@ -147,9 +151,7 @@ function ListView({
         />
       ))}
       <Text style={styles.hint}>
-        {reduced
-          ? 'Tap “Move” to file an activity into a bucket.'
-          : 'Swipe right to file, swipe left to unfile — or tap “Move”.'}
+        {reduced ? t('hintReduced') : t('hintSwipe')}
       </Text>
     </View>
   );
@@ -168,6 +170,7 @@ function ActivityRow({
   onMove: () => void;
   onUnfile: () => void;
 }) {
+  const { t } = useTranslation('organize');
   const translateX = useRef(new Animated.Value(0)).current;
 
   // Swipe is an enhancement; the "Move" button is the accessible alternative.
@@ -201,16 +204,16 @@ function ActivityRow({
             </Text>
           </View>
         ) : (
-          <Text style={styles.unfiled}>Unfiled</Text>
+          <Text style={styles.unfiled}>{t('unfiled')}</Text>
         )}
       </View>
       <Pressable
         onPress={onMove}
         accessibilityRole="button"
-        accessibilityLabel={`Move ${quest.title} to a bucket`}
+        accessibilityLabel={t('moveA11y', { title: quest.title })}
         style={styles.moveBtn}
       >
-        <Text style={styles.moveBtnText}>Move</Text>
+        <Text style={styles.moveBtnText}>{t('move')}</Text>
       </Pressable>
     </Animated.View>
   );
@@ -233,11 +236,12 @@ function BucketsView({
   onMoveBucket: (id: string, delta: number) => void;
   onBattle: (id: string) => void;
 }) {
+  const { t } = useTranslation('organize');
   return (
     <View style={styles.list}>
-      <PrimaryButton label="＋ New bucket" onPress={onNew} />
+      <PrimaryButton label={t('newBucket')} onPress={onNew} />
       {buckets.length === 0 ? (
-        <Text style={styles.empty}>No buckets yet. Create one to group related activities.</Text>
+        <Text style={styles.empty}>{t('emptyBuckets')}</Text>
       ) : (
         buckets.map((b, i) => {
           const color = getBucketColor(b.colorId);
@@ -246,7 +250,7 @@ function BucketsView({
             <View
               key={b.id}
               style={styles.bucketCard}
-              accessibilityLabel={`${b.name} bucket, ${count} ${count === 1 ? 'activity' : 'activities'}`}
+              accessibilityLabel={t('bucketA11y', { name: b.name, count })}
             >
               <View style={[styles.bucketIcon, { backgroundColor: color.soft }]}>
                 <BucketIcon iconId={b.iconId} size={26} tint={color.accent} />
@@ -256,30 +260,30 @@ function BucketsView({
                   {b.name}
                 </Text>
                 <Text style={styles.bucketCount}>
-                  {count} {count === 1 ? 'activity' : 'activities'}
+                  {t('activity', { count })}
                 </Text>
               </View>
               <View style={styles.bucketActions}>
-                <IconBtn label={`Move ${b.name} up`} disabled={i === 0} text="↑" onPress={() => onMoveBucket(b.id, -1)} />
+                <IconBtn label={t('moveUpA11y', { name: b.name })} disabled={i === 0} text="↑" onPress={() => onMoveBucket(b.id, -1)} />
                 <IconBtn
-                  label={`Move ${b.name} down`}
+                  label={t('moveDownA11y', { name: b.name })}
                   disabled={i === buckets.length - 1}
                   text="↓"
                   onPress={() => onMoveBucket(b.id, 1)}
                 />
-                <IconBtn label={`Edit ${b.name}`} text="✎" onPress={() => onEdit(b.id)} />
-                {count > 0 && <IconBtn label={`Battle the ${b.name} ritual`} text="⚔️" onPress={() => onBattle(b.id)} />}
+                <IconBtn label={t('editA11y', { name: b.name })} text="✎" onPress={() => onEdit(b.id)} />
+                {count > 0 && <IconBtn label={t('battleA11y', { name: b.name })} text="⚔️" onPress={() => onBattle(b.id)} />}
               </View>
             </View>
           );
         })
       )}
-      <View style={styles.bucketCard} accessibilityLabel={`Unfiled, ${unfiledCount} activities`}>
+      <View style={styles.bucketCard} accessibilityLabel={t('unfiledA11y', { count: unfiledCount })}>
         <View style={[styles.bucketIcon, styles.unfiledIcon]} />
         <View style={styles.bucketInfo}>
-          <Text style={styles.bucketName}>Unfiled</Text>
+          <Text style={styles.bucketName}>{t('unfiled')}</Text>
           <Text style={styles.bucketCount}>
-            {unfiledCount} {unfiledCount === 1 ? 'activity' : 'activities'}
+            {t('activity', { count: unfiledCount })}
           </Text>
         </View>
       </View>

@@ -8,6 +8,7 @@
  */
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useIntervention } from '@/state/InterventionContext';
@@ -24,6 +25,7 @@ const INK_ON_DARK = '#F4F2FF';
 const MUTED_ON_DARK = '#A9A4C7';
 
 export function InterventionOverlay() {
+  const { t } = useTranslation('intervention');
   const { current, proceed, faceIt } = useIntervention();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const reduced = useReducedMotion();
@@ -44,7 +46,7 @@ export function InterventionOverlay() {
 
   const dragon = getDragon(current.dragonId ?? 'procrastination', current.dragonName);
   const plan = buildCoaching({ dragonId: current.dragonId ?? 'procrastination', goals: [] });
-  const question = plan.questions[0]?.text ?? 'What changes in five minutes that isn’t true right now?';
+  const question = plan.questions[0]?.text ?? t('fallbackQuestion');
 
   const onFace = () => {
     const dragonId = current.dragonId ?? 'procrastination';
@@ -56,15 +58,15 @@ export function InterventionOverlay() {
   return (
     <View style={styles.overlay} pointerEvents="box-none">
       <View style={styles.scrim}>
-        <Animated.View style={[styles.card, { transform: [{ scale }] }]} accessible accessibilityLiveRegion="polite" accessibilityLabel="Think twice before leaving">
-          <Text style={styles.kicker}>HOLD ON</Text>
-          <Text style={styles.taunt}>Leaving now? {dragon.taunt}</Text>
+        <Animated.View style={[styles.card, { transform: [{ scale }] }]} accessible accessibilityLiveRegion="polite" accessibilityLabel={t('cardA11y')}>
+          <Text style={styles.kicker}>{t('kicker')}</Text>
+          <Text style={styles.taunt}>{t('leavingNow', { taunt: dragon.taunt })}</Text>
           <Text style={styles.question}>{question}</Text>
-          <Pressable onPress={onFace} accessibilityRole="button" accessibilityLabel="Face it" style={styles.faceBtn}>
-            <Text style={styles.faceText}>🐉 Face it</Text>
+          <Pressable onPress={onFace} accessibilityRole="button" accessibilityLabel={t('faceItA11y')} style={styles.faceBtn}>
+            <Text style={styles.faceText}>{t('faceIt')}</Text>
           </Pressable>
-          <Pressable onPress={proceed} accessibilityRole="button" accessibilityLabel="Leave anyway" hitSlop={8} style={styles.leaveBtn}>
-            <Text style={styles.leaveText}>Leave anyway</Text>
+          <Pressable onPress={proceed} accessibilityRole="button" accessibilityLabel={t('leaveAnywayA11y')} hitSlop={8} style={styles.leaveBtn}>
+            <Text style={styles.leaveText}>{t('leaveAnyway')}</Text>
           </Pressable>
         </Animated.View>
       </View>

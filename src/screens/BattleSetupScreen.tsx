@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, DragonSprite } from '@/components';
@@ -40,22 +41,24 @@ const shadow = {
   elevation: 3,
 };
 
-// Techniques, reframed as fun "war gadgets" — each with the science behind it.
-const GADGETS: Record<TechniqueId, { icon: string; tag: string; why: string }> = {
-  pomodoro: { icon: '⚔️', tag: 'Sprint Blade', why: '25-minute sprints ride your brain’s natural focus cycle; the short break prevents burnout.' },
-  deepwork: { icon: '🛡️', tag: 'Siege Shield', why: 'Longer 52-minute blocks let you reach flow, where the deepest work happens; 17 min restores you.' },
-  quick10: { icon: '🗡️', tag: 'Quick Strike', why: 'Ten minutes beats zero — a tiny start defuses procrastination (the hardest part is beginning).' },
-  custom: { icon: '🎛️', tag: 'Custom Rig', why: 'Your tempo — pick a length you can fully commit to and finish.' },
-  flowtime: { icon: '🌊', tag: 'Flow Saber', why: 'No clock pressure — work until you naturally stop. Great for creative momentum.' },
+// Techniques, reframed as fun "war gadgets" — icons are decorative; the tag and
+// the science copy live in the `battle` namespace, keyed by technique id.
+const GADGET_ICONS: Record<TechniqueId, string> = {
+  pomodoro: '⚔️',
+  deepwork: '🛡️',
+  quick10: '🗡️',
+  custom: '🎛️',
+  flowtime: '🌊',
 };
 
-function gadgetSub(id: TechniqueId, customMin: number): string {
-  const secs = workSeconds(getTechnique(id), customMin);
-  return secs === null ? 'open-ended' : `${Math.round(secs / 60)} min`;
-}
-
 export function BattleSetupScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('battle');
   const { questId, questIds, bucketId, goalId } = route.params ?? {};
+
+  const gadgetSub = (id: TechniqueId, mins: number): string => {
+    const secs = workSeconds(getTechnique(id), mins);
+    return secs === null ? t('gadgets.openEnded') : t('setup.minutes', { n: Math.round(secs / 60) });
+  };
   const { quests, addQuest } = useGame();
   const { getPlan } = usePlan();
   const { assignments, buckets } = useBuckets();
@@ -87,6 +90,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const resolvedDragon = getDragon(dragonId, dragonName);
+  const resolvedDragonName = t('dragons:' + dragonId + '.name', { defaultValue: resolvedDragon.name });
   const reflections = entriesForDragon(dragonId);
   const latest = reflections[0];
 
@@ -98,10 +102,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const ctx = primary ? habitContext(primary, goals) : null;
 
   const explainCoins = () =>
-    Alert.alert(
-      '🪙 Coins',
-      `You have ${coins}. Win a battle to earn coins — more for tougher blocks. Soon you’ll spend them in the Arsenal to collect war gadgets.`,
-    );
+    Alert.alert(t('setup.coinsAlertTitle'), t('setup.coinsAlertBody', { coins }));
 
   const add = (id: string) => setSelected((prev) => new Set(prev).add(id));
   const remove = (id: string) =>
@@ -151,7 +152,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const openReflect = () =>
     navigation.navigate('JournalComposer', {
       dragonId,
-      dragonName: resolvedDragon.name,
+      dragonName: resolvedDragonName,
       questIds: [...selected],
       ...(ctx ? { prompt: ctx.prompt, teaching: ctx.teaching } : {}),
     });
@@ -169,29 +170,29 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" hitSlop={12}>
+        <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={t('setup.close')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          War room
+          {t('setup.warRoom')}
         </Text>
-        <Pressable onPress={explainCoins} style={styles.coinPill} accessibilityRole="button" accessibilityLabel={`${coins} coins. What are coins?`}>
-          <Text style={styles.coinText}>🪙 {coins}</Text>
+        <Pressable onPress={explainCoins} style={styles.coinPill} accessibilityRole="button" accessibilityLabel={t('setup.coinsA11y', { coins })}>
+          <Text style={styles.coinText}>{t('setup.coinsPill', { coins })}</Text>
         </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* 1 — Reflection on top (social post). */}
-        <Pressable onPress={openReflect} accessibilityRole="button" accessibilityLabel="Reflect on your dragon" style={[styles.reflectCard, shadow]}>
+        <Pressable onPress={openReflect} accessibilityRole="button" accessibilityLabel={t('setup.reflectA11y')} style={[styles.reflectCard, shadow]}>
           <View style={styles.reflectHead}>
-            <Text style={styles.reflectKicker}>📓 REFLECT FIRST</Text>
+            <Text style={styles.reflectKicker}>{t('setup.reflectKicker')}</Text>
             {reflections.length > 0 && (
-              <Pressable onPress={() => navigation.navigate('Journal', { dragonId })} accessibilityRole="button" accessibilityLabel={`View ${reflections.length} past reflections`} hitSlop={8}>
-                <Text style={styles.reflectLink}>{reflections.length} past ›</Text>
+              <Pressable onPress={() => navigation.navigate('Journal', { dragonId })} accessibilityRole="button" accessibilityLabel={t('setup.pastReflectionsA11y', { count: reflections.length })} hitSlop={8}>
+                <Text style={styles.reflectLink}>{t('setup.pastReflectionsLink', { n: reflections.length })}</Text>
               </Pressable>
             )}
           </View>
-          <Text style={styles.reflectPromptStrong}>{ctx ? ctx.prompt : 'What’s stopping you? Name the dragon.'}</Text>
+          <Text style={styles.reflectPromptStrong}>{ctx ? ctx.prompt : t('setup.defaultPrompt')}</Text>
           {ctx && <Text style={styles.reflectTeaching}>🧠 {ctx.teaching}</Text>}
           {ctx?.goalTitle && (
             <View style={styles.goalChip}>
@@ -200,19 +201,19 @@ export function BattleSetupScreen({ route, navigation }: Props) {
           )}
           {latest && (
             <Text style={styles.latestText} numberOfLines={1}>
-              Last: {moodMeta(latest.mood)?.emoji ?? '🗒️'} {latest.text || 'Reflection saved'}
+              {t('setup.lastReflection', { emoji: moodMeta(latest.mood)?.emoji ?? '🗒️', text: latest.text || t('setup.reflectionSaved') })}
             </Text>
           )}
-          <Text style={styles.reflectCta}>{latest ? 'Add another reflection ›' : 'Journal what’s stopping you ›'}</Text>
+          <Text style={styles.reflectCta}>{latest ? t('setup.addAnotherReflection') : t('setup.journalStopping')}</Text>
         </Pressable>
 
         {/* Coach: critical-thinking questions + a matched tactic for this dragon. */}
-        <Pressable onPress={openCoaching} accessibilityRole="button" accessibilityLabel={`Confront ${resolvedDragon.name}`} style={styles.confrontBtn}>
-          <Text style={styles.confrontText}>🐉 Confront your dragon — questions + a tactic ›</Text>
+        <Pressable onPress={openCoaching} accessibilityRole="button" accessibilityLabel={t('setup.confrontA11y', { name: resolvedDragonName })} style={styles.confrontBtn}>
+          <Text style={styles.confrontText}>{t('setup.confrontCta')}</Text>
         </Pressable>
 
         {/* 2 — Choose your dragon. */}
-        <Text style={styles.sectionLabel}>YOUR DRAGON</Text>
+        <Text style={styles.sectionLabel}>{t('setup.yourDragon')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
           {DRAGONS.map((d) => {
             const on = dragonId === d.id;
@@ -222,12 +223,12 @@ export function BattleSetupScreen({ route, navigation }: Props) {
                 onPress={() => setDragonId(d.id)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
-                accessibilityLabel={`Fight ${d.name}`}
+                accessibilityLabel={t('setup.fightDragonA11y', { name: t('dragons:' + d.id + '.name', { defaultValue: d.name }) })}
                 style={[styles.dragonCard, on && styles.cardOn]}
               >
                 <DragonSprite colorId={d.colorId} size={66} />
                 <Text style={[styles.dragonCardName, on && styles.cardTextOn]} numberOfLines={1}>
-                  {d.name.replace('the Dragon of ', '')}
+                  {t('dragons:' + d.id + '.short', { defaultValue: d.name.replace('the Dragon of ', '') })}
                 </Text>
               </Pressable>
             );
@@ -236,55 +237,54 @@ export function BattleSetupScreen({ route, navigation }: Props) {
             onPress={() => setDragonId(CUSTOM_DRAGON_ID)}
             accessibilityRole="button"
             accessibilityState={{ selected: dragonId === CUSTOM_DRAGON_ID }}
-            accessibilityLabel="Name your own dragon"
+            accessibilityLabel={t('setup.nameOwnDragonA11y')}
             style={[styles.dragonCard, dragonId === CUSTOM_DRAGON_ID && styles.cardOn]}
           >
             <Text style={styles.customDragonPlus}>＋</Text>
-            <Text style={[styles.dragonCardName, dragonId === CUSTOM_DRAGON_ID && styles.cardTextOn]}>Custom</Text>
+            <Text style={[styles.dragonCardName, dragonId === CUSTOM_DRAGON_ID && styles.cardTextOn]}>{t('setup.custom')}</Text>
           </Pressable>
         </ScrollView>
         {dragonId === CUSTOM_DRAGON_ID && (
           <TextInput
             value={dragonName}
             onChangeText={setDragonName}
-            placeholder="Name your dragon (Sugar, Snooze, Self-Doubt…)"
+            placeholder={t('setup.customDragonPlaceholder')}
             placeholderTextColor={MUTED}
             style={styles.input}
             maxLength={32}
-            accessibilityLabel="Custom dragon name"
+            accessibilityLabel={t('setup.customDragonNameA11y')}
           />
         )}
 
         {/* 3 — Pick your gadget (technique). */}
-        <Text style={styles.sectionLabel}>YOUR WAR GADGET</Text>
+        <Text style={styles.sectionLabel}>{t('setup.yourWarGadget')}</Text>
         <View style={styles.gadgetGrid}>
-          {TECHNIQUES.map((t) => {
-            const on = techniqueId === t.id;
-            const g = GADGETS[t.id];
+          {TECHNIQUES.map((tech) => {
+            const on = techniqueId === tech.id;
             return (
               <Pressable
-                key={t.id}
-                onPress={() => setTechniqueId(t.id)}
+                key={tech.id}
+                onPress={() => setTechniqueId(tech.id)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
-                accessibilityLabel={`${g.tag}, ${t.name}, ${gadgetSub(t.id, customMin)}`}
+                accessibilityLabel={t('setup.gadgetA11y', { tag: t('gadgets.' + tech.id + '.tag'), technique: tech.name, duration: gadgetSub(tech.id, customMin) })}
                 style={[styles.gadgetCard, on && styles.cardOn]}
               >
-                <Text style={styles.gadgetIcon}>{g.icon}</Text>
-                <Text style={[styles.gadgetTag, on && styles.cardTextOn]}>{g.tag}</Text>
-                <Text style={styles.gadgetSub}>{gadgetSub(t.id, customMin)}</Text>
+                <Text style={styles.gadgetIcon}>{GADGET_ICONS[tech.id]}</Text>
+                <Text style={[styles.gadgetTag, on && styles.cardTextOn]}>{t('gadgets.' + tech.id + '.tag')}</Text>
+                <Text style={styles.gadgetSub}>{gadgetSub(tech.id, customMin)}</Text>
               </Pressable>
             );
           })}
         </View>
-        <Text style={styles.gadgetWhy}>🧠 {GADGETS[techniqueId].why}</Text>
+        <Text style={styles.gadgetWhy}>🧠 {t('gadgets.' + techniqueId + '.why')}</Text>
         {techniqueId === 'custom' && (
           <View style={styles.stepper}>
-            <Pressable onPress={() => setCustomMin((m) => clampCustomMinutes(m - 5))} accessibilityRole="button" accessibilityLabel="Decrease minutes" style={styles.stepBtn}>
+            <Pressable onPress={() => setCustomMin((m) => clampCustomMinutes(m - 5))} accessibilityRole="button" accessibilityLabel={t('setup.decreaseMinutesA11y')} style={styles.stepBtn}>
               <Text style={styles.stepBtnText}>–</Text>
             </Pressable>
-            <Text style={styles.stepVal}>{clampCustomMinutes(customMin)} min</Text>
-            <Pressable onPress={() => setCustomMin((m) => clampCustomMinutes(m + 5))} accessibilityRole="button" accessibilityLabel="Increase minutes" style={styles.stepBtn}>
+            <Text style={styles.stepVal}>{t('setup.minutes', { n: clampCustomMinutes(customMin) })}</Text>
+            <Pressable onPress={() => setCustomMin((m) => clampCustomMinutes(m + 5))} accessibilityRole="button" accessibilityLabel={t('setup.increaseMinutesA11y')} style={styles.stepBtn}>
               <Text style={styles.stepBtnText}>+</Text>
             </Pressable>
           </View>
@@ -292,19 +292,19 @@ export function BattleSetupScreen({ route, navigation }: Props) {
 
         {/* 4 — Missions (habits), compact: chips + add. */}
         <View style={styles.missionHead}>
-          <Text style={styles.sectionLabel}>MISSIONS ({selected.size})</Text>
-          <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" accessibilityLabel="Add missions" hitSlop={8}>
-            <Text style={styles.addMissions}>＋ Add</Text>
+          <Text style={styles.sectionLabel}>{t('setup.missionsLabel', { n: selected.size })}</Text>
+          <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" accessibilityLabel={t('setup.addMissionsA11y')} hitSlop={8}>
+            <Text style={styles.addMissions}>{t('setup.addShort')}</Text>
           </Pressable>
         </View>
         {selectedQuests.length === 0 ? (
           <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" style={styles.emptyMissions}>
-            <Text style={styles.emptyMissionsText}>Pick the habits for this block ›</Text>
+            <Text style={styles.emptyMissionsText}>{t('setup.emptyMissions')}</Text>
           </Pressable>
         ) : (
           <View style={styles.missionChips}>
             {selectedQuests.map((q) => (
-              <Pressable key={q.id} onPress={() => remove(q.id)} accessibilityRole="button" accessibilityLabel={`Remove ${q.title}`} style={styles.missionChip}>
+              <Pressable key={q.id} onPress={() => remove(q.id)} accessibilityRole="button" accessibilityLabel={t('setup.removeMissionA11y', { title: q.title })} style={styles.missionChip}>
                 <Text style={styles.missionChipText} numberOfLines={1}>
                   {CATEGORY_META[q.category].icon} {q.title}
                 </Text>
@@ -319,10 +319,10 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         onPress={() => void begin()}
         disabled={!canFight}
         accessibilityRole="button"
-        accessibilityLabel="Begin battle"
+        accessibilityLabel={t('setup.beginBattleA11y')}
         style={[styles.cta, !canFight && styles.ctaOff]}
       >
-        <Text style={styles.ctaText}>⚔️ Begin battle</Text>
+        <Text style={styles.ctaText}>{t('setup.beginBattle')}</Text>
       </Pressable>
 
       {/* Mission picker — a clean overlay, not an always-on crowded list. */}
@@ -330,33 +330,33 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         <View style={styles.sheetBackdrop}>
           <View style={styles.sheet}>
             <View style={styles.sheetHead}>
-              <Text style={styles.sheetTitle}>Add missions</Text>
-              <Pressable onPress={() => setPickerOpen(false)} accessibilityRole="button" accessibilityLabel="Done" hitSlop={12}>
-                <Text style={styles.sheetDone}>Done</Text>
+              <Text style={styles.sheetTitle}>{t('setup.addMissionsTitle')}</Text>
+              <Pressable onPress={() => setPickerOpen(false)} accessibilityRole="button" accessibilityLabel={t('setup.doneA11y')} hitSlop={12}>
+                <Text style={styles.sheetDone}>{t('setup.done')}</Text>
               </Pressable>
             </View>
             <View style={styles.addRow}>
               <TextInput
                 value={customActivity}
                 onChangeText={setCustomActivity}
-                placeholder="＋ Type a custom one (e.g. boiled eggs)"
+                placeholder={t('setup.customActivityPlaceholder')}
                 placeholderTextColor={MUTED}
                 style={styles.addInput}
                 onSubmitEditing={() => void addCustomActivity()}
                 returnKeyType="done"
                 maxLength={60}
-                accessibilityLabel="Add a custom activity"
+                accessibilityLabel={t('setup.addCustomActivityA11y')}
               />
-              <Pressable onPress={() => void addCustomActivity()} disabled={customActivity.trim().length === 0} accessibilityRole="button" accessibilityLabel="Add activity" style={styles.addBtn}>
-                <Text style={[styles.addBtnText, customActivity.trim().length === 0 && styles.addBtnOff]}>Add</Text>
+              <Pressable onPress={() => void addCustomActivity()} disabled={customActivity.trim().length === 0} accessibilityRole="button" accessibilityLabel={t('setup.addActivityA11y')} style={styles.addBtn}>
+                <Text style={[styles.addBtnText, customActivity.trim().length === 0 && styles.addBtnOff]}>{t('setup.add')}</Text>
               </Pressable>
             </View>
             <ScrollView style={styles.sheetList} contentContainerStyle={styles.sheetListContent} showsVerticalScrollIndicator={false}>
               {available.length === 0 ? (
-                <Text style={styles.sheetEmpty}>Everything’s in. Type a custom one above.</Text>
+                <Text style={styles.sheetEmpty}>{t('setup.allIn')}</Text>
               ) : (
                 available.map((q) => (
-                  <Pressable key={q.id} onPress={() => add(q.id)} accessibilityRole="button" accessibilityLabel={`Add ${q.title}`} style={styles.sheetRow}>
+                  <Pressable key={q.id} onPress={() => add(q.id)} accessibilityRole="button" accessibilityLabel={t('setup.addMissionA11y', { title: q.title })} style={styles.sheetRow}>
                     <Text style={styles.sheetRowIcon}>{CATEGORY_META[q.category].icon}</Text>
                     <Text style={styles.sheetRowTitle} numberOfLines={1}>
                       {q.title}

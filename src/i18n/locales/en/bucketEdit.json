@@ -1,0 +1,25 @@
+{
+  "titleEdit": "Edit bucket",
+  "titleNew": "New bucket",
+  "previewName": "Your bucket",
+  "nameLabel": "Name",
+  "namePlaceholder": "e.g. Health, Work, Learning",
+  "iconSection": "Icon",
+  "iconGroupA11y": "Bucket icon",
+  "iconA11y": "{{name}} icon",
+  "colorSection": "Color",
+  "colorGroupA11y": "Bucket color",
+  "colorA11y": "{{color}} color",
+  "colorName": {
+    "violet": "violet",
+    "teal": "teal",
+    "gold": "gold",
+    "rose": "rose",
+    "sky": "sky",
+    "lime": "lime",
+    "slate": "slate"
+  },
+  "saveChanges": "Save changes",
+  "createBucket": "Create bucket",
+  "deleteBucket": "Delete bucket"
+}
