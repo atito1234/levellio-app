@@ -13,13 +13,20 @@
 export const SUPPORTED_LOCALES = ['en', 'fr', 'es', 'ht'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
+/**
+ * Languages OFFERED in the UI language picker + eligible for device auto-detect.
+ * Haitian Creole is intentionally excluded for now (experimental, filled by an
+ * intern later) but its code/resources stay in SUPPORTED_LOCALES.
+ */
+export const OFFERED_LOCALES = ['en', 'fr', 'es'] as const;
+
 /** A user's stored preference: an explicit language or "follow the device". */
 export type LocaleSetting = 'system' | SupportedLocale;
 
 export const DEFAULT_LOCALE: SupportedLocale = 'en';
 
 /** Namespaces (one JSON file per area, per locale). Add new areas here. */
-export const NAMESPACES = ['common', 'tabs', 'feed', 'settings', 'paywall', 'profile', 'notifications', 'discover', 'stories', 'messaging', 'ai', 'onboarding', 'auth', 'dashboard', 'capacities'] as const;
+export const NAMESPACES = ['common', 'tabs', 'feed', 'settings', 'paywall', 'profile', 'notifications', 'discover', 'stories', 'messaging', 'ai', 'onboarding', 'auth', 'dashboard', 'capacities', 'hero', 'danger', 'projects', 'featured', 'addActivity', 'goals', 'quests', 'quickCapture', 'scheduler', 'plan', 'progress', 'categories', 'activityJourney', 'activityTimer', 'analytics', 'battle', 'bucketEdit', 'capacityFocus', 'coaching', 'connections', 'dragons', 'goalTemplates', 'habits', 'insights', 'intervention', 'journal', 'kitSelect', 'kits', 'milestone', 'monthly', 'organize', 'questComplete', 'ripple', 'timePicker'] as const;
 export type Namespace = (typeof NAMESPACES)[number];
 
 /** Translation maturity, surfaced in the language picker so testers know. */
@@ -49,6 +56,8 @@ export function isSupportedLocale(value: unknown): value is SupportedLocale {
  */
 export function resolveLocale(setting: LocaleSetting, deviceLocale?: string | null): SupportedLocale {
   if (setting !== 'system') return setting;
-  const base = (deviceLocale ?? '').toLowerCase().split('-')[0];
-  return isSupportedLocale(base) ? base : DEFAULT_LOCALE;
+  const base = (deviceLocale ?? '').toLowerCase().split('-')[0] ?? '';
+  // Auto-detect only into an OFFERED language (so e.g. a Creole device starts in
+  // English and can still switch); other devices fall back to English.
+  return (OFFERED_LOCALES as readonly string[]).includes(base) ? (base as SupportedLocale) : DEFAULT_LOCALE;
 }

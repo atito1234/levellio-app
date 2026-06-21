@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { spacing, typography } from '@/theme';
@@ -13,6 +14,7 @@ import { getBucketColor } from '@/lib/buckets';
 import { dayKey } from '@/lib/dates';
 import { WEEKDAY_LABELS } from '@/lib/calendar';
 import { weekdayOfKey, weekdaysLabel } from '@/lib/recurrence';
+import { recurrenceLabelOpts } from '@/lib/recurrenceLabels';
 import { minutesToLabel } from '@/lib/schedule';
 import { MiniCalendar } from './MiniCalendar';
 import { TimePicker } from './TimePicker';
@@ -55,6 +57,7 @@ export function AddActivitySheet({
   /** Pre-link to projects (opens as a daily habit so it powers them every day). */
   defaultProjectIds?: readonly string[] | null;
 }) {
+  const { t } = useTranslation('addActivity');
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { quests, addQuest } = useGame();
   const { goals, linkGoal } = useGoals();
@@ -216,12 +219,12 @@ export function AddActivitySheet({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {/* Tap the dimmed area above the sheet to dismiss. */}
-        <Pressable style={styles.backdropTap} onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" />
+        <Pressable style={styles.backdropTap} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('close')} />
         <View style={styles.sheet}>
           <View style={styles.head}>
-            <Text style={styles.title}>Add an activity</Text>
-            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Done" hitSlop={12}>
-              <Text style={styles.done}>Done</Text>
+            <Text style={styles.title}>{t('title')}</Text>
+            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={t('done')} hitSlop={12}>
+              <Text style={styles.done}>{t('done')}</Text>
             </Pressable>
           </View>
 
@@ -239,7 +242,7 @@ export function AddActivitySheet({
                 setTitle(t);
                 if (added) setAdded(null);
               }}
-              placeholder="Type or 🎙️ speak it (e.g. 10 push-ups)"
+              placeholder={t('placeholder')}
               placeholderTextColor={MUTED}
               style={styles.input}
               autoFocus
@@ -247,23 +250,23 @@ export function AddActivitySheet({
               onSubmitEditing={() => void add()}
               returnKeyType="done"
               blurOnSubmit={false}
-              accessibilityLabel="New activity name"
+              accessibilityLabel={t('nameLabel')}
             />
 
             {scopedProjects.length > 0 && (
               <View style={styles.scopeBanner}>
                 <Text style={styles.scopeText} numberOfLines={2}>
-                  🤝 Adding to {scopedProjects.map((p) => `${p.emoji} ${p.title}`).join(', ')} — a daily habit that powers it.
+                  {t('scopeBanner', { projects: scopedProjects.map((p) => `${p.emoji} ${p.title}`).join(', ') })}
                 </Text>
               </View>
             )}
 
             {/* WHEN — today / a specific date / repeat weekly. */}
-            <Text style={styles.label}>When</Text>
+            <Text style={styles.label}>{t('when')}</Text>
             <View style={styles.chips}>
-              {modeChip('today', 'Today')}
-              {modeChip('date', '📅 Pick date')}
-              {modeChip('weekly', '↻ Repeat')}
+              {modeChip('today', t('today'))}
+              {modeChip('date', t('pickDate'))}
+              {modeChip('weekly', t('repeat'))}
             </View>
 
             {whenMode === 'date' && (
@@ -290,9 +293,9 @@ export function AddActivitySheet({
                   })}
                 </View>
                 <View style={styles.weekFoot}>
-                  <Text style={styles.weekSummary}>{weekdays.length ? weekdaysLabel(weekdays) : 'Pick the days it repeats'}</Text>
+                  <Text style={styles.weekSummary}>{weekdays.length ? weekdaysLabel(weekdays, recurrenceLabelOpts(t)) : t('pickDays')}</Text>
                   <Pressable onPress={() => setWeekdays(weekdays.length === 7 ? [] : ALL_DAYS)} accessibilityRole="button" hitSlop={8}>
-                    <Text style={styles.everyDay}>{weekdays.length === 7 ? 'Clear' : 'Every day'}</Text>
+                    <Text style={styles.everyDay}>{weekdays.length === 7 ? t('clear') : t('everyDay')}</Text>
                   </Pressable>
                 </View>
               </>
@@ -305,14 +308,14 @@ export function AddActivitySheet({
               accessibilityState={{ checked: timeOn }}
               style={styles.timeToggle}
             >
-              <Text style={styles.timeToggleText}>⏰ {timeOn ? minutesToLabel(timeMinutes) : 'Set a time (optional)'}</Text>
-              <Text style={styles.timeToggleHint}>{timeOn ? 'Tap to remove' : 'Any time'}</Text>
+              <Text style={styles.timeToggleText}>⏰ {timeOn ? minutesToLabel(timeMinutes) : t('setTime')}</Text>
+              <Text style={styles.timeToggleHint}>{timeOn ? t('tapToRemove') : t('anyTime')}</Text>
             </Pressable>
             {timeOn && <TimePicker minutes={timeMinutes} onChange={setTimeMinutes} />}
 
             {goals.length > 0 && (
               <>
-                <Text style={styles.label}>Goal (optional)</Text>
+                <Text style={styles.label}>{t('goalOptional')}</Text>
                 <View style={styles.chips}>
                   {goals.map((g) => {
                     const on = goalId === g.id;
@@ -337,7 +340,7 @@ export function AddActivitySheet({
 
             {buckets.length > 0 && (
               <>
-                <Text style={styles.label}>Group (optional)</Text>
+                <Text style={styles.label}>{t('groupOptional')}</Text>
                 <View style={styles.chips}>
                   {buckets.map((b) => {
                     const on = bucketId === b.id;
@@ -360,7 +363,7 @@ export function AddActivitySheet({
 
             {signedIn && myProjects.length > 0 && (
               <>
-                <Text style={styles.label}>Contributes to (optional)</Text>
+                <Text style={styles.label}>{t('contributesTo')}</Text>
                 <View style={styles.chips}>
                   {myProjects.map((p) => {
                     const on = projectIds.includes(p.id);
@@ -381,16 +384,16 @@ export function AddActivitySheet({
                   })}
                 </View>
                 {projectIds.length > 0 && (
-                  <Text style={styles.pledge}>Your completions now power {projectIds.length === 1 ? 'this project' : 'these projects'}. 🤝</Text>
+                  <Text style={styles.pledge}>{t('pledge', { count: projectIds.length })}</Text>
                 )}
               </>
             )}
 
-            {added && <Text style={styles.added}>✓ Added “{added}” — add another, or tap Done.</Text>}
+            {added && <Text style={styles.added}>{t('added', { name: added })}</Text>}
 
             <View style={styles.links}>
               <Pressable onPress={openAdvanced} accessibilityRole="button" hitSlop={8}>
-                <Text style={styles.link}>⚙️ Advanced options ›</Text>
+                <Text style={styles.link}>{t('advanced')}</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -400,10 +403,10 @@ export function AddActivitySheet({
             onPress={() => void add()}
             disabled={!canAdd}
             accessibilityRole="button"
-            accessibilityLabel="Add activity"
+            accessibilityLabel={t('addActivityA11y')}
             style={[styles.addBtn, !canAdd && styles.addBtnOff]}
           >
-            <Text style={styles.addBtnText}>＋ Add activity</Text>
+            <Text style={styles.addBtnText}>{t('addActivity')}</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>

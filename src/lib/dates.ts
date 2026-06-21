@@ -32,18 +32,30 @@ export function shiftDayKey(key: string, deltaDays: number): string {
   return dayKey(dt);
 }
 
-/** Friendly label for a day key, e.g. "Sun, Jun 14". */
-export function formatDayKey(key: string): string {
+/** Friendly label for a day key, e.g. "Sun, Jun 14". Locale defaults to en-US. */
+export function formatDayKey(key: string, locale = 'en-US'): string {
   const [y, m, d] = key.split('-').map(Number);
   if (!y || !m || !d) return key;
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  return new Date(y, m - 1, d).toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-/** "Today" / "Tomorrow" / "Yesterday" relative to `todayKey`, else the formatted day. */
-export function relativeDayLabel(key: string, todayKey: string): string {
+/** Optional localized words + date locale for {@link relativeDayLabel}. */
+export interface RelativeDayLabels {
+  today?: string;
+  tomorrow?: string;
+  yesterday?: string;
+  locale?: string;
+}
+
+/**
+ * "Today" / "Tomorrow" / "Yesterday" relative to `todayKey`, else the formatted
+ * day. Pass localized words via `opts` (English when omitted, so callers and
+ * tests that don't translate keep working).
+ */
+export function relativeDayLabel(key: string, todayKey: string, opts: RelativeDayLabels = {}): string {
   const diff = dayDiff(todayKey, key);
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Tomorrow';
-  if (diff === -1) return 'Yesterday';
-  return formatDayKey(key);
+  if (diff === 0) return opts.today ?? 'Today';
+  if (diff === 1) return opts.tomorrow ?? 'Tomorrow';
+  if (diff === -1) return opts.yesterday ?? 'Yesterday';
+  return formatDayKey(key, opts.locale);
 }

@@ -1,0 +1,16 @@
+{
+  "back": "Retour",
+  "kicker": "CAPACITÉ",
+  "habitsThatStrengthen": "Habitudes qui renforcent {{name}}",
+  "doneTodayA11y": "{{title}}, fait aujourd'hui",
+  "doItNowA11y": "{{title}}, fais-le maintenant",
+  "scheduledTime": "⏰ {{time}}",
+  "done": "✓ Fait",
+  "doIt": "Le faire ›",
+  "addToPlanA11y": "Ajouter {{title}} au plan d'aujourd'hui",
+  "add": "+ Ajouter",
+  "empty": "Aucune habitude n'alimente cette capacité pour l'instant. Ajoutes-en une pour la développer.",
+  "inTodaysPlan": "DANS LE PLAN D'AUJOURD'HUI",
+  "nonePlanned": "Rien de prévu aujourd'hui — ajoutes-en une ci-dessous pour développer {{name}}.",
+  "notPlannedYet": "PAS ENCORE PRÉVU"
+}

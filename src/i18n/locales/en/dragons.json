@@ -1,0 +1,44 @@
+{
+  "laziness": {
+    "name": "the Dragon of Laziness",
+    "short": "Laziness",
+    "taunt": "“You’ll do it tomorrow…”",
+    "victory": "Laziness slain — momentum is yours."
+  },
+  "fear": {
+    "name": "the Dragon of Fear",
+    "short": "Fear",
+    "taunt": "“What if you fail?”",
+    "victory": "Fear slain — you moved anyway."
+  },
+  "unworthiness": {
+    "name": "the Dragon of Unworthiness",
+    "short": "Unworthiness",
+    "taunt": "“You’re not good enough for this.”",
+    "victory": "Unworthiness slain — you showed up for yourself."
+  },
+  "tooold": {
+    "name": "the Dragon of “Too Old”",
+    "short": "“Too Old”",
+    "taunt": "“It’s too late to change.”",
+    "victory": "“Too Old” slain — today counts."
+  },
+  "procrastination": {
+    "name": "the Dragon of Procrastination",
+    "short": "Procrastination",
+    "taunt": "“Just five more minutes…”",
+    "victory": "Procrastination slain — you started."
+  },
+  "doubt": {
+    "name": "the Dragon of Doubt",
+    "short": "Doubt",
+    "taunt": "“This won’t even work.”",
+    "victory": "Doubt slain — proof over opinion."
+  },
+  "custom": {
+    "name": "your Dragon",
+    "short": "Custom",
+    "taunt": "“You can’t beat me.”",
+    "victory": "Dragon slain — well fought."
+  }
+}

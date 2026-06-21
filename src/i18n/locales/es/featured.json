@@ -1,0 +1,37 @@
+{
+  "proj-malaria": {
+    "title": "Reducción de focos de malaria en Fort-Liberté",
+    "region": "Fort-Liberté, Haití",
+    "summary": "Detén la malaria en su origen. Drena y limpia el agua estancada donde se reproducen los mosquitos — cada foco eliminado protege a tus vecinos.",
+    "unit": "focos limpiados",
+    "reward": "Mosquiteros + larvicida para las zonas más afectadas"
+  },
+  "proj-gardens": {
+    "title": "Huertos comunitarios · Huertos",
+    "region": "Ouanaminthe, Haití",
+    "summary": "Cultiva alimento y resiliencia. Cuida los huertos compartidos para que las familias tengan verduras frescas y plántulas que compartir.",
+    "unit": "parcelas cuidadas",
+    "reward": "Semillas, herramientas y un barril de agua de lluvia para el huerto"
+  },
+  "proj-water": {
+    "title": "Agua limpia juntos",
+    "region": "Cap-Haïtien, Haití",
+    "summary": "Agua segura, cada día. Trata el agua del hogar y mantén limpios los puntos de recolección para reducir las enfermedades por agua.",
+    "unit": "hogares tratando agua",
+    "reward": "Filtros de agua de cerámica para los hogares participantes"
+  },
+  "proj-waste": {
+    "title": "Reducción de residuos del barrio",
+    "region": "Port-de-Paix, Haití",
+    "summary": "Un barrio más limpio es un barrio más sano. Recoge, separa y desecha bien los residuos para mantener despejados desagües y calles.",
+    "unit": "bolsas recogidas",
+    "reward": "Contenedores comunitarios + una recogida mensual"
+  },
+  "proj-school": {
+    "title": "Útiles escolares para cada niño",
+    "region": "Gonaïves, Haití",
+    "summary": "Que los niños sigan aprendiendo. Ayuda a los niños a estudiar a diario y prepara kits para que cada uno empiece el trimestre listo.",
+    "unit": "sesiones de estudio registradas",
+    "reward": "Kits escolares (cuadernos, bolígrafos, mochilas) para el grupo"
+  }
+}

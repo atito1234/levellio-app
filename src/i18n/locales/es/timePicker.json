@@ -1,0 +1,12 @@
+{
+  "hour": "Hora",
+  "minute": "Minuto",
+  "amA11y": "Mañana",
+  "pmA11y": "Tarde o noche",
+  "scheduledFor": "Programado para {{time}}",
+  "increaseA11y": "Aumentar {{unit}}",
+  "decreaseA11y": "Disminuir {{unit}}",
+  "valueA11y": "{{label}} {{value}}",
+  "unitHour": "la hora",
+  "unitMinute": "los minutos"
+}

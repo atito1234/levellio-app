@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -48,13 +49,6 @@ const ACTION_POS: Record<string, Pt> = {
   breathe: { x: 54, y: 352 },
   'sleep-early': { x: 286, y: 352 },
 };
-const ACTION_SHORT: Record<string, string> = {
-  water: 'Water',
-  walk: 'Walk',
-  breathe: 'Breathe',
-  'sleep-early': 'Sleep early',
-};
-
 const DISPLAY_CAPS = Object.keys(CAP_POS) as CapacityId[];
 const DISPLAY_ACTIONS = Object.keys(ACTION_POS);
 const CENTER: Pt = { x: 170, y: 210 };
@@ -99,10 +93,17 @@ const EDGES: Edge[] = DISPLAY_ACTIONS.flatMap((actionId) =>
 );
 
 export function ConnectionsScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('connections');
   const reduced = useReducedMotion();
   const { levels } = useCapacities(); // real, persisted capacity levels
   const { quests } = useGame();
   const [selected, setSelected] = useState<string | null>(null);
+
+  // Localized labels: capacity names come from the shared `capacities` namespace
+  // keyed by id; action short labels live in this screen's namespace.
+  const capName = (id: CapacityId): string => t('capacities:' + id);
+  const actionLabel = (id: string): string => t('action_' + id);
+  const joinCapsForAction = (id: string): string => capacitiesForAction(id).map((c) => capName(c)).join(', ');
 
   // Per-activity focus: highlight the capacities THIS activity strengthens, plus
   // every action that also feeds them (its place in the web).
@@ -134,18 +135,18 @@ export function ConnectionsScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
       </View>
 
       <Text style={styles.title} accessibilityRole="header">
-        {focusQuest ? 'How this connects' : 'How your actions connect'}
+        {focusQuest ? t('titleFocus') : t('title')}
       </Text>
       <Text style={styles.helper}>
         {focusQuest
-          ? `${focusQuest.title} strengthens ${focusDeltas.map((d) => getCapacity(d.capacityId).name).join(', ')}. Tap any action to explore.`
-          : 'Tap any action to see everything it strengthens.'}
+          ? t('helperFocus', { title: focusQuest.title, capacities: focusDeltas.map((d) => capName(d.capacityId)).join(', ') })
+          : t('helper')}
       </Text>
 
       <View style={styles.stage}>
@@ -201,12 +202,16 @@ export function ConnectionsScreen({ route, navigation }: Props) {
                 key={capId}
                 accessible
                 accessibilityRole="image"
-                accessibilityLabel={`${cap.name} ${level} percent${fed && previewDelta ? `, plus ${previewDelta}` : ''}`}
+                accessibilityLabel={
+                  fed && previewDelta
+                    ? t('capacityLevelPlusA11y', { name: capName(capId), level, delta: previewDelta })
+                    : t('capacityLevelA11y', { name: capName(capId), level })
+                }
                 style={[styles.capNode, { left: pos.x - CAP_SIZE / 2, top: pos.y - CAP_SIZE / 2, opacity: dim ? 0.38 : 1 }]}
               >
                 <CapacityRing level={level} colorId={cap.colorId} size={CAP_SIZE} strokeWidth={6} />
                 <View style={styles.capCenter} pointerEvents="none">
-                  <Text style={styles.capName}>{cap.name}</Text>
+                  <Text style={styles.capName}>{capName(capId)}</Text>
                   {fed && previewDelta ? (
                     <Text style={[styles.capPct, { color: CAPACITY_HEX[cap.colorId] }]}>+{previewDelta}</Text>
                   ) : (
@@ -222,18 +227,18 @@ export function ConnectionsScreen({ route, navigation }: Props) {
             const pos = ACTION_POS[actionId]!;
             const isSel = selected === actionId;
             const dim = selected !== null && !isSel;
-            const caps = capacitiesForAction(actionId).map((c) => getCapacity(c).name).join(', ');
+            const caps = joinCapsForAction(actionId);
             return (
               <Pressable
                 key={actionId}
                 onPress={() => setSelected(isSel ? null : actionId)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSel }}
-                accessibilityLabel={`${ACTION_SHORT[actionId]} — strengthens ${caps}`}
+                accessibilityLabel={t('actionStrengthensA11y', { action: actionLabel(actionId), capacities: caps })}
                 style={[styles.actionNode, { left: pos.x - 46, top: pos.y - 24, opacity: dim ? 0.5 : 1 }, isSel && styles.actionNodeSel]}
               >
                 <Text style={[styles.actionText, isSel && styles.actionTextSel]} numberOfLines={1}>
-                  {ACTION_SHORT[actionId]}
+                  {actionLabel(actionId)}
                 </Text>
               </Pressable>
             );
@@ -245,20 +250,20 @@ export function ConnectionsScreen({ route, navigation }: Props) {
       <View style={styles.legend}>
         <View style={styles.legendItem}>
           <View style={[styles.legendLine, { height: 1.4 }]} />
-          <Text style={styles.legendText}>light contribution</Text>
+          <Text style={styles.legendText}>{t('legendLight')}</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendLine, { height: 4 }]} />
-          <Text style={styles.legendText}>strong contribution</Text>
+          <Text style={styles.legendText}>{t('legendStrong')}</Text>
         </View>
       </View>
 
       <Text style={styles.footnote} accessibilityLiveRegion="polite">
         {selected
-          ? `${ACTION_SHORT[selected]} strengthens ${capacitiesForAction(selected).map((c) => getCapacity(c).name).join(', ')}.`
+          ? t('footnoteSelected', { action: actionLabel(selected), capacities: joinCapsForAction(selected) })
           : focusMode
-            ? 'Highlighted rings are what this activity builds — and the actions that share them.'
-            : 'Thicker lines mean a stronger effect.'}
+            ? t('footnoteFocus')
+            : t('footnote')}
       </Text>
     </ScreenContainer>
   );

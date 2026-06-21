@@ -3,7 +3,9 @@
     "title": "Idioma",
     "subtitle": "Elige el idioma de la app",
     "system": "Predeterminado del sistema",
-    "draftBadge": "Borrador"
+    "draftBadge": "Borrador",
+    "current": "Actual: {{lang}}",
+    "switchTo": "Cambiar a"
   },
   "plus": {
     "title": "Levellio Plus",
@@ -18,6 +20,72 @@
     "title": "Tu héroe",
     "nameLabel": "Tu nombre",
     "namePlaceholder": "¿Cómo te llamamos?",
-    "presentation": "Presentación"
+    "presentation": "Presentación",
+    "female": "Mujer",
+    "male": "Hombre",
+    "neutral": "Neutral"
+  },
+  "account": {
+    "title": "Cuenta",
+    "signedIn": "Sesión iniciada.",
+    "signedInAs": "Sesión iniciada como {{email}}.",
+    "signOut": "Cerrar sesión",
+    "signOutConfirmTitle": "¿Cerrar sesión?",
+    "signOutConfirmBody": "Puedes volver a iniciar sesión cuando quieras.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar cuenta",
+    "deleteHelp": "Elimina permanentemente tu cuenta y tus datos de comunidad + proyectos (membresías, contribuciones, publicaciones, comentarios, reacciones, seguimientos). No se puede deshacer.",
+    "deleteConfirmTitle": "¿Eliminar tu cuenta?",
+    "deleteConfirmBody": "Esto elimina permanentemente tu cuenta y tus datos de comunidad + proyectos. No se puede deshacer.",
+    "confirmPassword": "Confirma tu contraseña",
+    "passwordPlaceholder": "Tu contraseña",
+    "deleteForever": "Eliminar para siempre",
+    "deleteFailed": "No se pudo eliminar tu cuenta. Inténtalo de nuevo."
+  },
+  "beta": {
+    "title": "Eres un miembro beta temprano 💜",
+    "note": "Levellio es totalmente gratis durante la beta. No hay nada que comprar, y ningún pago se iniciará sin tu consentimiento.",
+    "cta": "Acerca de Premium (próximamente)"
+  },
+  "ai": {
+    "title": "Sugerencias de misiones con IA",
+    "note": "Levellio es totalmente utilizable sin IA. El modo en el dispositivo no necesita clave ni red. El modo nube usa tu propia clave API, que nunca vemos.",
+    "mode": "Modo IA",
+    "onDevice": "🔒 En el dispositivo (Gratis)",
+    "cloud": "☁️ Nube · tu clave (Gratis)",
+    "provider": "Proveedor",
+    "keySaved": "✓ Clave API guardada",
+    "noKey": "Sin clave API",
+    "yourKey": "Tu clave API",
+    "keyPlaceholder": "Pega la clave API de tu proveedor",
+    "keyHelper": "Guardada solo en el llavero seguro de tu dispositivo. Nunca registrada ni subida.",
+    "saveKey": "Guardar clave",
+    "clearKey": "Borrar clave",
+    "onDeviceHelp": "Funciona de forma privada en tu dispositivo. Sin clave ni red.",
+    "noKeyHelp": "¿Prefieres no gestionar una clave? El modo en el dispositivo funciona sin ninguna clave."
+  },
+  "community": {
+    "title": "Comunidad y comentarios",
+    "note": "Los Proyectos comunitarios te permiten construir hábitos juntos hacia una meta real compartida. Estos controles son tuyos — actívalos cuando quieras.",
+    "haptics": "Respuesta háptica",
+    "showWorld": "Mostrar Proyectos del mundo en Hoy",
+    "notifyWorld": "Avísame sobre hitos del mundo",
+    "prepGoals": "Las metas de preparación alimentan el proyecto",
+    "prepHelp": "Cuando eliges una meta personal para \"preparar\" una meta de proyecto: ON hace que sus hábitos cuenten para el progreso del proyecto; OFF solo lo muestra como recordatorio."
+  },
+  "insights": {
+    "title": "Análisis de hábitos",
+    "note": "Levellio guarda notas simples en tu dispositivo sobre cómo se forman tus hábitos, para que una futura actualización pueda mostrarte análisis. Nada se sube — sin analíticas, sin cuentas. Tú eliges exactamente qué se registra.",
+    "recordProvenance": "Recordar cómo se forman los grupos",
+    "recordContribution": "Seguir qué actividades construyen qué grupos",
+    "includeContext": "Incluir detalles de actividad (categoría, dificultad, XP)",
+    "includeSourceActivities": "Incluir qué actividades inspiraron un grupo",
+    "includeTimestamps": "Conservar marcas de tiempo exactas",
+    "recordSession": "Registrar sesiones (duración, hora del día)",
+    "includeLocation": "Capturar ubicación y velocidad (requiere permiso)"
+  },
+  "about": {
+    "title": "Acerca de y legal",
+    "contact": "Contactar soporte"
   }
 }

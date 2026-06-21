@@ -153,7 +153,7 @@ export function PostDetailScreen({ route, navigation }: Props) {
                 const on = hCat === cat;
                 return (
                   <Pressable key={cat} onPress={() => setHCat(cat)} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.attachChip, on && styles.attachChipOn]}>
-                    <Text style={[styles.attachChipText, on && styles.attachChipTextOn]}>{CATEGORY_META[cat].icon} {CATEGORY_META[cat].label}</Text>
+                    <Text style={[styles.attachChipText, on && styles.attachChipTextOn]}>{CATEGORY_META[cat].icon} {t(`categories:${cat}`)}</Text>
                   </Pressable>
                 );
               })}

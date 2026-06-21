@@ -1,0 +1,44 @@
+{
+  "laziness": {
+    "name": "le Dragon de la Paresse",
+    "short": "Paresse",
+    "taunt": "« Tu le feras demain… »",
+    "victory": "Paresse terrassée — l’élan est à toi."
+  },
+  "fear": {
+    "name": "le Dragon de la Peur",
+    "short": "Peur",
+    "taunt": "« Et si tu échoues ? »",
+    "victory": "Peur terrassée — tu as avancé malgré tout."
+  },
+  "unworthiness": {
+    "name": "le Dragon de l’Indignité",
+    "short": "Indignité",
+    "taunt": "« Tu n’es pas à la hauteur. »",
+    "victory": "Indignité terrassée — tu as été présent pour toi."
+  },
+  "tooold": {
+    "name": "le Dragon du « Trop Vieux »",
+    "short": "« Trop Vieux »",
+    "taunt": "« Il est trop tard pour changer. »",
+    "victory": "« Trop Vieux » terrassé — aujourd’hui compte."
+  },
+  "procrastination": {
+    "name": "le Dragon de la Procrastination",
+    "short": "Procrastination",
+    "taunt": "« Encore cinq minutes… »",
+    "victory": "Procrastination terrassée — tu as commencé."
+  },
+  "doubt": {
+    "name": "le Dragon du Doute",
+    "short": "Doute",
+    "taunt": "« Ça ne marchera même pas. »",
+    "victory": "Doute terrassé — la preuve plutôt que l’avis."
+  },
+  "custom": {
+    "name": "ton Dragon",
+    "short": "Perso",
+    "taunt": "« Tu ne peux pas me vaincre. »",
+    "victory": "Dragon terrassé — bien joué."
+  }
+}

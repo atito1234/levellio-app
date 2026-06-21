@@ -1,0 +1,20 @@
+{
+  "tier": { "novice": "Novice", "pathfinder": "Pathfinder", "luminary": "Luminary" },
+  "companion": { "spark": "Spark", "ember": "Ember", "phoenixling": "Phoenixling" },
+  "kitTitle": "Kit",
+  "kitClassic": "Classic",
+  "changeKit": "Change kit",
+  "level": "Level",
+  "totalXp": "Total XP",
+  "analyticsTitle": "Your analytics",
+  "analyticsHint": "Take 3 seconds to see if you're headed the right way — and unlock deeper insights as your days accomplished add up.",
+  "seeProgress": "See your progress",
+  "wispTitle": "Your Wisp",
+  "wispHint": "Your companion evolves as your hero rises through the tiers.",
+  "tierProgressTitle": "Tier Progression",
+  "progressToNextTier": "Progress to next tier",
+  "toNext_one": "{{count}} level to {{tier}}",
+  "toNext_other": "{{count}} levels to {{tier}}",
+  "topReached": "Top tier reached — you're a Luminary!",
+  "journeyTitle": "Your Journey"
+}

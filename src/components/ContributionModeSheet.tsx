@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography } from '@/theme';
 import { captureLocationSafely } from '@/services/sensors/deviceContext';
 import { detectContributionMode, hasGeofence, type ContributionMode, type Project } from '@/lib/projects';
@@ -29,6 +30,7 @@ export function ContributionModeSheet({
   onChoose: (mode: ContributionMode) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation('projects');
   const [suggested, setSuggested] = useState<ContributionMode | null>(null);
   const [detecting, setDetecting] = useState(false);
   const canGeolocate = locationEnabled && projects.some(hasGeofence);
@@ -60,14 +62,14 @@ export function ContributionModeSheet({
       <Pressable
         onPress={() => onChoose(mode)}
         accessibilityRole="button"
-        accessibilityLabel={`${title}. ${body}${on ? '. Suggested.' : ''}`}
+        accessibilityLabel={`${title}. ${body}${on ? t('contributionMode.suggestedA11y') : ''}`}
         style={[styles.option, on && styles.optionOn]}
       >
         <Text style={styles.optionEmoji}>{emoji}</Text>
         <View style={{ flex: 1 }}>
           <Text style={styles.optionTitle}>
             {title}
-            {on ? '  · suggested' : ''}
+            {on ? t('contributionMode.suggested') : ''}
           </Text>
           <Text style={styles.optionBody}>{body}</Text>
         </View>
@@ -79,18 +81,18 @@ export function ContributionModeSheet({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
-          <Text style={styles.title}>How did you do this?</Text>
-          <Text style={styles.sub}>Both count toward the project — this just shows how.</Text>
+          <Text style={styles.title}>{t('contributionMode.title')}</Text>
+          <Text style={styles.sub}>{t('contributionMode.sub')}</Text>
           {detecting && (
             <View style={styles.detecting}>
               <ActivityIndicator color={VIOLET} />
-              <Text style={styles.detectingText}>Checking your location…</Text>
+              <Text style={styles.detectingText}>{t('contributionMode.detecting')}</Text>
             </View>
           )}
-          <Option mode="onsite" emoji="📍" title="On-site" body="On the ground, at the project." />
-          <Option mode="remote" emoji="🌍" title="From anywhere" body="For my own goal — it still helps." />
+          <Option mode="onsite" emoji="📍" title={t('contributionMode.onsiteTitle')} body={t('contributionMode.onsiteBody')} />
+          <Option mode="remote" emoji="🌍" title={t('contributionMode.remoteTitle')} body={t('contributionMode.remoteBody')} />
           <Pressable onPress={onClose} accessibilityRole="button" style={styles.skip} hitSlop={8}>
-            <Text style={styles.skipText}>Cancel</Text>
+            <Text style={styles.skipText}>{t('contributionMode.cancel')}</Text>
           </Pressable>
         </View>
       </View>

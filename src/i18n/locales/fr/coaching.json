@@ -1,0 +1,19 @@
+{
+  "close": "Fermer",
+  "title": "Affronte ton dragon",
+  "thisSoundsLike": "Ça ressemble à : {{label}}",
+  "thinkItThrough": "RÉFLÉCHIS-Y · {{current}}/{{total}}",
+  "nextQuestionA11y": "Question suivante",
+  "seeTacticA11y": "Voir la tactique",
+  "next": "Suivant ›",
+  "seeATactic": "Voir une tactique ›",
+  "tryThis": "ESSAIE CECI",
+  "evidence": "🧠 {{principle}} ({{source}})",
+  "differentTacticA11y": "Essayer une autre tactique",
+  "differentTactic": "Essayer une autre tactique ›",
+  "readyA11y": "Je suis prêt, on y retourne",
+  "ready": "⚔️ Je suis prêt — on y retourne",
+  "journalThisA11y": "Noter ça dans le journal",
+  "journalThis": "📓 Noter ça",
+  "journalTeaching": "Essaie : {{name}} — {{how}}"
+}

@@ -32,8 +32,8 @@ export function addMonths(ref: MonthRef, delta: number): MonthRef {
 }
 
 /** "June 2026" */
-export function monthLabel(ref: MonthRef): string {
-  return new Date(ref.year, ref.month, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+export function monthLabel(ref: MonthRef, locale = 'en-US'): string {
+  return new Date(ref.year, ref.month, 1).toLocaleString(locale, { month: 'long', year: 'numeric' });
 }
 
 /**

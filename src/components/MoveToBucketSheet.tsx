@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { BucketIcon } from '@/components/BucketIcon';
 import { colors, radii, spacing, typography } from '@/theme';
 import { getBucketColor, type HabitBucket } from '@/lib/buckets';
@@ -25,26 +26,28 @@ export function MoveToBucketSheet({
   onSelect,
   onClose,
 }: Props) {
+  const { t } = useTranslation('projects');
+  const sel = (on: boolean) => (on ? t('moveToBucket.selectedSuffix') : '');
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable
         style={styles.backdrop}
         accessibilityRole="button"
-        accessibilityLabel="Close move to bucket"
+        accessibilityLabel={t('moveToBucket.closeA11y')}
         onPress={onClose}
       >
         <Pressable style={styles.sheet} accessible={false} onPress={() => {}}>
           <Text style={styles.title} accessibilityRole="header">
-            Move to bucket
+            {t('moveToBucket.title')}
           </Text>
           <Text style={styles.sub} numberOfLines={1}>
             {activityTitle}
           </Text>
           <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
             <Row
-              label="Unfiled"
+              label={t('moveToBucket.unfiled')}
               selected={!currentBucketId}
-              accessibilityLabel={`Unfiled${!currentBucketId ? ', selected' : ''}`}
+              accessibilityLabel={`${t('moveToBucket.unfiled')}${sel(!currentBucketId)}`}
               onPress={() => onSelect(null)}
             >
               <View style={styles.unfiledDot} />
@@ -57,7 +60,7 @@ export function MoveToBucketSheet({
                   key={b.id}
                   label={b.name}
                   selected={selected}
-                  accessibilityLabel={`${b.name} bucket${selected ? ', selected' : ''}`}
+                  accessibilityLabel={`${b.name}${t('moveToBucket.bucketSuffix')}${sel(selected)}`}
                   onPress={() => onSelect(b.id)}
                 >
                   <View style={[styles.iconWrap, { backgroundColor: color.soft }]}>

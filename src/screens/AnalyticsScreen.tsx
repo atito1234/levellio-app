@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { DotGrid, Sparkline } from '@/components/charts';
@@ -70,6 +72,7 @@ const TONE: Record<DirectionTone, { accent: string; soft: string; emoji: string 
 };
 
 export function AnalyticsScreen({ navigation }: Props) {
+  const { t } = useTranslation('analytics');
   const { character } = useGame();
   const { goals } = useGoals();
   const { events, ready } = useActivityLog();
@@ -108,19 +111,19 @@ export function AnalyticsScreen({ navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('a11yBack')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
-        <Text style={styles.kicker}>YOUR ANALYTICS</Text>
+        <Text style={styles.kicker}>{t('kicker')}</Text>
         <View style={styles.chevronSpacer} />
       </View>
       <Text style={styles.title} accessibilityRole="header">
-        Headed the right way?
+        {t('title')}
       </Text>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!ready ? (
-          <Text style={styles.empty}>Reading your journey…</Text>
+          <Text style={styles.empty}>{t('loading')}</Text>
         ) : (
           <>
             {/* The 3-second reflection. */}
@@ -131,20 +134,20 @@ export function AnalyticsScreen({ navigation }: Props) {
             </View>
 
             {/* Plus: a forward-looking forecast (additive — free insights unchanged). */}
-            <ForecastCard data={data} entitled={advancedInsights} onUnlock={() => navigation.navigate('Paywall')} />
+            <ForecastCard data={data} entitled={advancedInsights} onUnlock={() => navigation.navigate('Paywall')} t={t} />
 
             {/* This week + the headline counters. */}
             <View style={styles.weekCard}>
               <View style={styles.weekHead}>
-                <Text style={styles.cardTitle}>This week</Text>
-                <Text style={styles.weekCount}>{closedThisWeek}/7 days</Text>
+                <Text style={styles.cardTitle}>{t('week.title')}</Text>
+                <Text style={styles.weekCount}>{t('week.count', { done: closedThisWeek })}</Text>
               </View>
               <View style={styles.weekRow}>
                 {data.cells.map((c) => (
                   <View key={c.key} style={styles.weekCell}>
                     <View
                       style={[styles.dot, c.done && styles.dotDone, c.isToday && styles.dotToday]}
-                      accessibilityLabel={`${weekdayLabel(c.weekday)} ${c.done ? 'active' : 'rest'}`}
+                      accessibilityLabel={c.done ? t('week.a11yActive', { day: weekdayLabel(c.weekday) }) : t('week.a11yRest', { day: weekdayLabel(c.weekday) })}
                     >
                       {c.done && <Text style={styles.dotCheck}>✓</Text>}
                     </View>
@@ -153,9 +156,9 @@ export function AnalyticsScreen({ navigation }: Props) {
                 ))}
               </View>
               <View style={styles.counterRow}>
-                <Counter value={`${data.daysDone}`} label="days accomplished" />
-                <Counter value={`${data.streakDays}`} label="day streak" tint={TEAL} />
-                <Counter value={`${data.activities.length}`} label="activities" tint={VIOLET} />
+                <Counter value={`${data.daysDone}`} label={t('counter.daysAccomplished')} />
+                <Counter value={`${data.streakDays}`} label={t('counter.dayStreak')} tint={TEAL} />
+                <Counter value={`${data.activities.length}`} label={t('counter.activities')} tint={VIOLET} />
               </View>
             </View>
 
@@ -164,18 +167,21 @@ export function AnalyticsScreen({ navigation }: Props) {
               <View style={styles.feelCard}>
                 <View style={styles.insightHead}>
                   <Text style={styles.insightIcon}>⭐</Text>
-                  <Text style={styles.insightTitle}>How it feels</Text>
-                  <Text style={styles.feelAvg}>{data.ratings.average.toFixed(1)}/5</Text>
+                  <Text style={styles.insightTitle}>{t('feel.title')}</Text>
+                  <Text style={styles.feelAvg}>{t('feel.average', { value: data.ratings.average.toFixed(1) })}</Text>
                 </View>
                 <Text style={styles.insightBody}>
-                  Across {data.ratings.count} rated {data.ratings.count === 1 ? 'session' : 'sessions'}, your habits feel{' '}
-                  {feelWord(data.ratings.average)}
-                  {Math.abs(data.ratings.trend) >= 0.3
-                    ? data.ratings.trend > 0
-                      ? ' — and trending up lately.'
-                      : ' — dipping a little lately.'
-                    : '.'}
-                  {data.ratings.best ? ` You rate ${data.ratings.best.title} highest.` : ''}
+                  {t('feel.body', {
+                    count: data.ratings.count,
+                    word: feelWord(data.ratings.average, t),
+                    trend:
+                      Math.abs(data.ratings.trend) >= 0.3
+                        ? data.ratings.trend > 0
+                          ? t('feel.trendUp')
+                          : t('feel.trendDown')
+                        : t('feel.trendFlat'),
+                    best: data.ratings.best ? t('feel.best', { title: data.ratings.best.title }) : '',
+                  })}
                 </Text>
               </View>
             )}
@@ -187,20 +193,20 @@ export function AnalyticsScreen({ navigation }: Props) {
                 📈 <Text style={styles.nextStrong}>{confidenceLabel(data.daysDone)}</Text>
               </Text>
               <Text style={styles.nextSub}>
-                Every insight is shown — confidence grows as your days add up ({data.daysDone} so far).
+                {t('confidence.sub', { days: data.daysDone })}
               </Text>
             </View>
 
             {/* All insights, ungated (thin data is labelled "early"). */}
-            <Text style={styles.sectionLabel}>WHAT YOUR DATA SAYS</Text>
+            <Text style={styles.sectionLabel}>{t('sections.data')}</Text>
             {INSIGHT_TIERS.map((tier) => (
-              <InsightCard key={tier.id} tier={tier} data={data} goals={goals} />
+              <InsightCard key={tier.id} tier={tier} data={data} goals={goals} t={t} />
             ))}
 
             {/* From repetition to habit — real per-activity journeys. */}
             {data.activities.length > 0 && (
               <>
-                <Text style={styles.sectionLabel}>FROM REPETITION TO HABIT</Text>
+                <Text style={styles.sectionLabel}>{t('sections.repetition')}</Text>
                 {data.activities.slice(0, 5).map((a) => (
                   <JourneyRow
                     key={a.activityId}
@@ -209,13 +215,14 @@ export function AnalyticsScreen({ navigation }: Props) {
                     activityId={a.activityId}
                     title={a.title}
                     onPress={() => navigation.navigate('ActivityJourney', { activityId: a.activityId })}
+                    t={t}
                   />
                 ))}
               </>
             )}
 
             {/* Why the ring works — the science, honestly. */}
-            <Text style={styles.sectionLabel}>WHY THE RING WORKS</Text>
+            <Text style={styles.sectionLabel}>{t('sections.ring')}</Text>
             {RING_SCIENCE.map((c) => (
               <View key={c.id} style={styles.scienceCard}>
                 <View style={styles.insightHead}>
@@ -235,10 +242,10 @@ export function AnalyticsScreen({ navigation }: Props) {
             <Pressable
               onPress={() => navigation.navigate('Insights')}
               accessibilityRole="button"
-              accessibilityLabel="See full activity insights"
+              accessibilityLabel={t('fullLink.a11y')}
               style={styles.fullLink}
             >
-              <Text style={styles.fullLinkText}>📊 See full activity insights ›</Text>
+              <Text style={styles.fullLinkText}>{t('fullLink.text')}</Text>
             </Pressable>
           </>
         )}
@@ -247,43 +254,45 @@ export function AnalyticsScreen({ navigation }: Props) {
   );
 }
 
-const STATUS_META: Record<JourneyStatus, { label: string; color: string }> = {
-  graduated: { label: '🏅 Habit unlocked', color: '#B5740A' },
-  solidified: { label: '🌱 Locked in', color: TEAL },
-  building: { label: 'Building', color: VIOLET },
-  new: { label: 'Just started', color: MUTED },
+const STATUS_COLOR: Record<JourneyStatus, string> = {
+  graduated: '#B5740A',
+  solidified: TEAL,
+  building: VIOLET,
+  new: MUTED,
 };
 
-function JourneyRow({ sessions, today, activityId, title, onPress }: { sessions: readonly ActivitySessionEvent[]; today: string; activityId: string; title: string; onPress: () => void }) {
+function JourneyRow({ sessions, today, activityId, title, onPress, t }: { sessions: readonly ActivitySessionEvent[]; today: string; activityId: string; title: string; onPress: () => void; t: TFunction }) {
   const j = activityJourney(sessions, activityId, title, today);
   const cells = activityDayCells(sessions, activityId, today, 28);
-  const status = STATUS_META[j.status];
+  const statusColor = STATUS_COLOR[j.status];
+  const statusLabel = t(`status.${j.status}`);
+  const streakText = j.currentStreak > 0 ? t('journey.dayInRow', { days: j.currentStreak }) : t('journey.startAgain');
+  const autoText = j.graduated ? t('journey.runsOnOwn') : t('journey.towardAutomatic', { value: j.progressPct });
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`${title} journey. ${status.label}. See details`} style={styles.journeyCard}>
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={t('journey.a11y', { title, status: statusLabel })} style={styles.journeyCard}>
       <View style={styles.journeyHead}>
         <Text style={styles.journeyTitle} numberOfLines={1}>
           {title}
         </Text>
-        <Text style={[styles.journeyStatus, { color: status.color }]}>{status.label}</Text>
+        <Text style={[styles.journeyStatus, { color: statusColor }]}>{statusLabel}</Text>
       </View>
       <DotGrid cells={cells} />
       <Text style={styles.journeySub}>
-        {j.currentStreak > 0 ? `Day ${j.currentStreak} in a row` : 'Start again today'} ·{' '}
-        {j.graduated ? 'runs on its own' : `${j.progressPct}% toward automatic`} · view ›
+        {streakText} · {autoText} · {t('journey.view')}
       </Text>
     </Pressable>
   );
 }
 
-function feelWord(avg: number): string {
-  if (avg >= 4.5) return 'excellent';
-  if (avg >= 3.5) return 'good';
-  if (avg >= 2.5) return 'okay';
-  return 'like a grind';
+function feelWord(avg: number, t: TFunction): string {
+  if (avg >= 4.5) return t('feel.wordExcellent');
+  if (avg >= 3.5) return t('feel.wordGood');
+  if (avg >= 2.5) return t('feel.wordOkay');
+  return t('feel.wordGrind');
 }
 
 /** Plus forecast — projects when the next insight + automaticity land at current pace. */
-function ForecastCard({ data, entitled, onUnlock }: { data: ScreenData; entitled: boolean; onUnlock: () => void }) {
+function ForecastCard({ data, entitled, onUnlock, t }: { data: ScreenData; entitled: boolean; onUnlock: () => void; t: TFunction }) {
   const perDay = data.activeThisWeek / 7;
   const eta = (need: number): number | null => (need <= 0 ? 0 : perDay > 0 ? Math.ceil(need / perDay) : null);
 
@@ -292,11 +301,11 @@ function ForecastCard({ data, entitled, onUnlock }: { data: ScreenData; entitled
       <Pressable onPress={onUnlock} accessibilityRole="button" style={[styles.forecastCard, styles.forecastLocked]}>
         <View style={styles.insightHead}>
           <Text style={styles.insightIcon}>🔮</Text>
-          <Text style={styles.insightTitle}>Forecast</Text>
-          <Text style={styles.plusTag}>✦ Plus</Text>
+          <Text style={styles.insightTitle}>{t('forecast.title')}</Text>
+          <Text style={styles.plusTag}>{t('forecast.plusTag')}</Text>
         </View>
-        <Text style={styles.insightBody}>See when your next insight, streaks, and automaticity will land at your current pace.</Text>
-        <Text style={styles.forecastCta}>Unlock with Levellio Plus ›</Text>
+        <Text style={styles.insightBody}>{t('forecast.lockedBody')}</Text>
+        <Text style={styles.forecastCta}>{t('forecast.cta')}</Text>
       </Pressable>
     );
   }
@@ -304,26 +313,27 @@ function ForecastCard({ data, entitled, onUnlock }: { data: ScreenData; entitled
   const next = nextLockedTier(data.daysDone);
   const nextEta = next ? eta(next.unlockDays - data.daysDone) : null;
   const autoEta = eta(66 - data.longest);
+  const perWeek = Math.round(perDay * 7);
 
   return (
     <View style={[styles.forecastCard, { borderColor: VIOLET }]}>
       <View style={styles.insightHead}>
         <Text style={styles.insightIcon}>🔮</Text>
-        <Text style={styles.insightTitle}>Your forecast</Text>
-        <Text style={styles.plusTag}>✦ Plus</Text>
+        <Text style={styles.insightTitle}>{t('forecast.yourTitle')}</Text>
+        <Text style={styles.plusTag}>{t('forecast.plusTag')}</Text>
       </View>
       {next ? (
         <Text style={styles.insightBody}>
-          At your current pace you’ll unlock <Text style={styles.bodyStrong}>{next.title}</Text>{' '}
-          {nextEta != null ? (nextEta === 0 ? 'any day now' : `in about ${nextEta} ${nextEta === 1 ? 'day' : 'days'}`) : 'as you keep showing up'}.
+          {t('forecast.nextUnlockPrefix')}<Text style={styles.bodyStrong}>{next.title}</Text>{' '}
+          {nextEta != null ? (nextEta === 0 ? t('forecast.etaSoon') : t('forecast.eta', { count: nextEta })) : t('forecast.etaKeepGoing')}.
         </Text>
       ) : (
-        <Text style={styles.insightBody}>Every insight tier is unlocked — you’re in rare air. 🛡️</Text>
+        <Text style={styles.insightBody}>{t('forecast.allUnlocked')}</Text>
       )}
       <Text style={styles.insightBody}>
-        Automaticity (~66 days){' '}
-        {autoEta != null ? (autoEta === 0 ? 'is within reach' : `is about ${autoEta} active ${autoEta === 1 ? 'day' : 'days'} away`) : 'builds with each active day'}{' '}
-        at {Math.round(perDay * 7)} active {Math.round(perDay * 7) === 1 ? 'day' : 'days'}/week.
+        {t('forecast.autoPrefix')}
+        {autoEta != null ? (autoEta === 0 ? t('forecast.autoWithinReach') : t('forecast.autoAway', { count: autoEta })) : t('forecast.autoBuilds')}
+        {t('forecast.autoPace', { count: perWeek })}
       </Text>
     </View>
   );
@@ -338,8 +348,8 @@ function Counter({ value, label, tint = INK }: { value: string; label: string; t
   );
 }
 
-function InsightCard({ tier, data, goals }: { tier: InsightTier; data: ScreenData; goals: Goals }) {
-  const body = renderInsight(tier, data, goals);
+function InsightCard({ tier, data, goals, t }: { tier: InsightTier; data: ScreenData; goals: Goals; t: TFunction }) {
+  const body = renderInsight(tier, data, goals, t);
   return (
     <View style={styles.insightCard}>
       <View style={styles.insightHead}>
@@ -351,51 +361,51 @@ function InsightCard({ tier, data, goals }: { tier: InsightTier; data: ScreenDat
   );
 }
 
-function renderInsight(tier: InsightTier, data: ScreenData, goals: Goals): React.ReactNode {
+function renderInsight(tier: InsightTier, data: ScreenData, goals: Goals, t: TFunction): React.ReactNode {
+  const dayWord = (n: number) => t('insight.days', { count: n });
   switch (tier.id) {
     case 'streak':
       return (
         <Text style={styles.insightBody}>
           {data.streakDays > 0
-            ? `You’re on a ${data.streakDays}-day streak. Your longest run so far is ${data.longest} ${data.longest === 1 ? 'day' : 'days'}.`
-            : `Your streak reset — your longest run was ${data.longest} ${data.longest === 1 ? 'day' : 'days'}. One win today starts the next.`}
+            ? t('insight.streakActive', { streak: data.streakDays, longest: dayWord(data.longest) })
+            : t('insight.streakReset', { longest: dayWord(data.longest) })}
         </Text>
       );
     case 'rhythm': {
       const { bestWeekday, bestHour } = data.summary;
       if (bestWeekday === null && bestHour === null) {
-        return <Text style={styles.insightBody}>Keep logging with the timer to reveal your best day and time.</Text>;
+        return <Text style={styles.insightBody}>{t('insight.rhythmEmpty')}</Text>;
       }
       const day = bestWeekday !== null ? weekdayLabel(bestWeekday) : null;
       const hr = bestHour !== null ? hourLabel(bestHour) : null;
-      return (
-        <Text style={styles.insightBody}>
-          You show up most {day ? `on ${day}s` : ''}{day && hr ? ', around ' : hr ? 'around ' : ''}
-          {hr ?? ''}. Stack new habits there — momentum is on your side.
-        </Text>
-      );
+      const body =
+        day && hr
+          ? t('insight.rhythmDayTime', { day, hour: hr })
+          : day
+            ? t('insight.rhythmDay', { day })
+            : t('insight.rhythmTime', { hour: hr });
+      return <Text style={styles.insightBody}>{body}</Text>;
     }
     case 'anchor': {
       const top = data.activities[0];
-      if (!top) return <Text style={styles.insightBody}>Complete a few sessions to find your anchor habit.</Text>;
+      if (!top) return <Text style={styles.insightBody}>{t('insight.anchorEmpty')}</Text>;
       return (
         <Text style={styles.insightBody}>
-          <Text style={styles.bodyStrong}>{top.title}</Text> is your anchor — {top.summary.count}{' '}
-          {top.summary.count === 1 ? 'session' : 'sessions'} logged. Anchor habits make the rest easier to start.
+          {t('insight.anchor', { count: top.summary.count, title: top.title })}
         </Text>
       );
     }
     case 'mix': {
       const top = data.categories[0];
-      if (!top) return <Text style={styles.insightBody}>As you log across areas, your focus will show up here.</Text>;
+      if (!top) return <Text style={styles.insightBody}>{t('insight.mixEmpty')}</Text>;
       const cat = resolveCategory(top.category);
       const meta = CATEGORY_META[cat];
       const goal = goals.find((g) => g.categories.includes(cat));
       return (
         <Text style={styles.insightBody}>
-          Most of your energy goes to <Text style={styles.bodyStrong}>{meta?.label ?? top.category}</Text>{' '}
-          ({top.summary.count} {top.summary.count === 1 ? 'session' : 'sessions'}).
-          {goal ? ` That directly feeds your goal “${goal.title}.”` : ' Tie it to a goal to make it count double.'}
+          {t('insight.mixIntro', { count: top.summary.count, label: meta?.label ?? top.category })}
+          {goal ? t('insight.mixGoal', { goal: goal.title }) : t('insight.mixNoGoal')}
         </Text>
       );
     }
@@ -403,10 +413,10 @@ function renderInsight(tier: InsightTier, data: ScreenData, goals: Goals): React
       const atBest = data.streakDays > 0 && data.streakDays >= data.longest;
       return (
         <Text style={styles.insightBody}>
-          Your longest unbroken run is <Text style={styles.bodyStrong}>{data.longest} days</Text>.{' '}
+          {t('insight.resilienceIntro', { longest: data.longest })}
           {atBest
-            ? 'You’re at your best right now — protect the streak.'
-            : `You’ve done it before, so you can do it again — you’re ${data.streakDays} ${data.streakDays === 1 ? 'day' : 'days'} in now.`}
+            ? t('insight.resilienceAtBest')
+            : t('insight.resilienceComeback', { count: data.streakDays })}
         </Text>
       );
     }
@@ -417,14 +427,10 @@ function renderInsight(tier: InsightTier, data: ScreenData, goals: Goals): React
       return (
         <>
           <Text style={styles.insightBody}>
-            {top ? (
-              <>
-                <Text style={styles.bodyStrong}>{top.title}</Text> is {streak} {streak === 1 ? 'day' : 'days'} in a row.
-              </>
-            ) : (
-              'Habits become automatic with repetition.'
-            )}{' '}
-            Research suggests automaticity lands on average around 66 days — but you’ll feel it before any number does.
+            {top
+              ? t('insight.automaticTop', { count: streak, title: top.title })
+              : t('insight.automaticNone')}
+            {t('insight.automaticScience')}
           </Text>
           <View style={styles.track}>
             <View style={[styles.trackFill, { width: `${pct}%` }]} />

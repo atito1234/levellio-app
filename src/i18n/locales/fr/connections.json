@@ -1,0 +1,19 @@
+{
+  "back": "Retour",
+  "titleFocus": "Comment ça se connecte",
+  "title": "Comment tes actions se connectent",
+  "helperFocus": "{{title}} renforce {{capacities}}. Touche une action pour explorer.",
+  "helper": "Touche une action pour voir tout ce qu'elle renforce.",
+  "capacityLevelA11y": "{{name}} {{level}} pour cent",
+  "capacityLevelPlusA11y": "{{name}} {{level}} pour cent, plus {{delta}}",
+  "actionStrengthensA11y": "{{action}} — renforce {{capacities}}",
+  "legendLight": "contribution légère",
+  "legendStrong": "contribution forte",
+  "footnoteSelected": "{{action}} renforce {{capacities}}.",
+  "footnoteFocus": "Les anneaux en surbrillance sont ce que cette activité construit — et les actions qui les partagent.",
+  "footnote": "Des lignes plus épaisses indiquent un effet plus fort.",
+  "action_water": "Eau",
+  "action_walk": "Marche",
+  "action_breathe": "Respirer",
+  "action_sleep-early": "Dormir tôt"
+}

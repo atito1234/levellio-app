@@ -1,0 +1,212 @@
+{
+  "target": {
+    "name": "Cible"
+  },
+  "star": {
+    "name": "Étoile"
+  },
+  "flame": {
+    "name": "Flamme"
+  },
+  "heart": {
+    "name": "Cœur"
+  },
+  "dumbbell": {
+    "name": "Haltère"
+  },
+  "leaf": {
+    "name": "Feuille"
+  },
+  "drop": {
+    "name": "Goutte d’eau"
+  },
+  "sun": {
+    "name": "Soleil"
+  },
+  "moon": {
+    "name": "Lune"
+  },
+  "bulb": {
+    "name": "Idée"
+  },
+  "book": {
+    "name": "Livre"
+  },
+  "pencil": {
+    "name": "Écriture"
+  },
+  "palette": {
+    "name": "Créativité"
+  },
+  "music": {
+    "name": "Musique"
+  },
+  "coin": {
+    "name": "Finance"
+  },
+  "briefcase": {
+    "name": "Travail"
+  },
+  "people": {
+    "name": "Relations"
+  },
+  "home": {
+    "name": "Maison"
+  },
+  "plant": {
+    "name": "Croissance"
+  },
+  "clock": {
+    "name": "Temps"
+  },
+  "compass": {
+    "name": "Explorer"
+  },
+  "check": {
+    "name": "Tâches"
+  },
+  "kit-arg": {
+    "name": "Argentine"
+  },
+  "kit-dza": {
+    "name": "Algérie"
+  },
+  "kit-aus": {
+    "name": "Australie"
+  },
+  "kit-aut": {
+    "name": "Autriche"
+  },
+  "kit-bel": {
+    "name": "Belgique"
+  },
+  "kit-bra": {
+    "name": "Brésil"
+  },
+  "kit-cmr": {
+    "name": "Cameroun"
+  },
+  "kit-can": {
+    "name": "Canada"
+  },
+  "kit-col": {
+    "name": "Colombie"
+  },
+  "kit-cri": {
+    "name": "Costa Rica"
+  },
+  "kit-hrv": {
+    "name": "Croatie"
+  },
+  "kit-dnk": {
+    "name": "Danemark"
+  },
+  "kit-ecu": {
+    "name": "Équateur"
+  },
+  "kit-egy": {
+    "name": "Égypte"
+  },
+  "kit-eng": {
+    "name": "Angleterre"
+  },
+  "kit-fra": {
+    "name": "France"
+  },
+  "kit-deu": {
+    "name": "Allemagne"
+  },
+  "kit-gha": {
+    "name": "Ghana"
+  },
+  "kit-irn": {
+    "name": "Iran"
+  },
+  "kit-irq": {
+    "name": "Irak"
+  },
+  "kit-ita": {
+    "name": "Italie"
+  },
+  "kit-civ": {
+    "name": "Côte d’Ivoire"
+  },
+  "kit-jam": {
+    "name": "Jamaïque"
+  },
+  "kit-jpn": {
+    "name": "Japon"
+  },
+  "kit-mex": {
+    "name": "Mexique"
+  },
+  "kit-mar": {
+    "name": "Maroc"
+  },
+  "kit-nld": {
+    "name": "Pays-Bas"
+  },
+  "kit-nzl": {
+    "name": "Nouvelle-Zélande"
+  },
+  "kit-nga": {
+    "name": "Nigeria"
+  },
+  "kit-pan": {
+    "name": "Panama"
+  },
+  "kit-pry": {
+    "name": "Paraguay"
+  },
+  "kit-pol": {
+    "name": "Pologne"
+  },
+  "kit-prt": {
+    "name": "Portugal"
+  },
+  "kit-qat": {
+    "name": "Qatar"
+  },
+  "kit-sau": {
+    "name": "Arabie saoudite"
+  },
+  "kit-sen": {
+    "name": "Sénégal"
+  },
+  "kit-srb": {
+    "name": "Serbie"
+  },
+  "kit-zaf": {
+    "name": "Afrique du Sud"
+  },
+  "kit-kor": {
+    "name": "Corée du Sud"
+  },
+  "kit-esp": {
+    "name": "Espagne"
+  },
+  "kit-che": {
+    "name": "Suisse"
+  },
+  "kit-tun": {
+    "name": "Tunisie"
+  },
+  "kit-tur": {
+    "name": "Turquie"
+  },
+  "kit-ukr": {
+    "name": "Ukraine"
+  },
+  "kit-usa": {
+    "name": "États-Unis"
+  },
+  "kit-ury": {
+    "name": "Uruguay"
+  },
+  "kit-uzb": {
+    "name": "Ouzbékistan"
+  },
+  "kit-wal": {
+    "name": "Pays de Galles"
+  }
+}

@@ -25,5 +25,9 @@
     "title": "Próximamente",
     "body": "Compartir fotos y videos llega la próxima semana."
   },
-  "plusBadge": "Fundador"
+  "plusBadge": "Fundador",
+  "weekdaysShort": ["D", "L", "M", "M", "J", "V", "S"],
+  "weekdaysFull": ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
+  "weekdaysAbbr": ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+  "recurrence": { "everyDay": "Cada día", "weekdays": "Días laborables", "weekends": "Fines de semana" }
 }

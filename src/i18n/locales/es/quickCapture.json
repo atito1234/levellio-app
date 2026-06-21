@@ -1,0 +1,20 @@
+{
+  "close": "Cerrar",
+  "title": "Añadir rápido",
+  "lead": "Escríbelo, o toca el 🎤 de tu teclado y dilo sin más.",
+  "scope": "🎯 Añadiendo a {{target}}",
+  "scopeDaily": "🎯 Añadiendo a {{target}} — como hábitos diarios",
+  "inputPlaceholder": "p. ej. caminar 20 min tras el almuerzo, beber agua, sin refrescos a las 19h",
+  "inputA11y": "Captura tus hábitos",
+  "heard_one": "ESCUCHÉ {{count}} HÁBITO",
+  "heard_other": "ESCUCHÉ {{count}} HÁBITOS",
+  "chipAt": ", a las {{time}}",
+  "chipIncluded": "Incluido, toca para excluir",
+  "chipExcluded": "Excluido, toca para incluir",
+  "noMatch": "Mmm, aún no pude detectar un hábito — prueba «caminar 20 min» o «beber agua».",
+  "addToToday": "Añadir al plan de hoy",
+  "addToTodayA11y": "Añadir estos al plan de hoy",
+  "addEmpty": "Añadir hábitos",
+  "add_one": "Añadir {{count}} hábito",
+  "add_other": "Añadir {{count}} hábitos"
+}

@@ -1,0 +1,18 @@
+{
+  "kicker": "QUÊTE TERMINÉE",
+  "continue": "Continuer",
+  "xpA11y": "Tu as gagné {{xp}} XP",
+  "xpA11yBonus": "Tu as gagné {{xp}} XP, dont un bonus de série de {{bonus}} XP",
+  "xpA11yLevel": "Tu as gagné {{xp}} XP, et atteint le niveau {{level}}",
+  "xpA11yBonusLevel": "Tu as gagné {{xp}} XP, dont un bonus de série de {{bonus}} XP, et atteint le niveau {{level}}",
+  "unit": "XP",
+  "streakBonus": "🔥 Inclut un bonus de série de +{{bonus}}",
+  "levelUpA11y": "Niveau supérieur ! Tu as atteint le niveau {{level}}",
+  "levelUp": "NIVEAU SUPÉRIEUR !",
+  "level": "Niveau {{level}}",
+  "progressXp": "{{current}} / {{needed}} XP",
+  "share": "Partager",
+  "claimReward": "Réclamer la récompense",
+  "shareMessage": "Je viens de gagner {{xp}} XP dans Levellio ! ⚔️✨ Je transforme la vraie vie en quête épique.",
+  "shareMessageLevel": "Je viens de gagner {{xp}} XP et d’atteindre le niveau {{level}} dans Levellio ! ⚔️✨ Je transforme la vraie vie en quête épique."
+}

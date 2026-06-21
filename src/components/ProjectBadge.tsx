@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography } from '@/theme';
 import { getBucketColor } from '@/lib/buckets';
 import type { Project } from '@/lib/projects';
@@ -10,6 +11,7 @@ import type { Project } from '@/lib/projects';
  * projects are linked, shows the first + a "+N".
  */
 export function ProjectBadge({ projects, compact = false }: { projects: Project[]; compact?: boolean }) {
+  const { t } = useTranslation('projects');
   if (projects.length === 0) return null;
   const first = projects[0]!;
   const c = getBucketColor(first.colorId);
@@ -18,7 +20,7 @@ export function ProjectBadge({ projects, compact = false }: { projects: Project[
   return (
     <View
       style={[styles.badge, { backgroundColor: c.soft, borderColor: c.accent }]}
-      accessibilityLabel={`Supports ${projects.map((p) => p.title).join(', ')}`}
+      accessibilityLabel={t('badge.supportsA11y', { projects: projects.map((p) => p.title).join(', ') })}
     >
       <Text style={styles.handshake}>🤝</Text>
       <Text style={[styles.text, { color: c.accent }]} numberOfLines={1}>

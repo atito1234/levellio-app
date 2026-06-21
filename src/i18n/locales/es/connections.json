@@ -1,0 +1,19 @@
+{
+  "back": "Volver",
+  "titleFocus": "Cómo se conecta esto",
+  "title": "Cómo se conectan tus acciones",
+  "helperFocus": "{{title}} fortalece {{capacities}}. Toca cualquier acción para explorar.",
+  "helper": "Toca cualquier acción para ver todo lo que fortalece.",
+  "capacityLevelA11y": "{{name}} {{level}} por ciento",
+  "capacityLevelPlusA11y": "{{name}} {{level}} por ciento, más {{delta}}",
+  "actionStrengthensA11y": "{{action}} — fortalece {{capacities}}",
+  "legendLight": "contribución ligera",
+  "legendStrong": "contribución fuerte",
+  "footnoteSelected": "{{action}} fortalece {{capacities}}.",
+  "footnoteFocus": "Los anillos resaltados son lo que construye esta actividad — y las acciones que los comparten.",
+  "footnote": "Las líneas más gruesas indican un efecto más fuerte.",
+  "action_water": "Agua",
+  "action_walk": "Caminar",
+  "action_breathe": "Respirar",
+  "action_sleep-early": "Dormir temprano"
+}

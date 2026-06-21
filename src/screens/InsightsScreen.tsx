@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CapacityRing, ScreenContainer } from '@/components';
 import { HBarChart, HourBars, BarHistogram, type BarDatum, type HistogramBar } from '@/components/charts';
@@ -22,7 +24,7 @@ import {
 } from '@/lib/analytics';
 import { gapsFor, planProgressOn } from '@/lib/plan';
 import { CATEGORY_META, resolveCategory } from '@/lib/categories';
-import { dayKey, shiftDayKey } from '@/lib/dates';
+import { dayKey, shiftDayKey, formatDayKey } from '@/lib/dates';
 import { rollupForDay } from '@/lib/metrics/rollup';
 import { getCapacity, type CapacityId } from '@/lib/compounding';
 import { useGame } from '@/state/GameContext';
@@ -39,14 +41,12 @@ const VIOLET = '#6C4CF1';
 const TEAL = '#16C8A8';
 const MUTED = '#5A5A72';
 
-const METHOD_LABEL: Record<ActivitySessionEvent['method'], string> = {
-  timer: 'Timer',
-  pomodoro: 'Focus',
-  manual: 'Logged',
-};
+function methodLabel(method: ActivitySessionEvent['method'], translate: TFunction): string {
+  return translate(`method.${method}`);
+}
 
-function categoryLabel(category: string): string {
-  return CATEGORY_META[resolveCategory(category)]?.label ?? 'Other';
+function categoryLabel(category: string, translate: TFunction): string {
+  return CATEGORY_META[resolveCategory(category)]?.label ?? translate('categoryOther');
 }
 function categoryIcon(category: string): string {
   return CATEGORY_META[resolveCategory(category)]?.icon ?? '•';
@@ -62,17 +62,13 @@ function topCapacities(rollup: { capacityPoints: Partial<Record<CapacityId, numb
 }
 
 /** Pretty label for a YYYY-MM-DD key, e.g. "Sun, Jun 14". */
-function dayLabel(key: string): string {
-  const [y, m, d] = key.split('-').map(Number);
-  if (!y || !m || !d) return key;
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
+function dayLabel(key: string, locale: string): string {
+  return formatDayKey(key, locale);
 }
 
 export function InsightsScreen({ route, navigation }: Props) {
+  const { t, i18n } = useTranslation('insights');
+  const locale = i18n.language;
   const { events, ready } = useActivityLog();
   const activityId = route.params?.activityId;
   const category = route.params?.category;
@@ -112,26 +108,26 @@ export function InsightsScreen({ route, navigation }: Props) {
         .filter((c) => c.summary.totalMin > 0)
         .map((c, i) => ({
           key: c.category,
-          label: categoryLabel(c.category),
+          label: categoryLabel(c.category, t),
           icon: categoryIcon(c.category),
           value: c.summary.totalMin,
           display: formatMinutes(c.summary.totalMin),
           tone: i % 2 === 0 ? 'violet' : 'teal',
         })),
-    [scoped],
+    [scoped, t],
   );
 
-  let heading = 'Insights';
-  let kicker = 'WHAT’S WORKING';
+  let heading = t('heading.default');
+  let kicker = t('heading.kickerOverview');
   if (activityId) {
-    heading = scoped[scoped.length - 1]?.title ?? 'Activity';
-    kicker = 'ACTIVITY HISTORY';
+    heading = scoped[scoped.length - 1]?.title ?? t('heading.activity');
+    kicker = t('heading.kickerActivity');
   } else if (category) {
-    heading = categoryLabel(category);
-    kicker = 'CATEGORY';
+    heading = categoryLabel(category, t);
+    kicker = t('heading.kickerCategory');
   } else if (day) {
-    heading = dayLabel(day);
-    kicker = 'THIS DAY';
+    heading = dayLabel(day, locale);
+    kicker = t('heading.kickerDay');
   }
 
   const isOverview = !activityId && !category && !day;
@@ -139,7 +135,7 @@ export function InsightsScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('a11yBack')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.kicker}>{kicker}</Text>
@@ -151,12 +147,12 @@ export function InsightsScreen({ route, navigation }: Props) {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!ready ? (
-          <Text style={styles.empty}>Loading your activity…</Text>
+          <Text style={styles.empty}>{t('loading')}</Text>
         ) : scoped.length === 0 ? (
-          <EmptyState scope={isOverview ? 'overview' : activityId ? 'activity' : category ? 'category' : 'day'} />
+          <EmptyState scope={isOverview ? 'overview' : activityId ? 'activity' : category ? 'category' : 'day'} t={t} />
         ) : (
           <>
-            <SummaryCard summary={summary} />
+            <SummaryCard summary={summary} t={t} />
 
             {/* Day review: plan-vs-done, minutes by category, and time of day. */}
             {day && planRing && (
@@ -168,15 +164,15 @@ export function InsightsScreen({ route, navigation }: Props) {
                   </View>
                 </View>
                 <View style={styles.rowMain}>
-                  <Text style={styles.rowTitle}>Plan vs done</Text>
+                  <Text style={styles.rowTitle}>{t('planRing.title')}</Text>
                   <Text style={styles.rowSub}>
-                    {planRing.done} of {planRing.total} planned habits done
+                    {t('planRing.sub', { done: planRing.done, total: planRing.total })}
                   </Text>
                 </View>
               </View>
             )}
             {day && catBars.length > 0 && (
-              <Section label="MINUTES BY CATEGORY">
+              <Section label={t('sections.minutesByCategory')}>
                 <View style={styles.chartCard}>
                   <BarHistogram
                     bars={catBars.map((b) => ({ label: b.label, value: b.value }))}
@@ -189,7 +185,7 @@ export function InsightsScreen({ route, navigation }: Props) {
               </Section>
             )}
             {day && dayCaps.length > 0 && (
-              <Section label="WHAT MOVED YOUR CAPACITIES">
+              <Section label={t('sections.movedCapacities')}>
                 <View style={styles.chipWrap}>
                   {dayCaps.map((c) => (
                     <Pressable
@@ -197,10 +193,10 @@ export function InsightsScreen({ route, navigation }: Props) {
                       style={styles.capChip}
                       onPress={() => navigation.navigate('CapacityFocus', { capacityId: c.id })}
                       accessibilityRole="button"
-                      accessibilityLabel={`${c.name} gained ${c.value} points today. See what feeds it`}
+                      accessibilityLabel={t('cap.a11y', { name: c.name, value: c.value })}
                     >
                       <Text style={styles.capChipText}>
-                        {c.name} +{c.value} ›
+                        {t('cap.label', { name: c.name, value: c.value })}
                       </Text>
                     </Pressable>
                   ))}
@@ -208,25 +204,25 @@ export function InsightsScreen({ route, navigation }: Props) {
               </Section>
             )}
             {day && (
-              <Section label="TIME OF DAY">
+              <Section label={t('sections.timeOfDay')}>
                 <View style={styles.chartCard}>
                   <HourBars counts={summary.byHour} />
                 </View>
               </Section>
             )}
             {day && dayGaps.length > 0 && (
-              <Section label="GAPS TO CARRY FORWARD">
+              <Section label={t('sections.gaps')}>
                 {dayGaps.slice(0, 6).map((q) => (
                   <Pressable
                     key={q.id}
                     style={styles.row}
                     onPress={() => navigation.navigate('Plan', { day: shiftDayKey(dayKey(new Date()), 1) })}
                     accessibilityRole="button"
-                    accessibilityLabel={`${q.title} wasn't done. Plan it for tomorrow`}
+                    accessibilityLabel={t('gap.a11y', { title: q.title })}
                   >
                     <View style={styles.rowMain}>
                       <Text style={styles.rowTitle}>{q.title}</Text>
-                      <Text style={styles.rowSub}>Not done · tap to plan for tomorrow</Text>
+                      <Text style={styles.rowSub}>{t('gap.sub')}</Text>
                     </View>
                     <Text style={styles.rowChevron}>›</Text>
                   </Pressable>
@@ -236,21 +232,21 @@ export function InsightsScreen({ route, navigation }: Props) {
 
             {/* Overview: tap a category to drill in. */}
             {isOverview && (
-              <Section label="BY CATEGORY">
+              <Section label={t('sections.byCategory')}>
                 {byCategory(scoped).map((c) => (
                   <Pressable
                     key={c.category}
                     onPress={() => navigation.push('Insights', { category: c.category })}
                     accessibilityRole="button"
-                    accessibilityLabel={`${categoryLabel(c.category)}, ${c.summary.count} ${c.summary.count === 1 ? 'session' : 'sessions'}. See details`}
+                    accessibilityLabel={t('row.a11yCategory', { count: c.summary.count, label: categoryLabel(c.category, t) })}
                     style={styles.row}
                   >
                     <Text style={styles.rowIcon}>{categoryIcon(c.category)}</Text>
                     <View style={styles.rowMain}>
-                      <Text style={styles.rowTitle}>{categoryLabel(c.category)}</Text>
+                      <Text style={styles.rowTitle}>{categoryLabel(c.category, t)}</Text>
                       <Text style={styles.rowSub}>
-                        {c.summary.count} {c.summary.count === 1 ? 'session' : 'sessions'} · {formatMinutes(c.summary.totalMin)}
-                        {c.summary.bestHour !== null ? ` · best ${hourLabel(c.summary.bestHour)}` : ''}
+                        {t('row.sub', { count: c.summary.count, minutes: formatMinutes(c.summary.totalMin) })}
+                        {c.summary.bestHour !== null ? t('row.bestSuffix', { time: hourLabel(c.summary.bestHour) }) : ''}
                       </Text>
                     </View>
                     <Text style={styles.rowChevron}>›</Text>
@@ -261,20 +257,20 @@ export function InsightsScreen({ route, navigation }: Props) {
 
             {/* Category: tap an activity to see its full history. */}
             {category && !activityId && (
-              <Section label="ACTIVITIES">
+              <Section label={t('sections.activities')}>
                 {byActivity(scoped).map((a) => (
                   <Pressable
                     key={a.activityId}
                     onPress={() => navigation.push('Insights', { activityId: a.activityId })}
                     accessibilityRole="button"
-                    accessibilityLabel={`${a.title}, ${a.summary.count} ${a.summary.count === 1 ? 'session' : 'sessions'}. See history`}
+                    accessibilityLabel={t('row.a11yActivity', { count: a.summary.count, title: a.title })}
                     style={styles.row}
                   >
                     <View style={styles.rowMain}>
                       <Text style={styles.rowTitle}>{a.title}</Text>
                       <Text style={styles.rowSub}>
-                        {a.summary.count} {a.summary.count === 1 ? 'session' : 'sessions'} · {formatMinutes(a.summary.totalMin)}
-                        {a.summary.bestHour !== null ? ` · best ${hourLabel(a.summary.bestHour)}` : ''}
+                        {t('row.sub', { count: a.summary.count, minutes: formatMinutes(a.summary.totalMin) })}
+                        {a.summary.bestHour !== null ? t('row.bestSuffix', { time: hourLabel(a.summary.bestHour) }) : ''}
                       </Text>
                     </View>
                     <Text style={styles.rowChevron}>›</Text>
@@ -290,27 +286,27 @@ export function InsightsScreen({ route, navigation }: Props) {
                 <Pressable
                   onPress={() => setShowSessions((v) => !v)}
                   accessibilityRole="button"
-                  accessibilityLabel={showSessions ? 'Hide session details' : 'Show session details'}
+                  accessibilityLabel={showSessions ? t('details.a11yHide') : t('details.a11yShow')}
                 >
-                  <Text style={styles.sectionLabel}>{showSessions ? 'HIDE DETAILS ▲' : `DETAILS · ${scoped.length} ${scoped.length === 1 ? 'SESSION' : 'SESSIONS'} ▾`}</Text>
+                  <Text style={styles.sectionLabel}>{showSessions ? t('details.hide') : t('details.show', { count: scoped.length })}</Text>
                 </Pressable>
                 {showSessions && (
                   <View style={styles.sectionBody}>
                     {[...scoped]
                       .sort((a, b) => b.createdAt - a.createdAt)
                       .map((s) => (
-                        <SessionRow key={s.id} session={s} showDay={false} />
+                        <SessionRow key={s.id} session={s} showDay={false} t={t} locale={locale} />
                       ))}
                   </View>
                 )}
               </View>
             ) : (
-              <Section label={activityId ? 'SESSIONS' : 'RECENT'}>
+              <Section label={activityId ? t('sections.sessions') : t('sections.recent')}>
                 {[...scoped]
                   .sort((a, b) => b.createdAt - a.createdAt)
                   .slice(0, activityId ? 60 : 12)
                   .map((s) => (
-                    <SessionRow key={s.id} session={s} showDay={!day} />
+                    <SessionRow key={s.id} session={s} showDay={!day} t={t} locale={locale} />
                   ))}
               </Section>
             )}
@@ -320,10 +316,10 @@ export function InsightsScreen({ route, navigation }: Props) {
               <Pressable
                 onPress={() => navigation.navigate('Plan', { day: shiftDayKey(dayKey(new Date()), 1) })}
                 accessibilityRole="button"
-                accessibilityLabel="Plan tomorrow"
+                accessibilityLabel={t('planTomorrow.a11y')}
                 style={styles.planTomorrow}
               >
-                <Text style={styles.planTomorrowText}>🗓 Plan tomorrow ›</Text>
+                <Text style={styles.planTomorrowText}>{t('planTomorrow.text')}</Text>
               </Pressable>
             )}
           </>
@@ -333,24 +329,24 @@ export function InsightsScreen({ route, navigation }: Props) {
   );
 }
 
-function SummaryCard({ summary }: { summary: Summary }) {
+function SummaryCard({ summary, t }: { summary: Summary; t: TFunction }) {
   return (
     <View style={styles.summaryCard}>
       <View style={styles.statGrid}>
-        <Stat value={`${summary.count}`} label={summary.count === 1 ? 'session' : 'sessions'} />
-        <Stat value={formatMinutes(summary.totalMin)} label="total time" />
-        <Stat value={summary.avgMin !== null ? formatMinutes(summary.avgMin) : '—'} label="avg / session" />
+        <Stat value={`${summary.count}`} label={t('summary.session', { count: summary.count })} />
+        <Stat value={formatMinutes(summary.totalMin)} label={t('summary.totalTime')} />
+        <Stat value={summary.avgMin !== null ? formatMinutes(summary.avgMin) : '—'} label={t('summary.avgPerSession')} />
       </View>
       {(summary.bestHour !== null || summary.bestWeekday !== null) && (
         <View style={styles.bestRow}>
           {summary.bestHour !== null && (
-            <View style={styles.bestPill} accessibilityLabel={`Most active around ${hourLabel(summary.bestHour)}`}>
-              <Text style={styles.bestPillText}>⏰ Best time · {hourLabel(summary.bestHour)}</Text>
+            <View style={styles.bestPill} accessibilityLabel={t('summary.a11yBestTime', { time: hourLabel(summary.bestHour) })}>
+              <Text style={styles.bestPillText}>{t('summary.bestTime', { time: hourLabel(summary.bestHour) })}</Text>
             </View>
           )}
           {summary.bestWeekday !== null && (
-            <View style={styles.bestPill} accessibilityLabel={`Most active on ${weekdayLabel(summary.bestWeekday)}`}>
-              <Text style={styles.bestPillText}>📅 Best day · {weekdayLabel(summary.bestWeekday)}</Text>
+            <View style={styles.bestPill} accessibilityLabel={t('summary.a11yBestDay', { day: weekdayLabel(summary.bestWeekday) })}>
+              <Text style={styles.bestPillText}>{t('summary.bestDay', { day: weekdayLabel(summary.bestWeekday) })}</Text>
             </View>
           )}
         </View>
@@ -368,20 +364,28 @@ function Stat({ value, label }: { value: string; label: string }) {
   );
 }
 
-function SessionRow({ session, showDay }: { session: ActivitySessionEvent; showDay: boolean }) {
+function SessionRow({ session, showDay, t, locale }: { session: ActivitySessionEvent; showDay: boolean; t: TFunction; locale: string }) {
   const min = Math.round(session.durationSec / 60);
-  const durLabel = session.durationSec > 0 ? formatMinutes(min) : METHOD_LABEL[session.method];
-  const when = showDay ? `${dayLabel(sessionDay(session))} · ${sessionTimeLabel(session)}` : sessionTimeLabel(session);
+  const method = methodLabel(session.method, t);
+  const durLabel = session.durationSec > 0 ? formatMinutes(min) : method;
+  const title = session.title ?? t('activityFallback');
+  const when = showDay ? `${dayLabel(sessionDay(session), locale)} · ${sessionTimeLabel(session)}` : sessionTimeLabel(session);
   return (
     <View
       style={styles.sessionRow}
-      accessibilityLabel={`${session.title ?? 'Activity'}, ${when}, ${durLabel}, ${METHOD_LABEL[session.method]}${session.location ? ', location captured' : ''}`}
+      accessibilityLabel={t('session.a11y', {
+        title,
+        when,
+        duration: durLabel,
+        method,
+        location: session.location ? t('session.a11yLocationSuffix') : '',
+      })}
     >
       <View style={styles.rowMain}>
-        <Text style={styles.rowTitle}>{session.title ?? 'Activity'}</Text>
+        <Text style={styles.rowTitle}>{title}</Text>
         <Text style={styles.rowSub}>
-          {when} · {METHOD_LABEL[session.method]}
-          {session.location ? ' · 📍' : ''}
+          {when} · {method}
+          {session.location ? t('session.locationDot') : ''}
         </Text>
       </View>
       <Text style={styles.sessionDur}>{durLabel}</Text>
@@ -389,19 +393,11 @@ function SessionRow({ session, showDay }: { session: ActivitySessionEvent; showD
   );
 }
 
-function EmptyState({ scope }: { scope: 'overview' | 'activity' | 'category' | 'day' }) {
-  const msg =
-    scope === 'day'
-      ? 'No activities completed on this day yet.'
-      : scope === 'activity'
-        ? 'No sessions logged for this activity yet. Complete it once to start building its history.'
-        : scope === 'category'
-          ? 'No sessions in this category yet.'
-          : 'Complete a few activities and your patterns will show up here — your best times, days, and what’s working.';
+function EmptyState({ scope, t }: { scope: 'overview' | 'activity' | 'category' | 'day'; t: TFunction }) {
   return (
     <View style={styles.emptyWrap}>
       <Text style={styles.emptyEmoji}>📈</Text>
-      <Text style={styles.empty}>{msg}</Text>
+      <Text style={styles.empty}>{t(`empty.${scope}`)}</Text>
     </View>
   );
 }

@@ -1,0 +1,25 @@
+{
+  "titleEdit": "Editar grupo",
+  "titleNew": "Nuevo grupo",
+  "previewName": "Tu grupo",
+  "nameLabel": "Nombre",
+  "namePlaceholder": "p. ej. Salud, Trabajo, Aprendizaje",
+  "iconSection": "Icono",
+  "iconGroupA11y": "Icono del grupo",
+  "iconA11y": "Icono {{name}}",
+  "colorSection": "Color",
+  "colorGroupA11y": "Color del grupo",
+  "colorA11y": "Color {{color}}",
+  "colorName": {
+    "violet": "violeta",
+    "teal": "turquesa",
+    "gold": "dorado",
+    "rose": "rosa",
+    "sky": "celeste",
+    "lime": "lima",
+    "slate": "pizarra"
+  },
+  "saveChanges": "Guardar cambios",
+  "createBucket": "Crear grupo",
+  "deleteBucket": "Eliminar grupo"
+}

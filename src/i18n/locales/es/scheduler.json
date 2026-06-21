@@ -1,0 +1,19 @@
+{
+  "today": "Hoy",
+  "tomorrow": "Mañana",
+  "yesterday": "Ayer",
+  "noActivities": "Aún no hay actividades.",
+  "addFor": "＋ Añadir actividad para {{day}}",
+  "addForA11y": "Añadir una actividad para {{day}}",
+  "doneTag": "✓ hecho",
+  "stateDone": "Hecho",
+  "stateScheduled": "Programado",
+  "stateNot": "No programado",
+  "actionSchedule": "programar",
+  "actionUnschedule": "desprogramar",
+  "tapTo": "Toca para {{action}}",
+  "rowA11y": "{{state}}: {{title}} el {{day}}. {{tail}}",
+  "prevMonth": "Mes anterior",
+  "nextMonth": "Mes siguiente",
+  "dayScheduledA11y": "{{day}}, {{count}} programado(s)"
+}

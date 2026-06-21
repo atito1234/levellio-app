@@ -161,7 +161,7 @@ export function PostComposerScreen({ route, navigation }: Props) {
                       accessibilityState={{ selected: on }}
                       style={[styles.chip, on && styles.chipOn]}
                     >
-                      <Text style={[styles.chipText, on && styles.chipTextOn]}>{CATEGORY_META[cat].icon} {CATEGORY_META[cat].label}</Text>
+                      <Text style={[styles.chipText, on && styles.chipTextOn]}>{CATEGORY_META[cat].icon} {t(`categories:${cat}`)}</Text>
                     </Pressable>
                   );
                 })}

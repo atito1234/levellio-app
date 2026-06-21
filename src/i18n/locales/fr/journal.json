@@ -1,0 +1,62 @@
+{
+  "list": {
+    "title": "Journal de combat",
+    "a11yBack": "Retour",
+    "a11yNew": "Nouvelle réflexion",
+    "banner": "🔒 Privé pour l’instant — le partage et les réactions des autres arrivent avec la mise à jour communautaire.",
+    "empty": "Pas encore de réflexion. Nomme ce qui te bloque — c’est le premier coup porté."
+  },
+  "time": {
+    "justNow": "à l’instant",
+    "minutes": "{{n}} min",
+    "hours": "{{n}} h",
+    "days": "{{n}} j"
+  },
+  "card": {
+    "you": "Toi",
+    "a11yPhoto": "Photo jointe",
+    "videoAttached": "🎥 Vidéo jointe",
+    "notePlaceholder": "Ajoute une note de suivi…",
+    "a11yAddNote": "Ajouter une note de suivi",
+    "a11ySaveNote": "Enregistrer la note",
+    "noteButton": "Note"
+  },
+  "composer": {
+    "a11yCancel": "Annuler",
+    "title": "Réfléchir",
+    "a11yPost": "Publier la réflexion",
+    "post": "Publier",
+    "you": "Toi",
+    "battling": "En combat contre {{name}}",
+    "battleReflection": "Réflexion de combat",
+    "teachingLabel": "🧠 POURQUOI C’EST IMPORTANT",
+    "inputPlaceholder": "Qu’est-ce qui te bloque pour cette habitude ? Nomme le dragon…",
+    "a11yReflection": "Ta réflexion",
+    "a11yPhoto": "Photo jointe",
+    "videoAttached": "🎥 Vidéo jointe",
+    "a11yRemoveMedia": "Retirer le média",
+    "a11yAddMedia": "Ajouter une photo ou une vidéo",
+    "replaceMedia": "📷 Remplacer la photo / vidéo",
+    "addMedia": "📷 Ajouter une photo / vidéo",
+    "feelLabel": "Comment ça te fait sentir ?",
+    "audienceLabel": "Qui peut voir ça ?",
+    "audienceNoteSuffix": "Le partage et les réactions des autres arrivent avec la mise à jour communautaire.",
+    "permTitle": "Accès aux photos requis",
+    "permBody": "Autorise l’accès aux photos dans les Réglages pour joindre une photo ou une vidéo.",
+    "mediaErrorTitle": "Impossible d’ajouter le média",
+    "mediaErrorBody": "Un problème est survenu lors de la sélection de ce fichier."
+  },
+  "mood": {
+    "stuck": "Bloqué",
+    "anxious": "Anxieux",
+    "drained": "Épuisé",
+    "resisting": "Résistant",
+    "hopeful": "Plein d’espoir",
+    "determined": "Déterminé"
+  },
+  "audience": {
+    "private": { "label": "Moi seul", "note": "Reste sur ton appareil." },
+    "circle": { "label": "Cercle de confiance", "note": "Partagé avec ton cercle dès que le partage arrive." },
+    "public": { "label": "Public", "note": "Partagé publiquement dès que le partage arrive." }
+  }
+}

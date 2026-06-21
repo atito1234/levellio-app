@@ -1,0 +1,21 @@
+{
+  "back": "Retour",
+  "title": "Planifiez vos habitudes",
+  "month": "Mois",
+  "year": "Année",
+  "prevMonth": "Mois précédent",
+  "nextMonth": "Mois suivant",
+  "prevYear": "Année précédente",
+  "nextYear": "Année suivante",
+  "dayScheduledA11y": "{{day}}, {{count}} planifié(s)",
+  "nothingScheduled": "Rien de planifié",
+  "scheduledDone": "{{count}} planifié(s) · {{done}} fait(s)",
+  "removeFromA11y": "Retirer {{title}} du {{day}}",
+  "reviewDay": "📊 Revoir cette journée ›",
+  "addForA11y": "Ajouter une activité pour {{day}}",
+  "addFor": "＋ Ajouter une activité pour {{day}}",
+  "hideHabits": "Masquer vos habitudes ▲",
+  "scheduleFrom": "＋ Planifier depuis vos habitudes ▾",
+  "chipAddA11y": "Ajouter {{title}}",
+  "chipRemoveA11y": "Retirer {{title}}"
+}

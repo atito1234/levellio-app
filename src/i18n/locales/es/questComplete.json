@@ -1,0 +1,18 @@
+{
+  "kicker": "MISIÓN COMPLETADA",
+  "continue": "Continuar",
+  "xpA11y": "Ganaste {{xp}} XP",
+  "xpA11yBonus": "Ganaste {{xp}} XP, incluido un bono de racha de {{bonus}} XP",
+  "xpA11yLevel": "Ganaste {{xp}} XP, y alcanzaste el nivel {{level}}",
+  "xpA11yBonusLevel": "Ganaste {{xp}} XP, incluido un bono de racha de {{bonus}} XP, y alcanzaste el nivel {{level}}",
+  "unit": "XP",
+  "streakBonus": "🔥 Incluye un bono de racha de +{{bonus}}",
+  "levelUpA11y": "¡Subiste de nivel! Alcanzaste el nivel {{level}}",
+  "levelUp": "¡SUBISTE DE NIVEL!",
+  "level": "Nivel {{level}}",
+  "progressXp": "{{current}} / {{needed}} XP",
+  "share": "Compartir",
+  "claimReward": "Reclamar recompensa",
+  "shareMessage": "¡Acabo de ganar {{xp}} XP en Levellio! ⚔️✨ Convirtiendo la vida real en una misión épica.",
+  "shareMessageLevel": "¡Acabo de ganar {{xp}} XP y alcanzar el nivel {{level}} en Levellio! ⚔️✨ Convirtiendo la vida real en una misión épica."
+}

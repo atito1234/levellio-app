@@ -1,0 +1,212 @@
+{
+  "target": {
+    "name": "Target"
+  },
+  "star": {
+    "name": "Star"
+  },
+  "flame": {
+    "name": "Flame"
+  },
+  "heart": {
+    "name": "Heart"
+  },
+  "dumbbell": {
+    "name": "Dumbbell"
+  },
+  "leaf": {
+    "name": "Leaf"
+  },
+  "drop": {
+    "name": "Water drop"
+  },
+  "sun": {
+    "name": "Sun"
+  },
+  "moon": {
+    "name": "Moon"
+  },
+  "bulb": {
+    "name": "Idea"
+  },
+  "book": {
+    "name": "Book"
+  },
+  "pencil": {
+    "name": "Writing"
+  },
+  "palette": {
+    "name": "Creativity"
+  },
+  "music": {
+    "name": "Music"
+  },
+  "coin": {
+    "name": "Finance"
+  },
+  "briefcase": {
+    "name": "Work"
+  },
+  "people": {
+    "name": "Relationships"
+  },
+  "home": {
+    "name": "Home"
+  },
+  "plant": {
+    "name": "Growth"
+  },
+  "clock": {
+    "name": "Time"
+  },
+  "compass": {
+    "name": "Explore"
+  },
+  "check": {
+    "name": "Tasks"
+  },
+  "kit-arg": {
+    "name": "Argentina"
+  },
+  "kit-dza": {
+    "name": "Algeria"
+  },
+  "kit-aus": {
+    "name": "Australia"
+  },
+  "kit-aut": {
+    "name": "Austria"
+  },
+  "kit-bel": {
+    "name": "Belgium"
+  },
+  "kit-bra": {
+    "name": "Brazil"
+  },
+  "kit-cmr": {
+    "name": "Cameroon"
+  },
+  "kit-can": {
+    "name": "Canada"
+  },
+  "kit-col": {
+    "name": "Colombia"
+  },
+  "kit-cri": {
+    "name": "Costa Rica"
+  },
+  "kit-hrv": {
+    "name": "Croatia"
+  },
+  "kit-dnk": {
+    "name": "Denmark"
+  },
+  "kit-ecu": {
+    "name": "Ecuador"
+  },
+  "kit-egy": {
+    "name": "Egypt"
+  },
+  "kit-eng": {
+    "name": "England"
+  },
+  "kit-fra": {
+    "name": "France"
+  },
+  "kit-deu": {
+    "name": "Germany"
+  },
+  "kit-gha": {
+    "name": "Ghana"
+  },
+  "kit-irn": {
+    "name": "Iran"
+  },
+  "kit-irq": {
+    "name": "Iraq"
+  },
+  "kit-ita": {
+    "name": "Italy"
+  },
+  "kit-civ": {
+    "name": "Ivory Coast"
+  },
+  "kit-jam": {
+    "name": "Jamaica"
+  },
+  "kit-jpn": {
+    "name": "Japan"
+  },
+  "kit-mex": {
+    "name": "Mexico"
+  },
+  "kit-mar": {
+    "name": "Morocco"
+  },
+  "kit-nld": {
+    "name": "Netherlands"
+  },
+  "kit-nzl": {
+    "name": "New Zealand"
+  },
+  "kit-nga": {
+    "name": "Nigeria"
+  },
+  "kit-pan": {
+    "name": "Panama"
+  },
+  "kit-pry": {
+    "name": "Paraguay"
+  },
+  "kit-pol": {
+    "name": "Poland"
+  },
+  "kit-prt": {
+    "name": "Portugal"
+  },
+  "kit-qat": {
+    "name": "Qatar"
+  },
+  "kit-sau": {
+    "name": "Saudi Arabia"
+  },
+  "kit-sen": {
+    "name": "Senegal"
+  },
+  "kit-srb": {
+    "name": "Serbia"
+  },
+  "kit-zaf": {
+    "name": "South Africa"
+  },
+  "kit-kor": {
+    "name": "South Korea"
+  },
+  "kit-esp": {
+    "name": "Spain"
+  },
+  "kit-che": {
+    "name": "Switzerland"
+  },
+  "kit-tun": {
+    "name": "Tunisia"
+  },
+  "kit-tur": {
+    "name": "Turkey"
+  },
+  "kit-ukr": {
+    "name": "Ukraine"
+  },
+  "kit-usa": {
+    "name": "United States"
+  },
+  "kit-ury": {
+    "name": "Uruguay"
+  },
+  "kit-uzb": {
+    "name": "Uzbekistan"
+  },
+  "kit-wal": {
+    "name": "Wales"
+  }
+}

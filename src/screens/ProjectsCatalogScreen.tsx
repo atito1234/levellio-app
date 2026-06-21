@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
@@ -9,6 +10,7 @@ import { useProjects } from '@/state/ProjectsContext';
 import { useEntitlements } from '@/state/SubscriptionContext';
 import { canUseProjectsUnlimited } from '@/services/monetization';
 import { projectColor, type Project } from '@/lib/projects';
+import { localizeProject } from '@/lib/projectText';
 import type { RootStackParamList } from '@/navigation/types';
 
 /** Free members can create one project; Plus unlocks unlimited. Joining is always free. */
@@ -23,6 +25,7 @@ const VIOLET = '#6C4CF1';
 const MUTED = '#5A5A72';
 
 export function ProjectsCatalogScreen() {
+  const { t } = useTranslation('projects');
   const navigation = useNavigation<Nav>();
   const { account } = useAuth();
   const { signedIn, isShared, featured, myProjects, refresh } = useProjects();
@@ -45,26 +48,23 @@ export function ProjectsCatalogScreen() {
         <ScrollView contentContainerStyle={styles.gateContent} showsVerticalScrollIndicator={false}>
           <Text style={styles.gateEmoji}>🤝</Text>
           <Text style={styles.gateTitle} accessibilityRole="header">
-            Community Projects
+            {t('gate.title')}
           </Text>
-          <Text style={styles.gateLead}>
-            Join others working toward a shared, real-world goal — clean water, community gardens, malaria source
-            reduction. Your everyday habits add up to collective change, and you can see what teammates are doing.
-          </Text>
+          <Text style={styles.gateLead}>{t('gate.lead')}</Text>
           <Pressable
             onPress={() => navigation.navigate('SignIn')}
             accessibilityRole="button"
-            accessibilityLabel="Sign in to join"
+            accessibilityLabel={t('gate.signIn')}
             style={styles.cta}
           >
-            <Text style={styles.ctaText}>Sign in to join</Text>
+            <Text style={styles.ctaText}>{t('gate.signIn')}</Text>
           </Pressable>
           <Pressable
             onPress={() => navigation.navigate('JoinProject', {})}
             accessibilityRole="button"
             style={styles.ghost}
           >
-            <Text style={styles.ghostText}>I have an invite code</Text>
+            <Text style={styles.ghostText}>{t('gate.haveCode')}</Text>
           </Pressable>
         </ScrollView>
       </ScreenContainer>
@@ -77,35 +77,35 @@ export function ProjectsCatalogScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.title} accessibilityRole="header">
-              Projects
+              {t('title')}
             </Text>
             <Text style={styles.subtitle}>
-              {account?.displayName ? `Hi, ${account.displayName}` : 'Build habits that add up'}
-              {!isShared ? ' · offline mode' : ''}
+              {account?.displayName ? t('greeting', { name: account.displayName }) : t('tagline')}
+              {!isShared ? ` · ${t('offline')}` : ''}
             </Text>
           </View>
         </View>
 
         <View style={styles.actions}>
           <Pressable onPress={onCreate} accessibilityRole="button" style={styles.actionBtn}>
-            <Text style={styles.actionText}>{canCreate ? '+ Create' : '+ Create (Plus)'}</Text>
+            <Text style={styles.actionText}>{canCreate ? t('create') : t('createPlus')}</Text>
           </Pressable>
           <Pressable onPress={() => navigation.navigate('JoinProject', {})} accessibilityRole="button" style={[styles.actionBtn, styles.actionGhost]}>
-            <Text style={[styles.actionText, { color: VIOLET }]}>Join with code</Text>
+            <Text style={[styles.actionText, { color: VIOLET }]}>{t('joinWithCode')}</Text>
           </Pressable>
         </View>
 
         {myProjects.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>MY PROJECTS</Text>
+            <Text style={styles.sectionLabel}>{t('myProjects')}</Text>
             {myProjects.map((p) => (
               <ProjectCard key={p.id} project={p} onPress={() => navigation.navigate('ProjectDetail', { projectId: p.id })} joined />
             ))}
           </>
         )}
 
-        <Text style={styles.sectionLabel}>FEATURED</Text>
-        {featured.length === 0 && <Text style={styles.empty}>No featured projects yet.</Text>}
+        <Text style={styles.sectionLabel}>{t('featured')}</Text>
+        {featured.length === 0 && <Text style={styles.empty}>{t('noFeatured')}</Text>}
         {featured
           .filter((p) => !myProjects.some((m) => m.id === p.id))
           .map((p) => (
@@ -117,12 +117,15 @@ export function ProjectsCatalogScreen() {
 }
 
 function ProjectCard({ project, onPress, joined }: { project: Project; onPress: () => void; joined?: boolean }) {
+  const { t } = useTranslation('projects');
   const c = projectColor(project);
+  const text = localizeProject(t, project);
+  const members = t('memberCount', { count: project.memberCount });
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${project.title}, ${project.memberCount} members`}
+      accessibilityLabel={`${text.title}, ${members}`}
       style={[styles.card, { borderLeftColor: c.accent }]}
     >
       <View style={styles.cardHead}>
@@ -131,23 +134,23 @@ function ProjectCard({ project, onPress, joined }: { project: Project; onPress: 
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.cardTitle} numberOfLines={2}>
-            {project.title}
+            {text.title}
           </Text>
           <Text style={styles.cardMeta} numberOfLines={1}>
-            {project.region || 'Community'} · {project.memberCount} {project.memberCount === 1 ? 'member' : 'members'}
+            {t('meta', { region: text.region || t('community'), members })}
           </Text>
         </View>
         {joined && (
           <View style={[styles.joinedPill, { backgroundColor: c.soft }]}>
-            <Text style={[styles.joinedText, { color: c.accent }]}>Joined</Text>
+            <Text style={[styles.joinedText, { color: c.accent }]}>{t('joined')}</Text>
           </View>
         )}
       </View>
       <Text style={styles.cardSummary} numberOfLines={2}>
-        {project.summary}
+        {text.summary}
       </Text>
       <Text style={styles.cardGoal}>
-        Goal: {project.weeklyGoal} {project.unit} / week
+        {t('weeklyGoal', { goal: project.weeklyGoal, unit: text.unit })}
       </Text>
     </Pressable>
   );

@@ -1,0 +1,11 @@
+{
+  "dismissA11y": "Dismiss celebration",
+  "milestoneA11y": "Milestone: {{label}}",
+  "milestoneDetailA11y": "Milestone: {{label}}. {{detail}}",
+  "shareWin": "📣 Share your win",
+  "shareWinA11y": "Share your win with members",
+  "feed": "📰 Feed",
+  "calendar": "📅 Calendar",
+  "done": "Done",
+  "tapToContinue": "Tap to continue"
+}

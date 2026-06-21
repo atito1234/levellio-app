@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { DifficultyBadge } from './DifficultyBadge';
 import { awardedXp } from '@/lib/leveling';
@@ -17,6 +18,7 @@ interface QuestCardProps {
 
 /** A single quest row with difficulty, XP reward, and a complete action. */
 export function QuestCard({ quest, streakDays, onComplete, onEdit }: QuestCardProps) {
+  const { t } = useTranslation('quests');
   const reward = awardedXp(quest.baseXp, streakDays);
   const done = quest.completed;
 
@@ -48,7 +50,7 @@ export function QuestCard({ quest, streakDays, onComplete, onEdit }: QuestCardPr
         <Pressable
           style={styles.bodyPressable}
           accessibilityRole="button"
-          accessibilityLabel={`Edit quest: ${quest.title}`}
+          accessibilityLabel={t('editQuestA11y', { title: quest.title })}
           onPress={() => onEdit(quest.id)}
         >
           {body}
@@ -58,17 +60,17 @@ export function QuestCard({ quest, streakDays, onComplete, onEdit }: QuestCardPr
       )}
 
       {done ? (
-        <View style={styles.doneBadge} accessibilityLabel="Quest completed">
+        <View style={styles.doneBadge} accessibilityLabel={t('completedA11y')}>
           <Text style={styles.doneCheck}>✓</Text>
         </View>
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Complete quest: ${quest.title}, rewards ${reward} XP`}
+          accessibilityLabel={t('completeA11y', { title: quest.title, xp: reward })}
           onPress={() => onComplete(quest.id)}
           style={({ pressed }) => [styles.completeBtn, pressed && styles.completeBtnPressed]}
         >
-          <Text style={styles.completeText}>Complete</Text>
+          <Text style={styles.completeText}>{t('complete')}</Text>
         </Pressable>
       )}
     </View>

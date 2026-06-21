@@ -1,0 +1,37 @@
+{
+  "proj-malaria": {
+    "title": "Fort-Liberté Malaria Source Reduction",
+    "region": "Fort-Liberté, Haiti",
+    "summary": "Stop malaria at the source. Drain and clean standing water where mosquitoes breed — every site cleared protects your neighbours.",
+    "unit": "sites cleaned",
+    "reward": "Bed nets + larvicide for the most-affected blocks"
+  },
+  "proj-gardens": {
+    "title": "Community Gardens · Huertos",
+    "region": "Ouanaminthe, Haiti",
+    "summary": "Grow food and resilience. Tend shared garden beds so families have fresh vegetables and seedlings to share.",
+    "unit": "beds tended",
+    "reward": "Seeds, tools, and a rainwater barrel for the garden"
+  },
+  "proj-water": {
+    "title": "Clean Water Together",
+    "region": "Cap-Haïtien, Haiti",
+    "summary": "Safe water, every day. Treat household water and keep collection points clean to cut waterborne illness.",
+    "unit": "households treating water",
+    "reward": "Ceramic water filters for participating households"
+  },
+  "proj-waste": {
+    "title": "Neighbourhood Waste Reduction",
+    "region": "Port-de-Paix, Haiti",
+    "summary": "A cleaner block is a healthier block. Collect, sort, and properly dispose of waste to keep drains and streets clear.",
+    "unit": "bags collected",
+    "reward": "Community bins + a monthly collection pickup"
+  },
+  "proj-school": {
+    "title": "School Kits for Every Child",
+    "region": "Gonaïves, Haiti",
+    "summary": "Keep kids learning. Help children study daily and prepare kits so every child starts the term ready.",
+    "unit": "study sessions logged",
+    "reward": "School kits (notebooks, pens, backpacks) for the cohort"
+  }
+}

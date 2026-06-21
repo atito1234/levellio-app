@@ -1,0 +1,103 @@
+{
+  "a11yBack": "Back",
+  "kicker": "YOUR ANALYTICS",
+  "title": "Headed the right way?",
+  "loading": "Reading your journey…",
+  "week": {
+    "title": "This week",
+    "count": "{{done}}/7 days",
+    "a11yActive": "{{day}} active",
+    "a11yRest": "{{day}} rest"
+  },
+  "counter": {
+    "daysAccomplished": "days accomplished",
+    "dayStreak": "day streak",
+    "activities": "activities"
+  },
+  "feel": {
+    "title": "How it feels",
+    "average": "{{value}}/5",
+    "body_one": "Across {{count}} rated session, your habits feel {{word}}{{trend}}{{best}}",
+    "body_other": "Across {{count}} rated sessions, your habits feel {{word}}{{trend}}{{best}}",
+    "trendUp": " — and trending up lately.",
+    "trendDown": " — dipping a little lately.",
+    "trendFlat": ".",
+    "best": " You rate {{title}} highest.",
+    "wordExcellent": "excellent",
+    "wordGood": "good",
+    "wordOkay": "okay",
+    "wordGrind": "like a grind"
+  },
+  "confidence": {
+    "sub": "Every insight is shown — confidence grows as your days add up ({{days}} so far)."
+  },
+  "sections": {
+    "data": "WHAT YOUR DATA SAYS",
+    "repetition": "FROM REPETITION TO HABIT",
+    "ring": "WHY THE RING WORKS"
+  },
+  "status": {
+    "graduated": "🏅 Habit unlocked",
+    "solidified": "🌱 Locked in",
+    "building": "Building",
+    "new": "Just started"
+  },
+  "journey": {
+    "a11y": "{{title}} journey. {{status}}. See details",
+    "dayInRow": "Day {{days}} in a row",
+    "startAgain": "Start again today",
+    "runsOnOwn": "runs on its own",
+    "towardAutomatic": "{{value}}% toward automatic",
+    "view": "view ›"
+  },
+  "forecast": {
+    "title": "Forecast",
+    "yourTitle": "Your forecast",
+    "plusTag": "✦ Plus",
+    "lockedBody": "See when your next insight, streaks, and automaticity will land at your current pace.",
+    "cta": "Unlock with Levellio Plus ›",
+    "nextUnlockPrefix": "At your current pace you’ll unlock ",
+    "etaSoon": "any day now",
+    "eta_one": "in about {{count}} day",
+    "eta_other": "in about {{count}} days",
+    "etaKeepGoing": "as you keep showing up",
+    "allUnlocked": "Every insight tier is unlocked — you’re in rare air. 🛡️",
+    "autoPrefix": "Automaticity (~66 days) ",
+    "autoWithinReach": "is within reach",
+    "autoAway_one": "is about {{count}} active day away",
+    "autoAway_other": "is about {{count}} active days away",
+    "autoBuilds": "builds with each active day",
+    "autoPace_one": " at {{count}} active day/week.",
+    "autoPace_other": " at {{count}} active days/week."
+  },
+  "insight": {
+    "streakActive": "You’re on a {{streak}}-day streak. Your longest run so far is {{longest}}.",
+    "streakReset": "Your streak reset — your longest run was {{longest}}. One win today starts the next.",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "rhythmEmpty": "Keep logging with the timer to reveal your best day and time.",
+    "rhythmDayTime": "You show up most on {{day}}s, around {{hour}}. Stack new habits there — momentum is on your side.",
+    "rhythmDay": "You show up most on {{day}}s. Stack new habits there — momentum is on your side.",
+    "rhythmTime": "You show up most around {{hour}}. Stack new habits there — momentum is on your side.",
+    "anchorEmpty": "Complete a few sessions to find your anchor habit.",
+    "anchor_one": "{{title}} is your anchor — {{count}} session logged. Anchor habits make the rest easier to start.",
+    "anchor_other": "{{title}} is your anchor — {{count}} sessions logged. Anchor habits make the rest easier to start.",
+    "mixEmpty": "As you log across areas, your focus will show up here.",
+    "mixIntro_one": "Most of your energy goes to {{label}} ({{count}} session).",
+    "mixIntro_other": "Most of your energy goes to {{label}} ({{count}} sessions).",
+    "mixGoal": " That directly feeds your goal “{{goal}}.”",
+    "mixNoGoal": " Tie it to a goal to make it count double.",
+    "resilienceIntro": "Your longest unbroken run is {{longest}} days. ",
+    "resilienceAtBest": "You’re at your best right now — protect the streak.",
+    "resilienceComeback_one": "You’ve done it before, so you can do it again — you’re {{count}} day in now.",
+    "resilienceComeback_other": "You’ve done it before, so you can do it again — you’re {{count}} days in now.",
+    "automaticTop_one": "{{title}} is {{count}} day in a row. ",
+    "automaticTop_other": "{{title}} is {{count}} days in a row. ",
+    "automaticNone": "Habits become automatic with repetition. ",
+    "automaticScience": "Research suggests automaticity lands on average around 66 days — but you’ll feel it before any number does."
+  },
+  "fullLink": {
+    "a11y": "See full activity insights",
+    "text": "📊 See full activity insights ›"
+  }
+}

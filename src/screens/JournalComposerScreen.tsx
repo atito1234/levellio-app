@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, HeroAvatar } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useJournal } from '@/state/JournalContext';
-import { MOODS, AUDIENCES, audienceMeta, type JournalAudience, type JournalMedia, type JournalMood } from '@/lib/journal';
+import { MOODS, AUDIENCES, type JournalAudience, type JournalMedia, type JournalMood } from '@/lib/journal';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'JournalComposer'>;
@@ -20,6 +21,7 @@ const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
 export function JournalComposerScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('journal');
   const { dragonId, dragonName, questIds, prompt, teaching } = route.params ?? {};
   const { character } = useGame();
   const { addEntry } = useJournal();
@@ -36,7 +38,7 @@ export function JournalComposerScreen({ route, navigation }: Props) {
     try {
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert('Photos access needed', 'Allow photo access in Settings to attach a photo or video.');
+        Alert.alert(t('composer.permTitle'), t('composer.permBody'));
         return;
       }
       const res = await ImagePicker.launchImageLibraryAsync({
@@ -47,7 +49,7 @@ export function JournalComposerScreen({ route, navigation }: Props) {
       const asset = res.canceled ? null : res.assets[0];
       if (asset) setMedia({ uri: asset.uri, type: asset.type === 'video' ? 'video' : 'image' });
     } catch {
-      Alert.alert('Couldn’t add media', 'Something went wrong picking that file.');
+      Alert.alert(t('composer.mediaErrorTitle'), t('composer.mediaErrorBody'));
     }
   };
 
@@ -58,19 +60,19 @@ export function JournalComposerScreen({ route, navigation }: Props) {
     navigation.goBack();
   };
 
-  const aud = audienceMeta(audience);
+  const audNote = t(`audience.${audience}.note`);
 
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Cancel" hitSlop={12}>
-          <Text style={styles.cancel}>Cancel</Text>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('composer.a11yCancel')} hitSlop={12}>
+          <Text style={styles.cancel}>{t('common:action.cancel')}</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          Reflect
+          {t('composer.title')}
         </Text>
-        <Pressable onPress={() => void post()} disabled={!canPost} accessibilityRole="button" accessibilityLabel="Post reflection" hitSlop={12}>
-          <Text style={[styles.post, !canPost && styles.postOff]}>Post</Text>
+        <Pressable onPress={() => void post()} disabled={!canPost} accessibilityRole="button" accessibilityLabel={t('composer.a11yPost')} hitSlop={12}>
+          <Text style={[styles.post, !canPost && styles.postOff]}>{t('composer.post')}</Text>
         </Pressable>
       </View>
 
@@ -79,14 +81,14 @@ export function JournalComposerScreen({ route, navigation }: Props) {
         <View style={styles.header}>
           <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={44} />
           <View style={{ flex: 1 }}>
-            <Text style={styles.you}>You</Text>
-            {dragonName ? <Text style={styles.context}>Battling {dragonName}</Text> : <Text style={styles.context}>Battle reflection</Text>}
+            <Text style={styles.you}>{t('composer.you')}</Text>
+            {dragonName ? <Text style={styles.context}>{t('composer.battling', { name: dragonName })}</Text> : <Text style={styles.context}>{t('composer.battleReflection')}</Text>}
           </View>
         </View>
 
         {teaching ? (
           <View style={styles.teachingCard}>
-            <Text style={styles.teachingLabel}>🧠 WHY THIS MATTERS</Text>
+            <Text style={styles.teachingLabel}>{t('composer.teachingLabel')}</Text>
             <Text style={styles.teachingText}>{teaching}</Text>
           </View>
         ) : null}
@@ -98,69 +100,72 @@ export function JournalComposerScreen({ route, navigation }: Props) {
           onChangeText={setText}
           autoFocus
           multiline
-          placeholder={prompt ?? 'What’s stopping you from this habit? Name the dragon…'}
+          placeholder={prompt ?? t('composer.inputPlaceholder')}
           placeholderTextColor={MUTED}
           style={styles.input}
-          accessibilityLabel="Your reflection"
+          accessibilityLabel={t('composer.a11yReflection')}
         />
 
         {media && (
           <View style={styles.mediaWrap}>
             {media.type === 'image' ? (
-              <Image source={{ uri: media.uri }} style={styles.mediaImage} accessibilityLabel="Attached photo" />
+              <Image source={{ uri: media.uri }} style={styles.mediaImage} accessibilityLabel={t('composer.a11yPhoto')} />
             ) : (
               <View style={styles.videoTile}>
-                <Text style={styles.videoTileText}>🎥 Video attached</Text>
+                <Text style={styles.videoTileText}>{t('composer.videoAttached')}</Text>
               </View>
             )}
-            <Pressable onPress={() => setMedia(undefined)} accessibilityRole="button" accessibilityLabel="Remove media" style={styles.mediaRemove}>
+            <Pressable onPress={() => setMedia(undefined)} accessibilityRole="button" accessibilityLabel={t('composer.a11yRemoveMedia')} style={styles.mediaRemove}>
               <Text style={styles.mediaRemoveText}>✕</Text>
             </Pressable>
           </View>
         )}
 
-        <Pressable onPress={() => void pickMedia()} accessibilityRole="button" accessibilityLabel="Add photo or video" style={styles.mediaBtn}>
-          <Text style={styles.mediaBtnText}>📷 {media ? 'Replace photo / video' : 'Add photo / video'}</Text>
+        <Pressable onPress={() => void pickMedia()} accessibilityRole="button" accessibilityLabel={t('composer.a11yAddMedia')} style={styles.mediaBtn}>
+          <Text style={styles.mediaBtnText}>{media ? t('composer.replaceMedia') : t('composer.addMedia')}</Text>
         </Pressable>
 
-        <Text style={styles.fieldLabel}>How does this make you feel?</Text>
+        <Text style={styles.fieldLabel}>{t('composer.feelLabel')}</Text>
         <View style={styles.chips}>
           {MOODS.map((m) => {
             const on = mood === m.id;
+            const label = t(`mood.${m.id}`);
             return (
               <Pressable
                 key={m.id}
                 onPress={() => setMood(on ? undefined : m.id)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
-                accessibilityLabel={m.label}
+                accessibilityLabel={label}
                 style={[styles.chip, on && styles.chipOn]}
               >
-                <Text style={[styles.chipText, on && styles.chipTextOn]}>{m.emoji} {m.label}</Text>
+                <Text style={[styles.chipText, on && styles.chipTextOn]}>{m.emoji} {label}</Text>
               </Pressable>
             );
           })}
         </View>
 
-        <Text style={styles.fieldLabel}>Who can see this?</Text>
+        <Text style={styles.fieldLabel}>{t('composer.audienceLabel')}</Text>
         <View style={styles.chips}>
           {AUDIENCES.map((a) => {
             const on = audience === a.id;
+            const label = t(`audience.${a.id}.label`);
+            const note = t(`audience.${a.id}.note`);
             return (
               <Pressable
                 key={a.id}
                 onPress={() => setAudience(a.id)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
-                accessibilityLabel={`${a.label}. ${a.note}`}
+                accessibilityLabel={`${label}. ${note}`}
                 style={[styles.chip, on && styles.chipOn]}
               >
-                <Text style={[styles.chipText, on && styles.chipTextOn]}>{a.icon} {a.label}</Text>
+                <Text style={[styles.chipText, on && styles.chipTextOn]}>{a.icon} {label}</Text>
               </Pressable>
             );
           })}
         </View>
-        <Text style={styles.audienceNote}>{aud.note} Sharing & reactions from others arrive with the community update.</Text>
+        <Text style={styles.audienceNote}>{audNote} {t('composer.audienceNoteSuffix')}</Text>
       </ScrollView>
     </ScreenContainer>
   );

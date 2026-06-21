@@ -1,0 +1,18 @@
+{
+  "kicker": "QUEST COMPLETE",
+  "continue": "Continue",
+  "xpA11y": "You earned {{xp}} XP",
+  "xpA11yBonus": "You earned {{xp}} XP, including a {{bonus}} XP streak bonus",
+  "xpA11yLevel": "You earned {{xp}} XP, and reached level {{level}}",
+  "xpA11yBonusLevel": "You earned {{xp}} XP, including a {{bonus}} XP streak bonus, and reached level {{level}}",
+  "unit": "XP",
+  "streakBonus": "🔥 Includes +{{bonus}} streak bonus",
+  "levelUpA11y": "Level up! You reached level {{level}}",
+  "levelUp": "LEVEL UP!",
+  "level": "Level {{level}}",
+  "progressXp": "{{current}} / {{needed}} XP",
+  "share": "Share",
+  "claimReward": "Claim reward",
+  "shareMessage": "I just earned {{xp}} XP in Levellio! ⚔️✨ Turning real life into an epic quest.",
+  "shareMessageLevel": "I just earned {{xp}} XP and reached level {{level}} in Levellio! ⚔️✨ Turning real life into an epic quest."
+}

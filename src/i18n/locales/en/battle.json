@@ -1,0 +1,99 @@
+{
+  "setup": {
+    "close": "Close",
+    "warRoom": "War room",
+    "coinsA11y": "{{coins}} coins. What are coins?",
+    "coinsPill": "🪙 {{coins}}",
+    "coinsAlertTitle": "🪙 Coins",
+    "coinsAlertBody": "You have {{coins}}. Win a battle to earn coins — more for tougher blocks. Soon you’ll spend them in the Arsenal to collect war gadgets.",
+    "reflectA11y": "Reflect on your dragon",
+    "reflectKicker": "📓 REFLECT FIRST",
+    "pastReflectionsA11y": "View {{count}} past reflections",
+    "pastReflectionsLink": "{{n}} past ›",
+    "defaultPrompt": "What’s stopping you? Name the dragon.",
+    "lastReflection": "Last: {{emoji}} {{text}}",
+    "reflectionSaved": "Reflection saved",
+    "addAnotherReflection": "Add another reflection ›",
+    "journalStopping": "Journal what’s stopping you ›",
+    "confrontA11y": "Confront {{name}}",
+    "confrontCta": "🐉 Confront your dragon — questions + a tactic ›",
+    "yourDragon": "YOUR DRAGON",
+    "fightDragonA11y": "Fight {{name}}",
+    "nameOwnDragonA11y": "Name your own dragon",
+    "custom": "Custom",
+    "customDragonPlaceholder": "Name your dragon (Sugar, Snooze, Self-Doubt…)",
+    "customDragonNameA11y": "Custom dragon name",
+    "yourWarGadget": "YOUR WAR GADGET",
+    "gadgetA11y": "{{tag}}, {{technique}}, {{duration}}",
+    "decreaseMinutesA11y": "Decrease minutes",
+    "increaseMinutesA11y": "Increase minutes",
+    "minutes": "{{n}} min",
+    "missionsLabel": "MISSIONS ({{n}})",
+    "addMissionsA11y": "Add missions",
+    "addShort": "＋ Add",
+    "emptyMissions": "Pick the habits for this block ›",
+    "removeMissionA11y": "Remove {{title}}",
+    "beginBattleA11y": "Begin battle",
+    "beginBattle": "⚔️ Begin battle",
+    "addMissionsTitle": "Add missions",
+    "doneA11y": "Done",
+    "done": "Done",
+    "customActivityPlaceholder": "＋ Type a custom one (e.g. boiled eggs)",
+    "addCustomActivityA11y": "Add a custom activity",
+    "addActivityA11y": "Add activity",
+    "add": "Add",
+    "allIn": "Everything’s in. Type a custom one above.",
+    "addMissionA11y": "Add {{title}}"
+  },
+  "gadgets": {
+    "openEnded": "open-ended",
+    "pomodoro": {
+      "tag": "Sprint Blade",
+      "why": "25-minute sprints ride your brain’s natural focus cycle; the short break prevents burnout."
+    },
+    "deepwork": {
+      "tag": "Siege Shield",
+      "why": "Longer 52-minute blocks let you reach flow, where the deepest work happens; 17 min restores you."
+    },
+    "quick10": {
+      "tag": "Quick Strike",
+      "why": "Ten minutes beats zero — a tiny start defuses procrastination (the hardest part is beginning)."
+    },
+    "custom": {
+      "tag": "Custom Rig",
+      "why": "Your tempo — pick a length you can fully commit to and finish."
+    },
+    "flowtime": {
+      "tag": "Flow Saber",
+      "why": "No clock pressure — work until you naturally stop. Great for creative momentum."
+    }
+  },
+  "battle": {
+    "noHabits": "These habits are no longer available.",
+    "goBack": "Go back",
+    "retreatA11y": "Retreat",
+    "retreat": "Retreat",
+    "victoryA11y": "Victory",
+    "victory": "⚔️ Victory!",
+    "summary_one": "{{completed}}/{{selected}} habit done{{xp}}",
+    "summary_other": "{{completed}}/{{selected}} habits done{{xp}}",
+    "summaryXp": " · +{{xp}} XP",
+    "summaryCoins": "🪙 +{{coins}} coins",
+    "inBattle": "IN BATTLE",
+    "faceYourDragon": "FACE YOUR DRAGON",
+    "dragonHealthA11y": "Dragon health {{pct}} percent",
+    "clockElapsedA11y": "{{clock}} elapsed",
+    "clockRemainingA11y": "{{clock}} remaining",
+    "countUp": " · count up",
+    "doneA11y": "Done",
+    "done": "Done",
+    "pauseA11y": "Pause",
+    "resumeA11y": "Resume",
+    "startBattleA11y": "Start battle",
+    "pause": "Pause",
+    "resume": "Resume",
+    "start": "Start",
+    "finishA11y": "Land the final blow and finish",
+    "finish": "⚔️ Finish — slay it"
+  }
+}

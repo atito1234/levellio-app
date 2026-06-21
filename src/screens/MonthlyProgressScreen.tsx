@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CapacityRing, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -13,7 +14,6 @@ import {
   isFutureMonth,
   monthLabel,
   monthOf,
-  WEEKDAY_LABELS,
 } from '@/lib/calendar';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -26,6 +26,8 @@ const MUTED = '#5A5A72';
 const HEAT = ['#ECEAE4', '#CDEDE4', '#8FE0CE', '#46CBB0', '#16C8A8'] as const;
 
 export function MonthlyProgressScreen({ navigation }: Props) {
+  const { t, i18n } = useTranslation('monthly');
+  const weekdays = t('common:weekdaysShort', { returnObjects: true }) as string[];
   const { levels, history } = useCapacities();
   const now = new Date();
   const todayKey = dayKey(now);
@@ -41,30 +43,30 @@ export function MonthlyProgressScreen({ navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('a11yBack')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          Your progress
+          {t('title')}
         </Text>
         <Pressable
           onPress={() => navigation.navigate('Insights')}
           accessibilityRole="button"
-          accessibilityLabel="See your activity insights"
+          accessibilityLabel={t('a11yInsights')}
           hitSlop={10}
         >
-          <Text style={styles.insightsLink}>Insights ›</Text>
+          <Text style={styles.insightsLink}>{t('insightsLink')}</Text>
         </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* Current capacity rings (real, persisted). */}
-        <Text style={styles.sectionLabel}>CAPACITIES NOW</Text>
+        <Text style={styles.sectionLabel}>{t('capacitiesNow')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
           {CAPACITIES.map((cap) => {
             const lvl = Math.round(levels[cap.id]);
             return (
-              <View key={cap.id} style={styles.capCell} accessibilityLabel={`${cap.name} ${lvl} percent`}>
+              <View key={cap.id} style={styles.capCell} accessibilityLabel={t('a11yCapacity', { name: cap.name, value: lvl })}>
                 <View style={styles.capRingWrap}>
                   <CapacityRing level={lvl} colorId={cap.colorId} size={56} strokeWidth={6} />
                   <View style={styles.capRingCenter} pointerEvents="none">
@@ -79,15 +81,15 @@ export function MonthlyProgressScreen({ navigation }: Props) {
 
         {/* Month heatmap. */}
         <View style={styles.monthHead}>
-          <Pressable onPress={() => setRef((r) => addMonths(r, -1))} accessibilityRole="button" accessibilityLabel="Previous month" hitSlop={10}>
+          <Pressable onPress={() => setRef((r) => addMonths(r, -1))} accessibilityRole="button" accessibilityLabel={t('a11yPrevMonth')} hitSlop={10}>
             <Text style={styles.monthNav}>‹</Text>
           </Pressable>
-          <Text style={styles.monthTitle}>{monthLabel(ref)}</Text>
+          <Text style={styles.monthTitle}>{monthLabel(ref, i18n.language)}</Text>
           <Pressable
             onPress={() => !nextDisabled && setRef((r) => addMonths(r, 1))}
             disabled={nextDisabled}
             accessibilityRole="button"
-            accessibilityLabel="Next month"
+            accessibilityLabel={t('a11yNextMonth')}
             accessibilityState={{ disabled: nextDisabled }}
             hitSlop={10}
           >
@@ -96,7 +98,7 @@ export function MonthlyProgressScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.weekRow}>
-          {WEEKDAY_LABELS.map((d, i) => (
+          {weekdays.map((d, i) => (
             <Text key={i} style={styles.weekday}>
               {d}
             </Text>
@@ -115,7 +117,7 @@ export function MonthlyProgressScreen({ navigation }: Props) {
                   <Pressable
                     key={ci}
                     accessibilityRole="button"
-                    accessibilityLabel={`${cell.key}, ${pts} capacity ${pts === 1 ? 'point' : 'points'}. See this day's activities`}
+                    accessibilityLabel={t('a11yDay', { count: pts, date: cell.key })}
                     onPress={() => navigation.navigate('Insights', { day: dayK })}
                     style={[styles.cell, { backgroundColor: HEAT[intensityLevel(pts)] }, isToday && styles.cellToday]}
                   >
@@ -129,17 +131,17 @@ export function MonthlyProgressScreen({ navigation }: Props) {
 
         {/* Legend */}
         <View style={styles.legend}>
-          <Text style={styles.legendText}>Less</Text>
+          <Text style={styles.legendText}>{t('legendLess')}</Text>
           {HEAT.map((c, i) => (
             <View key={i} style={[styles.legendSwatch, { backgroundColor: c }]} />
           ))}
-          <Text style={styles.legendText}>More</Text>
+          <Text style={styles.legendText}>{t('legendMore')}</Text>
         </View>
 
         <Text style={styles.footnote}>
           {monthTotal > 0
-            ? `${monthTotal} capacity points earned this month. Each completed habit adds to the days it strengthens.`
-            : 'Complete habits to light up your month — each one adds capacity points to that day.'}
+            ? t('footnoteEarned', { points: monthTotal })
+            : t('footnoteEmpty')}
         </Text>
       </ScrollView>
     </ScreenContainer>

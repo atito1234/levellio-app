@@ -1,0 +1,25 @@
+{
+  "titleEdit": "Modifier le groupe",
+  "titleNew": "Nouveau groupe",
+  "previewName": "Ton groupe",
+  "nameLabel": "Nom",
+  "namePlaceholder": "ex. Santé, Travail, Apprentissage",
+  "iconSection": "Icône",
+  "iconGroupA11y": "Icône du groupe",
+  "iconA11y": "Icône {{name}}",
+  "colorSection": "Couleur",
+  "colorGroupA11y": "Couleur du groupe",
+  "colorA11y": "Couleur {{color}}",
+  "colorName": {
+    "violet": "violet",
+    "teal": "turquoise",
+    "gold": "or",
+    "rose": "rose",
+    "sky": "bleu ciel",
+    "lime": "vert citron",
+    "slate": "ardoise"
+  },
+  "saveChanges": "Enregistrer les modifications",
+  "createBucket": "Créer le groupe",
+  "deleteBucket": "Supprimer le groupe"
+}

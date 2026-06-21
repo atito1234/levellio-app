@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -27,6 +28,7 @@ const TRACK = '#ECEAE4';
 const EMOJI_CHOICES = ['🎯', '💪', '🥗', '❤️', '🧘', '💰', '📚', '🌱', '🏆', '✨', '😴', '🧠'];
 
 export function GoalEditorScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('goals');
   const { goals, addGoal, updateGoal, removeGoal } = useGoals();
   const { addLibraryHabit } = useGame();
 
@@ -45,12 +47,14 @@ export function GoalEditorScreen({ route, navigation }: Props) {
   const toggleCategory = (c: QuestCategory) =>
     setCategories((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
 
-  const createFromTemplate = async (t: GoalTemplate) => {
+  const templateTitle = (tpl: GoalTemplate) => t(`goalTemplates:${tpl.key}`, { defaultValue: tpl.title });
+
+  const createFromTemplate = async (tpl: GoalTemplate) => {
     if (saving) return;
     setSaving(true);
-    await addGoal({ title: t.title, emoji: t.emoji, colorId: t.colorId, categories: t.categories });
+    await addGoal({ title: templateTitle(tpl), emoji: tpl.emoji, colorId: tpl.colorId, categories: tpl.categories });
     // Seed a few starter habits (deduped via the canonical create path).
-    for (const id of t.suggestedHabitIds) {
+    for (const id of tpl.suggestedHabitIds) {
       const habit = HABIT_LIBRARY.find((h) => h.id === id);
       if (habit) await addLibraryHabit(habit);
     }
@@ -70,10 +74,10 @@ export function GoalEditorScreen({ route, navigation }: Props) {
 
   const confirmDelete = () => {
     if (!editingId) return;
-    Alert.alert('Delete goal?', 'Your activities stay — only this goal is removed.', [
-      { text: 'Keep', style: 'cancel' },
+    Alert.alert(t('deleteTitle'), t('deleteBody'), [
+      { text: t('keep'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('deleteConfirm'),
         style: 'destructive',
         onPress: async () => {
           await removeGoal(editingId);
@@ -86,11 +90,11 @@ export function GoalEditorScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          {isEditing ? 'Edit goal' : 'New goal'}
+          {isEditing ? t('editTitle') : t('newTitle')}
         </Text>
         <View style={styles.chevronSpacer} />
       </View>
@@ -98,49 +102,49 @@ export function GoalEditorScreen({ route, navigation }: Props) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!isEditing && (
           <>
-            <Text style={styles.lead}>What do you want to build toward? Pick one — habits do the rest.</Text>
+            <Text style={styles.lead}>{t('lead')}</Text>
 
-            <Text style={styles.sectionLabel}>PICK A GOAL</Text>
+            <Text style={styles.sectionLabel}>{t('pickGoal')}</Text>
             <View style={styles.templates}>
-              {GOAL_TEMPLATES.map((t) => (
+              {GOAL_TEMPLATES.map((tpl) => (
                 <Pressable
-                  key={t.key}
-                  onPress={() => void createFromTemplate(t)}
+                  key={tpl.key}
+                  onPress={() => void createFromTemplate(tpl)}
                   accessibilityRole="button"
-                  accessibilityLabel={`Create goal: ${t.title}`}
+                  accessibilityLabel={t('createA11y', { title: templateTitle(tpl) })}
                   style={styles.templateCard}
                 >
-                  <Text style={styles.templateEmoji}>{t.emoji}</Text>
-                  <Text style={styles.templateTitle}>{t.title}</Text>
+                  <Text style={styles.templateEmoji}>{tpl.emoji}</Text>
+                  <Text style={styles.templateTitle}>{templateTitle(tpl)}</Text>
                   <Text style={styles.templateAreas} numberOfLines={1}>
-                    {t.categories.map((c) => CATEGORY_META[c].label).join(' · ')}
+                    {tpl.categories.map((c) => t(`categories:${c}`)).join(' · ')}
                   </Text>
                 </Pressable>
               ))}
             </View>
 
-            <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>OR MAKE YOUR OWN</Text>
+            <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>{t('orOwn')}</Text>
           </>
         )}
         <View style={styles.form}>
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="e.g. Lose weight for the wedding"
+            placeholder={t('titlePlaceholder')}
             placeholderTextColor={MUTED}
             style={styles.input}
             maxLength={60}
-            accessibilityLabel="Goal title"
+            accessibilityLabel={t('titleA11y')}
           />
 
-          <Text style={styles.fieldLabel}>Icon</Text>
+          <Text style={styles.fieldLabel}>{t('icon')}</Text>
           <View style={styles.emojiRow}>
             {EMOJI_CHOICES.map((e) => (
               <Pressable
                 key={e}
                 onPress={() => setEmoji(e)}
                 accessibilityRole="button"
-                accessibilityLabel={`Icon ${e}`}
+                accessibilityLabel={t('iconA11y', { emoji: e })}
                 accessibilityState={{ selected: emoji === e }}
                 style={[styles.emojiCell, emoji === e && styles.emojiCellOn]}
               >
@@ -149,7 +153,7 @@ export function GoalEditorScreen({ route, navigation }: Props) {
             ))}
           </View>
 
-          <Text style={styles.fieldLabel}>Life areas</Text>
+          <Text style={styles.fieldLabel}>{t('lifeAreas')}</Text>
           <View style={styles.chips}>
             {CATEGORY_ORDER.map((c) => {
               const on = categories.includes(c);
@@ -159,18 +163,18 @@ export function GoalEditorScreen({ route, navigation }: Props) {
                   onPress={() => toggleCategory(c)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: on }}
-                  accessibilityLabel={CATEGORY_META[c].label}
+                  accessibilityLabel={t(`categories:${c}`)}
                   style={[styles.chip, on && styles.chipOn]}
                 >
                   <Text style={[styles.chipText, on && styles.chipTextOn]}>
-                    {CATEGORY_META[c].icon} {CATEGORY_META[c].label}
+                    {CATEGORY_META[c].icon} {t(`categories:${c}`)}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
 
-          <Text style={styles.fieldLabel}>Color</Text>
+          <Text style={styles.fieldLabel}>{t('color')}</Text>
           <View style={styles.colorRow}>
             {GOAL_COLOR_IDS.map((c) => (
               <Pressable
@@ -178,7 +182,7 @@ export function GoalEditorScreen({ route, navigation }: Props) {
                 onPress={() => setColorId(c)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: colorId === c }}
-                accessibilityLabel={`${c} color`}
+                accessibilityLabel={t('colorA11y', { color: c })}
                 style={[styles.swatch, { backgroundColor: getBucketColor(c).accent }, colorId === c && styles.swatchOn]}
               />
             ))}
@@ -188,15 +192,15 @@ export function GoalEditorScreen({ route, navigation }: Props) {
             onPress={() => void saveCustom()}
             disabled={!canSave}
             accessibilityRole="button"
-            accessibilityLabel={isEditing ? 'Save changes' : 'Create goal'}
+            accessibilityLabel={isEditing ? t('saveChanges') : t('create')}
             style={[styles.save, !canSave && styles.saveOff]}
           >
-            <Text style={styles.saveText}>{isEditing ? 'Save changes' : 'Create goal'}</Text>
+            <Text style={styles.saveText}>{isEditing ? t('saveChanges') : t('create')}</Text>
           </Pressable>
 
           {isEditing && (
-            <Pressable onPress={confirmDelete} accessibilityRole="button" accessibilityLabel="Delete goal" style={styles.delete}>
-              <Text style={styles.deleteText}>Delete goal</Text>
+            <Pressable onPress={confirmDelete} accessibilityRole="button" accessibilityLabel={t('delete')} style={styles.delete}>
+              <Text style={styles.deleteText}>{t('delete')}</Text>
             </Pressable>
           )}
         </View>

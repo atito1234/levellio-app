@@ -1,0 +1,16 @@
+{
+  "back": "Back",
+  "kicker": "CAPACITY",
+  "habitsThatStrengthen": "Habits that strengthen {{name}}",
+  "doneTodayA11y": "{{title}}, done today",
+  "doItNowA11y": "{{title}}, do it now",
+  "scheduledTime": "⏰ {{time}}",
+  "done": "✓ Done",
+  "doIt": "Do it ›",
+  "addToPlanA11y": "Add {{title}} to today's plan",
+  "add": "+ Add",
+  "empty": "No habits feed this capacity yet. Add one that does to grow it.",
+  "inTodaysPlan": "IN TODAY'S PLAN",
+  "nonePlanned": "None planned today — add one below to grow {{name}}.",
+  "notPlannedYet": "NOT PLANNED YET"
+}

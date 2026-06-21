@@ -1,0 +1,20 @@
+{
+  "tier": { "novice": "Novato", "pathfinder": "Explorador", "luminary": "Luminaria" },
+  "companion": { "spark": "Chispa", "ember": "Brasa", "phoenixling": "Fenixito" },
+  "kitTitle": "Atuendo",
+  "kitClassic": "Clásico",
+  "changeKit": "Cambiar atuendo",
+  "level": "Nivel",
+  "totalXp": "XP total",
+  "analyticsTitle": "Tus analíticas",
+  "analyticsHint": "Tómate 3 segundos para ver si vas por buen camino — y desbloquea análisis más profundos a medida que se acumulan tus días cumplidos.",
+  "seeProgress": "Ver tu progreso",
+  "wispTitle": "Tu Wisp",
+  "wispHint": "Tu compañero evoluciona a medida que tu héroe sube de nivel.",
+  "tierProgressTitle": "Progreso de nivel",
+  "progressToNextTier": "Progreso al siguiente nivel",
+  "toNext_one": "{{count}} nivel para {{tier}}",
+  "toNext_other": "{{count}} niveles para {{tier}}",
+  "topReached": "¡Nivel máximo alcanzado — eres una Luminaria!",
+  "journeyTitle": "Tu viaje"
+}

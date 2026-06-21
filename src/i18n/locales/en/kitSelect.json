@@ -1,0 +1,9 @@
+{
+  "title": "Choose your kit",
+  "note": "Original nation colorways — pick one to wear it everywhere your hero appears.",
+  "classic": "Classic",
+  "classicA11y": "Classic look, no kit",
+  "classicA11ySelected": "Classic look, no kit, selected",
+  "kitA11y": "{{colorway}}, {{pattern}} kit",
+  "kitA11ySelected": "{{colorway}}, {{pattern}} kit, selected"
+}

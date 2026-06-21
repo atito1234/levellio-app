@@ -1,0 +1,21 @@
+{
+  "back": "Atrás",
+  "title": "Programa tus hábitos",
+  "month": "Mes",
+  "year": "Año",
+  "prevMonth": "Mes anterior",
+  "nextMonth": "Mes siguiente",
+  "prevYear": "Año anterior",
+  "nextYear": "Año siguiente",
+  "dayScheduledA11y": "{{day}}, {{count}} programado(s)",
+  "nothingScheduled": "Nada programado",
+  "scheduledDone": "{{count}} programado(s) · {{done}} hecho(s)",
+  "removeFromA11y": "Quitar {{title}} de {{day}}",
+  "reviewDay": "📊 Revisar este día ›",
+  "addForA11y": "Añadir una actividad para {{day}}",
+  "addFor": "＋ Añadir actividad para {{day}}",
+  "hideHabits": "Ocultar tus hábitos ▲",
+  "scheduleFrom": "＋ Programar desde tus hábitos ▾",
+  "chipAddA11y": "Añadir {{title}}",
+  "chipRemoveA11y": "Quitar {{title}}"
+}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { radii, shadows, spacing, typography } from '@/theme';
 import { getBucketColor } from '@/lib/buckets';
 import { goalColor, type Goal } from '@/lib/goal';
@@ -45,6 +46,7 @@ export function OwnedActivityCard({
   onEdit: () => void;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation('projects');
   const [pickOpen, setPickOpen] = useState(false);
   const inGoals = goals.filter((g) => inGoalIds.has(g.id));
 
@@ -69,15 +71,15 @@ export function OwnedActivityCard({
               key={g.id}
               onPress={() => onToggleGoal(g.id)}
               accessibilityRole="button"
-              accessibilityLabel={`In goal ${g.title}. Tap to remove.`}
+              accessibilityLabel={t('card.inGoalA11y', { goal: g.title })}
               style={[styles.goalChip, { backgroundColor: c.soft, borderColor: c.accent }]}
             >
               <Text style={[styles.goalChipText, { color: c.accent }]} numberOfLines={1}>{g.emoji} {g.title} ✓</Text>
             </Pressable>
           );
         })}
-        <Pressable onPress={() => setPickOpen((v) => !v)} accessibilityRole="button" accessibilityLabel="Add this activity to a goal" style={styles.addGoalChip}>
-          <Text style={styles.addGoalText}>{pickOpen ? 'Done' : '＋ Goal'}</Text>
+        <Pressable onPress={() => setPickOpen((v) => !v)} accessibilityRole="button" accessibilityLabel={t('card.addGoalA11y')} style={styles.addGoalChip}>
+          <Text style={styles.addGoalText}>{pickOpen ? t('card.goalDone') : t('card.addGoal')}</Text>
         </Pressable>
       </View>
 
@@ -86,28 +88,28 @@ export function OwnedActivityCard({
           {goals.filter((g) => !inGoalIds.has(g.id)).map((g) => {
             const c = goalColor(g);
             return (
-              <Pressable key={g.id} onPress={() => onToggleGoal(g.id)} accessibilityRole="button" accessibilityLabel={`Add to ${g.title}`} style={[styles.pickChip, { borderColor: c.accent }]}>
+              <Pressable key={g.id} onPress={() => onToggleGoal(g.id)} accessibilityRole="button" accessibilityLabel={t('card.addToGoalA11y', { goal: g.title })} style={[styles.pickChip, { borderColor: c.accent }]}>
                 <Text style={[styles.pickChipText, { color: c.accent }]} numberOfLines={1}>＋ {g.emoji} {g.title}</Text>
               </Pressable>
             );
           })}
-          <Pressable onPress={onNewGoal} accessibilityRole="button" accessibilityLabel="Create a new goal" style={styles.pickNew}>
-            <Text style={styles.pickNewText}>＋ New goal</Text>
+          <Pressable onPress={onNewGoal} accessibilityRole="button" accessibilityLabel={t('card.newGoalA11y')} style={styles.pickNew}>
+            <Text style={styles.pickNewText}>{t('card.newGoal')}</Text>
           </Pressable>
         </View>
       )}
 
       <View style={styles.actions}>
-        <Pressable onPress={onDo} accessibilityRole="button" accessibilityLabel={`Do ${title} now`} style={[styles.primary, { backgroundColor: TEAL }]}>
-          <Text style={styles.primaryText}>Do it now</Text>
+        <Pressable onPress={onDo} accessibilityRole="button" accessibilityLabel={t('card.doNowA11y', { title })} style={[styles.primary, { backgroundColor: TEAL }]}>
+          <Text style={styles.primaryText}>{t('card.doNow')}</Text>
         </Pressable>
-        <Pressable onPress={onBattle} accessibilityRole="button" accessibilityLabel={`Battle ${title}`} style={styles.ghost} hitSlop={6}>
+        <Pressable onPress={onBattle} accessibilityRole="button" accessibilityLabel={t('card.battleA11y', { title })} style={styles.ghost} hitSlop={6}>
           <Text style={styles.ghostText}>⚔️</Text>
         </Pressable>
-        <Pressable onPress={onEdit} accessibilityRole="button" accessibilityLabel={`Edit ${title}`} style={styles.ghost} hitSlop={6}>
+        <Pressable onPress={onEdit} accessibilityRole="button" accessibilityLabel={t('card.editA11y', { title })} style={styles.ghost} hitSlop={6}>
           <Text style={styles.ghostText}>✎</Text>
         </Pressable>
-        <Pressable onPress={onRemove} accessibilityRole="button" accessibilityLabel={`Remove ${title}`} style={styles.ghost} hitSlop={6}>
+        <Pressable onPress={onRemove} accessibilityRole="button" accessibilityLabel={t('card.removeA11y', { title })} style={styles.ghost} hitSlop={6}>
           <Text style={[styles.ghostText, { color: ROSE }]}>✕</Text>
         </Pressable>
       </View>
@@ -132,6 +134,7 @@ export function SuggestedActivityCard({
   onAdd: () => void;
   onEdit: () => void;
 }) {
+  const { t } = useTranslation('projects');
   return (
     <View style={[styles.card, styles.suggested]}>
       <View style={styles.head}>
@@ -146,10 +149,10 @@ export function SuggestedActivityCard({
       <Pressable
         onPress={added ? onEdit : onAdd}
         accessibilityRole="button"
-        accessibilityLabel={added ? `${title} is yours. Edit it.` : `Add ${title} to your activities`}
+        accessibilityLabel={added ? t('card.suggestedYoursA11y', { title }) : t('card.suggestedAddA11y', { title })}
         style={[styles.adopt, added ? styles.adoptDone : { backgroundColor: VIOLET }]}
       >
-        <Text style={[styles.adoptText, added && styles.adoptDoneText]}>{added ? '✓ Yours · Edit' : '＋ Add to my activities'}</Text>
+        <Text style={[styles.adoptText, added && styles.adoptDoneText]}>{added ? t('card.yoursEdit') : t('card.addToActivities')}</Text>
       </Pressable>
     </View>
   );

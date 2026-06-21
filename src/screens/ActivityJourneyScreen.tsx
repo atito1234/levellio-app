@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { DotGrid, Sparkline } from '@/components/charts';
@@ -34,14 +35,15 @@ const cardShadow = {
   elevation: 3,
 } as const;
 
-const STATUS_META: Record<JourneyStatus, { label: string; color: string }> = {
-  graduated: { label: '🏅 Habit unlocked', color: '#B5740A' },
-  solidified: { label: '🌱 Locked in', color: TEAL },
-  building: { label: 'Building', color: VIOLET },
-  new: { label: 'Just started', color: MUTED },
+const STATUS_COLOR: Record<JourneyStatus, string> = {
+  graduated: '#B5740A',
+  solidified: TEAL,
+  building: VIOLET,
+  new: MUTED,
 };
 
 export function ActivityJourneyScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('activityJourney');
   const { activityId } = route.params;
   const { quests } = useGame();
   const { events, ready } = useActivityLog();
@@ -58,79 +60,80 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
     return [...set].sort((a, b) => getCapacity(a).order - getCapacity(b).order);
   }, [chainOf, activityId, quests]);
   const linkable = quests.filter((q) => q.id !== activityId && !linkedIds.includes(q.id));
-  const titleFor = (id: string) => quests.find((q) => q.id === id)?.title ?? 'Activity';
+  const titleFor = (id: string) => quests.find((q) => q.id === id)?.title ?? t('activityFallback');
 
   const data = useMemo(() => {
     const sessions = sessionsOf(events);
     const today = dayKey(new Date());
     const fromQuest = quests.find((q) => q.id === activityId)?.title;
     const fromSession = [...sessions].reverse().find((s) => s.activityId === activityId)?.title;
-    const title = fromQuest ?? fromSession ?? 'Activity';
+    const title = fromQuest ?? fromSession ?? t('activityFallback');
     return {
       title,
       journey: activityJourney(sessions, activityId, title, today),
       cells: activityDayCells(sessions, activityId, today, 35),
       adherence: activityWeeklyAdherence(sessions, activityId, today, 8),
     };
-  }, [events, quests, activityId]);
+  }, [events, quests, activityId, t]);
 
   const j = data.journey;
-  const status = STATUS_META[j.status];
+  const statusColor = STATUS_COLOR[j.status];
+  const statusLabel = t(`status.${j.status}`);
   const hasHistory = j.totalDays > 0;
   const solidPct = (SOLIDIFY_DAYS / HABIT_DAYS) * 100;
 
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('a11yBack')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
-        <Text style={styles.kicker}>FROM REPETITION TO HABIT</Text>
+        <Text style={styles.kicker}>{t('kicker')}</Text>
         <View style={styles.chevronSpacer} />
       </View>
 
       <Text style={styles.title} accessibilityRole="header">
         {data.title}
       </Text>
-      <View style={[styles.statusChip, { borderColor: status.color }]}>
-        <Text style={[styles.statusText, { color: status.color }]}>{status.label}</Text>
+      <View style={[styles.statusChip, { borderColor: statusColor }]}>
+        <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!ready ? (
-          <Text style={styles.empty}>Loading your journey…</Text>
+          <Text style={styles.empty}>{t('loading')}</Text>
         ) : !hasHistory ? (
           <View style={styles.card}>
-            <Text style={styles.empty}>No reps logged yet. Do it once to start the path — every journey begins with day one.</Text>
+            <Text style={styles.empty}>{t('emptyHistory')}</Text>
           </View>
         ) : (
           <>
             {/* Progress toward automatic, with Day 21 / 66 markers. */}
             <View style={styles.card}>
               <View style={styles.rowBetween}>
-                <Text style={styles.cardTitle}>Toward automatic</Text>
-                <Text style={styles.bigPct}>{j.progressPct}%</Text>
+                <Text style={styles.cardTitle}>{t('automatic.title')}</Text>
+                <Text style={styles.bigPct}>{t('automatic.pct', { value: j.progressPct })}</Text>
               </View>
               <View style={styles.track}>
                 <View style={[styles.trackFill, { width: `${Math.max(2, j.progressPct)}%` }]} />
                 <View style={[styles.tick, { left: `${solidPct}%` }]} />
               </View>
               <View style={styles.markerRow}>
-                <Text style={styles.marker}>Day 1</Text>
-                <Text style={[styles.marker, styles.markerMid]}>Day {SOLIDIFY_DAYS}</Text>
-                <Text style={styles.marker}>Day {HABIT_DAYS}</Text>
+                <Text style={styles.marker}>{t('automatic.dayMarker', { n: 1 })}</Text>
+                <Text style={[styles.marker, styles.markerMid]}>{t('automatic.dayMarker', { n: SOLIDIFY_DAYS })}</Text>
+                <Text style={styles.marker}>{t('automatic.dayMarker', { n: HABIT_DAYS })}</Text>
               </View>
               <Text style={styles.cardSub}>
                 {j.graduated
-                  ? 'This runs on its own now — automaticity reached.'
-                  : `Day ${j.currentStreak} in a row. Automaticity averages ~${HABIT_DAYS} days — you’ll feel it before any number does.`}
+                  ? t('automatic.graduated')
+                  : t('automatic.building', { streak: j.currentStreak, days: HABIT_DAYS })}
               </Text>
             </View>
 
             {/* Real consistency — the user's own weekly trajectory. */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Your consistency</Text>
-              <Text style={styles.cardSub}>Days done per week — last 8 weeks</Text>
+              <Text style={styles.cardTitle}>{t('consistency.title')}</Text>
+              <Text style={styles.cardSub}>{t('consistency.sub')}</Text>
               <View style={styles.curveWrap}>
                 <Sparkline values={data.adherence} color={VIOLET} />
               </View>
@@ -139,33 +142,33 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
             {/* Past days — real completion grid. */}
             <View style={styles.card}>
               <View style={styles.rowBetween}>
-                <Text style={styles.cardTitle}>Past days</Text>
-                <Text style={styles.cardSub}>{data.cells.filter((c) => c.done).length}/{data.cells.length} closed</Text>
+                <Text style={styles.cardTitle}>{t('pastDays.title')}</Text>
+                <Text style={styles.cardSub}>{t('pastDays.closed', { done: data.cells.filter((c) => c.done).length, total: data.cells.length })}</Text>
               </View>
               <DotGrid cells={data.cells} />
             </View>
 
             {/* Honest stat row. */}
             <View style={styles.statsRow}>
-              <Stat value={`${j.currentStreak}`} label="day streak" tint={TEAL} />
-              <Stat value={`${j.totalDays}`} label="days closed" />
-              <Stat value={`${j.daysSinceStart}`} label="days on the path" tint={VIOLET} />
+              <Stat value={`${j.currentStreak}`} label={t('stats.dayStreak')} tint={TEAL} />
+              <Stat value={`${j.totalDays}`} label={t('stats.daysClosed')} />
+              <Stat value={`${j.daysSinceStart}`} label={t('stats.daysOnPath')} tint={VIOLET} />
             </View>
 
             {/* Your chain — explicit links that power the same ripple. */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Your chain</Text>
-              <Text style={styles.cardSub}>Link activities you do together — they power the same ripple.</Text>
+              <Text style={styles.cardTitle}>{t('chain.title')}</Text>
+              <Text style={styles.cardSub}>{t('chain.sub')}</Text>
               {linkedIds.length === 0 ? (
-                <Text style={styles.chainEmpty}>Nothing linked yet.</Text>
+                <Text style={styles.chainEmpty}>{t('chain.empty')}</Text>
               ) : (
                 <View style={styles.chainList}>
                   {linkedIds.map((id) => (
                     <View key={id} style={styles.chainRow}>
-                      <Pressable onPress={() => navigation.push('ActivityJourney', { activityId: id })} accessibilityRole="button" accessibilityLabel={`Open ${titleFor(id)} journey`} style={styles.chainMain}>
+                      <Pressable onPress={() => navigation.push('ActivityJourney', { activityId: id })} accessibilityRole="button" accessibilityLabel={t('chain.a11yOpen', { title: titleFor(id) })} style={styles.chainMain}>
                         <Text style={styles.chainTitle} numberOfLines={1}>🔗 {titleFor(id)}</Text>
                       </Pressable>
-                      <Pressable onPress={() => void removeLink(activityId, id)} accessibilityRole="button" accessibilityLabel={`Unlink ${titleFor(id)}`} hitSlop={8}>
+                      <Pressable onPress={() => void removeLink(activityId, id)} accessibilityRole="button" accessibilityLabel={t('chain.a11yUnlink', { title: titleFor(id) })} hitSlop={8}>
                         <Text style={styles.chainRemove}>✕</Text>
                       </Pressable>
                     </View>
@@ -173,19 +176,19 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
                 </View>
               )}
               {chainCaps.length > 0 && linkedIds.length > 0 && (
-                <Text style={styles.chainCaps}>Together you power: {chainCaps.map((c) => getCapacity(c).name).join(' · ')}</Text>
+                <Text style={styles.chainCaps}>{t('chain.powers', { caps: chainCaps.map((c) => getCapacity(c).name).join(' · ') })}</Text>
               )}
-              <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" accessibilityLabel="Link another activity" disabled={linkable.length === 0} style={[styles.linkBtn, linkable.length === 0 && styles.linkBtnOff]}>
-                <Text style={styles.linkBtnText}>＋ Link an activity</Text>
+              <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" accessibilityLabel={t('chain.a11yLinkAnother')} disabled={linkable.length === 0} style={[styles.linkBtn, linkable.length === 0 && styles.linkBtnOff]}>
+                <Text style={styles.linkBtnText}>{t('chain.linkButton')}</Text>
               </Pressable>
             </View>
 
             <View style={styles.actions}>
-              <Pressable onPress={() => navigation.navigate('Ripple', { questId: activityId })} accessibilityRole="button" accessibilityLabel="Do it now" style={styles.cta}>
-                <Text style={styles.ctaText}>Do it now ›</Text>
+              <Pressable onPress={() => navigation.navigate('Ripple', { questId: activityId })} accessibilityRole="button" accessibilityLabel={t('actions.a11yDoNow')} style={styles.cta}>
+                <Text style={styles.ctaText}>{t('actions.doNow')}</Text>
               </Pressable>
-              <Pressable onPress={() => navigation.navigate('Connections', { questId: activityId })} accessibilityRole="button" accessibilityLabel="See how this connects" style={styles.secondary}>
-                <Text style={styles.secondaryText}>🔗 See how this connects</Text>
+              <Pressable onPress={() => navigation.navigate('Connections', { questId: activityId })} accessibilityRole="button" accessibilityLabel={t('actions.a11yConnects')} style={styles.secondary}>
+                <Text style={styles.secondaryText}>{t('actions.connects')}</Text>
               </Pressable>
             </View>
           </>
@@ -196,14 +199,14 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
         <View style={styles.sheetBackdrop}>
           <View style={styles.sheet}>
             <View style={styles.sheetHead}>
-              <Text style={styles.sheetTitle}>Link an activity</Text>
-              <Pressable onPress={() => setPickerOpen(false)} accessibilityRole="button" accessibilityLabel="Done" hitSlop={12}>
-                <Text style={styles.sheetDone}>Done</Text>
+              <Text style={styles.sheetTitle}>{t('picker.title')}</Text>
+              <Pressable onPress={() => setPickerOpen(false)} accessibilityRole="button" accessibilityLabel={t('picker.a11yDone')} hitSlop={12}>
+                <Text style={styles.sheetDone}>{t('picker.done')}</Text>
               </Pressable>
             </View>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.sheetListContent}>
               {linkable.length === 0 ? (
-                <Text style={styles.empty}>No other activities to link yet.</Text>
+                <Text style={styles.empty}>{t('picker.empty')}</Text>
               ) : (
                 linkable.map((q) => (
                   <Pressable
@@ -213,7 +216,7 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
                       setPickerOpen(false);
                     }}
                     accessibilityRole="button"
-                    accessibilityLabel={`Link ${q.title}`}
+                    accessibilityLabel={t('picker.a11yLink', { title: q.title })}
                     style={styles.sheetRow}
                   >
                     <Text style={styles.sheetRowIcon}>{CATEGORY_META[q.category].icon}</Text>

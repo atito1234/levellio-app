@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -17,7 +18,6 @@ import { ACHIEVEMENT_GOLD, getAction, getCapacity, ripple } from '@/lib/compound
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { activityTiming } from '@/lib/activityTimer';
 import { nextActivity, type NextReason } from '@/lib/nextActivity';
-import { CATEGORY_META } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
 import type { ContributionMode } from '@/lib/projects';
 import type { QuestReward } from '@/types';
@@ -42,6 +42,7 @@ const HR = (HRING - HSTROKE) / 2;
 const HC = 2 * Math.PI * HR;
 
 export function RippleScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('ripple');
   const reduced = useReducedMotion();
   const { quests } = useGame();
   const { goals } = useGoals();
@@ -59,7 +60,7 @@ export function RippleScreen({ route, navigation }: Props) {
   const seedAction = getAction(actionId) ?? getAction('water')!;
 
   const title = quest ? quest.title : seedAction.name;
-  const crumb = quest ? `${CATEGORY_META[quest.category].label} · daily` : 'Health · daily';
+  const crumb = quest ? t('crumb', { category: t('categories:' + quest.category) }) : t('crumbFallback');
   const showGlass = !quest && actionId === 'water';
   // Honest UI: real deltas, derived from the habit's category (or the seed action).
   const deltas = (quest ? rippleForQuest(quest) : ripple(seedAction.id)).slice(0, 3);
@@ -67,8 +68,8 @@ export function RippleScreen({ route, navigation }: Props) {
   const timing = quest ? activityTiming(quest) : null;
   const startLabel = timing
     ? timing.method === 'pomodoro'
-      ? `Start focus · ${timing.minutes} min`
-      : `Start ${timing.minutes}-min timer`
+      ? t('startFocus', { minutes: timing.minutes })
+      : t('startTimer', { minutes: timing.minutes })
     : null;
 
   const [done, setDone] = useState(alreadyDone);
@@ -181,7 +182,7 @@ export function RippleScreen({ route, navigation }: Props) {
   const ripScale = ripA.interpolate({ inputRange: [0, 1], outputRange: [0.72, 1.9] });
   const ripOpacity = ripA.interpolate({ inputRange: [0, 0.12, 1], outputRange: [0, 0.32, 0] });
 
-  const summary = deltas.map((d) => `${getCapacity(d.capacityId).name} up ${d.delta} percent`).join(', ');
+  const summary = deltas.map((d) => t('capacitySummaryItem', { name: t('capacities:' + d.capacityId), delta: d.delta })).join(', ');
 
   // Once done, suggest the next activity (chain → same goal → anywhere).
   const suggestion = useMemo(
@@ -194,14 +195,14 @@ export function RippleScreen({ route, navigation }: Props) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {/* Top bar — Hick's law: minimal chrome, one journey. */}
         <View style={styles.topbar}>
-          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
             <Text style={styles.chevron}>‹</Text>
           </Pressable>
           <Text style={styles.crumb}>{crumb}</Text>
           <View style={styles.chevronSpacer} />
         </View>
 
-        <Text style={styles.kicker}>TODAY&apos;S RING</Text>
+        <Text style={styles.kicker}>{t('todaysRing')}</Text>
         <Text style={styles.title} accessibilityRole="header">
           {title}
         </Text>
@@ -241,16 +242,17 @@ export function RippleScreen({ route, navigation }: Props) {
         </View>
 
         {/* Capacities it feeds — honest preview before, real deltas after. */}
-        <Text style={styles.sectionLabel}>ALSO STRENGTHENS</Text>
+        <Text style={styles.sectionLabel}>{t('alsoStrengthens')}</Text>
         <View style={styles.chipsRow}>
           {deltas.map((d, i) => {
             const cap = getCapacity(d.capacityId);
+            const capLabel = t('capacities:' + d.capacityId);
             const scale = chipPulse[i]!.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] });
             return (
               <Animated.View
                 key={d.capacityId}
                 style={[styles.chip, { transform: [{ scale: reduced ? 1 : scale }] }]}
-                accessibilityLabel={`${cap.name} plus ${d.delta} percent`}
+                accessibilityLabel={t('capacityPlusA11y', { name: capLabel, delta: d.delta })}
               >
                 <View style={styles.ringWrap}>
                   <CapacityRing level={shown[i] ?? 0} colorId={cap.colorId} size={64} strokeWidth={6} />
@@ -258,40 +260,38 @@ export function RippleScreen({ route, navigation }: Props) {
                     <Text style={styles.ringCenterText}>{done ? `+${shown[i] ?? 0}%` : '—'}</Text>
                   </View>
                 </View>
-                <Text style={styles.chipName}>{cap.name}</Text>
+                <Text style={styles.chipName}>{capLabel}</Text>
               </Animated.View>
             );
           })}
         </View>
 
-        <Text style={styles.caption}>One action. Many rings move.</Text>
-        <Text style={styles.footnote}>
-          A habit is a node, not a checkbox — closing one ring quietly lifts everything it feeds.
-        </Text>
+        <Text style={styles.caption}>{t('oneActionManyRings')}</Text>
+        <Text style={styles.footnote}>{t('footnote')}</Text>
         {quest && (
           <Pressable
             onPress={() => navigation.navigate('Connections', { questId: quest.id })}
             accessibilityRole="button"
-            accessibilityLabel="See how this activity connects"
+            accessibilityLabel={t('seeHowConnectsA11y')}
             style={styles.connLink}
           >
-            <Text style={styles.connLinkText}>🔗 See how this connects ›</Text>
+            <Text style={styles.connLinkText}>{t('seeHowConnects')}</Text>
           </Pressable>
         )}
         {quest && (
           <Pressable
             onPress={() => navigation.navigate('Insights', { activityId: quest.id })}
             accessibilityRole="button"
-            accessibilityLabel="See this activity's history and best times"
+            accessibilityLabel={t('seeHistoryA11y')}
             style={styles.connLink}
           >
-            <Text style={styles.connLinkText}>📈 See its history ›</Text>
+            <Text style={styles.connLinkText}>{t('seeHistory')}</Text>
           </Pressable>
         )}
         {quest && signedIn && myProjects.length > 0 && (
           <View style={styles.linkSection}>
-            <Text style={styles.sectionLabel}>SUPPORTS PROJECTS</Text>
-            <Text style={styles.linkHint}>Tap a project to have this habit power it too.</Text>
+            <Text style={styles.sectionLabel}>{t('supportsProjects')}</Text>
+            <Text style={styles.linkHint}>{t('supportsProjectsHint')}</Text>
             <View style={styles.linkChips}>
               {myProjects.map((p) => {
                 const on = linkedProjectIds(quest.id).includes(p.id);
@@ -302,7 +302,7 @@ export function RippleScreen({ route, navigation }: Props) {
                     onPress={() => void (on ? unlinkHabit(quest.id, p.id) : linkHabit(quest.id, p.id))}
                     accessibilityRole="button"
                     accessibilityState={{ selected: on }}
-                    accessibilityLabel={`${on ? 'Stop supporting' : 'Support'} ${p.title} with this habit`}
+                    accessibilityLabel={on ? t('stopSupportingProjectA11y', { title: p.title }) : t('supportProjectA11y', { title: p.title })}
                     style={[styles.linkChip, on && { backgroundColor: col.soft, borderColor: col.accent }]}
                   >
                     <Text style={[styles.linkChipText, on && { color: col.accent }]} numberOfLines={1}>
@@ -340,35 +340,35 @@ export function RippleScreen({ route, navigation }: Props) {
           <Pressable
             onPress={() => navigation.navigate('ActivityTimer', { questId: quest.id })}
             accessibilityRole="button"
-            accessibilityLabel={startLabel ?? 'Start'}
+            accessibilityLabel={startLabel ?? t('start')}
             style={styles.timerBtn}
           >
-            <Text style={styles.timerBtnText}>⏱ {startLabel}</Text>
+            <Text style={styles.timerBtnText}>{t('startTimerLabel', { label: startLabel })}</Text>
           </Pressable>
-          <Pressable onPress={handleDone} accessibilityRole="button" accessibilityLabel={`Just log ${title}`} style={styles.logBtn}>
-            <Text style={styles.logBtnText}>Just log it now</Text>
+          <Pressable onPress={handleDone} accessibilityRole="button" accessibilityLabel={t('justLogA11y', { title })} style={styles.logBtn}>
+            <Text style={styles.logBtnText}>{t('justLogNow')}</Text>
           </Pressable>
         </View>
       ) : done && quest && suggestion?.next ? (
         <View style={styles.actions}>
-          <Text style={styles.nextKicker}>✓ Logged · {nextReasonLabel(suggestion.reason)}</Text>
+          <Text style={styles.nextKicker}>{t('loggedReason', { reason: nextReasonLabel(suggestion.reason, t) })}</Text>
           <Pressable
             onPress={() => navigation.replace('Ripple', { questId: suggestion.next!.id })}
             accessibilityRole="button"
-            accessibilityLabel={`Next up: ${suggestion.next.title}. Do it now`}
+            accessibilityLabel={t('nextUpA11y', { title: suggestion.next.title })}
             style={styles.timerBtn}
           >
             <Text style={styles.timerBtnText} numberOfLines={1}>
-              Next up: {suggestion.next.title}  ›
+              {t('nextUp', { title: suggestion.next.title })}
             </Text>
           </Pressable>
           <Pressable
             onPress={() => navigation.navigate('Main', { screen: 'Dashboard' })}
             accessibilityRole="button"
-            accessibilityLabel={suggestion.goalChoices.length > 1 ? 'Focus a different goal' : 'Back to Today'}
+            accessibilityLabel={suggestion.goalChoices.length > 1 ? t('focusDifferentGoalA11y') : t('backToTodayA11y')}
             style={styles.logBtn}
           >
-            <Text style={styles.logBtnText}>{suggestion.goalChoices.length > 1 ? 'Focus a different goal ›' : 'Back to Today ›'}</Text>
+            <Text style={styles.logBtnText}>{suggestion.goalChoices.length > 1 ? t('focusDifferentGoal') : t('backToToday')}</Text>
           </Pressable>
         </View>
       ) : (
@@ -377,24 +377,24 @@ export function RippleScreen({ route, navigation }: Props) {
           disabled={done}
           accessibilityRole="button"
           accessibilityState={{ disabled: done }}
-          accessibilityLabel={done ? `${title} completed` : `Mark ${title} done`}
+          accessibilityLabel={done ? t('completedA11y', { title }) : t('markDoneA11y', { title })}
           style={[styles.doneBtn, done && styles.doneBtnDone]}
         >
-          <Text style={[styles.doneText, done && styles.doneTextDone]}>{done ? '✓ Logged' : 'Done'}</Text>
+          <Text style={[styles.doneText, done && styles.doneTextDone]}>{done ? t('loggedShort') : t('doneBtn')}</Text>
         </Pressable>
       )}
     </ScreenContainer>
   );
 }
 
-function nextReasonLabel(reason: NextReason): string {
+function nextReasonLabel(reason: NextReason, t: (key: string) => string): string {
   switch (reason) {
     case 'chain':
-      return 'next in your chain';
+      return t('reasonChain');
     case 'goal':
-      return 'keep this goal moving';
+      return t('reasonGoal');
     default:
-      return 'next up';
+      return t('reasonDefault');
   }
 }
 

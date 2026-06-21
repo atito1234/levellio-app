@@ -1,0 +1,20 @@
+{
+  "tier": { "novice": "Novice", "pathfinder": "Éclaireur", "luminary": "Luminaire" },
+  "companion": { "spark": "Étincelle", "ember": "Braise", "phoenixling": "Phénixonnet" },
+  "kitTitle": "Tenue",
+  "kitClassic": "Classique",
+  "changeKit": "Changer de tenue",
+  "level": "Niveau",
+  "totalXp": "XP totale",
+  "analyticsTitle": "Vos analyses",
+  "analyticsHint": "Prenez 3 secondes pour voir si vous allez dans la bonne direction — et débloquez des analyses plus poussées à mesure que vos jours accomplis s'accumulent.",
+  "seeProgress": "Voir vos progrès",
+  "wispTitle": "Votre Wisp",
+  "wispHint": "Votre compagnon évolue à mesure que votre héros monte en palier.",
+  "tierProgressTitle": "Progression de palier",
+  "progressToNextTier": "Progression vers le palier suivant",
+  "toNext_one": "{{count}} niveau avant {{tier}}",
+  "toNext_other": "{{count}} niveaux avant {{tier}}",
+  "topReached": "Palier maximum atteint — vous êtes un Luminaire !",
+  "journeyTitle": "Votre parcours"
+}

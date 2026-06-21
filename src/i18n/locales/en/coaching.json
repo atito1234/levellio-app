@@ -1,0 +1,19 @@
+{
+  "close": "Close",
+  "title": "Confront your dragon",
+  "thisSoundsLike": "This sounds like: {{label}}",
+  "thinkItThrough": "THINK IT THROUGH · {{current}}/{{total}}",
+  "nextQuestionA11y": "Next question",
+  "seeTacticA11y": "See the tactic",
+  "next": "Next ›",
+  "seeATactic": "See a tactic ›",
+  "tryThis": "TRY THIS",
+  "evidence": "🧠 {{principle}} ({{source}})",
+  "differentTacticA11y": "Try a different tactic",
+  "differentTactic": "Try a different tactic ›",
+  "readyA11y": "I'm ready, back to it",
+  "ready": "⚔️ I’m ready — back to it",
+  "journalThisA11y": "Journal this",
+  "journalThis": "📓 Journal this",
+  "journalTeaching": "Try: {{name}} — {{how}}"
+}

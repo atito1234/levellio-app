@@ -1,0 +1,82 @@
+{
+  "a11yBack": "Back",
+  "method": {
+    "timer": "Timer",
+    "pomodoro": "Focus",
+    "manual": "Logged"
+  },
+  "categoryOther": "Other",
+  "activityFallback": "Activity",
+  "loading": "Loading your activity…",
+  "heading": {
+    "default": "Insights",
+    "activity": "Activity",
+    "kickerOverview": "WHAT’S WORKING",
+    "kickerActivity": "ACTIVITY HISTORY",
+    "kickerCategory": "CATEGORY",
+    "kickerDay": "THIS DAY"
+  },
+  "summary": {
+    "session_one": "session",
+    "session_other": "sessions",
+    "totalTime": "total time",
+    "avgPerSession": "avg / session",
+    "a11yBestTime": "Most active around {{time}}",
+    "a11yBestDay": "Most active on {{day}}",
+    "bestTime": "⏰ Best time · {{time}}",
+    "bestDay": "📅 Best day · {{day}}"
+  },
+  "planRing": {
+    "title": "Plan vs done",
+    "sub": "{{done}} of {{total}} planned habits done"
+  },
+  "sections": {
+    "minutesByCategory": "MINUTES BY CATEGORY",
+    "movedCapacities": "WHAT MOVED YOUR CAPACITIES",
+    "timeOfDay": "TIME OF DAY",
+    "gaps": "GAPS TO CARRY FORWARD",
+    "byCategory": "BY CATEGORY",
+    "activities": "ACTIVITIES",
+    "sessions": "SESSIONS",
+    "recent": "RECENT"
+  },
+  "cap": {
+    "a11y": "{{name}} gained {{value}} points today. See what feeds it",
+    "label": "{{name}} +{{value}} ›"
+  },
+  "gap": {
+    "a11y": "{{title}} wasn't done. Plan it for tomorrow",
+    "sub": "Not done · tap to plan for tomorrow"
+  },
+  "row": {
+    "a11yCategory_one": "{{label}}, {{count}} session. See details",
+    "a11yCategory_other": "{{label}}, {{count}} sessions. See details",
+    "a11yActivity_one": "{{title}}, {{count}} session. See history",
+    "a11yActivity_other": "{{title}}, {{count}} sessions. See history",
+    "sub_one": "{{count}} session · {{minutes}}",
+    "sub_other": "{{count}} sessions · {{minutes}}",
+    "bestSuffix": " · best {{time}}"
+  },
+  "details": {
+    "a11yShow": "Show session details",
+    "a11yHide": "Hide session details",
+    "hide": "HIDE DETAILS ▲",
+    "show_one": "DETAILS · {{count}} SESSION ▾",
+    "show_other": "DETAILS · {{count}} SESSIONS ▾"
+  },
+  "session": {
+    "a11y": "{{title}}, {{when}}, {{duration}}, {{method}}{{location}}",
+    "a11yLocationSuffix": ", location captured",
+    "locationDot": " · 📍"
+  },
+  "empty": {
+    "day": "No activities completed on this day yet.",
+    "activity": "No sessions logged for this activity yet. Complete it once to start building its history.",
+    "category": "No sessions in this category yet.",
+    "overview": "Complete a few activities and your patterns will show up here — your best times, days, and what’s working."
+  },
+  "planTomorrow": {
+    "a11y": "Plan tomorrow",
+    "text": "🗓 Plan tomorrow ›"
+  }
+}

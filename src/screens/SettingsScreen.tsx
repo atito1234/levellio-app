@@ -31,7 +31,6 @@ import { useSettings } from '@/state/SettingsContext';
 import { type AIMode, type CloudProvider } from '@/services/settings';
 import type { MetadataPrivacy } from '@/lib/metadata';
 import { clearByoApiKey, getByoApiKey, setByoApiKey } from '@/services/security/secureKeyStore';
-import { SETTINGS_COPY } from '@/content/uiCopy';
 import {
   CONTACT_EMAIL,
   LEGAL_LINKS,
@@ -43,8 +42,8 @@ import type { HeroPresentation } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 import {
   LOCALE_LABELS,
-  LOCALE_STATUS,
-  SUPPORTED_LOCALES,
+  OFFERED_LOCALES,
+  isSupportedLocale,
   type LocaleSetting,
 } from '@/i18n/config';
 import { COSMETIC_THEMES, getTheme } from '@/data/cosmetics';
@@ -53,26 +52,17 @@ import { useEntitlements } from '@/state/SubscriptionContext';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const AI_MODE_OPTIONS: ChipOption<AIMode>[] = [
-  { value: 'on-device', label: '🔒 On-device (Free)' },
-  { value: 'cloud', label: '☁️ Cloud · your key (Free)' },
-];
-
+// Provider names are brand names — not translated.
 const PROVIDER_OPTIONS: ChipOption<CloudProvider>[] = [
   { value: 'gemini', label: 'Gemini' },
   { value: 'openai', label: 'OpenAI' },
   { value: 'anthropic', label: 'Anthropic' },
 ];
 
-const PRESENTATION_OPTIONS: ChipOption<HeroPresentation>[] = [
-  { value: 'female', label: 'Female' },
-  { value: 'male', label: 'Male' },
-  { value: 'neutral', label: 'Neutral' },
-];
-
 export function SettingsScreen() {
   const navigation = useNavigation<Nav>();
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
+  const activeLocale = isSupportedLocale(i18n.language) ? i18n.language : 'en';
   const { character, setPresentation, setName } = useGame();
   const [nameDraft, setNameDraft] = useState(character?.name ?? '');
   const { account, isReal, signOut, deleteAccount } = useAuth();
@@ -88,11 +78,22 @@ export function SettingsScreen() {
     void update({ cosmeticThemeId: id });
   };
 
-  // Auto-detected on first run, so no redundant "System default" — just the languages.
-  const localeOptions: ChipOption<LocaleSetting>[] = SUPPORTED_LOCALES.map((l) => ({
+  // Only the languages you can switch TO — the active one is hidden (shown as a
+  // "current" line below), and Creole is not offered yet.
+  const localeOptions: ChipOption<LocaleSetting>[] = OFFERED_LOCALES.filter((l) => l !== activeLocale).map((l) => ({
     value: l as LocaleSetting,
-    label: LOCALE_STATUS[l] === 'draft' ? `${LOCALE_LABELS[l]} · ${t('language.draftBadge')}` : LOCALE_LABELS[l],
+    label: LOCALE_LABELS[l],
   }));
+
+  const aiModeOptions: ChipOption<AIMode>[] = [
+    { value: 'on-device', label: t('ai.onDevice') },
+    { value: 'cloud', label: t('ai.cloud') },
+  ];
+  const presentationOptions: ChipOption<HeroPresentation>[] = [
+    { value: 'female', label: t('hero.female') },
+    { value: 'male', label: t('hero.male') },
+    { value: 'neutral', label: t('hero.neutral') },
+  ];
 
   const [keySaved, setKeySaved] = useState(false);
   const [keyInput, setKeyInput] = useState('');
@@ -101,26 +102,11 @@ export function SettingsScreen() {
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | undefined>();
 
-  const confirmSignOut = () => {
-  const doSignOut = () =>
-    void signOut().then(() => {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Onboarding' }],
-      });
-    });
-
-  if (Platform.OS === 'web') {
-    const ok = window.confirm('Sign out? You can sign back in anytime.');
-    if (ok) doSignOut();
-    return;
-  }
-
-  Alert.alert('Sign out?', 'You can sign back in anytime.', [
-    { text: 'Cancel', style: 'cancel' },
-    { text: 'Sign out', style: 'destructive', onPress: doSignOut },
-  ]);
-};
+  const confirmSignOut = () =>
+    Alert.alert(t('account.signOutConfirmTitle'), t('account.signOutConfirmBody'), [
+      { text: t('account.cancel'), style: 'cancel' },
+      { text: t('account.signOut'), style: 'destructive', onPress: () => void signOut() },
+    ]);
 
   const runDelete = async () => {
     setDeleteBusy(true);
@@ -131,7 +117,7 @@ export function SettingsScreen() {
       setDeleteOpen(false);
       setDeletePassword('');
     } else {
-      setDeleteError(res.error ?? 'Could not delete your account. Please try again.');
+      setDeleteError(res.error ?? t('account.deleteFailed'));
     }
   };
 
@@ -174,9 +160,9 @@ export function SettingsScreen() {
         {/* Account — only when signed in (community/projects). */}
         {account && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Account</Text>
-            <Text style={styles.note}>Signed in{account.email ? ` as ${account.email}` : ''}.</Text>
-            <PrimaryButton label="Sign out" variant="ghost" onPress={confirmSignOut} />
+            <Text style={styles.cardTitle}>{t('account.title')}</Text>
+            <Text style={styles.note}>{account.email ? t('account.signedInAs', { email: account.email }) : t('account.signedIn')}</Text>
+            <PrimaryButton label={t('account.signOut')} variant="ghost" onPress={confirmSignOut} />
             <Pressable
               onPress={() => {
                 setDeleteError(undefined);
@@ -184,28 +170,27 @@ export function SettingsScreen() {
                 setDeleteOpen(true);
               }}
               accessibilityRole="button"
-              accessibilityLabel="Delete account"
+              accessibilityLabel={t('account.delete')}
               style={styles.deleteBtn}
             >
-              <Text style={styles.deleteBtnText}>Delete account</Text>
+              <Text style={styles.deleteBtnText}>{t('account.delete')}</Text>
             </Pressable>
-            <Text style={styles.help}>
-              Permanently deletes your account and your community + project data (memberships,
-              contributions, posts, comments, reactions, follows). This can’t be undone.
-            </Text>
+            <Text style={styles.help}>{t('account.deleteHelp')}</Text>
           </View>
         )}
 
         {/* Language */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{t('language.title')}</Text>
-          <Text style={styles.note}>{t('language.subtitle')}</Text>
-          <ChipSelector
-            label={t('language.title')}
-            options={localeOptions}
-            selected={settings.locale}
-            onSelect={(locale) => update({ locale })}
-          />
+          <Text style={styles.note}>{t('language.current', { lang: LOCALE_LABELS[activeLocale] })}</Text>
+          {localeOptions.length > 0 && (
+            <ChipSelector
+              label={t('language.switchTo')}
+              options={localeOptions}
+              selected={settings.locale}
+              onSelect={(locale) => update({ locale })}
+            />
+          )}
         </View>
 
         {/* Levellio Plus — founding member during the beta */}
@@ -240,10 +225,10 @@ export function SettingsScreen() {
 
         {/* Beta banner — honest, no charging */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>{SETTINGS_COPY.betaBannerTitle}</Text>
-          <Text style={styles.note}>{SETTINGS_COPY.betaBannerNote}</Text>
+          <Text style={styles.cardTitle}>{t('beta.title')}</Text>
+          <Text style={styles.note}>{t('beta.note')}</Text>
           <PrimaryButton
-            label={SETTINGS_COPY.betaBannerCta}
+            label={t('beta.cta')}
             variant="ghost"
             onPress={() => navigation.navigate('Paywall')}
           />
@@ -251,56 +236,56 @@ export function SettingsScreen() {
 
         {/* AI section */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>{SETTINGS_COPY.aiSectionTitle}</Text>
-          <Text style={styles.note}>{SETTINGS_COPY.aiSectionNote}</Text>
+          <Text style={styles.cardTitle}>{t('ai.title')}</Text>
+          <Text style={styles.note}>{t('ai.note')}</Text>
           <PrimaryButton label={t('ai:learnMore')} variant="ghost" onPress={() => navigation.navigate('AISetup')} />
 
           <ChipSelector
-            label="AI mode"
-            options={AI_MODE_OPTIONS}
+            label={t('ai.mode')}
+            options={aiModeOptions}
             selected={settings.aiMode}
             onSelect={(aiMode) => update({ aiMode })}
           />
 
           {settings.aiMode === 'on-device' ? (
-            <Text style={styles.help}>{SETTINGS_COPY.aiOnDeviceHelp}</Text>
+            <Text style={styles.help}>{t('ai.onDeviceHelp')}</Text>
           ) : (
             <>
               <ChipSelector
-                label="Provider"
+                label={t('ai.provider')}
                 options={PROVIDER_OPTIONS}
                 selected={settings.provider}
                 onSelect={(provider) => update({ provider })}
               />
               <View
                 style={[styles.statusPill, keySaved ? styles.statusOk : styles.statusWarn]}
-                accessibilityLabel={keySaved ? 'API key saved' : 'No API key set'}
+                accessibilityLabel={keySaved ? t('ai.keySaved') : t('ai.noKey')}
               >
-                <Text style={styles.statusText}>{keySaved ? '✓ API key saved' : 'No API key set'}</Text>
+                <Text style={styles.statusText}>{keySaved ? t('ai.keySaved') : t('ai.noKey')}</Text>
               </View>
               <TextField
-                label="Your API key"
+                label={t('ai.yourKey')}
                 value={keyInput}
                 onChangeText={setKeyInput}
-                placeholder="Paste your provider API key"
+                placeholder={t('ai.keyPlaceholder')}
                 secureTextEntry
                 autoCapitalize="none"
                 autoCorrect={false}
-                helper="Stored only in your device's secure keychain. Never logged or uploaded."
+                helper={t('ai.keyHelper')}
               />
               <PrimaryButton
-                label="Save key"
+                label={t('ai.saveKey')}
                 variant="action"
                 onPress={handleSaveKey}
                 disabled={keyInput.trim().length === 0}
               />
               {keySaved && (
-                <PrimaryButton label="Clear key" variant="ghost" onPress={handleClearKey} />
+                <PrimaryButton label={t('ai.clearKey')} variant="ghost" onPress={handleClearKey} />
               )}
             </>
           )}
 
-          <Text style={styles.help}>{SETTINGS_COPY.aiNoKeyHelp}</Text>
+          <Text style={styles.help}>{t('ai.noKeyHelp')}</Text>
         </View>
 
         {/* Hero presentation (free) */}
@@ -319,7 +304,7 @@ export function SettingsScreen() {
             />
             <ChipSelector
               label={t('hero.presentation')}
-              options={PRESENTATION_OPTIONS}
+              options={presentationOptions}
               selected={character.presentation}
               onSelect={(p) => setPresentation(p)}
             />
@@ -328,28 +313,25 @@ export function SettingsScreen() {
 
         {/* Community & feedback */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Community &amp; feedback</Text>
-          <Text style={styles.note}>
-            Community Projects let you build habits together toward a shared, real-world goal. These
-            controls are yours — turn them on when you want them.
-          </Text>
+          <Text style={styles.cardTitle}>{t('community.title')}</Text>
+          <Text style={styles.note}>{t('community.note')}</Text>
           <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Haptic feedback</Text>
+            <Text style={styles.toggleLabel}>{t('community.haptics')}</Text>
             <Switch
               value={settings.hapticsEnabled}
               onValueChange={(v) => void update({ hapticsEnabled: v })}
-              accessibilityLabel="Haptic feedback"
+              accessibilityLabel={t('community.haptics')}
               accessibilityRole="switch"
               trackColor={{ true: colors.identity, false: colors.border }}
               thumbColor={colors.surface}
             />
           </View>
           <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Show World Projects on Today</Text>
+            <Text style={styles.toggleLabel}>{t('community.showWorld')}</Text>
             <Switch
               value={settings.worldProjectsEnabled}
               onValueChange={(v) => void update({ worldProjectsEnabled: v, ...(v ? {} : { worldProjectAlerts: false }) })}
-              accessibilityLabel="Show World Projects on Today"
+              accessibilityLabel={t('community.showWorld')}
               accessibilityRole="switch"
               trackColor={{ true: colors.identity, false: colors.border }}
               thumbColor={colors.surface}
@@ -357,11 +339,11 @@ export function SettingsScreen() {
           </View>
           {settings.worldProjectsEnabled && (
             <View style={styles.toggleRow}>
-              <Text style={styles.toggleLabel}>Notify me about world milestones</Text>
+              <Text style={styles.toggleLabel}>{t('community.notifyWorld')}</Text>
               <Switch
                 value={settings.worldProjectAlerts}
                 onValueChange={(v) => void update({ worldProjectAlerts: v })}
-                accessibilityLabel="Notify me about world milestones"
+                accessibilityLabel={t('community.notifyWorld')}
                 accessibilityRole="switch"
                 trackColor={{ true: colors.identity, false: colors.border }}
                 thumbColor={colors.surface}
@@ -369,80 +351,30 @@ export function SettingsScreen() {
             </View>
           )}
           <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Prep goals feed project progress</Text>
+            <Text style={styles.toggleLabel}>{t('community.prepGoals')}</Text>
             <Switch
               value={settings.projectPrepLinkMode === 'full'}
               onValueChange={(v) => void update({ projectPrepLinkMode: v ? 'full' : 'visual' })}
-              accessibilityLabel="Prep goals feed project progress"
+              accessibilityLabel={t('community.prepGoals')}
               accessibilityRole="switch"
               trackColor={{ true: colors.identity, false: colors.border }}
               thumbColor={colors.surface}
             />
           </View>
-          <Text style={styles.help}>
-            When you pick a personal goal to “prepare” for a project goal: ON makes its habits count
-            toward the project goal’s progress; OFF just shows it as a reminder. See what people
-            around the world are building toward — a premium membership for projects is coming soon.
-          </Text>
+          <Text style={styles.help}>{t('community.prepHelp')}</Text>
         </View>
 
         {/* Habit insights & privacy (on-device, opt-in) */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Habit insights</Text>
-          <Text style={styles.note}>
-            Levellio keeps simple notes on your device about how your habits form, so a future update
-            can show you insights. Nothing is uploaded — no analytics, no accounts. You choose exactly
-            what&apos;s recorded.
-          </Text>
-          <PrivacyToggle
-            label="Remember how buckets are formed"
-            value={settings.metadataPrivacy.recordProvenance}
-            field="recordProvenance"
-            privacy={settings.metadataPrivacy}
-            update={update}
-          />
-          <PrivacyToggle
-            label="Track which activities build which buckets"
-            value={settings.metadataPrivacy.recordContribution}
-            field="recordContribution"
-            privacy={settings.metadataPrivacy}
-            update={update}
-          />
-          <PrivacyToggle
-            label="Include activity details (category, difficulty, XP)"
-            value={settings.metadataPrivacy.includeContext}
-            field="includeContext"
-            privacy={settings.metadataPrivacy}
-            update={update}
-          />
-          <PrivacyToggle
-            label="Include which activities inspired a bucket"
-            value={settings.metadataPrivacy.includeSourceActivities}
-            field="includeSourceActivities"
-            privacy={settings.metadataPrivacy}
-            update={update}
-          />
-          <PrivacyToggle
-            label="Keep exact timestamps"
-            value={settings.metadataPrivacy.includeTimestamps}
-            field="includeTimestamps"
-            privacy={settings.metadataPrivacy}
-            update={update}
-          />
-          <PrivacyToggle
-            label="Record activity sessions (duration, time of day)"
-            value={settings.metadataPrivacy.recordSession}
-            field="recordSession"
-            privacy={settings.metadataPrivacy}
-            update={update}
-          />
-          <PrivacyToggle
-            label="Capture location &amp; speed (needs permission)"
-            value={settings.metadataPrivacy.includeLocation}
-            field="includeLocation"
-            privacy={settings.metadataPrivacy}
-            update={update}
-          />
+          <Text style={styles.cardTitle}>{t('insights.title')}</Text>
+          <Text style={styles.note}>{t('insights.note')}</Text>
+          <PrivacyToggle label={t('insights.recordProvenance')} value={settings.metadataPrivacy.recordProvenance} field="recordProvenance" privacy={settings.metadataPrivacy} update={update} />
+          <PrivacyToggle label={t('insights.recordContribution')} value={settings.metadataPrivacy.recordContribution} field="recordContribution" privacy={settings.metadataPrivacy} update={update} />
+          <PrivacyToggle label={t('insights.includeContext')} value={settings.metadataPrivacy.includeContext} field="includeContext" privacy={settings.metadataPrivacy} update={update} />
+          <PrivacyToggle label={t('insights.includeSourceActivities')} value={settings.metadataPrivacy.includeSourceActivities} field="includeSourceActivities" privacy={settings.metadataPrivacy} update={update} />
+          <PrivacyToggle label={t('insights.includeTimestamps')} value={settings.metadataPrivacy.includeTimestamps} field="includeTimestamps" privacy={settings.metadataPrivacy} update={update} />
+          <PrivacyToggle label={t('insights.recordSession')} value={settings.metadataPrivacy.recordSession} field="recordSession" privacy={settings.metadataPrivacy} update={update} />
+          <PrivacyToggle label={t('insights.includeLocation')} value={settings.metadataPrivacy.includeLocation} field="includeLocation" privacy={settings.metadataPrivacy} update={update} />
         </View>
 
         {/* Danger zone — scoped, permanent data deletion. */}
@@ -450,7 +382,7 @@ export function SettingsScreen() {
 
         {/* About & Legal */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>About &amp; Legal</Text>
+          <Text style={styles.cardTitle}>{t('about.title')}</Text>
 
           {LEGAL_LINKS.map((link) => (
             <Pressable
@@ -473,7 +405,7 @@ export function SettingsScreen() {
             onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)}
             style={styles.row}
           >
-            <Text style={styles.rowLabel}>Contact support</Text>
+            <Text style={styles.rowLabel}>{t('about.contact')}</Text>
             <Text style={styles.rowValue}>{CONTACT_EMAIL}</Text>
           </Pressable>
 
@@ -488,16 +420,14 @@ export function SettingsScreen() {
       <Modal visible={deleteOpen} transparent animationType="fade" onRequestClose={() => setDeleteOpen(false)}>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Delete your account?</Text>
-            <Text style={styles.note}>
-              This permanently removes your account and your community + project data. It can’t be undone.
-            </Text>
+            <Text style={styles.modalTitle}>{t('account.deleteConfirmTitle')}</Text>
+            <Text style={styles.note}>{t('account.deleteConfirmBody')}</Text>
             {isReal && (
               <TextField
-                label="Confirm your password"
+                label={t('account.confirmPassword')}
                 value={deletePassword}
                 onChangeText={setDeletePassword}
-                placeholder="Your password"
+                placeholder={t('account.passwordPlaceholder')}
                 secureTextEntry
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -505,13 +435,13 @@ export function SettingsScreen() {
             )}
             {deleteError && <Text style={styles.deleteError}>{deleteError}</Text>}
             <PrimaryButton
-              label="Delete forever"
+              label={t('account.deleteForever')}
               variant="ghost"
               onPress={() => void runDelete()}
               loading={deleteBusy}
               disabled={deleteBusy || (isReal && deletePassword.trim().length === 0)}
             />
-            <PrimaryButton label="Cancel" variant="ghost" onPress={() => setDeleteOpen(false)} disabled={deleteBusy} />
+            <PrimaryButton label={t('account.cancel')} variant="ghost" onPress={() => setDeleteOpen(false)} disabled={deleteBusy} />
           </View>
         </View>
       </Modal>

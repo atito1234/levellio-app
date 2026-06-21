@@ -1,0 +1,16 @@
+{
+  "a11yBack": "Back",
+  "title": "Your progress",
+  "a11yInsights": "See your activity insights",
+  "insightsLink": "Insights ›",
+  "capacitiesNow": "CAPACITIES NOW",
+  "a11yCapacity": "{{name}} {{value}} percent",
+  "a11yPrevMonth": "Previous month",
+  "a11yNextMonth": "Next month",
+  "a11yDay_one": "{{date}}, {{count}} capacity point. See this day's activities",
+  "a11yDay_other": "{{date}}, {{count}} capacity points. See this day's activities",
+  "legendLess": "Less",
+  "legendMore": "More",
+  "footnoteEarned": "{{points}} capacity points earned this month. Each completed habit adds to the days it strengthens.",
+  "footnoteEmpty": "Complete habits to light up your month — each one adds capacity points to that day."
+}

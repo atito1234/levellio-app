@@ -1,0 +1,23 @@
+{
+  "title": "Zone de danger",
+  "note": "Supprimez votre planification et vos données. Choisissez une portée, puis un niveau. Tout ici est permanent et",
+  "cannotUndo": "ne peut pas être annulé",
+  "scope": "PORTÉE",
+  "allDays": "Tous les jours",
+  "allDaysLower": "tous les jours",
+  "targeting": "Cible : {{scope}}",
+  "clearSchedule": { "label": "Effacer la planification", "sub": "Déplanifie les habitudes — habitudes et répétitions restent" },
+  "clearRules": { "label": "Effacer planification + règles de répétition", "sub": "Arrête aussi les répétitions — habitudes restent" },
+  "deleteAll": { "label": "Tout supprimer", "sub": "Habitudes + tout l'historique, définitivement" },
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "clearScheduleTitle": "Effacer la planification ?",
+  "clearScheduleMsg": "Supprime les habitudes planifiées pour {{scope}}. Vos habitudes et règles de répétition restent. Ceci est irréversible.",
+  "clearRulesTitle": "Effacer planification + règles de répétition ?",
+  "clearRulesMsg": "Supprime les habitudes planifiées ET arrête les répétitions pour {{scope}} dans toute l'application. Les habitudes restent. Ceci est irréversible.",
+  "deleteAllTitle": "Tout supprimer ?",
+  "deleteAllMsg": "Supprime définitivement les habitudes pour {{scope}} ET leur historique de séances/analyses. Ceci est irréversible.",
+  "scheduleCleared": "Planification effacée pour {{scope}}.",
+  "rulesCleared": "Planification et règles de répétition effacées pour {{scope}}.",
+  "deletedAll": "Tout supprimé pour {{scope}}."
+}

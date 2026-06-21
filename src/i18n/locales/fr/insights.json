@@ -1,0 +1,82 @@
+{
+  "a11yBack": "Retour",
+  "method": {
+    "timer": "Minuteur",
+    "pomodoro": "Focus",
+    "manual": "Enregistré"
+  },
+  "categoryOther": "Autre",
+  "activityFallback": "Activité",
+  "loading": "Chargement de ton activité…",
+  "heading": {
+    "default": "Analyses",
+    "activity": "Activité",
+    "kickerOverview": "CE QUI FONCTIONNE",
+    "kickerActivity": "HISTORIQUE DE L’ACTIVITÉ",
+    "kickerCategory": "CATÉGORIE",
+    "kickerDay": "CE JOUR"
+  },
+  "summary": {
+    "session_one": "séance",
+    "session_other": "séances",
+    "totalTime": "temps total",
+    "avgPerSession": "moy. / séance",
+    "a11yBestTime": "Le plus actif vers {{time}}",
+    "a11yBestDay": "Le plus actif le {{day}}",
+    "bestTime": "⏰ Meilleure heure · {{time}}",
+    "bestDay": "📅 Meilleur jour · {{day}}"
+  },
+  "planRing": {
+    "title": "Prévu vs fait",
+    "sub": "{{done}} sur {{total}} habitudes prévues faites"
+  },
+  "sections": {
+    "minutesByCategory": "MINUTES PAR CATÉGORIE",
+    "movedCapacities": "CE QUI A FAIT BOUGER TES CAPACITÉS",
+    "timeOfDay": "MOMENT DE LA JOURNÉE",
+    "gaps": "À REPORTER",
+    "byCategory": "PAR CATÉGORIE",
+    "activities": "ACTIVITÉS",
+    "sessions": "SÉANCES",
+    "recent": "RÉCENT"
+  },
+  "cap": {
+    "a11y": "{{name}} a gagné {{value}} points aujourd’hui. Voir ce qui l’alimente",
+    "label": "{{name}} +{{value}} ›"
+  },
+  "gap": {
+    "a11y": "{{title}} n’a pas été fait. Planifie-le pour demain",
+    "sub": "Pas fait · touche pour planifier demain"
+  },
+  "row": {
+    "a11yCategory_one": "{{label}}, {{count}} séance. Voir les détails",
+    "a11yCategory_other": "{{label}}, {{count}} séances. Voir les détails",
+    "a11yActivity_one": "{{title}}, {{count}} séance. Voir l’historique",
+    "a11yActivity_other": "{{title}}, {{count}} séances. Voir l’historique",
+    "sub_one": "{{count}} séance · {{minutes}}",
+    "sub_other": "{{count}} séances · {{minutes}}",
+    "bestSuffix": " · top {{time}}"
+  },
+  "details": {
+    "a11yShow": "Afficher les détails des séances",
+    "a11yHide": "Masquer les détails des séances",
+    "hide": "MASQUER LES DÉTAILS ▲",
+    "show_one": "DÉTAILS · {{count}} SÉANCE ▾",
+    "show_other": "DÉTAILS · {{count}} SÉANCES ▾"
+  },
+  "session": {
+    "a11y": "{{title}}, {{when}}, {{duration}}, {{method}}{{location}}",
+    "a11yLocationSuffix": ", lieu enregistré",
+    "locationDot": " · 📍"
+  },
+  "empty": {
+    "day": "Aucune activité terminée ce jour-là pour l’instant.",
+    "activity": "Aucune séance enregistrée pour cette activité pour l’instant. Fais-la une fois pour commencer son historique.",
+    "category": "Aucune séance dans cette catégorie pour l’instant.",
+    "overview": "Termine quelques activités et tes tendances apparaîtront ici — tes meilleures heures, tes meilleurs jours et ce qui fonctionne."
+  },
+  "planTomorrow": {
+    "a11y": "Planifier demain",
+    "text": "🗓 Planifier demain ›"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "a11yBack": "Retour",
+  "title": "Ta progression",
+  "a11yInsights": "Voir tes analyses d’activité",
+  "insightsLink": "Analyses ›",
+  "capacitiesNow": "CAPACITÉS ACTUELLES",
+  "a11yCapacity": "{{name}} {{value}} pour cent",
+  "a11yPrevMonth": "Mois précédent",
+  "a11yNextMonth": "Mois suivant",
+  "a11yDay_one": "{{date}}, {{count}} point de capacité. Voir les activités de ce jour",
+  "a11yDay_other": "{{date}}, {{count}} points de capacité. Voir les activités de ce jour",
+  "legendLess": "Moins",
+  "legendMore": "Plus",
+  "footnoteEarned": "{{points}} points de capacité gagnés ce mois-ci. Chaque habitude accomplie renforce les jours concernés.",
+  "footnoteEmpty": "Accomplis des habitudes pour illuminer ton mois — chacune ajoute des points de capacité à ce jour-là."
+}

@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { MonthCalendar } from './MonthCalendar';
 import { spacing, typography } from '@/theme';
 import { CATEGORY_META } from '@/lib/categories';
-import { dayKey, relativeDayLabel } from '@/lib/dates';
+import { dayKey, relativeDayLabel, type RelativeDayLabels } from '@/lib/dates';
 import type { Quest } from '@/types';
 
 const INK = '#1F2937';
@@ -34,24 +35,29 @@ export function MiniScheduler({
   accent?: string;
   onAddForDay?: (day: string) => void;
 }) {
+  const { t, i18n } = useTranslation('scheduler');
+  const dayLabels: RelativeDayLabels = { today: t('today'), tomorrow: t('tomorrow'), yesterday: t('yesterday'), locale: i18n.language };
   const todayK = dayKey(new Date());
   const [selected, setSelected] = useState(todayK);
   const plannedSet = useMemo(() => new Set(getPlan(selected) ?? []), [getPlan, selected]);
   const doneSet = doneByDay.get(selected) ?? EMPTY;
   const isPast = selected < todayK;
+  const selectedLabel = relativeDayLabel(selected, todayK, dayLabels);
 
   return (
     <View style={styles.wrap}>
       <MonthCalendar quests={quests} getPlan={getPlan} doneByDay={doneByDay} todayKey={todayK} selected={selected} onSelectDay={setSelected} />
 
       <View style={styles.panel}>
-        <Text style={styles.panelTitle}>{relativeDayLabel(selected, todayK)}</Text>
+        <Text style={styles.panelTitle}>{selectedLabel}</Text>
         {quests.length === 0 ? (
-          <Text style={styles.empty}>No activities yet.</Text>
+          <Text style={styles.empty}>{t('noActivities')}</Text>
         ) : (
           quests.map((q) => {
             const planned = plannedSet.has(q.id);
             const done = doneSet.has(q.id);
+            const state = done ? t('stateDone') : planned ? t('stateScheduled') : t('stateNot');
+            const tail = done ? '' : t('tapTo', { action: planned ? t('actionUnschedule') : t('actionSchedule') });
             return (
               <Pressable
                 key={q.id}
@@ -59,13 +65,13 @@ export function MiniScheduler({
                 disabled={done}
                 accessibilityRole="button"
                 accessibilityState={{ selected: planned || done }}
-                accessibilityLabel={`${done ? 'Done' : planned ? 'Scheduled' : 'Not scheduled'}: ${q.title} on ${relativeDayLabel(selected, todayK)}. ${done ? '' : 'Tap to ' + (planned ? 'unschedule' : 'schedule')}`}
+                accessibilityLabel={t('rowA11y', { state, title: q.title, day: selectedLabel, tail })}
                 style={styles.row}
               >
                 <Text style={styles.rowIcon}>{CATEGORY_META[q.category].icon}</Text>
                 <Text style={[styles.rowTitle, done && styles.rowTitleDone]} numberOfLines={1}>{q.title}</Text>
                 {done ? (
-                  <Text style={styles.doneTag}>✓ done</Text>
+                  <Text style={styles.doneTag}>{t('doneTag')}</Text>
                 ) : (
                   <View style={[styles.check, planned && { backgroundColor: accent, borderColor: accent }]}>
                     {planned && <Text style={styles.checkMark}>✓</Text>}
@@ -76,8 +82,8 @@ export function MiniScheduler({
           })
         )}
         {onAddForDay && !isPast && (
-          <Pressable onPress={() => onAddForDay(selected)} accessibilityRole="button" accessibilityLabel={`Add an activity for ${relativeDayLabel(selected, todayK)}`} style={[styles.addBtn, { backgroundColor: accent }]}>
-            <Text style={styles.addText}>＋ Add activity for {relativeDayLabel(selected, todayK)}</Text>
+          <Pressable onPress={() => onAddForDay(selected)} accessibilityRole="button" accessibilityLabel={t('addForA11y', { day: selectedLabel })} style={[styles.addBtn, { backgroundColor: accent }]}>
+            <Text style={styles.addText}>{t('addFor', { day: selectedLabel })}</Text>
           </Pressable>
         )}
       </View>
