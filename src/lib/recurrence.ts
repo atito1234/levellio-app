@@ -44,12 +44,22 @@ export function materializeInto(
   return { days, materialized: [...materialized, ...todo.map((e) => e.dayKey)] };
 }
 
+/** Optional localized strings for {@link weekdaysLabel} (English when omitted). */
+export interface WeekdaysLabelOpts {
+  /** 7 short weekday names, Sun→Sat. */
+  dayNames?: readonly string[];
+  everyDay?: string;
+  weekdays?: string;
+  weekends?: string;
+}
+
 /** Human label for a recurrence pattern: "Every day" / "Weekdays" / "Mon · Wed · Fri". */
-export function weekdaysLabel(days: readonly number[] | undefined): string {
+export function weekdaysLabel(days: readonly number[] | undefined, opts: WeekdaysLabelOpts = {}): string {
   const set = [...new Set((days ?? []).filter((d) => d >= 0 && d <= 6))].sort((a, b) => a - b);
   if (set.length === 0) return '';
-  if (set.length === 7) return 'Every day';
-  if (set.length === 5 && [1, 2, 3, 4, 5].every((d) => set.includes(d))) return 'Weekdays';
-  if (set.length === 2 && set.includes(0) && set.includes(6)) return 'Weekends';
-  return set.map((d) => DAY_NAMES[d]).join(' · ');
+  if (set.length === 7) return opts.everyDay ?? 'Every day';
+  if (set.length === 5 && [1, 2, 3, 4, 5].every((d) => set.includes(d))) return opts.weekdays ?? 'Weekdays';
+  if (set.length === 2 && set.includes(0) && set.includes(6)) return opts.weekends ?? 'Weekends';
+  const names = opts.dayNames ?? DAY_NAMES;
+  return set.map((d) => names[d]).join(' · ');
 }

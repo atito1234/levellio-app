@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CapacityRing, ProjectBadge, ScreenContainer } from '@/components';
 import {
@@ -58,13 +60,7 @@ const VIOLET = '#6C4CF1';
 const TEAL = '#16C8A8';
 const MUTED = '#5A5A72';
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'goals', label: 'Goals' },
-  { key: 'buckets', label: 'Buckets' },
-  { key: 'capacities', label: 'Capacities' },
-  { key: 'habits', label: 'Habits' },
-];
+const TAB_KEYS: Tab[] = ['overview', 'goals', 'buckets', 'capacities', 'habits'];
 
 const RANGE_DAYS = 28;
 const TREND_DAYS = 56;
@@ -78,6 +74,7 @@ const VERDICT_BG: Record<Direction['tone'], string> = {
 };
 
 export function ProgressHubScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('progress');
   const [tab, setTab] = useState<Tab>(route.params?.tab ?? 'overview');
   const { events, ready } = useActivityLog();
   useAnalyticsRollup(events); // keep durable history fresh while viewing
@@ -231,10 +228,10 @@ export function ProgressHubScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
-        <Text style={styles.kicker}>YOUR PROGRESS</Text>
+        <Text style={styles.kicker}>{t('kicker')}</Text>
         <View style={styles.chevronSpacer} />
       </View>
 
@@ -242,7 +239,7 @@ export function ProgressHubScreen({ route, navigation }: Props) {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!ready ? (
-          <Text style={styles.empty}>Loading your progress…</Text>
+          <Text style={styles.empty}>{t('loading')}</Text>
         ) : !hasData ? (
           <EmptyState />
         ) : tab === 'overview' ? (
@@ -261,17 +258,17 @@ export function ProgressHubScreen({ route, navigation }: Props) {
         ) : tab === 'goals' ? (
           <>
             {goalMap && goalMap.nodes.length > 0 && (
-              <Section label="HOW IT CONNECTS">
+              <Section label={t('howConnects')}>
                 <View style={styles.cardCenter}>
                   <RelationshipMap center={goalMap.center} nodes={goalMap.nodes} onPressNode={(n) => run({ label: 'Open', kind: 'focus', target: { questId: n.id } })} />
-                  <Text style={styles.provenance}>{goalMap.center.label} ← its habits · tap a habit to open it</Text>
+                  <Text style={styles.provenance}>{t('mapProvenance', { label: goalMap.center.label })}</Text>
                 </View>
               </Section>
             )}
-            <GroupList items={goalStats.map((s, i) => ({ stat: s, series: goalSeries[i]! }))} kind="goal" onRun={run} emptyMsg="No goals yet. Create one to ladder your habits up to a why." />
+            <GroupList items={goalStats.map((s, i) => ({ stat: s, series: goalSeries[i]! }))} kind="goal" onRun={run} emptyMsg={t('emptyGoals')} />
           </>
         ) : tab === 'buckets' ? (
-          <GroupList items={bucketStats.map((s, i) => ({ stat: s, series: bucketSeries[i]! }))} kind="bucket" onRun={run} emptyMsg="No buckets yet. Organize habits into buckets to track them here." />
+          <GroupList items={bucketStats.map((s, i) => ({ stat: s, series: bucketSeries[i]! }))} kind="bucket" onRun={run} emptyMsg={t('emptyBuckets')} />
         ) : tab === 'capacities' ? (
           <Capacities stats={capacityStats} levels={levels} onRun={run} />
         ) : (
@@ -283,19 +280,20 @@ export function ProgressHubScreen({ route, navigation }: Props) {
 }
 
 function Segmented({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
+  const { t } = useTranslation('progress');
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.segWrap}>
-      {TABS.map((t) => {
-        const active = t.key === tab;
+      {TAB_KEYS.map((key) => {
+        const active = key === tab;
         return (
           <Pressable
-            key={t.key}
-            onPress={() => onChange(t.key)}
+            key={key}
+            onPress={() => onChange(key)}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
             style={[styles.seg, active && styles.segActive]}
           >
-            <Text style={[styles.segText, active && styles.segTextActive]}>{t.label}</Text>
+            <Text style={[styles.segText, active && styles.segTextActive]}>{t(`tabs.${key}`)}</Text>
           </Pressable>
         );
       })}
@@ -328,7 +326,8 @@ function Overview({
   onMore: () => void;
   onRun: (a: InsightAction) => void;
 }) {
-  const radarAxes = CAPACITIES.map((c) => ({ label: c.name, value: levels[c.id] ?? 0, id: c.id }));
+  const { t } = useTranslation('progress');
+  const radarAxes = CAPACITIES.map((c) => ({ label: t(`capacities:${c.id}`), value: levels[c.id] ?? 0, id: c.id }));
   const moverRows: RankRow[] = [...movers]
     .filter((s) => s.scheduled > 0)
     .sort((a, b) => Math.abs(b.deltaPct) - Math.abs(a.deltaPct))
@@ -337,13 +336,13 @@ function Overview({
 
   return (
     <>
-      <View style={[styles.verdictCard, { backgroundColor: VERDICT_BG[verdict.tone] }]} accessibilityRole="header" accessibilityLabel={`${verdict.label}. ${verdict.reason}`}>
+      <View style={[styles.verdictCard, { backgroundColor: VERDICT_BG[verdict.tone] }]} accessibilityRole="header" accessibilityLabel={t('verdictA11y', { label: verdict.label, reason: verdict.reason })}>
         <Text style={styles.verdictLabel}>{verdict.label}</Text>
         <Text style={styles.verdictReason}>{verdict.reason}</Text>
       </View>
 
       {focus.length > 0 && (
-        <Section label="FOCUS NEXT">
+        <Section label={t('focusNext')}>
           {focus.map((rec) => (
             <Pressable
               key={rec.id}
@@ -356,42 +355,42 @@ function Overview({
                 <Text style={styles.rowTitle}>{rec.title}</Text>
                 <Text style={styles.rowSub}>{rec.reason}</Text>
               </View>
-              <Text style={styles.cta}>{rec.action.label} ›</Text>
+              <Text style={styles.cta}>{actLabel(rec.action.label, t)} ›</Text>
             </Pressable>
           ))}
         </Section>
       )}
 
-      <Section label="CAPACITY BALANCE">
+      <Section label={t('capacityBalance')}>
         <View style={styles.cardCenter}>
           <RadarChart axes={radarAxes} onPressAxis={(a) => a.id && onRun({ label: 'Focus', kind: 'focus', target: { capacityId: a.id as CapacityId } })} />
-          <Text style={styles.provenance}>Modeled from your habits · tap an axis to dig in</Text>
+          <Text style={styles.provenance}>{t('radarProvenance')}</Text>
         </View>
       </Section>
 
       {moverRows.length > 0 && (
-        <Section label="TOP MOVERS · WEEK OVER WEEK">
+        <Section label={t('topMovers')}>
           <View style={styles.card}>
             <RankBars rows={moverRows} onPressRow={(r) => onRun(moverAction(r, movers))} />
           </View>
         </Section>
       )}
 
-      <Section label="ADHERENCE TREND">
+      <Section label={t('adherenceTrend')}>
         <View style={styles.card}>
           <TrendChart series={trend} daysOfData={days} />
         </View>
       </Section>
 
-      <Section label="WHEN YOU SHOW UP">
+      <Section label={t('whenShowUp')}>
         <View style={styles.card}>
           <CalendarHeatmap points={activityPoints} colorId="violet" onPressDay={(p) => onReviewDay(p.dayKey)} />
-          <Text style={styles.provenance}>Each cell is a day · tap one to review it</Text>
+          <Text style={styles.provenance}>{t('heatProvenance')}</Text>
         </View>
       </Section>
 
       <Pressable onPress={onMore} accessibilityRole="button" style={styles.reflect}>
-        <Text style={styles.cta}>🧭 More insights · ratings, rhythm & science ›</Text>
+        <Text style={styles.cta}>{t('moreInsights')}</Text>
       </Pressable>
     </>
   );
@@ -434,6 +433,8 @@ function GroupList({
 }
 
 function GroupCard({ stat, series, onRun, action }: { stat: GroupStat; series: ReturnType<typeof adherenceTrendSeries>; onRun: (a: InsightAction) => void; action: InsightAction }) {
+  const { t } = useTranslation('progress');
+  const weekFull = t('common:weekdaysFull', { returnObjects: true }) as string[];
   const accent = colorOf(stat.colorId);
   return (
     <View style={styles.card}>
@@ -447,8 +448,8 @@ function GroupCard({ stat, series, onRun, action }: { stat: GroupStat; series: R
         <View style={styles.rowMain}>
           <Text style={styles.rowTitle}>{stat.label}</Text>
           <Text style={styles.rowSub}>
-            {stat.done}/{stat.scheduled} done · {deltaText(stat.deltaPct)}
-            {stat.streak > 0 ? ` · 🔥 ${stat.streak}` : ''}
+            {t('doneStat', { done: stat.done, scheduled: stat.scheduled, delta: deltaText(stat.deltaPct, t) })}
+            {stat.streak > 0 ? t('streakSuffix', { streak: stat.streak }) : ''}
           </Text>
         </View>
       </View>
@@ -458,10 +459,10 @@ function GroupCard({ stat, series, onRun, action }: { stat: GroupStat; series: R
         </View>
       )}
       {stat.gapWeekdays.length > 0 && (
-        <Text style={styles.gapNote}>Biggest gap: {weekdayLabel(stat.gapWeekdays[0]!)}s</Text>
+        <Text style={styles.gapNote}>{t('biggestGap', { day: weekFull[stat.gapWeekdays[0]!] ?? '' })}</Text>
       )}
       <Pressable onPress={() => onRun(action)} accessibilityRole="button" style={styles.cardCta}>
-        <Text style={styles.cta}>{action.label} ›</Text>
+        <Text style={styles.cta}>{actLabel(action.label, t)} ›</Text>
       </Pressable>
     </View>
   );
@@ -470,16 +471,18 @@ function GroupCard({ stat, series, onRun, action }: { stat: GroupStat; series: R
 // --- Capacities -------------------------------------------------------------
 
 function Capacities({ stats, levels, onRun }: { stats: GroupStat[]; levels: Record<string, number>; onRun: (a: InsightAction) => void }) {
-  const radarAxes = CAPACITIES.map((c) => ({ label: c.name, value: levels[c.id] ?? 0, id: c.id }));
+  const { t } = useTranslation('progress');
+  const capName = (id: string) => t(`capacities:${id}`);
+  const radarAxes = CAPACITIES.map((c) => ({ label: capName(c.id), value: levels[c.id] ?? 0, id: c.id }));
   return (
     <>
-      <Section label="BALANCE">
+      <Section label={t('balance')}>
         <View style={styles.cardCenter}>
           <RadarChart axes={radarAxes} onPressAxis={(a) => a.id && onRun({ label: 'Focus', kind: 'focus', target: { capacityId: a.id as CapacityId } })} />
-          <Text style={styles.provenance}>Modeled from your habits (derived) · sensors coming soon</Text>
+          <Text style={styles.provenance}>{t('capRadarProvenance')}</Text>
         </View>
       </Section>
-      <Section label="EACH CAPACITY">
+      <Section label={t('eachCapacity')}>
         {CAPACITIES.map((c) => {
           const stat = stats.find((s) => s.id === c.id);
           const level = levels[c.id] ?? 0;
@@ -489,7 +492,7 @@ function Capacities({ stats, levels, onRun }: { stats: GroupStat[]; levels: Reco
               style={styles.card}
               onPress={() => onRun({ label: 'Focus', kind: 'focus', target: { capacityId: c.id } })}
               accessibilityRole="button"
-              accessibilityLabel={`${c.name}, level ${level}%. See what feeds it`}
+              accessibilityLabel={t('capLevelA11y', { name: capName(c.id), level })}
             >
               <View style={styles.groupHead}>
                 <View style={styles.ringWrap}>
@@ -499,9 +502,9 @@ function Capacities({ stats, levels, onRun }: { stats: GroupStat[]; levels: Reco
                   </View>
                 </View>
                 <View style={styles.rowMain}>
-                  <Text style={styles.rowTitle}>{c.name}</Text>
+                  <Text style={styles.rowTitle}>{capName(c.id)}</Text>
                   <Text style={styles.rowSub}>
-                    {stat && stat.scheduled > 0 ? `Feeding habits ${stat.adherencePct}% on track` : 'No habits feeding this yet'}
+                    {stat && stat.scheduled > 0 ? t('feeding', { pct: stat.adherencePct }) : t('noFeeding')}
                   </Text>
                 </View>
                 <Text style={styles.rowChevron}>›</Text>
@@ -510,14 +513,14 @@ function Capacities({ stats, levels, onRun }: { stats: GroupStat[]; levels: Reco
           );
         })}
       </Section>
-      <Section label="MEASURED METRICS">
+      <Section label={t('measuredMetrics')}>
         <View style={[styles.card, styles.sensorCard]}>
           <Text style={styles.sensorEmoji}>⌚️</Text>
           <View style={styles.rowMain}>
-            <Text style={styles.rowTitle}>Connect a device</Text>
-            <Text style={styles.rowSub}>Sleep, heart rate & steps will appear here as measured metrics.</Text>
+            <Text style={styles.rowTitle}>{t('connectDevice')}</Text>
+            <Text style={styles.rowSub}>{t('connectDeviceSub')}</Text>
           </View>
-          <Text style={styles.soon}>Soon</Text>
+          <Text style={styles.soon}>{t('soon')}</Text>
         </View>
       </Section>
     </>
@@ -529,29 +532,31 @@ function Capacities({ stats, levels, onRun }: { stats: GroupStat[]; levels: Reco
 type HabitFilter = 'all' | 'personal' | 'community';
 
 function Habits({ stats, onRun }: { stats: GroupStat[]; onRun: (a: InsightAction) => void }) {
+  const { t } = useTranslation('progress');
   const { projectsForHabit } = useProjects();
   const [filter, setFilter] = useState<HabitFilter>('all');
-  if (stats.length === 0) return <EmptyNote msg="No scheduled habits yet. Add a recurrence or plan a habit to track adherence." />;
+  if (stats.length === 0) return <EmptyNote msg={t('emptyHabits')} />;
 
   const community = stats.filter((s) => projectsForHabit(s.id).length > 0);
   const personal = stats.filter((s) => projectsForHabit(s.id).length === 0);
 
   const row = (s: GroupStat) => {
     const projects = projectsForHabit(s.id);
+    const supports = projects.length ? t('supportsSuffix', { projects: projects.map((p) => p.title).join(', ') }) : '';
     return (
       <Pressable
         key={s.id}
         style={styles.habitRow}
         onPress={() => onRun({ label: 'Open', kind: 'focus', target: { questId: s.id } })}
         accessibilityRole="button"
-        accessibilityLabel={`${s.label}, ${s.adherencePct}% adherence, ${s.done} of ${s.scheduled} done${projects.length ? `, supports ${projects.map((p) => p.title).join(', ')}` : ''}`}
+        accessibilityLabel={t('habitRowA11y', { label: s.label, pct: s.adherencePct, done: s.done, scheduled: s.scheduled, supports })}
       >
         <View style={styles.rowMain}>
           <Text style={styles.rowTitle} numberOfLines={1}>{s.label}</Text>
           {projects.length > 0 && <ProjectBadge projects={projects} />}
           <Text style={styles.rowSub}>
-            {s.done}/{s.scheduled} · {deltaText(s.deltaPct)}
-            {s.streak > 0 ? ` · 🔥 ${s.streak}` : ''}
+            {t('habitStat', { done: s.done, scheduled: s.scheduled, delta: deltaText(s.deltaPct, t) })}
+            {s.streak > 0 ? t('streakSuffix', { streak: s.streak }) : ''}
           </Text>
         </View>
         {s.weekly.length > 1 && <View style={styles.spark}><Sparkline values={s.weekly.map((v) => v / 100)} height={32} color={TEAL} /></View>}
@@ -573,16 +578,16 @@ function Habits({ stats, onRun }: { stats: GroupStat[]; onRun: (a: InsightAction
     <>
       {community.length > 0 && (
         <View style={styles.filterRow}>
-          <FilterChip value="all" label="All" />
-          <FilterChip value="personal" label="Personal" />
-          <FilterChip value="community" label="🤝 Community" />
+          <FilterChip value="all" label={t('filterAll')} />
+          <FilterChip value="personal" label={t('filterPersonal')} />
+          <FilterChip value="community" label={t('filterCommunity')} />
         </View>
       )}
       {(filter === 'all' || filter === 'personal') && personal.length > 0 && (
-        <Section label="MY HABITS">{personal.map(row)}</Section>
+        <Section label={t('myHabits')}>{personal.map(row)}</Section>
       )}
       {(filter === 'all' || filter === 'community') && community.length > 0 && (
-        <Section label="POWERING PROJECTS">{community.map(row)}</Section>
+        <Section label={t('poweringProjects')}>{community.map(row)}</Section>
       )}
     </>
   );
@@ -590,9 +595,16 @@ function Habits({ stats, onRun }: { stats: GroupStat[]; onRun: (a: InsightAction
 
 // --- Shared bits ------------------------------------------------------------
 
-function deltaText(delta: number): string {
-  if (delta === 0) return 'steady';
-  return delta > 0 ? `▲ ${delta}` : `▼ ${Math.abs(delta)}`;
+function deltaText(delta: number, t: TFunction): string {
+  if (delta === 0) return t('steady');
+  return delta > 0 ? t('up', { n: delta }) : t('down', { n: Math.abs(delta) });
+}
+
+/** Translate the small set of action labels created in this screen. */
+function actLabel(label: string, t: TFunction): string {
+  if (label === 'Focus') return t('actFocus');
+  if (label === 'Open') return t('actOpen');
+  return label;
 }
 
 function colorOf(colorId?: BucketColorId): string {
@@ -618,10 +630,11 @@ function EmptyNote({ msg }: { msg: string }) {
 }
 
 function EmptyState() {
+  const { t } = useTranslation('progress');
   return (
     <View style={styles.emptyWrap}>
       <Text style={styles.emptyEmoji}>📈</Text>
-      <Text style={styles.empty}>Complete a few habits and your progress — adherence, balance, and what to do next — shows up here.</Text>
+      <Text style={styles.empty}>{t('emptyState')}</Text>
     </View>
   );
 }

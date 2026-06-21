@@ -6,6 +6,7 @@ import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
 import { questIdsForScope, stripRecurrence } from '@/lib/dataReset';
 import { weekdaysLabel } from '@/lib/recurrence';
+import { recurrenceLabelOpts } from '@/lib/recurrenceLabels';
 import { emptyLevels } from '@/lib/compounding';
 import { metadataStore } from '@/services/metadata';
 import { rollupStore } from '@/services/analytics';
@@ -30,7 +31,7 @@ export function DataDangerZone() {
 
   const uid = user?.uid ?? null;
   const scope = picked.length ? picked : undefined;
-  const scopeLabel = picked.length ? weekdaysLabel([...picked].sort((a, b) => a - b)) : t('allDaysLower');
+  const scopeLabel = picked.length ? weekdaysLabel([...picked].sort((a, b) => a - b), recurrenceLabelOpts(t)) : t('allDaysLower');
 
   const toggle = (d: number) => {
     setDone(null);

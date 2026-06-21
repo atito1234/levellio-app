@@ -37,5 +37,14 @@
   "editQuestA11y": "Editar misión: {{title}}",
   "completedA11y": "Misión completada",
   "diff": { "easy": "Fácil", "medium": "Media", "hard": "Difícil" },
-  "diffA11y": "Dificultad: {{label}}"
+  "diffA11y": "Dificultad: {{label}}",
+  "library": {
+    "title": "Biblioteca de hábitos",
+    "sub": "Elige entre hábitos seleccionados — sin IA.",
+    "add": "Añadir",
+    "added": "✓ Añadido",
+    "addA11y": "Añadir {{title}} a tus misiones",
+    "addedA11y": "{{title}} añadido",
+    "done": "Listo"
+  }
 }

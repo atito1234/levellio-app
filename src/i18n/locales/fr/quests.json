@@ -37,5 +37,14 @@
   "editQuestA11y": "Modifier la quête : {{title}}",
   "completedA11y": "Quête terminée",
   "diff": { "easy": "Facile", "medium": "Moyen", "hard": "Difficile" },
-  "diffA11y": "Difficulté : {{label}}"
+  "diffA11y": "Difficulté : {{label}}",
+  "library": {
+    "title": "Bibliothèque d'habitudes",
+    "sub": "Choisissez parmi des habitudes proposées — sans IA.",
+    "add": "Ajouter",
+    "added": "✓ Ajouté",
+    "addA11y": "Ajouter {{title}} à vos quêtes",
+    "addedA11y": "{{title}} ajouté",
+    "done": "Terminé"
+  }
 }

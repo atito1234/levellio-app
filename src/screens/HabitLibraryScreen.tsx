@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { DifficultyBadge, PrimaryButton, ScreenContainer } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
@@ -14,6 +15,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'HabitLibrary'>;
 
 /** Curated starter library (no AI). Add any habit to active quests in one tap. */
 export function HabitLibraryScreen({ navigation }: Props) {
+  const { t } = useTranslation('quests');
   const { quests, addLibraryHabit } = useGame();
   const [addedIds, setAddedIds] = useState<string[]>([]);
   const sections = libraryByCategory();
@@ -28,8 +30,8 @@ export function HabitLibraryScreen({ navigation }: Props) {
   return (
     <ScreenContainer>
       <View style={styles.header}>
-        <Text style={styles.heading}>Habit Library</Text>
-        <Text style={styles.sub}>Pick from curated habits — no AI needed.</Text>
+        <Text style={styles.heading}>{t('library.title')}</Text>
+        <Text style={styles.sub}>{t('library.sub')}</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -53,7 +55,7 @@ export function HabitLibraryScreen({ navigation }: Props) {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={
-                      added ? `${habit.title} added` : `Add ${habit.title} to your quests`
+                      added ? t('library.addedA11y', { title: habit.title }) : t('library.addA11y', { title: habit.title })
                     }
                     accessibilityState={{ disabled: added }}
                     disabled={added}
@@ -61,7 +63,7 @@ export function HabitLibraryScreen({ navigation }: Props) {
                     style={[styles.addBtn, added && styles.addBtnDone]}
                   >
                     <Text style={[styles.addText, added && styles.addTextDone]}>
-                      {added ? '✓ Added' : 'Add'}
+                      {added ? t('library.added') : t('library.add')}
                     </Text>
                   </Pressable>
                 </View>
@@ -70,7 +72,7 @@ export function HabitLibraryScreen({ navigation }: Props) {
           </View>
         ))}
 
-        <PrimaryButton label="Done" variant="ghost" onPress={() => navigation.goBack()} />
+        <PrimaryButton label={t('library.done')} variant="ghost" onPress={() => navigation.goBack()} />
       </ScrollView>
     </ScreenContainer>
   );

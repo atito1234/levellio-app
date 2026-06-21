@@ -1,0 +1,21 @@
+{
+  "back": "Back",
+  "title": "Schedule your habits",
+  "month": "Month",
+  "year": "Year",
+  "prevMonth": "Previous month",
+  "nextMonth": "Next month",
+  "prevYear": "Previous year",
+  "nextYear": "Next year",
+  "dayScheduledA11y": "{{day}}, {{count}} scheduled",
+  "nothingScheduled": "Nothing scheduled",
+  "scheduledDone": "{{count}} scheduled · {{done}} done",
+  "removeFromA11y": "Remove {{title}} from {{day}}",
+  "reviewDay": "📊 Review this day ›",
+  "addForA11y": "Add an activity for {{day}}",
+  "addFor": "＋ Add activity for {{day}}",
+  "hideHabits": "Hide your habits ▲",
+  "scheduleFrom": "＋ Schedule from your habits ▾",
+  "chipAddA11y": "Add {{title}}",
+  "chipRemoveA11y": "Remove {{title}}"
+}

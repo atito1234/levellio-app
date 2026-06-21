@@ -14,6 +14,7 @@ import { getBucketColor } from '@/lib/buckets';
 import { dayKey } from '@/lib/dates';
 import { WEEKDAY_LABELS } from '@/lib/calendar';
 import { weekdayOfKey, weekdaysLabel } from '@/lib/recurrence';
+import { recurrenceLabelOpts } from '@/lib/recurrenceLabels';
 import { minutesToLabel } from '@/lib/schedule';
 import { MiniCalendar } from './MiniCalendar';
 import { TimePicker } from './TimePicker';
@@ -292,7 +293,7 @@ export function AddActivitySheet({
                   })}
                 </View>
                 <View style={styles.weekFoot}>
-                  <Text style={styles.weekSummary}>{weekdays.length ? weekdaysLabel(weekdays) : t('pickDays')}</Text>
+                  <Text style={styles.weekSummary}>{weekdays.length ? weekdaysLabel(weekdays, recurrenceLabelOpts(t)) : t('pickDays')}</Text>
                   <Pressable onPress={() => setWeekdays(weekdays.length === 7 ? [] : ALL_DAYS)} accessibilityRole="button" hitSlop={8}>
                     <Text style={styles.everyDay}>{weekdays.length === 7 ? t('clear') : t('everyDay')}</Text>
                   </Pressable>

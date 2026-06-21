@@ -37,5 +37,14 @@
   "editQuestA11y": "Edit quest: {{title}}",
   "completedA11y": "Quest completed",
   "diff": { "easy": "Easy", "medium": "Medium", "hard": "Hard" },
-  "diffA11y": "Difficulty: {{label}}"
+  "diffA11y": "Difficulty: {{label}}",
+  "library": {
+    "title": "Habit Library",
+    "sub": "Pick from curated habits — no AI needed.",
+    "add": "Add",
+    "added": "✓ Added",
+    "addA11y": "Add {{title}} to your quests",
+    "addedA11y": "{{title}} added",
+    "done": "Done"
+  }
 }

@@ -27,5 +27,7 @@
   },
   "plusBadge": "Fondateur",
   "weekdaysShort": ["D", "L", "M", "M", "J", "V", "S"],
-  "weekdaysFull": ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]
+  "weekdaysFull": ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"],
+  "weekdaysAbbr": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
+  "recurrence": { "everyDay": "Chaque jour", "weekdays": "Jours de semaine", "weekends": "Week-ends" }
 }

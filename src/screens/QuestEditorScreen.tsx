@@ -25,6 +25,7 @@ import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { QUEST_XP } from '@/lib/leveling';
 import { isValidScheduleMinutes, minutesToParts, partsToMinutes, type TimeParts } from '@/lib/schedule';
 import { weekdaysLabel } from '@/lib/recurrence';
+import { recurrenceLabelOpts } from '@/lib/recurrenceLabels';
 import type { QuestCategory, QuestDifficulty } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -242,7 +243,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
             <View style={styles.scheduleHeadText}>
               <Text style={styles.scheduleLabel}>{t('repeat')}</Text>
               <Text style={styles.scheduleHint}>
-                {repeatDays.length ? weekdaysLabel(repeatDays) : t('repeatHint')}
+                {repeatDays.length ? weekdaysLabel(repeatDays, recurrenceLabelOpts(t)) : t('repeatHint')}
               </Text>
             </View>
             <View style={styles.weekRow}>

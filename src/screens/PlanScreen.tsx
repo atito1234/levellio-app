@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AddActivityFab, AddActivitySheet, ProjectBadge, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -18,13 +19,13 @@ import {
   intensityLevel,
   monthLabel,
   monthOf,
-  WEEKDAY_LABELS,
   type MonthRef,
 } from '@/lib/calendar';
 import { CATEGORY_COLOR, CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
-import { dayKey, dayDiff, relativeDayLabel } from '@/lib/dates';
+import { dayKey, dayDiff, relativeDayLabel, type RelativeDayLabels } from '@/lib/dates';
 import { minutesToLabel } from '@/lib/schedule';
 import { weekdaysLabel } from '@/lib/recurrence';
+import { recurrenceLabelOpts } from '@/lib/recurrenceLabels';
 import type { Quest } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -41,6 +42,9 @@ const MUTED = '#5A5A72';
 const TRACK = '#E3E3EC';
 
 export function PlanScreen({ route, navigation }: Props) {
+  const { t, i18n } = useTranslation('plan');
+  const dayLabels: RelativeDayLabels = { today: t('scheduler:today'), tomorrow: t('scheduler:tomorrow'), yesterday: t('scheduler:yesterday'), locale: i18n.language };
+  const dayLabel = (k: string) => relativeDayLabel(k, todayK, dayLabels);
   const { quests } = useGame();
   const { buckets, assignments } = useBuckets();
   const { projectsForHabit } = useProjects();
@@ -92,11 +96,11 @@ export function PlanScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          Schedule your habits
+          {t('title')}
         </Text>
         <View style={styles.chevronSpacer} />
       </View>
@@ -113,7 +117,7 @@ export function PlanScreen({ route, navigation }: Props) {
               accessibilityState={{ selected: on }}
               style={[styles.viewTab, on && styles.viewTabOn]}
             >
-              <Text style={[styles.viewTabText, on && styles.viewTabTextOn]}>{v === 'month' ? 'Month' : 'Year'}</Text>
+              <Text style={[styles.viewTabText, on && styles.viewTabTextOn]}>{v === 'month' ? t('month') : t('year')}</Text>
             </Pressable>
           );
         })}
@@ -151,9 +155,9 @@ export function PlanScreen({ route, navigation }: Props) {
         {/* Selected day panel. */}
         <View style={styles.panel}>
           <View style={styles.panelHead}>
-            <Text style={styles.panelTitle}>{relativeDayLabel(selected, todayK)}</Text>
+            <Text style={styles.panelTitle}>{dayLabel(selected)}</Text>
             <Text style={styles.panelCount}>
-              {selSummary.count === 0 ? 'Nothing scheduled' : `${selSummary.count} scheduled · ${selSummary.doneCount} done`}
+              {selSummary.count === 0 ? t('nothingScheduled') : t('scheduledDone', { count: selSummary.count, done: selSummary.doneCount })}
             </Text>
           </View>
 
@@ -173,7 +177,7 @@ export function PlanScreen({ route, navigation }: Props) {
                         <Text style={styles.rowTime}>
                           {q.scheduledTime !== undefined ? `⏰ ${minutesToLabel(q.scheduledTime)}` : ''}
                           {q.scheduledTime !== undefined && q.scheduledDays?.length ? ' · ' : ''}
-                          {q.scheduledDays?.length ? `↻ ${weekdaysLabel(q.scheduledDays)}` : ''}
+                          {q.scheduledDays?.length ? `↻ ${weekdaysLabel(q.scheduledDays, recurrenceLabelOpts(t))}` : ''}
                         </Text>
                       )}
                     </View>
@@ -183,7 +187,7 @@ export function PlanScreen({ route, navigation }: Props) {
                       <Pressable
                         onPress={() => void togglePlanned(selected, q.id)}
                         accessibilityRole="button"
-                        accessibilityLabel={`Remove ${q.title} from ${relativeDayLabel(selected, todayK)}`}
+                        accessibilityLabel={t('removeFromA11y', { title: q.title, day: dayLabel(selected) })}
                         hitSlop={10}
                       >
                         <Text style={styles.removeX}>✕</Text>
@@ -201,23 +205,23 @@ export function PlanScreen({ route, navigation }: Props) {
               accessibilityRole="button"
               style={styles.secondaryBtn}
             >
-              <Text style={styles.secondaryBtnText}>📊 Review this day ›</Text>
+              <Text style={styles.secondaryBtnText}>{t('reviewDay')}</Text>
             </Pressable>
           ) : (
             <>
               <Pressable
                 onPress={() => openAddFor(selected)}
                 accessibilityRole="button"
-                accessibilityLabel={`Add an activity for ${relativeDayLabel(selected, todayK)}`}
+                accessibilityLabel={t('addForA11y', { day: dayLabel(selected) })}
                 style={styles.addBtn}
               >
-                <Text style={styles.addBtnText}>＋ Add activity for {relativeDayLabel(selected, todayK)}</Text>
+                <Text style={styles.addBtnText}>{t('addFor', { day: dayLabel(selected) })}</Text>
               </Pressable>
 
               {rails.length > 0 && (
                 <Pressable onPress={() => setShowLibrary((v) => !v)} accessibilityRole="button" style={styles.libraryToggle}>
                   <Text style={styles.libraryToggleText}>
-                    {showLibrary ? 'Hide your habits ▲' : '＋ Schedule from your habits ▾'}
+                    {showLibrary ? t('hideHabits') : t('scheduleFrom')}
                   </Text>
                 </Pressable>
               )}
@@ -234,7 +238,7 @@ export function PlanScreen({ route, navigation }: Props) {
                             onPress={() => void togglePlanned(selected, q.id)}
                             accessibilityRole="button"
                             accessibilityState={{ selected: on }}
-                            accessibilityLabel={`${on ? 'Remove' : 'Add'} ${q.title}`}
+                            accessibilityLabel={on ? t('chipRemoveA11y', { title: q.title }) : t('chipAddA11y', { title: q.title })}
                             style={[styles.habitChip, on && styles.habitChipOn]}
                           >
                             <Text style={[styles.habitChipText, on && styles.habitChipTextOn]}>
@@ -277,20 +281,22 @@ function MonthGrid({
   selected: string;
   onSelect: (k: string) => void;
 }) {
+  const { t, i18n } = useTranslation('plan');
+  const weekShort = t('common:weekdaysShort', { returnObjects: true }) as string[];
   const weeks = buildMonthMatrix(monthRef);
   return (
     <View style={styles.calCard}>
       <View style={styles.calHead}>
-        <Pressable onPress={onPrev} accessibilityRole="button" accessibilityLabel="Previous month" hitSlop={10}>
+        <Pressable onPress={onPrev} accessibilityRole="button" accessibilityLabel={t('prevMonth')} hitSlop={10}>
           <Text style={styles.nav}>‹</Text>
         </Pressable>
-        <Text style={styles.month}>{monthLabel(monthRef)}</Text>
-        <Pressable onPress={onNext} accessibilityRole="button" accessibilityLabel="Next month" hitSlop={10}>
+        <Text style={styles.month}>{monthLabel(monthRef, i18n.language)}</Text>
+        <Pressable onPress={onNext} accessibilityRole="button" accessibilityLabel={t('nextMonth')} hitSlop={10}>
           <Text style={styles.nav}>›</Text>
         </Pressable>
       </View>
       <View style={styles.weekRow}>
-        {WEEKDAY_LABELS.map((d, i) => (
+        {weekShort.map((d, i) => (
           <Text key={i} style={styles.weekday}>
             {d}
           </Text>
@@ -310,7 +316,7 @@ function MonthGrid({
                 onPress={() => onSelect(cell.key!)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
-                accessibilityLabel={`${cell.key}, ${s.count} scheduled`}
+                accessibilityLabel={t('dayScheduledA11y', { day: cell.key, count: s.count })}
                 style={[styles.mCell, styles.mDay, on && styles.mDayOn, isToday && !on && styles.mDayToday]}
               >
                 <Text style={[styles.mDayText, on && styles.mDayTextOn]}>{cell.day}</Text>
@@ -351,22 +357,23 @@ function YearGrid({
   selected: string;
   onSelect: (k: string) => void;
 }) {
+  const { t, i18n } = useTranslation('plan');
   const months: MonthRef[] = Array.from({ length: 12 }, (_, m) => ({ year, month: m }));
   return (
     <View style={styles.calCard}>
       <View style={styles.calHead}>
-        <Pressable onPress={onPrev} accessibilityRole="button" accessibilityLabel="Previous year" hitSlop={10}>
+        <Pressable onPress={onPrev} accessibilityRole="button" accessibilityLabel={t('prevYear')} hitSlop={10}>
           <Text style={styles.nav}>‹</Text>
         </Pressable>
         <Text style={styles.month}>{year}</Text>
-        <Pressable onPress={onNext} accessibilityRole="button" accessibilityLabel="Next year" hitSlop={10}>
+        <Pressable onPress={onNext} accessibilityRole="button" accessibilityLabel={t('nextYear')} hitSlop={10}>
           <Text style={styles.nav}>›</Text>
         </Pressable>
       </View>
       <View style={styles.yearWrap}>
         {months.map((ref) => (
           <View key={ref.month} style={styles.miniMonth}>
-            <Text style={styles.miniMonthLabel}>{monthLabel(ref).split(' ')[0]}</Text>
+            <Text style={styles.miniMonthLabel}>{monthLabel(ref, i18n.language).split(' ')[0]}</Text>
             <View style={styles.yearGridRows}>
               {buildMonthMatrix(ref).map((week, wi) => (
                 <View key={wi} style={styles.yearWeek}>
@@ -382,7 +389,7 @@ function YearGrid({
                         key={ci}
                         onPress={() => onSelect(cell.key!)}
                         accessibilityRole="button"
-                        accessibilityLabel={`${cell.key}, ${s.count} scheduled`}
+                        accessibilityLabel={t('dayScheduledA11y', { day: cell.key, count: s.count })}
                         style={[
                           styles.yCell,
                           styles.yDay,

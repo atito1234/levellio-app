@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ActivityTile, AddActivityFab, AddActivitySheet, MiniScheduler, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -31,6 +32,7 @@ const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
 export function GoalFocusScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('goals');
   const { goalId } = route.params;
   const { goals } = useGoals();
   const goal = goals.find((g) => g.id === goalId);
@@ -39,12 +41,12 @@ export function GoalFocusScreen({ route, navigation }: Props) {
     return (
       <ScreenContainer backgroundColor={BG}>
         <View style={styles.topbar}>
-          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
             <Text style={styles.chevron}>‹</Text>
           </Pressable>
           <View style={styles.chevronSpacer} />
         </View>
-        <Text style={styles.empty}>This goal is no longer available.</Text>
+        <Text style={styles.empty}>{t('focus.unavailable')}</Text>
       </ScreenContainer>
     );
   }
@@ -53,6 +55,7 @@ export function GoalFocusScreen({ route, navigation }: Props) {
 }
 
 function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['navigation'] }) {
+  const { t } = useTranslation('goals');
   const { quests, deleteQuest } = useGame();
   const { events } = useActivityLog();
   const { goals, membershipFor, setSupportingGoals } = useGoals();
@@ -98,9 +101,9 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
   const [addDates, setAddDates] = useState<string[] | null>(null);
 
   const deleteActivity = (quest: Quest) =>
-    Alert.alert('Remove activity?', `Remove “${quest.title}” from your activities?`, [
-      { text: 'Keep', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => void deleteQuest(quest.id) },
+    Alert.alert(t('focus.removeTitle'), t('focus.removeBody', { title: quest.title }), [
+      { text: t('focus.removeKeep'), style: 'cancel' },
+      { text: t('focus.removeConfirm'), style: 'destructive', onPress: () => void deleteQuest(quest.id) },
     ]);
 
   // Management row: tap to EDIT (never opens/does the activity); ✕ to remove.
@@ -111,7 +114,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         <Pressable
           onPress={() => navigation.navigate('QuestEditor', { questId: quest.id })}
           accessibilityRole="button"
-          accessibilityLabel={`Edit ${quest.title}`}
+          accessibilityLabel={t('focus.editA11y', { title: quest.title })}
           style={styles.rowMainPress}
         >
           <Text style={styles.rowIcon}>{CATEGORY_META[quest.category].icon}</Text>
@@ -120,24 +123,24 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
               {quest.title}
             </Text>
             {j.currentStreak > 0 ? (
-              <Text style={styles.rowStreak}>🔥 Day {j.currentStreak}{j.graduated ? ' · runs on its own' : j.solidified ? ' · locked in' : ''}</Text>
+              <Text style={styles.rowStreak}>{t('focus.streak', { count: j.currentStreak, suffix: j.graduated ? t('focus.streakGraduated') : j.solidified ? t('focus.streakSolidified') : '' })}</Text>
             ) : quest.scheduledTime !== undefined ? (
-              <Text style={styles.rowTime}>⏰ {minutesToLabel(quest.scheduledTime)}</Text>
+              <Text style={styles.rowTime}>{t('focus.atTime', { time: minutesToLabel(quest.scheduledTime) })}</Text>
             ) : (
-              <Text style={styles.rowEdit}>Tap to edit</Text>
+              <Text style={styles.rowEdit}>{t('focus.tapToEdit')}</Text>
             )}
           </View>
         </Pressable>
         <Pressable
           onPress={() => navigation.navigate('BattleSetup', { questId: quest.id })}
           accessibilityRole="button"
-          accessibilityLabel={`Slay your dragon for ${quest.title}`}
+          accessibilityLabel={t('focus.slayA11y', { title: quest.title })}
           hitSlop={10}
           style={styles.rowBattle}
         >
           <Text style={styles.rowBattleText}>⚔️</Text>
         </Pressable>
-        <Pressable onPress={() => deleteActivity(quest)} accessibilityRole="button" accessibilityLabel={`Remove ${quest.title}`} hitSlop={10} style={styles.rowDelete}>
+        <Pressable onPress={() => deleteActivity(quest)} accessibilityRole="button" accessibilityLabel={t('focus.removeRowA11y', { title: quest.title })} hitSlop={10} style={styles.rowDelete}>
           <Text style={styles.rowDeleteText}>✕</Text>
         </Pressable>
       </View>
@@ -147,12 +150,12 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
-        <Text style={styles.kicker}>YOUR JOURNEY</Text>
-        <Pressable onPress={() => navigation.navigate('GoalEditor', { goalId: goal.id })} accessibilityRole="button" accessibilityLabel="Edit goal" hitSlop={12}>
-          <Text style={[styles.editGoal, { color: accent }]}>✎ Edit</Text>
+        <Text style={styles.kicker}>{t('focus.kicker')}</Text>
+        <Pressable onPress={() => navigation.navigate('GoalEditor', { goalId: goal.id })} accessibilityRole="button" accessibilityLabel={t('focus.editGoalA11y')} hitSlop={12}>
+          <Text style={[styles.editGoal, { color: accent }]}>{t('focus.edit')}</Text>
         </Pressable>
       </View>
 
@@ -163,9 +166,9 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         </Text>
         <Text
           style={styles.sub}
-          accessibilityLabel={`${progress.doneTodayInGoal} of ${progress.plannedTodayInGoal} done today. ${progress.weeklyConsistencyPct} percent consistent this week.`}
+          accessibilityLabel={t('focus.subA11y', { done: progress.doneTodayInGoal, planned: progress.plannedTodayInGoal, pct: progress.weeklyConsistencyPct })}
         >
-          {progress.doneTodayInGoal}/{progress.plannedTodayInGoal} today · {progress.weeklyConsistencyPct}% this week
+          {t('focus.subText', { done: progress.doneTodayInGoal, planned: progress.plannedTodayInGoal, pct: progress.weeklyConsistencyPct })}
         </Text>
         <View style={styles.bar}>
           <View style={[styles.barFill, { backgroundColor: accent, width: `${Math.max(3, progress.weeklyConsistencyPct)}%` }]} />
@@ -177,16 +180,16 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         <View style={styles.tileRow}>
           <ActivityTile
             icon="✨"
-            label="New activity"
-            sub={goal.kind === 'project' ? 'A daily habit for this project' : 'Add a habit to this goal'}
+            label={t('focus.tileNew')}
+            sub={goal.kind === 'project' ? t('focus.tileNewSubProject') : t('focus.tileNewSubGoal')}
             onPress={() => { setAddDates(null); setAddOpen(true); }}
             tint={accent}
           />
           {goal.kind === 'project' && goal.projectId ? (
             <ActivityTile
               icon="🌍"
-              label="Ask peers"
-              sub="Get a habit that worked"
+              label={t('focus.tileAsk')}
+              sub={t('focus.tileAskSub')}
               onPress={() => navigation.navigate('PostComposer', { projectId: goal.projectId, kind: 'ask' })}
               tint={VIOLET}
             />
@@ -197,26 +200,26 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         <Pressable
           onPress={() => navigation.navigate('BattleSetup', { goalId: goal.id })}
           accessibilityRole="button"
-          accessibilityLabel="Prepare your war strategy for this goal"
+          accessibilityLabel={t('focus.prepareWarA11y')}
           style={[styles.battleCta, { backgroundColor: accent }]}
           disabled={habits.length === 0}
         >
-          <Text style={styles.battleText}>⚔️ Prepare your war strategy</Text>
+          <Text style={styles.battleText}>{t('focus.prepareWar')}</Text>
         </Pressable>
 
         {/* The ripple: capacities these activities power together. */}
         {capIds.length > 0 && (
           <View style={styles.rippleCard}>
-            <Text style={styles.sectionLabel}>THIS JOURNEY POWERS</Text>
+            <Text style={styles.sectionLabel}>{t('focus.powers')}</Text>
             <View style={styles.capChips}>
               {capIds.slice(0, 6).map((id) => (
                 <View key={id} style={styles.capChip}>
-                  <Text style={styles.capChipText}>{getCapacity(id).name}</Text>
+                  <Text style={styles.capChipText}>{t(`capacities:${id}`)}</Text>
                 </View>
               ))}
             </View>
-            <Pressable onPress={() => navigation.navigate('Connections')} accessibilityRole="button" accessibilityLabel="See how these activities connect" hitSlop={8}>
-              <Text style={styles.connectLink}>🔗 See how these activities connect ›</Text>
+            <Pressable onPress={() => navigation.navigate('Connections')} accessibilityRole="button" accessibilityLabel={t('focus.connectA11y')} hitSlop={8}>
+              <Text style={styles.connectLink}>{t('focus.connect')}</Text>
             </Pressable>
           </View>
         )}
@@ -224,35 +227,35 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         {/* Prepare a project goal with a personal goal. */}
         {goal.kind === 'project' && personalGoals.length > 0 && (
           <View style={styles.prepCard}>
-            <Text style={styles.sectionLabel}>PREPARING WITH</Text>
+            <Text style={styles.sectionLabel}>{t('focus.preparingWith')}</Text>
             <View style={styles.prepChips}>
               {personalGoals.filter((g) => supportingIds.includes(g.id)).map((g) => (
-                <Pressable key={g.id} onPress={() => toggleSupporting(g.id)} accessibilityRole="button" accessibilityLabel={`Stop preparing with ${g.title}`} style={[styles.prepChip, { borderColor: goalColor(g).accent, backgroundColor: goalColor(g).soft }]}>
+                <Pressable key={g.id} onPress={() => toggleSupporting(g.id)} accessibilityRole="button" accessibilityLabel={t('focus.stopPreparingA11y', { title: g.title })} style={[styles.prepChip, { borderColor: goalColor(g).accent, backgroundColor: goalColor(g).soft }]}>
                   <Text style={[styles.prepChipText, { color: goalColor(g).accent }]}>{g.emoji} {g.title} ✓</Text>
                 </Pressable>
               ))}
-              <Pressable onPress={() => setPrepOpen((v) => !v)} accessibilityRole="button" accessibilityLabel="Add a personal goal to prepare with" style={styles.prepAdd}>
-                <Text style={styles.prepAddText}>{prepOpen ? 'Done' : '＋ Prepare with a goal'}</Text>
+              <Pressable onPress={() => setPrepOpen((v) => !v)} accessibilityRole="button" accessibilityLabel={t('focus.addPrepareA11y')} style={styles.prepAdd}>
+                <Text style={styles.prepAddText}>{prepOpen ? t('focus.prepareDone') : t('focus.prepareWithGoal')}</Text>
               </Pressable>
             </View>
             {prepOpen && (
               <View style={styles.prepChips}>
                 {personalGoals.filter((g) => !supportingIds.includes(g.id)).map((g) => (
-                  <Pressable key={g.id} onPress={() => toggleSupporting(g.id)} accessibilityRole="button" accessibilityLabel={`Prepare with ${g.title}`} style={[styles.prepChip, { borderColor: goalColor(g).accent }]}>
+                  <Pressable key={g.id} onPress={() => toggleSupporting(g.id)} accessibilityRole="button" accessibilityLabel={t('focus.prepareWithA11y', { title: g.title })} style={[styles.prepChip, { borderColor: goalColor(g).accent }]}>
                     <Text style={[styles.prepChipText, { color: goalColor(g).accent }]}>＋ {g.emoji} {g.title}</Text>
                   </Pressable>
                 ))}
               </View>
             )}
-            <Text style={styles.prepHint}>Personal goals that help you get ready. In Settings, choose whether they just remind you or also feed this goal's progress.</Text>
+            <Text style={styles.prepHint}>{t('focus.prepHint')}</Text>
           </View>
         )}
 
         {habits.length === 0 ? (
-          <Text style={styles.empty}>No activities on this journey yet. Tap the 🎙️ button to add your first.</Text>
+          <Text style={styles.empty}>{t('focus.emptyActivities')}</Text>
         ) : (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>ACTIVITIES ({habits.length})</Text>
+            <Text style={styles.sectionLabel}>{t('focus.activities', { count: habits.length })}</Text>
             <View style={styles.rows}>
               {habits.map((q) => (
                 <ManageRow key={q.id} quest={q} />
@@ -263,7 +266,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
 
         {habits.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>YOUR CALENDAR · SCHEDULE ANY DAY</Text>
+            <Text style={styles.sectionLabel}>{t('focus.yourCalendar')}</Text>
             <MiniScheduler
               quests={habits}
               getPlan={getPlan}
@@ -275,12 +278,12 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
                 setAddOpen(true);
               }}
             />
-            <Text style={styles.calHint}>Tap a day to schedule these activities; ✓ marks days you completed them.</Text>
+            <Text style={styles.calHint}>{t('focus.calHint')}</Text>
           </View>
         )}
 
-        <Pressable onPress={() => navigation.navigate('GoalEditor')} accessibilityRole="button" accessibilityLabel="Create another goal" style={styles.newBtn}>
-          <Text style={styles.newBtnText}>＋ New goal</Text>
+        <Pressable onPress={() => navigation.navigate('GoalEditor')} accessibilityRole="button" accessibilityLabel={t('focus.createAnotherA11y')} style={styles.newBtn}>
+          <Text style={styles.newBtnText}>{t('focus.newGoal')}</Text>
         </Pressable>
       </ScrollView>
 
