@@ -1,0 +1,23 @@
+{
+  "back": "Retour",
+  "editTitle": "Modifier l'objectif",
+  "newTitle": "Nouvel objectif",
+  "lead": "Vers quoi voulez-vous progresser ? Choisissez-en un — les habitudes font le reste.",
+  "pickGoal": "CHOISIR UN OBJECTIF",
+  "createA11y": "Créer l'objectif : {{title}}",
+  "orOwn": "OU CRÉEZ LE VÔTRE",
+  "titlePlaceholder": "ex. Perdre du poids pour le mariage",
+  "titleA11y": "Titre de l'objectif",
+  "icon": "Icône",
+  "iconA11y": "Icône {{emoji}}",
+  "lifeAreas": "Domaines de vie",
+  "color": "Couleur",
+  "colorA11y": "Couleur {{color}}",
+  "saveChanges": "Enregistrer",
+  "create": "Créer l'objectif",
+  "delete": "Supprimer l'objectif",
+  "deleteTitle": "Supprimer l'objectif ?",
+  "deleteBody": "Vos activités restent — seul cet objectif est supprimé.",
+  "keep": "Garder",
+  "deleteConfirm": "Supprimer"
+}

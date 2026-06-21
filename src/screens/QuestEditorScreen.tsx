@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ChipSelector,
@@ -23,7 +24,6 @@ import { habitScience } from '@/data/habitScience';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { QUEST_XP } from '@/lib/leveling';
 import { isValidScheduleMinutes, minutesToParts, partsToMinutes, type TimeParts } from '@/lib/schedule';
-import { WEEKDAY_LABELS } from '@/lib/calendar';
 import { weekdaysLabel } from '@/lib/recurrence';
 import type { QuestCategory, QuestDifficulty } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
@@ -31,12 +31,6 @@ import type { RootStackParamList } from '@/navigation/types';
 const DEFAULT_SCHEDULE_PARTS: TimeParts = { hour12: 9, minute: 0, meridiem: 'AM' };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'QuestEditor'>;
-
-const DIFFICULTY_OPTIONS: ChipOption<QuestDifficulty>[] = [
-  { value: 'easy', label: `Easy · ${QUEST_XP.easy} XP` },
-  { value: 'medium', label: `Medium · ${QUEST_XP.medium} XP` },
-  { value: 'hard', label: `Hard · ${QUEST_XP.hard} XP` },
-];
 
 const CATEGORY_OPTIONS: ChipOption<QuestCategory>[] = CATEGORY_ORDER.map((c) => ({
   value: c,
@@ -46,6 +40,14 @@ const CATEGORY_OPTIONS: ChipOption<QuestCategory>[] = CATEGORY_ORDER.map((c) => 
 
 /** Manual quest creator/editor (no AI). Create, edit, and delete quests. */
 export function QuestEditorScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('quests');
+  const DIFFICULTY_OPTIONS: ChipOption<QuestDifficulty>[] = [
+    { value: 'easy', label: t('difficultyEasy', { xp: QUEST_XP.easy }) },
+    { value: 'medium', label: t('difficultyMedium', { xp: QUEST_XP.medium }) },
+    { value: 'hard', label: t('difficultyHard', { xp: QUEST_XP.hard }) },
+  ];
+  const weekShort = t('common:weekdaysShort', { returnObjects: true }) as string[];
+  const weekFull = t('common:weekdaysFull', { returnObjects: true }) as string[];
   const { quests, character, addQuest, updateQuest, deleteQuest } = useGame();
   const { signedIn, myProjects, linkedProjectIds, linkHabit, unlinkHabit } = useProjects();
   const { goals, linkGoal } = useGoals();
@@ -88,7 +90,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   // Smart suggestion (never imposed): a science-grounded reason for known habits.
   const whyPlaceholder = title.trim()
     ? habitScience({ title, category }).why.replace(/^a /, '').concat(' …')
-    : 'e.g. so I feel calmer and more focused';
+    : t('whyPlaceholder');
 
   const persist = async (draft: QuestDraft) => {
     setSaving(true);
@@ -142,11 +144,11 @@ export function QuestEditorScreen({ route, navigation }: Props) {
     const dup = findDuplicateActivity(quests, draft.title, editingId);
     if (dup) {
       Alert.alert(
-        'Already on your list',
-        `You already have “${dup.title}”. It repeats every day, so you don't need to add it again.`,
+        t('dupTitle'),
+        t('dupBody', { title: dup.title }),
         [
-          { text: 'Keep one', style: 'cancel' },
-          { text: 'Add anyway', style: 'destructive', onPress: () => void persist(draft) },
+          { text: t('dupKeep'), style: 'cancel' },
+          { text: t('dupAdd'), style: 'destructive', onPress: () => void persist(draft) },
         ],
       );
       return;
@@ -174,8 +176,8 @@ export function QuestEditorScreen({ route, navigation }: Props) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
-          <Text style={styles.heading}>{isEditing ? 'Edit Quest' : 'New Quest'}</Text>
-          <Text style={styles.sub}>Turn a real-life goal or habit into a quest.</Text>
+          <Text style={styles.heading}>{isEditing ? t('editTitle') : t('newTitle')}</Text>
+          <Text style={styles.sub}>{t('sub')}</Text>
         </View>
 
         <ScrollView
@@ -184,32 +186,32 @@ export function QuestEditorScreen({ route, navigation }: Props) {
           keyboardShouldPersistTaps="handled"
         >
           <TextField
-            label="Title"
+            label={t('title')}
             value={title}
-            onChangeText={(t) => {
-              setTitle(t);
+            onChangeText={(text) => {
+              setTitle(text);
               if (titleError) setTitleError(undefined);
             }}
-            placeholder="e.g. Read 10 pages"
+            placeholder={t('titlePlaceholder')}
             maxLength={TITLE_MAX}
             error={titleError}
           />
           <TextField
-            label="Description (optional)"
+            label={t('description')}
             value={description}
             onChangeText={setDescription}
-            placeholder="Add a note to your future self"
+            placeholder={t('descriptionPlaceholder')}
             maxLength={DESCRIPTION_MAX}
             multiline
           />
           <ChipSelector
-            label="Difficulty"
+            label={t('difficulty')}
             options={DIFFICULTY_OPTIONS}
             selected={difficulty}
             onSelect={setDifficulty}
           />
           <ChipSelector
-            label="Category"
+            label={t('category')}
             options={CATEGORY_OPTIONS}
             selected={category}
             onSelect={setCategory}
@@ -219,14 +221,14 @@ export function QuestEditorScreen({ route, navigation }: Props) {
           <View style={styles.scheduleBlock}>
             <View style={styles.scheduleHead}>
               <View style={styles.scheduleHeadText}>
-                <Text style={styles.scheduleLabel}>Set a time</Text>
-                <Text style={styles.scheduleHint}>Pin this activity to a specific time of day.</Text>
+                <Text style={styles.scheduleLabel}>{t('setTime')}</Text>
+                <Text style={styles.scheduleHint}>{t('setTimeHint')}</Text>
               </View>
               <Switch
                 value={scheduleOn}
                 onValueChange={setScheduleOn}
                 trackColor={{ true: colors.identity, false: colors.border }}
-                accessibilityLabel="Set a specific time for this activity"
+                accessibilityLabel={t('setTimeA11y')}
               />
             </View>
 
@@ -238,13 +240,13 @@ export function QuestEditorScreen({ route, navigation }: Props) {
           {/* Optional weekly recurrence — repeat on chosen weekdays. */}
           <View style={styles.scheduleBlock}>
             <View style={styles.scheduleHeadText}>
-              <Text style={styles.scheduleLabel}>Repeat</Text>
+              <Text style={styles.scheduleLabel}>{t('repeat')}</Text>
               <Text style={styles.scheduleHint}>
-                {repeatDays.length ? weekdaysLabel(repeatDays) : 'Pick the days this repeats (optional).'}
+                {repeatDays.length ? weekdaysLabel(repeatDays) : t('repeatHint')}
               </Text>
             </View>
             <View style={styles.weekRow}>
-              {WEEKDAY_LABELS.map((d, i) => {
+              {weekShort.map((d, i) => {
                 const on = repeatDays.includes(i);
                 return (
                   <Pressable
@@ -252,7 +254,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
                     onPress={() => setRepeatDays((cur) => (cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i]))}
                     accessibilityRole="button"
                     accessibilityState={{ selected: on }}
-                    accessibilityLabel={`Repeat on ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i]}`}
+                    accessibilityLabel={t('repeatOnA11y', { day: weekFull[i] })}
                     style={[styles.weekday, on && styles.weekdayOn]}
                   >
                     <Text style={[styles.weekdayText, on && styles.weekdayTextOn]}>{d}</Text>
@@ -266,24 +268,21 @@ export function QuestEditorScreen({ route, navigation }: Props) {
           <View style={styles.scheduleBlock}>
             <View style={styles.scheduleHead}>
               <View style={styles.scheduleHeadText}>
-                <Text style={styles.scheduleLabel}>Rate how it goes (1–5)</Text>
-                <Text style={styles.scheduleHint}>
-                  A quick “how did it go?” after each focus session — works for any habit, and powers
-                  your insights.
-                </Text>
+                <Text style={styles.scheduleLabel}>{t('rate')}</Text>
+                <Text style={styles.scheduleHint}>{t('rateHint')}</Text>
               </View>
               <Switch
                 value={rateOn}
                 onValueChange={setRateOn}
                 trackColor={{ true: colors.identity, false: colors.border }}
-                accessibilityLabel="Ask for a 1 to 5 rating after completing this habit"
+                accessibilityLabel={t('rateA11y')}
               />
             </View>
             <TextField
-              label="Why this matters to you (optional)"
+              label={t('why')}
               value={why}
-              onChangeText={(t) => {
-                setWhy(t);
+              onChangeText={(text) => {
+                setWhy(text);
                 if (whyError) setWhyError(undefined);
               }}
               placeholder={whyPlaceholder}
@@ -297,8 +296,8 @@ export function QuestEditorScreen({ route, navigation }: Props) {
           {signedIn && myProjects.length > 0 && (
             <View style={styles.scheduleBlock}>
               <View style={styles.scheduleHeadText}>
-                <Text style={styles.scheduleLabel}>Contributes to a project (optional)</Text>
-                <Text style={styles.scheduleHint}>Completing this habit will also power the projects you pick.</Text>
+                <Text style={styles.scheduleLabel}>{t('contributesProject')}</Text>
+                <Text style={styles.scheduleHint}>{t('contributesHint')}</Text>
               </View>
               <View style={styles.projChips}>
                 {myProjects.map((p) => {
@@ -326,15 +325,15 @@ export function QuestEditorScreen({ route, navigation }: Props) {
 
         <View style={styles.actions}>
           <PrimaryButton
-            label={isEditing ? 'Save changes' : 'Create quest'}
+            label={isEditing ? t('saveChanges') : t('create')}
             variant="action"
             onPress={handleSave}
             loading={saving}
           />
           {isEditing ? (
-            <PrimaryButton label="Delete quest" variant="ghost" onPress={handleDelete} />
+            <PrimaryButton label={t('delete')} variant="ghost" onPress={handleDelete} />
           ) : (
-            <PrimaryButton label="Cancel" variant="ghost" onPress={() => navigation.goBack()} />
+            <PrimaryButton label={t('cancel')} variant="ghost" onPress={() => navigation.goBack()} />
           )}
         </View>
       </KeyboardAvoidingView>

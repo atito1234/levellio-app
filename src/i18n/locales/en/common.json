@@ -25,5 +25,7 @@
     "title": "Coming soon",
     "body": "Photo & video sharing arrives next week."
   },
-  "plusBadge": "Founder"
+  "plusBadge": "Founder",
+  "weekdaysShort": ["S", "M", "T", "W", "T", "F", "S"],
+  "weekdaysFull": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 }

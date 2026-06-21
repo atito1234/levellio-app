@@ -1,0 +1,23 @@
+{
+  "back": "Atrás",
+  "editTitle": "Editar meta",
+  "newTitle": "Nueva meta",
+  "lead": "¿Hacia qué quieres avanzar? Elige una — los hábitos hacen el resto.",
+  "pickGoal": "ELIGE UNA META",
+  "createA11y": "Crear meta: {{title}}",
+  "orOwn": "O CREA LA TUYA",
+  "titlePlaceholder": "p. ej. Bajar de peso para la boda",
+  "titleA11y": "Título de la meta",
+  "icon": "Icono",
+  "iconA11y": "Icono {{emoji}}",
+  "lifeAreas": "Áreas de vida",
+  "color": "Color",
+  "colorA11y": "Color {{color}}",
+  "saveChanges": "Guardar cambios",
+  "create": "Crear meta",
+  "delete": "Eliminar meta",
+  "deleteTitle": "¿Eliminar meta?",
+  "deleteBody": "Tus actividades se quedan — solo se elimina esta meta.",
+  "keep": "Conservar",
+  "deleteConfirm": "Eliminar"
+}

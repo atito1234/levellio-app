@@ -25,5 +25,7 @@
     "title": "Bientôt disponible",
     "body": "Le partage de photos et vidéos arrive la semaine prochaine."
   },
-  "plusBadge": "Fondateur"
+  "plusBadge": "Fondateur",
+  "weekdaysShort": ["D", "L", "M", "M", "J", "V", "S"],
+  "weekdaysFull": ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]
 }

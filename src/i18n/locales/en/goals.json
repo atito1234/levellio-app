@@ -1,0 +1,23 @@
+{
+  "back": "Back",
+  "editTitle": "Edit goal",
+  "newTitle": "New goal",
+  "lead": "What do you want to build toward? Pick one — habits do the rest.",
+  "pickGoal": "PICK A GOAL",
+  "createA11y": "Create goal: {{title}}",
+  "orOwn": "OR MAKE YOUR OWN",
+  "titlePlaceholder": "e.g. Lose weight for the wedding",
+  "titleA11y": "Goal title",
+  "icon": "Icon",
+  "iconA11y": "Icon {{emoji}}",
+  "lifeAreas": "Life areas",
+  "color": "Color",
+  "colorA11y": "{{color}} color",
+  "saveChanges": "Save changes",
+  "create": "Create goal",
+  "delete": "Delete goal",
+  "deleteTitle": "Delete goal?",
+  "deleteBody": "Your activities stay — only this goal is removed.",
+  "keep": "Keep",
+  "deleteConfirm": "Delete"
+}
