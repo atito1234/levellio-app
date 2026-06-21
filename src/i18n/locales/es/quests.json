@@ -31,5 +31,11 @@
   "dupTitle": "Ya está en tu lista",
   "dupBody": "Ya tienes «{{title}}». Se repite cada día, así que no necesitas añadirla de nuevo.",
   "dupKeep": "Mantener una",
-  "dupAdd": "Añadir igual"
+  "dupAdd": "Añadir igual",
+  "complete": "Completar",
+  "completeA11y": "Completar misión: {{title}}, otorga {{xp}} XP",
+  "editQuestA11y": "Editar misión: {{title}}",
+  "completedA11y": "Misión completada",
+  "diff": { "easy": "Fácil", "medium": "Media", "hard": "Difícil" },
+  "diffA11y": "Dificultad: {{label}}"
 }

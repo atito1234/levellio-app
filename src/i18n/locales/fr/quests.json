@@ -31,5 +31,11 @@
   "dupTitle": "Déjà sur votre liste",
   "dupBody": "Vous avez déjà « {{title}} ». Elle se répète chaque jour, vous n'avez pas besoin de l'ajouter à nouveau.",
   "dupKeep": "En garder une",
-  "dupAdd": "Ajouter quand même"
+  "dupAdd": "Ajouter quand même",
+  "complete": "Terminer",
+  "completeA11y": "Terminer la quête : {{title}}, rapporte {{xp}} XP",
+  "editQuestA11y": "Modifier la quête : {{title}}",
+  "completedA11y": "Quête terminée",
+  "diff": { "easy": "Facile", "medium": "Moyen", "hard": "Difficile" },
+  "diffA11y": "Difficulté : {{label}}"
 }

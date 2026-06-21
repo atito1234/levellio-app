@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -27,6 +28,7 @@ const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
 export function QuickCaptureScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('quickCapture');
   const { addQuest } = useGame();
   const { getPlan, togglePlanned } = usePlan();
   const { goals, linkGoal } = useGoals();
@@ -90,21 +92,21 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Close" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('close')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          Quick add
+          {t('title')}
         </Text>
         <View style={styles.chevronSpacer} />
       </View>
 
       <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Text style={styles.lead}>Type it, or tap the 🎤 on your keyboard and just say it.</Text>
+        <Text style={styles.lead}>{t('lead')}</Text>
 
         {targetLabel.length > 0 && (
           <View style={styles.scopeBanner}>
-            <Text style={styles.scopeText} numberOfLines={2}>🎯 Adding to {targetLabel}{projectScoped ? ' — as daily habits' : ''}</Text>
+            <Text style={styles.scopeText} numberOfLines={2}>{t(projectScoped ? 'scopeDaily' : 'scope', { target: targetLabel })}</Text>
           </View>
         )}
 
@@ -113,24 +115,25 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
           onChangeText={setText}
           autoFocus
           multiline
-          placeholder="e.g. walk 20 min after lunch, drink water, no soda at 7pm"
+          placeholder={t('inputPlaceholder')}
           placeholderTextColor={MUTED}
           style={styles.input}
-          accessibilityLabel="Capture your habits"
+          accessibilityLabel={t('inputA11y')}
         />
 
         {parsed.length > 0 ? (
           <View style={styles.preview}>
-            <Text style={styles.sectionLabel}>I HEARD {included.length} HABIT{included.length === 1 ? '' : 'S'}</Text>
+            <Text style={styles.sectionLabel}>{t('heard', { count: included.length })}</Text>
             {parsed.map((p) => {
               const off = excluded.has(normalizeTitle(p.title));
+              const timePart = p.scheduledTime !== undefined ? t('chipAt', { time: minutesToLabel(p.scheduledTime) }) : '';
               return (
                 <Pressable
                   key={normalizeTitle(p.title)}
                   onPress={() => toggleExclude(p.title)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: !off }}
-                  accessibilityLabel={`${p.title}, ${CATEGORY_META[p.category].label}${p.scheduledTime !== undefined ? `, at ${minutesToLabel(p.scheduledTime)}` : ''}. ${off ? 'Excluded, tap to include' : 'Included, tap to exclude'}`}
+                  accessibilityLabel={`${p.title}, ${CATEGORY_META[p.category].label}${timePart}. ${off ? t('chipExcluded') : t('chipIncluded')}`}
                   style={[styles.chip, off && styles.chipOff]}
                 >
                   <Text style={styles.chipIcon}>{CATEGORY_META[p.category].icon}</Text>
@@ -149,16 +152,16 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
             })}
           </View>
         ) : text.trim().length > 0 ? (
-          <Text style={styles.hint}>Hmm, I couldn’t pick out a habit yet — try “walk 20 min” or “drink water”.</Text>
+          <Text style={styles.hint}>{t('noMatch')}</Text>
         ) : null}
 
         <View style={styles.planRow}>
-          <Text style={styles.planLabel}>Add to today’s plan</Text>
+          <Text style={styles.planLabel}>{t('addToToday')}</Text>
           <Switch
             value={planToday}
             onValueChange={setPlanToday}
             trackColor={{ true: TEAL, false: TRACK }}
-            accessibilityLabel="Add these to today's plan"
+            accessibilityLabel={t('addToTodayA11y')}
           />
         </View>
       </ScrollView>
@@ -167,11 +170,11 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
         onPress={() => void addAll()}
         disabled={included.length === 0 || saving}
         accessibilityRole="button"
-        accessibilityLabel={`Add ${included.length} habit${included.length === 1 ? '' : 's'}`}
+        accessibilityLabel={included.length === 0 ? t('addEmpty') : t('add', { count: included.length })}
         style={[styles.cta, (included.length === 0 || saving) && styles.ctaOff]}
       >
         <Text style={styles.ctaText}>
-          {included.length === 0 ? 'Add habits' : `Add ${included.length} habit${included.length === 1 ? '' : 's'}`}
+          {included.length === 0 ? t('addEmpty') : t('add', { count: included.length })}
         </Text>
       </Pressable>
     </ScreenContainer>

@@ -31,5 +31,11 @@
   "dupTitle": "Already on your list",
   "dupBody": "You already have “{{title}}”. It repeats every day, so you don't need to add it again.",
   "dupKeep": "Keep one",
-  "dupAdd": "Add anyway"
+  "dupAdd": "Add anyway",
+  "complete": "Complete",
+  "completeA11y": "Complete quest: {{title}}, rewards {{xp}} XP",
+  "editQuestA11y": "Edit quest: {{title}}",
+  "completedA11y": "Quest completed",
+  "diff": { "easy": "Easy", "medium": "Medium", "hard": "Hard" },
+  "diffA11y": "Difficulty: {{label}}"
 }

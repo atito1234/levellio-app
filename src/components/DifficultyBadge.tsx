@@ -1,12 +1,13 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors, radii, spacing, typography } from '@/theme';
 import type { QuestDifficulty } from '@/types';
 
-const STYLES: Record<QuestDifficulty, { bg: string; fg: string; label: string }> = {
-  easy: { bg: colors.tealSoft, fg: colors.tealDeep, label: 'Easy' },
-  medium: { bg: colors.goldSoft, fg: colors.goldDeep, label: 'Medium' },
-  hard: { bg: colors.violetSoft, fg: colors.violetDeep, label: 'Hard' },
+const STYLES: Record<QuestDifficulty, { bg: string; fg: string }> = {
+  easy: { bg: colors.tealSoft, fg: colors.tealDeep },
+  medium: { bg: colors.goldSoft, fg: colors.goldDeep },
+  hard: { bg: colors.violetSoft, fg: colors.violetDeep },
 };
 
 interface DifficultyBadgeProps {
@@ -15,13 +16,15 @@ interface DifficultyBadgeProps {
 
 /** Small colored pill conveying quest difficulty. */
 export function DifficultyBadge({ difficulty }: DifficultyBadgeProps) {
+  const { t } = useTranslation('quests');
   const s = STYLES[difficulty];
+  const label = t(`diff.${difficulty}`);
   return (
     <View
       style={[styles.badge, { backgroundColor: s.bg }]}
-      accessibilityLabel={`Difficulty: ${s.label}`}
+      accessibilityLabel={t('diffA11y', { label })}
     >
-      <Text style={[styles.text, { color: s.fg }]}>{s.label}</Text>
+      <Text style={[styles.text, { color: s.fg }]}>{label}</Text>
     </View>
   );
 }

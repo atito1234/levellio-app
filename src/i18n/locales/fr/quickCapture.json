@@ -1,0 +1,20 @@
+{
+  "close": "Fermer",
+  "title": "Ajout rapide",
+  "lead": "Tapez-le, ou touchez le 🎤 de votre clavier et dites-le simplement.",
+  "scope": "🎯 Ajout à {{target}}",
+  "scopeDaily": "🎯 Ajout à {{target}} — en habitudes quotidiennes",
+  "inputPlaceholder": "ex. marcher 20 min après le déjeuner, boire de l'eau, pas de soda à 19h",
+  "inputA11y": "Capturez vos habitudes",
+  "heard_one": "J'AI ENTENDU {{count}} HABITUDE",
+  "heard_other": "J'AI ENTENDU {{count}} HABITUDES",
+  "chipAt": ", à {{time}}",
+  "chipIncluded": "Incluse, toucher pour exclure",
+  "chipExcluded": "Exclue, toucher pour inclure",
+  "noMatch": "Hmm, je n'ai pas encore repéré d'habitude — essayez « marcher 20 min » ou « boire de l'eau ».",
+  "addToToday": "Ajouter au plan d'aujourd'hui",
+  "addToTodayA11y": "Ajouter au plan d'aujourd'hui",
+  "addEmpty": "Ajouter des habitudes",
+  "add_one": "Ajouter {{count}} habitude",
+  "add_other": "Ajouter {{count}} habitudes"
+}

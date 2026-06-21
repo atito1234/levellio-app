@@ -1,0 +1,20 @@
+{
+  "close": "Close",
+  "title": "Quick add",
+  "lead": "Type it, or tap the 🎤 on your keyboard and just say it.",
+  "scope": "🎯 Adding to {{target}}",
+  "scopeDaily": "🎯 Adding to {{target}} — as daily habits",
+  "inputPlaceholder": "e.g. walk 20 min after lunch, drink water, no soda at 7pm",
+  "inputA11y": "Capture your habits",
+  "heard_one": "I HEARD {{count}} HABIT",
+  "heard_other": "I HEARD {{count}} HABITS",
+  "chipAt": ", at {{time}}",
+  "chipIncluded": "Included, tap to exclude",
+  "chipExcluded": "Excluded, tap to include",
+  "noMatch": "Hmm, I couldn’t pick out a habit yet — try “walk 20 min” or “drink water”.",
+  "addToToday": "Add to today’s plan",
+  "addToTodayA11y": "Add these to today's plan",
+  "addEmpty": "Add habits",
+  "add_one": "Add {{count}} habit",
+  "add_other": "Add {{count}} habits"
+}
