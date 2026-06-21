@@ -1,0 +1,34 @@
+{
+  "gate": {
+    "title": "Projets communautaires",
+    "lead": "Rejoignez d'autres personnes œuvrant pour un objectif commun et concret — eau potable, jardins communautaires, réduction des sources de paludisme. Vos habitudes quotidiennes s'additionnent en un changement collectif, et vous voyez ce que font vos coéquipiers.",
+    "signIn": "Se connecter pour rejoindre",
+    "haveCode": "J'ai un code d'invitation"
+  },
+  "title": "Projets",
+  "greeting": "Bonjour, {{name}}",
+  "tagline": "Bâtissez des habitudes qui comptent",
+  "offline": "mode hors ligne",
+  "create": "+ Créer",
+  "createPlus": "+ Créer (Plus)",
+  "joinWithCode": "Rejoindre avec un code",
+  "myProjects": "MES PROJETS",
+  "featured": "À LA UNE",
+  "noFeatured": "Aucun projet à la une pour l'instant.",
+  "community": "Communauté",
+  "memberCount_one": "{{count}} membre",
+  "memberCount_other": "{{count}} membres",
+  "meta": "{{region}} · {{members}}",
+  "joined": "Rejoint",
+  "weeklyGoal": "Objectif : {{goal}} {{unit}} / semaine",
+  "strip": {
+    "yourCommunity": "VOTRE COMMUNAUTÉ",
+    "aroundWorld": "🌍 À TRAVERS LE MONDE",
+    "findMore": "En trouver d'autres",
+    "browse": "Parcourir les projets communautaires",
+    "beFirst": "Soyez le premier aujourd'hui",
+    "activeToday_one": "👥 {{count}} actif aujourd'hui",
+    "activeToday_other": "👥 {{count}} actifs aujourd'hui",
+    "cardA11y": "{{title}}. {{pct}} % de l'objectif de la semaine. {{active}} actifs aujourd'hui."
+  }
+}

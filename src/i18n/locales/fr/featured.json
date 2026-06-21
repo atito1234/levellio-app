@@ -1,0 +1,37 @@
+{
+  "proj-malaria": {
+    "title": "Réduction des sources de paludisme à Fort-Liberté",
+    "region": "Fort-Liberté, Haïti",
+    "summary": "Stoppez le paludisme à la source. Videz et nettoyez les eaux stagnantes où se reproduisent les moustiques — chaque site assaini protège vos voisins.",
+    "unit": "sites nettoyés",
+    "reward": "Moustiquaires + larvicide pour les quartiers les plus touchés"
+  },
+  "proj-gardens": {
+    "title": "Jardins communautaires · Huertos",
+    "region": "Ouanaminthe, Haïti",
+    "summary": "Cultivez nourriture et résilience. Entretenez les potagers partagés pour que les familles aient des légumes frais et des plants à échanger.",
+    "unit": "parcelles entretenues",
+    "reward": "Graines, outils et un récupérateur d'eau de pluie pour le jardin"
+  },
+  "proj-water": {
+    "title": "De l'eau propre ensemble",
+    "region": "Cap-Haïtien, Haïti",
+    "summary": "De l'eau sûre, chaque jour. Traitez l'eau du foyer et gardez les points de collecte propres pour réduire les maladies hydriques.",
+    "unit": "foyers traitant l'eau",
+    "reward": "Filtres à eau en céramique pour les foyers participants"
+  },
+  "proj-waste": {
+    "title": "Réduction des déchets du quartier",
+    "region": "Port-de-Paix, Haïti",
+    "summary": "Un quartier plus propre est un quartier plus sain. Collectez, triez et éliminez correctement les déchets pour garder caniveaux et rues dégagés.",
+    "unit": "sacs collectés",
+    "reward": "Poubelles communautaires + un ramassage mensuel"
+  },
+  "proj-school": {
+    "title": "Des fournitures scolaires pour chaque enfant",
+    "region": "Gonaïves, Haïti",
+    "summary": "Aidons les enfants à apprendre. Accompagnez leur étude quotidienne et préparez des kits pour que chaque enfant commence le trimestre prêt.",
+    "unit": "séances d'étude enregistrées",
+    "reward": "Kits scolaires (cahiers, stylos, sacs à dos) pour le groupe"
+  }
+}

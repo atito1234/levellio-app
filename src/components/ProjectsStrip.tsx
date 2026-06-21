@@ -1,9 +1,11 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Svg, { Circle, G } from 'react-native-svg';
 import { radii, spacing, typography } from '@/theme';
 import { useProjectSummary } from '@/state/ProjectsContext';
 import { cycleEndLabel, projectColor, type Project } from '@/lib/projects';
+import { localizeProject } from '@/lib/projectText';
 
 const INK = '#1F2937';
 const CARD = '#FFFFFF';
@@ -52,15 +54,17 @@ function MiniRing({ pct, accent }: { pct: number; accent: string }) {
 
 /** A live project card: ring + this-week status + today's teammate pulse. */
 function ProjectStripCard({ project, onPress }: { project: Project; onPress: () => void }) {
+  const { t } = useTranslation('projects');
   const summary = useProjectSummary(project.id);
   const pct = summary?.cycle.pct ?? 0;
   const accent = projectColor(project).accent;
   const active = summary?.activeToday ?? 0;
+  const title = localizeProject(t, project).title;
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${project.title}. ${pct}% of this week's goal. ${active} active today.`}
+      accessibilityLabel={t('strip.cardA11y', { title, pct, active })}
       style={styles.card}
     >
       <View style={styles.cardHead}>
@@ -68,13 +72,13 @@ function ProjectStripCard({ project, onPress }: { project: Project; onPress: () 
         <MiniRing pct={pct} accent={accent} />
       </View>
       <Text style={styles.cardTitle} numberOfLines={2}>
-        {project.title}
+        {title}
       </Text>
       <Text style={styles.cardMeta} numberOfLines={1}>
         {cycleEndLabel()}
       </Text>
       <Text style={[styles.cardPulse, { color: accent }]} numberOfLines={1}>
-        {active > 0 ? `👥 ${active} active today` : 'Be the first today'}
+        {active > 0 ? t('strip.activeToday', { count: active }) : t('strip.beFirst')}
       </Text>
     </Pressable>
   );
@@ -94,16 +98,29 @@ export function ProjectsStrip({
   onBrowse: () => void;
 }) {
   if (projects.length === 0) return null;
+  return <CommunityStrip projects={projects} onOpen={onOpen} onBrowse={onBrowse} />;
+}
+
+function CommunityStrip({
+  projects,
+  onOpen,
+  onBrowse,
+}: {
+  projects: Project[];
+  onOpen: (projectId: string) => void;
+  onBrowse: () => void;
+}) {
+  const { t } = useTranslation('projects');
   return (
     <View style={styles.wrap}>
-      <Text style={styles.heading}>YOUR COMMUNITY</Text>
+      <Text style={styles.heading}>{t('strip.yourCommunity')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {projects.map((p) => (
           <ProjectStripCard key={p.id} project={p} onPress={() => onOpen(p.id)} />
         ))}
-        <Pressable onPress={onBrowse} accessibilityRole="button" accessibilityLabel="Browse community projects" style={styles.more}>
+        <Pressable onPress={onBrowse} accessibilityRole="button" accessibilityLabel={t('strip.browse')} style={styles.more}>
           <Text style={styles.morePlus}>＋</Text>
-          <Text style={styles.moreText}>Find more</Text>
+          <Text style={styles.moreText}>{t('strip.findMore')}</Text>
         </Pressable>
       </ScrollView>
     </View>
@@ -122,9 +139,14 @@ export function WorldProjectsStrip({
   onOpen: (projectId: string) => void;
 }) {
   if (projects.length === 0) return null;
+  return <WorldStrip projects={projects} onOpen={onOpen} />;
+}
+
+function WorldStrip({ projects, onOpen }: { projects: Project[]; onOpen: (projectId: string) => void }) {
+  const { t } = useTranslation('projects');
   return (
     <View style={styles.wrap}>
-      <Text style={styles.heading}>🌍 AROUND THE WORLD</Text>
+      <Text style={styles.heading}>{t('strip.aroundWorld')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {projects.map((p) => (
           <ProjectStripCard key={p.id} project={p} onPress={() => onOpen(p.id)} />

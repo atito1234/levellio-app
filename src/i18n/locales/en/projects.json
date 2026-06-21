@@ -1,0 +1,34 @@
+{
+  "gate": {
+    "title": "Community Projects",
+    "lead": "Join others working toward a shared, real-world goal — clean water, community gardens, malaria source reduction. Your everyday habits add up to collective change, and you can see what teammates are doing.",
+    "signIn": "Sign in to join",
+    "haveCode": "I have an invite code"
+  },
+  "title": "Projects",
+  "greeting": "Hi, {{name}}",
+  "tagline": "Build habits that add up",
+  "offline": "offline mode",
+  "create": "+ Create",
+  "createPlus": "+ Create (Plus)",
+  "joinWithCode": "Join with code",
+  "myProjects": "MY PROJECTS",
+  "featured": "FEATURED",
+  "noFeatured": "No featured projects yet.",
+  "community": "Community",
+  "memberCount_one": "{{count}} member",
+  "memberCount_other": "{{count}} members",
+  "meta": "{{region}} · {{members}}",
+  "joined": "Joined",
+  "weeklyGoal": "Goal: {{goal}} {{unit}} / week",
+  "strip": {
+    "yourCommunity": "YOUR COMMUNITY",
+    "aroundWorld": "🌍 AROUND THE WORLD",
+    "findMore": "Find more",
+    "browse": "Browse community projects",
+    "beFirst": "Be the first today",
+    "activeToday_one": "👥 {{count}} active today",
+    "activeToday_other": "👥 {{count}} active today",
+    "cardA11y": "{{title}}. {{pct}}% of this week's goal. {{active}} active today."
+  }
+}

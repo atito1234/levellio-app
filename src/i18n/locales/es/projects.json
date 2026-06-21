@@ -1,0 +1,34 @@
+{
+  "gate": {
+    "title": "Proyectos comunitarios",
+    "lead": "Únete a otras personas que trabajan por una meta común y real — agua limpia, huertos comunitarios, reducción de focos de malaria. Tus hábitos diarios se suman a un cambio colectivo, y puedes ver lo que hacen tus compañeros.",
+    "signIn": "Inicia sesión para unirte",
+    "haveCode": "Tengo un código de invitación"
+  },
+  "title": "Proyectos",
+  "greeting": "Hola, {{name}}",
+  "tagline": "Crea hábitos que suman",
+  "offline": "modo sin conexión",
+  "create": "+ Crear",
+  "createPlus": "+ Crear (Plus)",
+  "joinWithCode": "Unirse con código",
+  "myProjects": "MIS PROYECTOS",
+  "featured": "DESTACADOS",
+  "noFeatured": "Aún no hay proyectos destacados.",
+  "community": "Comunidad",
+  "memberCount_one": "{{count}} miembro",
+  "memberCount_other": "{{count}} miembros",
+  "meta": "{{region}} · {{members}}",
+  "joined": "Unido",
+  "weeklyGoal": "Meta: {{goal}} {{unit}} / semana",
+  "strip": {
+    "yourCommunity": "TU COMUNIDAD",
+    "aroundWorld": "🌍 POR EL MUNDO",
+    "findMore": "Buscar más",
+    "browse": "Explorar proyectos comunitarios",
+    "beFirst": "Sé el primero hoy",
+    "activeToday_one": "👥 {{count}} activo hoy",
+    "activeToday_other": "👥 {{count}} activos hoy",
+    "cardA11y": "{{title}}. {{pct}} % de la meta de esta semana. {{active}} activos hoy."
+  }
+}
