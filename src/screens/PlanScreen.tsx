@@ -411,12 +411,13 @@ function YearGrid({
 }
 
 function Legend() {
+  const { t } = useTranslation('categories');
   return (
     <View style={styles.legend}>
       {CATEGORY_ORDER.map((c) => (
         <View key={c} style={styles.legendItem}>
           <View style={[styles.miniDot, { backgroundColor: CATEGORY_COLOR[c] }]} />
-          <Text style={styles.legendText}>{CATEGORY_META[c].label}</Text>
+          <Text style={styles.legendText}>{t(c)}</Text>
         </View>
       ))}
     </View>

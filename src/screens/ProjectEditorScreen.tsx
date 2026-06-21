@@ -168,7 +168,7 @@ export function ProjectEditorScreen({ navigation }: Props) {
         <View style={styles.wrap}>
           {CATEGORY_ORDER.map((c) => (
             <Pressable key={c} onPress={() => setHCat(c)} accessibilityRole="button" accessibilityState={{ selected: hCat === c }} style={[styles.chip, hCat === c && styles.chipOn]}>
-              <Text style={[styles.chipText, hCat === c && styles.chipTextOn]}>{CATEGORY_META[c].icon} {CATEGORY_META[c].label}</Text>
+              <Text style={[styles.chipText, hCat === c && styles.chipTextOn]}>{CATEGORY_META[c].icon} {t(`categories:${c}`)}</Text>
             </Pressable>
           ))}
         </View>

@@ -38,7 +38,7 @@ export function HabitLibraryScreen({ navigation }: Props) {
         {sections.map((section) => (
           <View key={section.category} style={styles.section}>
             <Text style={styles.sectionTitle}>
-              {CATEGORY_META[section.category].icon} {CATEGORY_META[section.category].label}
+              {CATEGORY_META[section.category].icon} {t(`categories:${section.category}`)}
             </Text>
             {section.habits.map((habit) => {
               // "Added" if added this session OR already on the user's list.

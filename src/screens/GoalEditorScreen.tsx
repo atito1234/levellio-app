@@ -115,7 +115,7 @@ export function GoalEditorScreen({ route, navigation }: Props) {
                   <Text style={styles.templateEmoji}>{tpl.emoji}</Text>
                   <Text style={styles.templateTitle}>{tpl.title}</Text>
                   <Text style={styles.templateAreas} numberOfLines={1}>
-                    {tpl.categories.map((c) => CATEGORY_META[c].label).join(' · ')}
+                    {tpl.categories.map((c) => t(`categories:${c}`)).join(' · ')}
                   </Text>
                 </Pressable>
               ))}
@@ -161,11 +161,11 @@ export function GoalEditorScreen({ route, navigation }: Props) {
                   onPress={() => toggleCategory(c)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: on }}
-                  accessibilityLabel={CATEGORY_META[c].label}
+                  accessibilityLabel={t(`categories:${c}`)}
                   style={[styles.chip, on && styles.chipOn]}
                 >
                   <Text style={[styles.chipText, on && styles.chipTextOn]}>
-                    {CATEGORY_META[c].icon} {CATEGORY_META[c].label}
+                    {CATEGORY_META[c].icon} {t(`categories:${c}`)}
                   </Text>
                 </Pressable>
               );

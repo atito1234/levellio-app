@@ -33,15 +33,14 @@ const DEFAULT_SCHEDULE_PARTS: TimeParts = { hour12: 9, minute: 0, meridiem: 'AM'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'QuestEditor'>;
 
-const CATEGORY_OPTIONS: ChipOption<QuestCategory>[] = CATEGORY_ORDER.map((c) => ({
-  value: c,
-  label: CATEGORY_META[c].label,
-  icon: CATEGORY_META[c].icon,
-}));
-
 /** Manual quest creator/editor (no AI). Create, edit, and delete quests. */
 export function QuestEditorScreen({ route, navigation }: Props) {
   const { t } = useTranslation('quests');
+  const CATEGORY_OPTIONS: ChipOption<QuestCategory>[] = CATEGORY_ORDER.map((c) => ({
+    value: c,
+    label: t(`categories:${c}`),
+    icon: CATEGORY_META[c].icon,
+  }));
   const DIFFICULTY_OPTIONS: ChipOption<QuestDifficulty>[] = [
     { value: 'easy', label: t('difficultyEasy', { xp: QUEST_XP.easy }) },
     { value: 'medium', label: t('difficultyMedium', { xp: QUEST_XP.medium }) },

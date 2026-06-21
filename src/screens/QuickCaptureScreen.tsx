@@ -133,7 +133,7 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
                   onPress={() => toggleExclude(p.title)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: !off }}
-                  accessibilityLabel={`${p.title}, ${CATEGORY_META[p.category].label}${timePart}. ${off ? t('chipExcluded') : t('chipIncluded')}`}
+                  accessibilityLabel={`${p.title}, ${t(`categories:${p.category}`)}${timePart}. ${off ? t('chipExcluded') : t('chipIncluded')}`}
                   style={[styles.chip, off && styles.chipOff]}
                 >
                   <Text style={styles.chipIcon}>{CATEGORY_META[p.category].icon}</Text>
@@ -142,7 +142,7 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
                       {p.title}
                     </Text>
                     <Text style={styles.chipMeta}>
-                      {CATEGORY_META[p.category].label}
+                      {t(`categories:${p.category}`)}
                       {p.scheduledTime !== undefined ? ` · ⏰ ${minutesToLabel(p.scheduledTime)}` : ''}
                     </Text>
                   </View>
