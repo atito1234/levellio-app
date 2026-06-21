@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -18,6 +19,7 @@ const TRACK = '#ECEAE4';
 const ERR = '#C0202C';
 
 export function JoinProjectScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('projects');
   const { joinByCode } = useProjects();
   const [code, setCode] = useState(normalizeInviteCode(route.params?.code ?? ''));
   const [shareFeed, setShareFeed] = useState(true);
@@ -33,45 +35,42 @@ export function JoinProjectScreen({ route, navigation }: Props) {
     const project = await joinByCode(code, shareFeed);
     setBusy(false);
     if (project) navigation.replace('ProjectDetail', { projectId: project.id });
-    else setError('No project found for that code. Double-check it with whoever invited you.');
+    else setError(t('join.notFound'));
   };
 
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Close" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('join.close')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          Join a project
+          {t('join.title')}
         </Text>
         <View style={{ width: 28 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.lead}>Enter the invite code someone shared with you.</Text>
+        <Text style={styles.lead}>{t('join.lead')}</Text>
 
         <TextInput
           value={code}
-          onChangeText={(t) => setCode(normalizeInviteCode(t))}
-          placeholder="CODE"
+          onChangeText={(text) => setCode(normalizeInviteCode(text))}
+          placeholder={t('join.codePlaceholder')}
           placeholderTextColor={MUTED}
           style={styles.codeInput}
           autoCapitalize="characters"
           autoCorrect={false}
           maxLength={16}
-          accessibilityLabel="Invite code"
+          accessibilityLabel={t('join.codeA11y')}
         />
 
         <View style={styles.consent}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.consentTitle}>Share my activity</Text>
-            <Text style={styles.consentBody}>
-              Let members see the habits you complete for this project (name + time). Your contributions count toward
-              the goal either way.
-            </Text>
+            <Text style={styles.consentTitle}>{t('join.shareTitle')}</Text>
+            <Text style={styles.consentBody}>{t('join.shareBody')}</Text>
           </View>
-          <Switch value={shareFeed} onValueChange={setShareFeed} accessibilityLabel="Share my activity in this project" />
+          <Switch value={shareFeed} onValueChange={setShareFeed} accessibilityLabel={t('join.shareA11y')} />
         </View>
 
         {error && <Text style={styles.error}>{error}</Text>}
@@ -80,10 +79,10 @@ export function JoinProjectScreen({ route, navigation }: Props) {
           onPress={() => void join()}
           disabled={!valid || busy}
           accessibilityRole="button"
-          accessibilityLabel="Join project"
+          accessibilityLabel={t('join.ctaA11y')}
           style={[styles.cta, (!valid || busy) && styles.ctaOff]}
         >
-          <Text style={styles.ctaText}>Join project</Text>
+          <Text style={styles.ctaText}>{t('join.cta')}</Text>
         </Pressable>
       </ScrollView>
     </ScreenContainer>

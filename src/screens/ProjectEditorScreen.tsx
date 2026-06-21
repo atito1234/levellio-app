@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -24,6 +25,7 @@ const TRACK = '#ECEAE4';
 const EMOJI_CHOICES = ['🎯', '🌱', '💧', '♻️', '🦟', '🎒', '🤝', '❤️', '🏥', '🌍', '🏫', '🍎'];
 
 export function ProjectEditorScreen({ navigation }: Props) {
+  const { t } = useTranslation('projects');
   const { createProject } = useProjects();
 
   const [title, setTitle] = useState('');
@@ -62,9 +64,9 @@ export function ProjectEditorScreen({ navigation }: Props) {
   const canSave = validateProjectDraft({ title, unit, weeklyGoal }).valid && !saving;
 
   const addHabit = () => {
-    const t = hTitle.trim();
-    if (t.length === 0) return;
-    setHabits((prev) => [...prev, { title: t, category: hCat, contribution: Math.max(1, parseInt(hValue, 10) || 1) }]);
+    const ht = hTitle.trim();
+    if (ht.length === 0) return;
+    setHabits((prev) => [...prev, { title: ht, category: hCat, contribution: Math.max(1, parseInt(hValue, 10) || 1) }]);
     setHTitle('');
     setHValue('1');
   };
@@ -94,45 +96,45 @@ export function ProjectEditorScreen({ navigation }: Props) {
   return (
     <ScreenContainer backgroundColor={BG}>
       <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Close" hitSlop={12}>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('editor.close')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
-          New project
+          {t('editor.title')}
         </Text>
         <View style={{ width: 28 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.lead}>Rally people around a shared, real-world goal. Invite others once it’s created.</Text>
+        <Text style={styles.lead}>{t('editor.lead')}</Text>
 
-        <TextInput value={title} onChangeText={setTitle} placeholder="Project name" placeholderTextColor={MUTED} style={styles.input} maxLength={60} accessibilityLabel="Project name" />
-        <TextInput value={region} onChangeText={setRegion} placeholder="Where (e.g. Fort-Liberté, Haiti)" placeholderTextColor={MUTED} style={styles.input} maxLength={60} accessibilityLabel="Region" />
-        <TextInput value={summary} onChangeText={setSummary} placeholder="What are you working toward and why?" placeholderTextColor={MUTED} style={[styles.input, styles.multiline]} multiline maxLength={240} accessibilityLabel="Summary" />
+        <TextInput value={title} onChangeText={setTitle} placeholder={t('editor.namePlaceholder')} placeholderTextColor={MUTED} style={styles.input} maxLength={60} accessibilityLabel={t('editor.nameA11y')} />
+        <TextInput value={region} onChangeText={setRegion} placeholder={t('editor.regionPlaceholder')} placeholderTextColor={MUTED} style={styles.input} maxLength={60} accessibilityLabel={t('editor.regionA11y')} />
+        <TextInput value={summary} onChangeText={setSummary} placeholder={t('editor.summaryPlaceholder')} placeholderTextColor={MUTED} style={[styles.input, styles.multiline]} multiline maxLength={240} accessibilityLabel={t('editor.summaryA11y')} />
 
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.fieldLabel}>Counting</Text>
-            <TextInput value={unit} onChangeText={setUnit} placeholder="trees planted" placeholderTextColor={MUTED} style={styles.input} maxLength={40} accessibilityLabel="Unit being counted" />
+            <Text style={styles.fieldLabel}>{t('editor.counting')}</Text>
+            <TextInput value={unit} onChangeText={setUnit} placeholder={t('editor.unitPlaceholder')} placeholderTextColor={MUTED} style={styles.input} maxLength={40} accessibilityLabel={t('editor.unitA11y')} />
           </View>
           <View style={{ width: 110 }}>
-            <Text style={styles.fieldLabel}>Weekly goal</Text>
-            <TextInput value={goalText} onChangeText={setGoalText} placeholder="100" placeholderTextColor={MUTED} style={styles.input} keyboardType="number-pad" maxLength={6} accessibilityLabel="Weekly goal" />
+            <Text style={styles.fieldLabel}>{t('editor.weeklyGoal')}</Text>
+            <TextInput value={goalText} onChangeText={setGoalText} placeholder="100" placeholderTextColor={MUTED} style={styles.input} keyboardType="number-pad" maxLength={6} accessibilityLabel={t('editor.weeklyGoalA11y')} />
           </View>
         </View>
 
-        <Text style={styles.fieldLabel}>Reward when the goal is met</Text>
-        <TextInput value={reward} onChangeText={setReward} placeholder="e.g. Seeds + tools for the garden" placeholderTextColor={MUTED} style={styles.input} maxLength={80} accessibilityLabel="Reward" />
+        <Text style={styles.fieldLabel}>{t('editor.rewardLabel')}</Text>
+        <TextInput value={reward} onChangeText={setReward} placeholder={t('editor.rewardPlaceholder')} placeholderTextColor={MUTED} style={styles.input} maxLength={80} accessibilityLabel={t('editor.rewardA11y')} />
 
-        <Text style={styles.fieldLabel}>On-site location (optional)</Text>
-        <Pressable onPress={() => void capturePin()} accessibilityRole="button" accessibilityLabel={pin ? 'Clear pinned location' : 'Use my current location as the project site'} style={[styles.pinBtn, pin && styles.pinBtnOn]}>
+        <Text style={styles.fieldLabel}>{t('editor.locationLabel')}</Text>
+        <Pressable onPress={() => void capturePin()} accessibilityRole="button" accessibilityLabel={pin ? t('editor.pinClearA11y') : t('editor.pinUseA11y')} style={[styles.pinBtn, pin && styles.pinBtnOn]}>
           <Text style={[styles.pinText, pin && styles.pinTextOn]}>
-            {pin ? `📍 Pinned (${pin.lat.toFixed(3)}, ${pin.lng.toFixed(3)}) · tap to clear` : pinning ? 'Getting location…' : '📍 Use my current location'}
+            {pin ? t('editor.pinned', { lat: pin.lat.toFixed(3), lng: pin.lng.toFixed(3) }) : pinning ? t('editor.gettingLocation') : t('editor.useLocation')}
           </Text>
         </Pressable>
-        <Text style={styles.pinHint}>Lets members’ on-the-ground completions show as “on-site”. Requires location permission.</Text>
+        <Text style={styles.pinHint}>{t('editor.pinHint')}</Text>
 
-        <Text style={styles.fieldLabel}>Icon</Text>
+        <Text style={styles.fieldLabel}>{t('editor.icon')}</Text>
         <View style={styles.wrap}>
           {EMOJI_CHOICES.map((e) => (
             <Pressable key={e} onPress={() => setEmoji(e)} accessibilityRole="button" accessibilityState={{ selected: emoji === e }} style={[styles.emojiCell, emoji === e && styles.emojiCellOn]}>
@@ -141,27 +143,27 @@ export function ProjectEditorScreen({ navigation }: Props) {
           ))}
         </View>
 
-        <Text style={styles.fieldLabel}>Color</Text>
+        <Text style={styles.fieldLabel}>{t('editor.color')}</Text>
         <View style={styles.wrap}>
           {PROJECT_COLOR_IDS.map((c) => (
-            <Pressable key={c} onPress={() => setColorId(c)} accessibilityRole="button" accessibilityState={{ selected: colorId === c }} accessibilityLabel={`${c} color`} style={[styles.swatch, { backgroundColor: getBucketColor(c).accent }, colorId === c && styles.swatchOn]} />
+            <Pressable key={c} onPress={() => setColorId(c)} accessibilityRole="button" accessibilityState={{ selected: colorId === c }} accessibilityLabel={t('editor.colorA11y', { color: c })} style={[styles.swatch, { backgroundColor: getBucketColor(c).accent }, colorId === c && styles.swatchOn]} />
           ))}
         </View>
 
-        <Text style={styles.fieldLabel}>Suggested habits (optional)</Text>
+        <Text style={styles.fieldLabel}>{t('editor.suggestedHabits')}</Text>
         {habits.map((h, i) => (
           <View key={`${h.title}-${i}`} style={styles.habitRow}>
             <Text style={styles.habitText} numberOfLines={1}>
-              {CATEGORY_META[h.category].icon} {h.title} · +{h.contribution} {unit || 'units'}
+              {CATEGORY_META[h.category].icon} {h.title} · +{h.contribution} {unit || t('editor.units')}
             </Text>
-            <Pressable onPress={() => setHabits((prev) => prev.filter((_, idx) => idx !== i))} accessibilityRole="button" accessibilityLabel={`Remove ${h.title}`} hitSlop={8}>
+            <Pressable onPress={() => setHabits((prev) => prev.filter((_, idx) => idx !== i))} accessibilityRole="button" accessibilityLabel={t('editor.removeHabitA11y', { title: h.title })} hitSlop={8}>
               <Text style={styles.remove}>✕</Text>
             </Pressable>
           </View>
         ))}
         <View style={styles.habitAdder}>
-          <TextInput value={hTitle} onChangeText={setHTitle} placeholder="Habit (e.g. Plant 5 seedlings)" placeholderTextColor={MUTED} style={[styles.input, { flex: 1 }]} maxLength={60} accessibilityLabel="Suggested habit title" />
-          <TextInput value={hValue} onChangeText={setHValue} style={[styles.input, { width: 56, textAlign: 'center' }]} keyboardType="number-pad" maxLength={4} accessibilityLabel="Units per completion" />
+          <TextInput value={hTitle} onChangeText={setHTitle} placeholder={t('editor.habitPlaceholder')} placeholderTextColor={MUTED} style={[styles.input, { flex: 1 }]} maxLength={60} accessibilityLabel={t('editor.habitTitleA11y')} />
+          <TextInput value={hValue} onChangeText={setHValue} style={[styles.input, { width: 56, textAlign: 'center' }]} keyboardType="number-pad" maxLength={4} accessibilityLabel={t('editor.unitsPerA11y')} />
         </View>
         <View style={styles.wrap}>
           {CATEGORY_ORDER.map((c) => (
@@ -170,12 +172,12 @@ export function ProjectEditorScreen({ navigation }: Props) {
             </Pressable>
           ))}
         </View>
-        <Pressable onPress={addHabit} accessibilityRole="button" accessibilityLabel="Add suggested habit" style={styles.addHabit}>
-          <Text style={styles.addHabitText}>+ Add habit</Text>
+        <Pressable onPress={addHabit} accessibilityRole="button" accessibilityLabel={t('editor.addHabitA11y')} style={styles.addHabit}>
+          <Text style={styles.addHabitText}>{t('editor.addHabit')}</Text>
         </Pressable>
 
-        <Pressable onPress={() => void save()} disabled={!canSave} accessibilityRole="button" accessibilityLabel="Create project" style={[styles.cta, !canSave && styles.ctaOff]}>
-          <Text style={styles.ctaText}>Create project</Text>
+        <Pressable onPress={() => void save()} disabled={!canSave} accessibilityRole="button" accessibilityLabel={t('editor.createA11y')} style={[styles.cta, !canSave && styles.ctaOff]}>
+          <Text style={styles.ctaText}>{t('editor.create')}</Text>
         </Pressable>
       </ScrollView>
     </ScreenContainer>

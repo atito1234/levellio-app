@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ActivityTile, AddActivitySheet, MiniScheduler, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
 import { spacing, typography } from '@/theme';
@@ -11,12 +13,13 @@ import { usePlan } from '@/state/PlanContext';
 import { useActivityLog } from '@/state/useActivityLog';
 import { sessionDay, sessionsOf } from '@/lib/analytics';
 import {
-  cycleEndLabel,
+  daysLeftInCycle,
   projectColor,
   type Contribution,
   type ProjectMember,
   type ProjectSuggestedHabit,
 } from '@/lib/projects';
+import { localizeProject } from '@/lib/projectText';
 import type { ProjectSnapshot } from '@/services/projects';
 import { CATEGORY_META } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
@@ -32,17 +35,24 @@ const GOLD = '#FFB23E';
 const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
-function timeAgo(ts: number): string {
+function timeAgo(ts: number, t: TFunction): string {
   const s = Math.max(0, Math.floor((Date.now() - ts) / 1000));
-  if (s < 60) return 'just now';
+  if (s < 60) return t('time.justNow');
   const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m ago`;
+  if (m < 60) return t('time.minutesAgo', { count: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return t('time.hoursAgo', { count: h });
+  return t('time.daysAgo', { count: Math.floor(h / 24) });
+}
+
+/** Localized "X days left" / "resets tomorrow" for the current weekly cycle. */
+function cycleLabel(t: TFunction): string {
+  const left = daysLeftInCycle();
+  return left <= 1 ? t('cycle.resetsTomorrow') : t('cycle.daysLeft', { count: left });
 }
 
 export function ProjectDetailScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('projects');
   const { projectId } = route.params;
   const { account } = useAuth();
   const { quests, addQuest } = useGame();
@@ -100,7 +110,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
 
   const adopt = async (habit: ProjectSuggestedHabit) => {
     const id = await ensureOwned(habit);
-    if (id) Alert.alert("You're in 🤝", `“${habit.title}” is now a daily habit of yours — it shows on your Today and powers this project every time you do it.`);
+    if (id) Alert.alert(t('detail.adoptedTitle'), t('detail.adoptedBody', { title: habit.title }));
   };
 
   // The user's OWN activities that power this project — theirs to add, edit,
@@ -140,15 +150,15 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   const invite = async () => {
     if (!project) return;
     await Share.share({
-      message: `Join me on Levellio for “${project.title}”. Use invite code ${project.inviteCode} or open levellio://join/${project.inviteCode}`,
+      message: t('detail.inviteMessage', { title: localizeProject(t, project).title, code: project.inviteCode }),
     });
   };
 
   const confirmLeave = () => {
-    Alert.alert('Leave project?', 'Your habits stay — they just stop contributing here.', [
-      { text: 'Stay', style: 'cancel' },
+    Alert.alert(t('detail.leaveTitle'), t('detail.leaveBody'), [
+      { text: t('detail.stay'), style: 'cancel' },
       {
-        text: 'Leave',
+        text: t('detail.leaveConfirm'),
         style: 'destructive',
         onPress: async () => {
           await leaveProject(projectId);
@@ -161,8 +171,8 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   if (loading) {
     return (
       <ScreenContainer backgroundColor={BG}>
-        <Topbar onBack={() => navigation.goBack()} title="Project" onInvite={undefined} />
-        <Text style={styles.loading}>Loading…</Text>
+        <Topbar onBack={() => navigation.goBack()} title={t('detail.header')} onInvite={undefined} />
+        <Text style={styles.loading}>{t('detail.loading')}</Text>
       </ScreenContainer>
     );
   }
@@ -170,43 +180,45 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
   if (!project) {
     return (
       <ScreenContainer backgroundColor={BG}>
-        <Topbar onBack={() => navigation.goBack()} title="Project" onInvite={undefined} />
-        <Text style={styles.loading}>This project is no longer available.</Text>
+        <Topbar onBack={() => navigation.goBack()} title={t('detail.header')} onInvite={undefined} />
+        <Text style={styles.loading}>{t('detail.unavailable')}</Text>
       </ScreenContainer>
     );
   }
 
+  const text = localizeProject(t, project);
+
   return (
     <ScreenContainer backgroundColor={BG}>
-      <Topbar onBack={() => navigation.goBack()} title="Project" onInvite={joined ? invite : undefined} />
+      <Topbar onBack={() => navigation.goBack()} title={t('detail.header')} onInvite={joined ? invite : undefined} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* Hero */}
         <View style={[styles.hero, { backgroundColor: c.soft }]}>
           <Text style={styles.heroEmoji}>{project.emoji}</Text>
           <Text style={styles.heroTitle} accessibilityRole="header">
-            {project.title}
+            {text.title}
           </Text>
           <Text style={styles.heroMeta}>
-            {project.region || 'Community'} · {project.memberCount} {project.memberCount === 1 ? 'member' : 'members'}
+            {t('meta', { region: text.region || t('community'), members: t('memberCount', { count: project.memberCount }) })}
           </Text>
-          <Text style={styles.heroSummary}>{project.summary}</Text>
+          <Text style={styles.heroSummary}>{text.summary}</Text>
         </View>
 
         {/* Progress */}
         <View style={styles.card}>
           <View style={styles.progressTop}>
             <Text style={styles.progressPct}>{pct}%</Text>
-            <Text style={styles.progressCycle}>{cycleEndLabel()}</Text>
+            <Text style={styles.progressCycle}>{cycleLabel(t)}</Text>
           </View>
-          <ProgressBar progress={pct / 100} color={barColor} trackColor={TRACK} height={14} label="Project weekly progress" />
+          <ProgressBar progress={pct / 100} color={barColor} trackColor={TRACK} height={14} label={t('detail.weeklyA11y')} />
           <Text style={styles.progressCount}>
-            {snap?.cycle.count ?? 0} / {project.weeklyGoal} {project.unit} this week
+            {t('detail.thisWeek', { count: snap?.cycle.count ?? 0, goal: project.weeklyGoal, unit: text.unit })}
           </Text>
           {activeToday > 0 && (
-            <Text style={[styles.pulse, { color: c.accent }]}>👥 {activeToday} active today</Text>
+            <Text style={[styles.pulse, { color: c.accent }]}>{t('strip.activeToday', { count: activeToday })}</Text>
           )}
           {project.reward.length > 0 && (
-            <Text style={styles.reward}>🎁 Reward at 100%: {project.reward}</Text>
+            <Text style={styles.reward}>{t('detail.reward', { reward: text.reward })}</Text>
           )}
         </View>
 
@@ -215,30 +227,28 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
           <View style={styles.card}>
             <View style={styles.consentRow}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.consentTitle}>Share my activity</Text>
-                <Text style={styles.consentBody}>
-                  Let members see the habits you complete here. Your contributions count either way.
-                </Text>
+                <Text style={styles.consentTitle}>{t('detail.shareTitle')}</Text>
+                <Text style={styles.consentBody}>{t('detail.shareBody')}</Text>
               </View>
-              <Switch value={joinShare} onValueChange={setJoinShare} accessibilityLabel="Share my activity" />
+              <Switch value={joinShare} onValueChange={setJoinShare} accessibilityLabel={t('detail.shareTitle')} />
             </View>
             <Pressable
               onPress={() => void joinProject(projectId, joinShare)}
               accessibilityRole="button"
-              accessibilityLabel="Join this project"
+              accessibilityLabel={t('detail.joinA11y')}
               style={styles.cta}
             >
-              <Text style={styles.ctaText}>Join this project</Text>
+              <Text style={styles.ctaText}>{t('detail.join')}</Text>
             </Pressable>
           </View>
         ) : (
           <View style={styles.card}>
             <View style={styles.consentRow}>
-              <Text style={styles.consentTitle}>Share my activity</Text>
+              <Text style={styles.consentTitle}>{t('detail.shareTitle')}</Text>
               <Switch
                 value={me?.shareFeed ?? true}
                 onValueChange={(v) => void setShareFeed(projectId, v)}
-                accessibilityLabel="Share my activity"
+                accessibilityLabel={t('detail.shareTitle')}
               />
             </View>
           </View>
@@ -247,8 +257,8 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         {/* Big, fun activity tiles: add your own, or ask peers who've solved it. */}
         {joined && (
           <View style={styles.tileRow}>
-            <ActivityTile icon="✨" label="New activity" sub="Add your own daily habit" onPress={() => { setAddDates(null); setAddOpen(true); }} tint={c.accent} />
-            <ActivityTile icon="🌍" label="Ask peers" sub="Get a habit that worked for them" onPress={() => navigation.navigate('PostComposer', { projectId, kind: 'ask' })} tint={VIOLET} />
+            <ActivityTile icon="✨" label={t('detail.tileNew')} sub={t('detail.tileNewSub')} onPress={() => { setAddDates(null); setAddOpen(true); }} tint={c.accent} />
+            <ActivityTile icon="🌍" label={t('detail.tileAsk')} sub={t('detail.tileAskSub')} onPress={() => navigation.navigate('PostComposer', { projectId, kind: 'ask' })} tint={VIOLET} />
           </View>
         )}
 
@@ -256,20 +266,20 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         {joined && (
           <>
             <View style={styles.sectionRow}>
-              <Text style={styles.sectionLabel}>YOUR ACTIVITIES HERE</Text>
+              <Text style={styles.sectionLabel}>{t('detail.yourActivities')}</Text>
               {myQuests.length > 1 && (
                 <Pressable
                   onPress={() => navigation.navigate('BattleSetup', { questIds: myQuests.map((q) => q.id) })}
                   accessibilityRole="button"
-                  accessibilityLabel="Take these activities into battle"
+                  accessibilityLabel={t('detail.slayA11y')}
                   hitSlop={8}
                 >
-                  <Text style={styles.slay}>⚔️ Slay these</Text>
+                  <Text style={styles.slay}>{t('detail.slay')}</Text>
                 </Pressable>
               )}
             </View>
             {myQuests.length === 0 ? (
-              <Text style={styles.empty}>Add a suggested activity below — or your own — to make it yours.</Text>
+              <Text style={styles.empty}>{t('detail.yourActivitiesEmpty')}</Text>
             ) : (
               <View style={styles.cardList}>
                 {myQuests.map((q) => (
@@ -291,14 +301,14 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
               </View>
             )}
             {projectGoal && (
-              <Pressable onPress={() => navigation.navigate('GoalFocus', { goalId: projectGoal.id })} accessibilityRole="button" accessibilityLabel="View this project's goal" style={styles.makeGoal}>
-                <Text style={styles.makeGoalText}>🎯 View project goal</Text>
+              <Pressable onPress={() => navigation.navigate('GoalFocus', { goalId: projectGoal.id })} accessibilityRole="button" accessibilityLabel={t('detail.viewGoalA11y')} style={styles.makeGoal}>
+                <Text style={styles.makeGoalText}>{t('detail.viewGoal')}</Text>
               </Pressable>
             )}
 
             {myQuests.length > 0 && (
               <>
-                <Text style={styles.sectionLabel}>YOUR CALENDAR · SCHEDULE ANY DAY</Text>
+                <Text style={styles.sectionLabel}>{t('detail.yourCalendar')}</Text>
                 <MiniScheduler
                   quests={myQuests}
                   getPlan={getPlan}
@@ -318,7 +328,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         {/* Suggested activities — big adopt cards (daily habit, reuse by name). */}
         {project.suggestedHabits.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>SUGGESTED ACTIVITIES</Text>
+            <Text style={styles.sectionLabel}>{t('detail.suggested')}</Text>
             <View style={styles.cardList}>
               {project.suggestedHabits.map((h, i) => {
                 const owned = questByTitle(h.title);
@@ -328,7 +338,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
                     key={`${h.title}-${i}`}
                     emoji={CATEGORY_META[h.category].icon}
                     title={h.title}
-                    contribution={`+${h.contribution} ${project.unit}`}
+                    contribution={t('detail.contribution', { value: h.contribution, unit: text.unit })}
                     accent={c.accent}
                     added={linked}
                     onAdd={() => void adopt(h)}
@@ -345,46 +355,46 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
           <Pressable
             onPress={() => navigation.navigate('PostComposer', { projectId })}
             accessibilityRole="button"
-            accessibilityLabel="Post an update to this project"
+            accessibilityLabel={t('detail.postUpdateA11y')}
             style={styles.postUpdate}
           >
-            <Text style={styles.postUpdateText}>💬 Post an update to your community</Text>
+            <Text style={styles.postUpdateText}>{t('detail.postUpdate')}</Text>
           </Pressable>
         )}
 
         {/* Activity feed */}
-        <Text style={styles.sectionLabel}>LIVE ACTIVITY</Text>
+        <Text style={styles.sectionLabel}>{t('detail.liveActivity')}</Text>
         {(snap?.feed.length ?? 0) === 0 ? (
-          <Text style={styles.empty}>No activity yet. Be the first to contribute!</Text>
+          <Text style={styles.empty}>{t('detail.noActivity')}</Text>
         ) : (
           snap!.feed.map((f: Contribution) => (
             <View key={f.id} style={styles.feedRow}>
               <View style={[styles.feedDot, { backgroundColor: c.accent }]} />
               <Text style={styles.feedText} numberOfLines={2}>
                 <Text style={styles.feedName}>{f.displayName}</Text> {f.habitTitle} · +{f.value}
-                {f.mode === 'onsite' ? ' · 📍 on-site' : ''}
+                {f.mode === 'onsite' ? t('detail.onSite') : ''}
               </Text>
-              <Text style={styles.feedTime}>{timeAgo(f.createdAt)}</Text>
+              <Text style={styles.feedTime}>{timeAgo(f.createdAt, t)}</Text>
             </View>
           ))
         )}
 
         {/* Members */}
-        <Text style={styles.sectionLabel}>MEMBERS ({snap?.members.length ?? 0})</Text>
+        <Text style={styles.sectionLabel}>{t('detail.members', { count: snap?.members.length ?? 0 })}</Text>
         {snap?.members.map((m) => (
           <View key={m.uid} style={styles.memberRow}>
             <Text style={styles.memberName} numberOfLines={1}>
               {m.displayName}
-              {m.role === 'owner' ? ' · owner' : ''}
-              {m.uid === uid ? ' · you' : ''}
+              {m.role === 'owner' ? t('detail.owner') : ''}
+              {m.uid === uid ? t('detail.you') : ''}
             </Text>
             <Text style={styles.memberTotal}>{m.contributionTotal}</Text>
           </View>
         ))}
 
         {joined && (
-          <Pressable onPress={confirmLeave} accessibilityRole="button" accessibilityLabel="Leave project" style={styles.leave}>
-            <Text style={styles.leaveText}>Leave project</Text>
+          <Pressable onPress={confirmLeave} accessibilityRole="button" accessibilityLabel={t('detail.leaveA11y')} style={styles.leave}>
+            <Text style={styles.leaveText}>{t('detail.leave')}</Text>
           </Pressable>
         )}
       </ScrollView>
@@ -404,17 +414,18 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
 }
 
 function Topbar({ onBack, title, onInvite }: { onBack: () => void; title: string; onInvite?: () => void }) {
+  const { t } = useTranslation('projects');
   return (
     <View style={styles.topbar}>
-      <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Close" hitSlop={12}>
+      <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel={t('detail.close')} hitSlop={12}>
         <Text style={styles.chevron}>‹</Text>
       </Pressable>
       <Text style={styles.topTitle} accessibilityRole="header">
         {title}
       </Text>
       {onInvite ? (
-        <Pressable onPress={onInvite} accessibilityRole="button" accessibilityLabel="Invite" hitSlop={12}>
-          <Text style={styles.invite}>Invite</Text>
+        <Pressable onPress={onInvite} accessibilityRole="button" accessibilityLabel={t('detail.inviteA11y')} hitSlop={12}>
+          <Text style={styles.invite}>{t('detail.invite')}</Text>
         </Pressable>
       ) : (
         <View style={{ width: 44 }} />
