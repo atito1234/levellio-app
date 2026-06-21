@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography } from '@/theme';
 import { hourLabel } from '@/lib/analytics';
 
@@ -18,13 +19,17 @@ const MAX_H = 64;
  * `counts` is the byHour[24] array from analytics.summarize.
  */
 export function HourBars({ counts }: { counts: readonly number[] }) {
+  const { t, i18n } = useTranslation('momentum');
+  const locale = i18n.language;
   const max = Math.max(1, ...counts);
   const peak = counts.reduce((best, c, i) => (c > (counts[best] ?? -1) ? i : best), 0);
   const peakHasData = (counts[peak] ?? 0) > 0;
-  const summary = peakHasData ? `Most active around ${hourLabel(peak)}` : 'No activity logged';
+  const summary = peakHasData
+    ? t('hourBars.mostActive', { time: hourLabel(peak, locale) })
+    : t('hourBars.noActivity');
 
   return (
-    <View accessible accessibilityRole="image" accessibilityLabel={`Time of day activity. ${summary}.`}>
+    <View accessible accessibilityRole="image" accessibilityLabel={t('hourBars.a11y', { summary })}>
       <View style={styles.bars} importantForAccessibility="no-hide-descendants">
         {counts.map((c, h) => {
           const height = c > 0 ? Math.max(4, Math.round((c / max) * MAX_H)) : 2;
@@ -39,7 +44,7 @@ export function HourBars({ counts }: { counts: readonly number[] }) {
       <View style={styles.axis}>
         {AXIS.map((h) => (
           <Text key={h} style={styles.tick}>
-            {hourLabel(h).replace(' ', '').toLowerCase()}
+            {hourLabel(h, locale).replace(' ', '').toLowerCase()}
           </Text>
         ))}
       </View>

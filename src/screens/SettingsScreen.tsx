@@ -401,7 +401,7 @@ export function SettingsScreen() {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Email support at ${CONTACT_EMAIL}`}
+            accessibilityLabel={t('about.emailSupportA11y', { email: CONTACT_EMAIL })}
             onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)}
             style={styles.row}
           >

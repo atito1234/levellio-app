@@ -7,6 +7,7 @@
  *
  * Pure (no I/O) so it's fully testable.
  */
+import type { TFunction } from 'i18next';
 import { dayDiff, shiftDayKey } from './dates';
 import { sessionDay } from './analytics';
 import type { ActivitySessionEvent } from './metadata';
@@ -102,41 +103,61 @@ export interface DirectionInput {
   activePrevWeek: number;
 }
 
-/** A quick, honest read on momentum — the headline of the dashboard. */
-export function directionVerdict({ daysDone, streakDays, activeThisWeek, activePrevWeek }: DirectionInput): Direction {
+/**
+ * A quick, honest read on momentum — the headline of the dashboard.
+ *
+ * Pure by default: when no translator is passed the English literals are
+ * returned (keeping the unit tests green). When `t` is provided the same copy is
+ * sourced from the `momentum` namespace.
+ */
+export function directionVerdict(
+  { daysDone, streakDays, activeThisWeek, activePrevWeek }: DirectionInput,
+  t?: TFunction,
+): Direction {
   if (daysDone === 0) {
     return {
       tone: 'start',
-      label: 'Your map starts today',
-      reason: 'Complete one habit and your direction will start to take shape here.',
+      label: t ? t('momentum:verdict.start.label') : 'Your map starts today',
+      reason: t
+        ? t('momentum:verdict.start.reason')
+        : 'Complete one habit and your direction will start to take shape here.',
     };
   }
 
-  const trend =
-    activeThisWeek > activePrevWeek
+  const trendKey: 'up' | 'down' | 'same' =
+    activeThisWeek > activePrevWeek ? 'up' : activeThisWeek < activePrevWeek ? 'down' : 'same';
+  const trend = t
+    ? t(`momentum:verdict.trend.${trendKey}`)
+    : trendKey === 'up'
       ? ' — up from last week.'
-      : activeThisWeek < activePrevWeek
+      : trendKey === 'down'
         ? ' — down from last week, worth a nudge.'
         : '.';
 
   if (streakDays >= 3 || activeThisWeek >= 4) {
     return {
       tone: 'onTrack',
-      label: 'Headed in the right direction',
-      reason: `You showed up ${activeThisWeek} of the last 7 days${trend}`,
+      label: t ? t('momentum:verdict.onTrack.label') : 'Headed in the right direction',
+      reason: t
+        ? t('momentum:verdict.onTrack.reason', { active: activeThisWeek, trend })
+        : `You showed up ${activeThisWeek} of the last 7 days${trend}`,
     };
   }
   if (activeThisWeek >= 2 || streakDays >= 1) {
     return {
       tone: 'building',
-      label: 'Building momentum',
-      reason: `${activeThisWeek} active ${activeThisWeek === 1 ? 'day' : 'days'} this week${trend} A little more makes it stick.`,
+      label: t ? t('momentum:verdict.building.label') : 'Building momentum',
+      reason: t
+        ? t('momentum:verdict.building.reason', { count: activeThisWeek, active: activeThisWeek, trend })
+        : `${activeThisWeek} active ${activeThisWeek === 1 ? 'day' : 'days'} this week${trend} A little more makes it stick.`,
     };
   }
   return {
     tone: 'drifting',
-    label: 'Time for a gentle nudge',
-    reason: 'It’s been quiet this week. One small win today restarts the momentum.',
+    label: t ? t('momentum:verdict.drifting.label') : 'Time for a gentle nudge',
+    reason: t
+      ? t('momentum:verdict.drifting.reason')
+      : 'It’s been quiet this week. One small win today restarts the momentum.',
   };
 }
 
@@ -179,6 +200,21 @@ export function nextLockedTier(daysDone: number): InsightTier | null {
 /** How many insight tiers are currently unlocked. */
 export function unlockedCount(daysDone: number): number {
   return INSIGHT_TIERS.filter((t) => daysDone >= t.unlockDays).length;
+}
+
+/**
+ * Localized title/teaser for a tier id. The English copy stays embedded in
+ * INSIGHT_TIERS as the fallback, so render sites can pass `t` for translation
+ * while the pure data array (and its tests) is left untouched.
+ */
+export function tierTitle(id: InsightTier['id'], t?: TFunction): string {
+  const fallback = INSIGHT_TIERS.find((tier) => tier.id === id)?.title ?? '';
+  return t ? t(`momentum:tier.${id}.title`) : fallback;
+}
+
+export function tierTeaser(id: InsightTier['id'], t?: TFunction): string {
+  const fallback = INSIGHT_TIERS.find((tier) => tier.id === id)?.teaser ?? '';
+  return t ? t(`momentum:tier.${id}.teaser`) : fallback;
 }
 
 // --- Self-reported rating insights ("how it feels") -------------------------

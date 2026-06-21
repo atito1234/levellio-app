@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Line, Polyline } from 'react-native-svg';
 import { spacing, typography } from '@/theme';
 import { getBucketColor } from '@/lib/buckets';
@@ -30,6 +31,8 @@ export function TrendChart({
   /** Day-count for the confidence chip (defaults to the series' own confidence). */
   daysOfData?: number;
 }) {
+  const { t, i18n } = useTranslation('momentum');
+  const locale = i18n.language;
   const [width, setWidth] = useState(0);
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
 
@@ -42,7 +45,8 @@ export function TrendChart({
   const polyline = series.points.map((p, i) => `${xAt(i).toFixed(1)},${scaleY(p.value, max, plotH).toFixed(1)}`).join(' ');
   const last = series.points[series.points.length - 1]?.value ?? 0;
   const unit = series.unit ?? '';
-  const a11y = `${series.label}. ${series.points.length === 0 ? 'No data yet' : `Latest ${last}${unit}`}.`;
+  const detail = series.points.length === 0 ? t('trendChart.noData') : t('trendChart.latest', { value: last, unit });
+  const a11y = t('trendChart.a11y', { label: series.label, detail });
 
   return (
     <View>
@@ -50,7 +54,7 @@ export function TrendChart({
         <Text style={styles.title} numberOfLines={1}>
           {series.label}
         </Text>
-        <Text style={styles.chip}>{daysOfData != null ? confidenceLabel(daysOfData) : series.confidence}</Text>
+        <Text style={styles.chip}>{daysOfData != null ? confidenceLabel(daysOfData, t) : series.confidence}</Text>
       </View>
       <View onLayout={onLayout} accessible accessibilityRole="image" accessibilityLabel={a11y}>
         {width > 0 && (
@@ -80,8 +84,8 @@ export function TrendChart({
       </View>
       {series.points.length > 0 && (
         <View style={styles.axis}>
-          <Text style={styles.tick}>{formatDayKey(series.points[0]!.dayKey)}</Text>
-          <Text style={styles.tick}>{formatDayKey(series.points[series.points.length - 1]!.dayKey)}</Text>
+          <Text style={styles.tick}>{formatDayKey(series.points[0]!.dayKey, locale)}</Text>
+          <Text style={styles.tick}>{formatDayKey(series.points[series.points.length - 1]!.dayKey, locale)}</Text>
         </View>
       )}
     </View>

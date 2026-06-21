@@ -1,7 +1,15 @@
 {
-  "greeting": { "morning": "Bonjour", "afternoon": "Bon après-midi", "evening": "Bonsoir", "fallbackName": "vous" },
+  "greeting": {
+    "morning": "Bonjour",
+    "afternoon": "Bon après-midi",
+    "evening": "Bonsoir",
+    "fallbackName": "vous"
+  },
   "openHeroA11y": "Ouvrir votre héros",
-  "share": { "hint": "Partagez une actualité…", "a11y": "Partagez une actualité avec votre communauté" },
+  "share": {
+    "hint": "Partagez une actualité…",
+    "a11y": "Partagez une actualité avec votre communauté"
+  },
   "step1": "ÉTAPE 1 · Votre objectif",
   "step1Pick": "ÉTAPE 1 · Choisissez un objectif pour commencer",
   "step2": "ÉTAPE 2 · Touchez 🎙️ pour ajouter vos activités",
@@ -30,7 +38,13 @@
   "upNextToday": "Ensuite aujourd'hui",
   "scheduleSubEmpty": "Touchez pour planifier vos habitudes dans le calendrier",
   "scheduleSubCount": "{{count}} planifiées aujourd'hui",
-  "chips": { "journal": "📓 Journal", "library": "📚 Bibliothèque", "buckets": "🗂 Groupes", "connections": "🔗 Connexions", "suggest": "✨ Suggérer" },
+  "chips": {
+    "journal": "📓 Journal",
+    "library": "📚 Bibliothèque",
+    "buckets": "🗂 Groupes",
+    "connections": "🔗 Connexions",
+    "suggest": "✨ Suggérer"
+  },
   "capacitiesTitle": "Vos capacités · 7 derniers jours",
   "progress": "Progrès ›",
   "goalsEmptyTitle": "Que voulez-vous accomplir ?",
@@ -40,5 +54,19 @@
   "yourGoals": "VOS OBJECTIFS",
   "newGoal": "Nouvel objectif",
   "tapToSwitch": "· touchez à nouveau l'objectif pour changer",
-  "todayCount": "{{done}}/{{total}} aujourd'hui"
+  "todayCount": "{{done}}/{{total}} aujourd'hui",
+  "scheduledForA11y": "Prévu à {{time}}",
+  "prioritizeA11y": "Prioriser cette activité pour la faire ensuite",
+  "streakPillA11y": "série de {{days}} jours",
+  "dragonsSlainA11y_one": "{{count}} dragon vaincu",
+  "dragonsSlainA11y_other": "{{count}} dragons vaincus",
+  "coinsA11y_one": "{{count}} pièce",
+  "coinsA11y_other": "{{count}} pièces",
+  "levelA11y": "Niveau {{level}}",
+  "focusActivityA11y": "Activité prioritaire {{index}} sur {{total}} : {{title}}",
+  "connectsA11y": "Voir comment {{title}} se connecte",
+  "warStrategyA11y": "Préparez votre stratégie de guerre pour {{title}}",
+  "bringToFocusA11y": "Mettre {{title}} en priorité",
+  "goalCardA11y": "{{title}}. {{done}} sur {{planned}} faits aujourd’hui, {{pct}} pour cent cette semaine.{{selected}}",
+  "goalCardSelected": " Sélectionné."
 }

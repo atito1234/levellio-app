@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography } from '@/theme';
 
 const MUTED = '#5A5A72';
@@ -29,12 +30,13 @@ export function BarHistogram({
   onPressBar?: (bar: HistogramBar, index: number) => void;
   highlightPeak?: boolean;
 }) {
+  const { t } = useTranslation('charts');
   const max = Math.max(1, ...bars.map((b) => b.value));
   const peak = bars.reduce((best, b, i) => (b.value > (bars[best]?.value ?? -1) ? i : best), 0);
   const peakHasData = (bars[peak]?.value ?? 0) > 0;
 
   return (
-    <View accessible accessibilityRole="image" accessibilityLabel={`Distribution chart with ${bars.length} bars.`}>
+    <View accessible accessibilityRole="image" accessibilityLabel={t('barHistogram.summary', { count: bars.length })}>
       <View style={styles.row} importantForAccessibility="no-hide-descendants">
         {bars.map((b, i) => {
           const h = b.value > 0 ? Math.max(4, Math.round((b.value / max) * MAX_H)) : 2;
@@ -57,7 +59,7 @@ export function BarHistogram({
               style={styles.colWrap}
               onPress={() => onPressBar(b, i)}
               accessibilityRole="button"
-              accessibilityLabel={`${b.label}: ${b.value}`}
+              accessibilityLabel={t('barHistogram.bar', { label: b.label, value: b.value })}
             >
               {Bar}
             </Pressable>

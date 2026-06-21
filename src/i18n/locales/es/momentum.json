@@ -1,0 +1,81 @@
+{
+  "verdict": {
+    "start": {
+      "label": "Tu mapa empieza hoy",
+      "reason": "Completa un hábito y tu dirección empezará a tomar forma aquí."
+    },
+    "onTrack": {
+      "label": "Vas por buen camino",
+      "reason": "Apareciste {{active}} de los últimos 7 días{{trend}}"
+    },
+    "building": {
+      "label": "Ganando impulso",
+      "reason_one": "{{active}} día activo esta semana{{trend}} Un poco más y se afianza.",
+      "reason_other": "{{active}} días activos esta semana{{trend}} Un poco más y se afianza."
+    },
+    "drifting": {
+      "label": "Hora de un pequeño empujón",
+      "reason": "Ha sido una semana tranquila. Una pequeña victoria hoy reinicia el impulso."
+    },
+    "trend": {
+      "up": " — más que la semana pasada.",
+      "down": " — menos que la semana pasada, conviene un empujón.",
+      "same": "."
+    }
+  },
+  "tier": {
+    "streak": {
+      "title": "Fuerza de la racha",
+      "teaser": "Cuántos días seguidos has aparecido."
+    },
+    "rhythm": {
+      "title": "Tu ritmo",
+      "teaser": "El día y la hora en que es más probable que aparezcas."
+    },
+    "anchor": {
+      "title": "Tu hábito ancla",
+      "teaser": "El hábito al que más vuelves — tu base."
+    },
+    "mix": {
+      "title": "Lo que funciona",
+      "teaser": "Qué área de tu vida recibe tu energía, y la meta que alimenta."
+    },
+    "resilience": {
+      "title": "Tu resiliencia",
+      "teaser": "Tu racha ininterrumpida más larga — la prueba de que puedes mantenerla."
+    },
+    "automatic": {
+      "title": "Volverse automático",
+      "teaser": "Cuando tus hábitos empiezan a funcionar solos — la ciencia de los 66 días."
+    }
+  },
+  "confidence": {
+    "early_one": "Inicial · {{count}} día",
+    "early_other": "Inicial · {{count}} días",
+    "building_one": "En desarrollo · {{count}} día",
+    "building_other": "En desarrollo · {{count}} días",
+    "confident": "Fiable"
+  },
+  "hourBars": {
+    "mostActive": "Más activo alrededor de {{time}}",
+    "noActivity": "Sin actividad registrada",
+    "a11y": "Actividad por hora del día. {{summary}}."
+  },
+  "trendChart": {
+    "noData": "Aún no hay datos",
+    "latest": "Último {{value}}{{unit}}",
+    "a11y": "{{label}}. {{detail}}.",
+    "overallAdherence": "Adherencia general"
+  },
+  "focus": {
+    "capLagging": "{{name}} se está quedando atrás",
+    "capLaggingReason": "Es tu capacidad más baja. «{{habit}}» la fortalece más rápido.",
+    "doHabit": "Hacer «{{habit}}»",
+    "groupSlipping": "{{label}} se está descuidando",
+    "groupSlippingReason": "Se hizo el {{pct}}% de lo que programaste.",
+    "focusGroup": "Enfocarte en {{label}}",
+    "weekdayGap": "Los {{day}} son tu punto débil",
+    "weekdayGapReason": "Es el día que más fallas. Planifícalo a propósito.",
+    "planDay": "Planificar {{day}}"
+  }
+}

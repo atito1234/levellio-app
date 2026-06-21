@@ -118,14 +118,24 @@ export function byActivity(sessions: readonly ActivitySessionEvent[]): ActivityS
 
 // --- Labels -----------------------------------------------------------------
 
-export function hourLabel(h: number): string {
-  const period = h < 12 ? 'AM' : 'PM';
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12} ${period}`;
+/**
+ * Clock-hour label. Defaults to the English 12-hour "7 AM" form (keeps the unit
+ * tests green and the default locale unchanged). For other locales we defer to
+ * the platform, which renders 24-hour clocks for fr/es ("14:00" style).
+ */
+export function hourLabel(h: number, locale = 'en-US'): string {
+  if (locale === 'en-US' || locale.startsWith('en')) {
+    const period = h < 12 ? 'AM' : 'PM';
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${h12} ${period}`;
+  }
+  const d = new Date(2000, 0, 1, h, 0, 0);
+  return d.toLocaleTimeString(locale, { hour: 'numeric' });
 }
 
-export function weekdayLabel(d: number): string {
-  return WEEKDAY_SHORT[d] ?? '';
+/** Short weekday label. Pass a 7-item names array (Sun-first) to localize. */
+export function weekdayLabel(d: number, names: readonly string[] = WEEKDAY_SHORT): string {
+  return names[d] ?? '';
 }
 
 export function formatMinutes(min: number): string {
@@ -136,7 +146,7 @@ export function formatMinutes(min: number): string {
 }
 
 /** Clock label for a session's completion time, when timestamps are kept. */
-export function sessionTimeLabel(session: ActivitySessionEvent): string {
+export function sessionTimeLabel(session: ActivitySessionEvent, locale = 'en-US'): string {
   const d = new Date(session.createdAt);
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
 }

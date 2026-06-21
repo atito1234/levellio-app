@@ -1,0 +1,22 @@
+{
+  "pomodoro": {
+    "name": "Pomodoro",
+    "blurb": "Sprints de concentration 25/5 classiques."
+  },
+  "deepwork": {
+    "name": "Travail profond",
+    "blurb": "Long bloc de travail profond 52/17."
+  },
+  "quick10": {
+    "name": "Éclair 10",
+    "blurb": "Une manche rapide de 10 minutes."
+  },
+  "custom": {
+    "name": "Personnalisé",
+    "blurb": "Définissez vos propres minutes."
+  },
+  "flowtime": {
+    "name": "Flowtime",
+    "blurb": "Sans limite — restez dans le flux jusqu'au bout."
+  }
+}

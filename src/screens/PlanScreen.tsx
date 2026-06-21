@@ -175,7 +175,7 @@ export function PlanScreen({ route, navigation }: Props) {
                       {projectsForHabit(q.id).length > 0 && <ProjectBadge projects={projectsForHabit(q.id)} compact />}
                       {(q.scheduledTime !== undefined || q.scheduledDays?.length) && (
                         <Text style={styles.rowTime}>
-                          {q.scheduledTime !== undefined ? `⏰ ${minutesToLabel(q.scheduledTime)}` : ''}
+                          {q.scheduledTime !== undefined ? `⏰ ${minutesToLabel(q.scheduledTime, i18n.language)}` : ''}
                           {q.scheduledTime !== undefined && q.scheduledDays?.length ? ' · ' : ''}
                           {q.scheduledDays?.length ? `↻ ${weekdaysLabel(q.scheduledDays, recurrenceLabelOpts(t))}` : ''}
                         </Text>

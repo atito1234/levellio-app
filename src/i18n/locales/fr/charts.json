@@ -1,0 +1,52 @@
+{
+  "rankBars": {
+    "summary_one": "Meilleures progressions, {{count}} élément.",
+    "summary_other": "Meilleures progressions, {{count}} éléments.",
+    "row": "{{label}}, {{delta}}"
+  },
+  "dotGrid": {
+    "summary_one": "{{done}} sur les {{total}} dernier jour effectué",
+    "summary_other": "{{done}} sur les {{total}} derniers jours effectués"
+  },
+  "calendarHeatmap": {
+    "summary_one": "Carte thermique du calendrier sur {{count}} jour.",
+    "summary_other": "Carte thermique du calendrier sur {{count}} jours.",
+    "day": "{{dayKey}} : {{value}}"
+  },
+  "hBarChart": {
+    "row": "{{label}}, {{display}}"
+  },
+  "radarChart": {
+    "summary": "Graphique d'équilibre. {{a11y}}."
+  },
+  "barHistogram": {
+    "summary_one": "Graphique de distribution avec {{count}} barre.",
+    "summary_other": "Graphique de distribution avec {{count}} barres.",
+    "bar": "{{label}} : {{value}}"
+  },
+  "hero": {
+    "label": "Héros {{presentation}}, palier {{tier}}",
+    "labelWithKit": "Héros {{presentation}}, palier {{tier}}, maillot {{nation}}",
+    "presentation": {
+      "female": "féminin",
+      "male": "masculin",
+      "neutral": "neutre"
+    },
+    "tierLabel": {
+      "novice": "Novice",
+      "pathfinder": "Éclaireur",
+      "luminary": "Sommité"
+    }
+  },
+  "wisp": {
+    "label": "Compagnon Wisp : {{label}}",
+    "stage": {
+      "spark": "Étincelle",
+      "ember": "Braise",
+      "phoenixling": "Phénix"
+    }
+  },
+  "xp": "{{xp}} sur {{needed}} XP",
+  "xpProgress": "Progression XP vers le niveau suivant",
+  "lvlShort": "NIV"
+}

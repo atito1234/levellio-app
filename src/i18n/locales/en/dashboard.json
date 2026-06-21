@@ -40,5 +40,19 @@
   "yourGoals": "YOUR GOALS",
   "newGoal": "New goal",
   "tapToSwitch": "· tap the goal again to switch",
-  "todayCount": "{{done}}/{{total}} today"
+  "todayCount": "{{done}}/{{total}} today",
+  "scheduledForA11y": "Scheduled for {{time}}",
+  "prioritizeA11y": "Prioritize this activity to be next",
+  "streakPillA11y": "{{days}} day streak",
+  "dragonsSlainA11y_one": "{{count}} dragon slain",
+  "dragonsSlainA11y_other": "{{count}} dragons slain",
+  "coinsA11y_one": "{{count}} coin",
+  "coinsA11y_other": "{{count}} coins",
+  "levelA11y": "Level {{level}}",
+  "focusActivityA11y": "Focus activity {{index}} of {{total}}: {{title}}",
+  "connectsA11y": "See how {{title}} connects",
+  "warStrategyA11y": "Prepare your war strategy for {{title}}",
+  "bringToFocusA11y": "Bring {{title}} to focus",
+  "goalCardA11y": "{{title}}. {{done}} of {{planned}} done today, {{pct}} percent this week.{{selected}}",
+  "goalCardSelected": " Selected."
 }

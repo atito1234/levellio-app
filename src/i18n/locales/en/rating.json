@@ -1,0 +1,14 @@
+{
+  "kicker": "HOW DID IT GO?",
+  "hint": {
+    "1": "A real grind",
+    "2": "A bit of a slog",
+    "3": "Fine — got it done",
+    "4": "Felt good",
+    "5": "Loved it"
+  },
+  "scaleHint": "1 = a grind · 5 = loved it",
+  "starA11y": "{{n}} of 5 — {{hint}}",
+  "skipA11y": "Skip rating",
+  "skip": "Skip"
+}

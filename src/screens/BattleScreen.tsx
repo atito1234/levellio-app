@@ -230,7 +230,7 @@ export function BattleScreen({ route, navigation }: Props) {
               {clock}
             </Text>
             <Text style={styles.clockSub}>
-              {technique.name}
+              {t('techniques:' + technique.id + '.name', { defaultValue: technique.name })}
               {totalSec === null ? t('battle.countUp') : ''}
             </Text>
           </>

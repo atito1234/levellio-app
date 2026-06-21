@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography } from '@/theme';
 
 // Locked palette (gold reserved for 100% rings — never on a partial bar).
@@ -28,13 +29,19 @@ export interface BarDatum {
  * normalizing to the row max). Each row is self-describing for screen readers.
  */
 export function HBarChart({ data, barHeight = 12 }: { data: readonly BarDatum[]; barHeight?: number }) {
+  const { t } = useTranslation('charts');
   const max = Math.max(1, ...data.map((d) => d.value));
   return (
     <View style={styles.wrap}>
       {data.map((d) => {
         const pct = d.value > 0 ? Math.max(6, Math.round((d.value / max) * 100)) : 0;
         return (
-          <View key={d.key} style={styles.row} accessibilityRole="text" accessibilityLabel={`${d.label}, ${d.display}`}>
+          <View
+            key={d.key}
+            style={styles.row}
+            accessibilityRole="text"
+            accessibilityLabel={t('hBarChart.row', { label: d.label, display: d.display })}
+          >
             <View style={styles.head}>
               <Text style={styles.label} numberOfLines={1}>
                 {d.icon ? `${d.icon} ` : ''}

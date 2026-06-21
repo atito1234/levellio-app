@@ -11,7 +11,8 @@ import { useProjects } from '@/state/ProjectsContext';
 import { usePlan } from '@/state/PlanContext';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
-import { isValidCommentText, timeAgo, type Comment, type Post, type SuggestedHabit } from '@/lib/community';
+import { isValidCommentText, type Comment, type Post, type SuggestedHabit } from '@/lib/community';
+import { relTime } from '@/lib/relTime';
 import type { QuestCategory } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -28,7 +29,7 @@ const TRACK = '#ECEAE4';
 /** A post + its comment thread. For "ask" posts, peers can attach a habit the asker adopts in one tap. */
 export function PostDetailScreen({ route, navigation }: Props) {
   const { postId } = route.params;
-  const { t } = useTranslation(['feed', 'common']);
+  const { t, i18n } = useTranslation(['feed', 'common']);
   const { subscribeFeed, subscribeComments, addComment } = useCommunity();
   const { notifyComment } = useNotifications();
   const { quests, addQuest } = useGame();
@@ -116,7 +117,7 @@ export function PostDetailScreen({ route, navigation }: Props) {
               <View key={c.id} style={styles.comment}>
                 <HeroAvatar presentation={c.presentation ?? 'neutral'} tier="novice" size={32} />
                 <View style={styles.commentBubble}>
-                  <Text style={styles.commentName}>{c.displayName} · <Text style={styles.commentTime}>{timeAgo(c.createdAt)}</Text></Text>
+                  <Text style={styles.commentName}>{c.displayName} · <Text style={styles.commentTime}>{relTime(c.createdAt, t, i18n.language)}</Text></Text>
                   <Text style={styles.commentText}>{c.text}</Text>
                   {c.suggestedHabit && (
                     <Pressable

@@ -1,0 +1,22 @@
+{
+  "pomodoro": {
+    "name": "Pomodoro",
+    "blurb": "Classic 25/5 focus sprints."
+  },
+  "deepwork": {
+    "name": "Deep Work",
+    "blurb": "Long 52/17 deep-work block."
+  },
+  "quick10": {
+    "name": "Quick 10",
+    "blurb": "A fast 10-minute round."
+  },
+  "custom": {
+    "name": "Custom",
+    "blurb": "Set your own minutes."
+  },
+  "flowtime": {
+    "name": "Flowtime",
+    "blurb": "Open-ended — flow until done."
+  }
+}

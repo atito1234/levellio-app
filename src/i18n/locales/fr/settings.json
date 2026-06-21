@@ -86,6 +86,7 @@
   },
   "about": {
     "title": "À propos et mentions légales",
-    "contact": "Contacter le support"
+    "contact": "Contacter le support",
+    "emailSupportA11y": "Contacter le support par e-mail à {{email}}"
   }
 }

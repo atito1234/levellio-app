@@ -1,0 +1,157 @@
+{
+  "framework": {
+    "com-b": {
+      "label": "What it takes to act",
+      "principle": "Any action needs three things at once — the ability to do it, a real chance to, and motivation in the moment.",
+      "source": "Michie, COM-B behaviour model"
+    },
+    "fogg-bmap": {
+      "label": "Make it easy and well-timed",
+      "principle": "Behaviour happens when motivation, ability, and a prompt line up — the easier the action, the less motivation you need.",
+      "source": "BJ Fogg, Behavior Model"
+    },
+    "cbt-distortions": {
+      "label": "Check the thought",
+      "principle": "Stuck feelings often ride on distorted thoughts (all-or-nothing, mind-reading, fortune-telling); naming and testing them loosens their grip.",
+      "source": "Beck & Burns, cognitive behavioural therapy"
+    },
+    "sdt": {
+      "label": "Reconnect to your why",
+      "principle": "Motivation lasts when an action feels self-chosen and tied to what you value, not forced on you.",
+      "source": "Deci & Ryan, Self-Determination Theory"
+    },
+    "implementation-intentions": {
+      "label": "If-then planning",
+      "principle": "Deciding in advance exactly when and where you will act sharply raises follow-through.",
+      "source": "Gollwitzer, implementation-intentions research"
+    },
+    "motivational-interviewing": {
+      "label": "Talk yourself toward it",
+      "principle": "Hearing your own reasons for change — in your own words — builds more commitment than being told.",
+      "source": "Miller & Rollnick, Motivational Interviewing"
+    },
+    "self-compassion": {
+      "label": "Be kind to yourself",
+      "principle": "Meeting a slip with kindness instead of harsh self-criticism makes you more likely to get back on track.",
+      "source": "Kristin Neff, self-compassion research"
+    },
+    "fear-setting": {
+      "label": "Name the worst case",
+      "principle": "Writing out what you fear, and how you would cope, shrinks vague dread into something you can handle.",
+      "source": "Stoic practice; Tim Ferriss, fear-setting"
+    },
+    "temptation-bundling": {
+      "label": "Pair it with a treat",
+      "principle": "Linking a habit you should do with something you enjoy makes you more likely to actually do it.",
+      "source": "Milkman, temptation-bundling research"
+    },
+    "habit-stacking": {
+      "label": "Anchor to an existing habit",
+      "principle": "Attaching a new habit right after one you already do gives it a reliable, built-in cue.",
+      "source": "Fogg & Clear, habit stacking"
+    },
+    "environment-design": {
+      "label": "Design your surroundings",
+      "principle": "Making the good choice the easy, obvious one — and distractions harder — beats relying on willpower.",
+      "source": "Behavioural environment-design research"
+    },
+    "two-minute-rule": {
+      "label": "Two-minute start",
+      "principle": "Shrinking a habit to two minutes lowers the cost to begin — and starting is most of the battle.",
+      "source": "Clear & Fogg, tiny-habits"
+    },
+    "five-second-rule": {
+      "label": "Move in five seconds",
+      "principle": "Counting down 5-4-3-2-1 and moving interrupts hesitation before your brain talks you out of it.",
+      "source": "Mel Robbins, the 5 Second Rule"
+    },
+    "zeigarnik": {
+      "label": "Just start the loop",
+      "principle": "Unfinished tasks nag at the mind — once you begin, the pull to finish works in your favour.",
+      "source": "Zeigarnik effect"
+    },
+    "loss-aversion": {
+      "label": "Protect what you have built",
+      "principle": "We feel a loss about twice as strongly as a gain, so not breaking a chain you have built is a powerful pull.",
+      "source": "Kahneman & Tversky, loss aversion"
+    },
+    "timeboxing": {
+      "label": "Short focused sprints",
+      "principle": "Single-tasked sprints with a clear end protect attention and make starting feel safe.",
+      "source": "Cirillo, Pomodoro Technique; timeboxing research"
+    }
+  },
+  "blocker": {
+    "low-energy": { "label": "Running on empty", "tell": "I’m too tired to start." },
+    "no-cue": { "label": "It slips my mind", "tell": "I just forget or never get to it." },
+    "too-much-friction": { "label": "Too much hassle", "tell": "It’s just a hassle to get going." },
+    "no-momentum": { "label": "Waiting to feel like it", "tell": "I’ll start once I feel like it." },
+    "boredom": { "label": "It’s boring", "tell": "It’s so dull I avoid it." },
+    "fear-of-failure": { "label": "Fear of failing", "tell": "What if I try and fail?" },
+    "fear-of-judgment": { "label": "Fear of being judged", "tell": "People will judge me for this." },
+    "uncertainty": { "label": "Not knowing how it’ll go", "tell": "I don’t know how this will turn out." },
+    "overwhelm": { "label": "It feels too big", "tell": "It feels too big to even face." },
+    "fear-of-change": { "label": "Scared of what changes", "tell": "What if this changes everything?" },
+    "imposter": { "label": "I’m not cut out for this", "tell": "I’m not really cut out for this." },
+    "not-deserving": { "label": "I don’t deserve it", "tell": "I don’t deserve to do this for myself." },
+    "comparison": { "label": "Everyone’s ahead of me", "tell": "Everyone else is so far ahead." },
+    "self-criticism": { "label": "I always mess up", "tell": "I always mess this up anyway." },
+    "perfection-worth": { "label": "It has to be perfect", "tell": "If it’s not perfect it doesn’t count." },
+    "wont-work": { "label": "It won’t make a difference", "tell": "This won’t even change anything." },
+    "no-proof-yet": { "label": "Nothing to show yet", "tell": "I’ve got nothing to show for it." },
+    "tried-before": { "label": "It didn’t stick before", "tell": "I’ve tried before and it didn’t last." },
+    "all-or-nothing": { "label": "All or nothing", "tell": "If I can’t do it fully, why bother?" },
+    "overthinking": { "label": "Stuck in my head", "tell": "I keep analysing instead of doing." },
+    "task-aversion": { "label": "I just don’t want to", "tell": "I really don’t want to start." },
+    "waiting-to-feel-ready": { "label": "Waiting to feel ready", "tell": "I’ll start when I feel ready." },
+    "present-bias": { "label": "Something funner right now", "tell": "I’d rather do something fun right now." },
+    "vague-plan": { "label": "Not sure where to start", "tell": "I’m not sure where to begin." },
+    "distraction": { "label": "Keep getting pulled away", "tell": "I keep getting pulled away." },
+    "fixed-mindset": { "label": "Too old to change", "tell": "I’m too old to change now." },
+    "sunk-cost": { "label": "Left it too late", "tell": "I’ve left it too late to matter." },
+    "low-energy-age": { "label": "Not the energy I had", "tell": "I don’t have the energy I used to." },
+    "comparison-young": { "label": "Everyone’s younger", "tell": "Everyone starting this is younger than me." }
+  },
+  "question": {
+    "q-smallest": { "text": "What’s the smallest version of this you couldn’t say no to?" },
+    "q-one-step": { "text": "What’s the very first physical step — just step one?" },
+    "q-tiny-promise": { "text": "Could you promise just two minutes, and stop after if you still want to?" },
+    "q-5min-change": { "text": "What will actually be different in five minutes that isn’t true right now?" },
+    "q-when-where": { "text": "Exactly when and where will you do this today?", "followUp": "Picture the moment — it makes it far more likely to happen." },
+    "q-after-what": { "text": "Which thing you already do every day could this come right after?" },
+    "q-evidence": { "text": "What’s the real evidence for that thought — and what’s the evidence against it?" },
+    "q-worst-case": { "text": "If the worst happened, how would you actually handle it?" },
+    "q-name-fear": { "text": "If you name the fear out loud, what is it really about?" },
+    "q-future-self": { "text": "What would the person you’re becoming do right now?" },
+    "q-why-matters": { "text": "Why did this matter enough to start in the first place?" },
+    "q-advice-friend": { "text": "What would you say to a friend who felt exactly this way?" },
+    "q-deserve": { "text": "If you did deserve this, what would you do next?" },
+    "q-cost-of-skip": { "text": "What does skipping today quietly cost you?" },
+    "q-treat-pair": { "text": "What could you pair this with so it’s something to look forward to?" },
+    "q-remove-friction": { "text": "What one thing could you remove or set up to make this easier?" },
+    "q-whose-voice": { "text": "Whose voice is that “you can’t” — and is it telling the truth?" },
+    "q-too-late": { "text": "If not now, when does “too late” actually begin?" },
+    "q-proof": { "text": "What small experiment would show whether this really works for you?" },
+    "q-feel-after": { "text": "How will you feel about yourself ten minutes after you’ve started?" },
+    "q-perfection": { "text": "Does this need to be perfect, or does it just need to be done?" },
+    "q-energy-now": { "text": "What version of this fits the energy you actually have right now?" },
+    "q-past-win": { "text": "When have you pushed through something like this before?" },
+    "q-reasons": { "text": "Give yourself three honest reasons this is worth doing today." },
+    "q-resist-what": { "text": "What are you actually resisting — the task, or a feeling about it?" }
+  },
+  "tactic": {
+    "two-minute-rule": { "name": "The two-minute start", "how": "Promise yourself just two minutes. Begin the tiniest first action and let momentum take over." },
+    "mini-version": { "name": "Shrink the goal", "how": "Cut it down to a version so small it feels almost silly to skip — one page, one set, one line." },
+    "five-second-rule": { "name": "Five-second launch", "how": "Count 5-4-3-2-1 and physically move before the hesitation can grow." },
+    "if-then": { "name": "If-then plan", "how": "Lock in the exact cue: “When I [finish X / it’s 7pm], then I will [do this] here.”" },
+    "habit-stack": { "name": "Stack it on a habit", "how": "Attach it right after something you already do every day, so the old habit becomes the cue." },
+    "environment-design": { "name": "Set the stage", "how": "Remove one bit of friction and put the cue in plain sight — make starting the path of least resistance." },
+    "temptation-bundle": { "name": "Pair it with a treat", "how": "Only let yourself enjoy something you love (a show, a podcast) while you do this." },
+    "pomodoro": { "name": "A focus sprint", "how": "Set a short timer, single-task until it rings, then take a real break. One sprint is enough to start." },
+    "reframe-thought": { "name": "Test the thought", "how": "Write the harsh thought down, then list the evidence for and against it. Replace it with a fairer one." },
+    "self-compassion-break": { "name": "A kindness break", "how": "Say what you’d tell a struggling friend: this is hard, you’re human, and one small step is enough." },
+    "fear-setting": { "name": "Name the worst case", "how": "Write the worst that could happen, how likely it is, and how you’d recover. Watch the dread shrink." },
+    "values-anchor": { "name": "Reconnect to your why", "how": "Finish this out loud: “I’m doing this because it matters to me, since…” Let the reason pull you." },
+    "reasons-out-loud": { "name": "Three reasons, your words", "how": "Say three honest reasons this is worth doing today. Hearing your own case builds real commitment." }
+  }
+}

@@ -10,7 +10,7 @@ import { minutesToLabel, minutesToParts, partsToMinutes, type Meridiem, type Tim
  * Shared by the QuestEditor and the Add-activity sheet.
  */
 export function TimePicker({ minutes, onChange }: { minutes: number; onChange: (minutes: number) => void }) {
-  const { t } = useTranslation('timePicker');
+  const { t, i18n } = useTranslation('timePicker');
   const parts = minutesToParts(minutes);
   const set = (next: TimeParts) => onChange(partsToMinutes(next));
   const bumpHour = (dir: 1 | -1) => set({ ...parts, hour12: ((parts.hour12 - 1 + dir + 12) % 12) + 1 });
@@ -48,7 +48,7 @@ export function TimePicker({ minutes, onChange }: { minutes: number; onChange: (
         </View>
       </View>
       <Text style={styles.scheduledFor} accessibilityLiveRegion="polite">
-        {t('scheduledFor', { time: minutesToLabel(minutes) })}
+        {t('scheduledFor', { time: minutesToLabel(minutes, i18n.language) })}
       </Text>
     </View>
   );

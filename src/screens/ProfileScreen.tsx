@@ -21,7 +21,8 @@ import { useGame } from '@/state/GameContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useCommunity } from '@/state/CommunityContext';
 import { useSettings } from '@/state/SettingsContext';
-import { timeAgo, type Post } from '@/lib/community';
+import { type Post } from '@/lib/community';
+import { relTime } from '@/lib/relTime';
 import type { HeroTier } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -29,7 +30,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
 
 export function ProfileScreen({ route, navigation }: Props) {
   const { uid } = route.params;
-  const { t } = useTranslation(['profile', 'common', 'messaging']);
+  const { t, i18n } = useTranslation(['profile', 'common', 'messaging']);
   const myUid = useMyUid();
   const isMe = myUid === uid;
   const { isFounding } = useSubscription();
@@ -130,7 +131,7 @@ export function ProfileScreen({ route, navigation }: Props) {
               <View key={`${m.label}-${i}`} style={styles.mRow}>
                 <Text style={styles.mEmoji}>{m.emoji}</Text>
                 <Text style={styles.mLabel} numberOfLines={1}>{m.label}</Text>
-                <Text style={styles.mTime}>{timeAgo(m.earnedAt)}</Text>
+                <Text style={styles.mTime}>{relTime(m.earnedAt, t, i18n.language)}</Text>
               </View>
             ))
           )}

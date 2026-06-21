@@ -22,11 +22,11 @@ import {
   REACTIONS,
   myReaction,
   reactionTotal,
-  timeAgo,
   topReactions,
   type Post,
   type ReactionEmoji,
 } from '@/lib/community';
+import { relTime } from '@/lib/relTime';
 
 const INK = '#1F2937';
 const CARD = '#FFFFFF';
@@ -40,7 +40,7 @@ const TRACK = '#ECEAE4';
  * Mirrors the familiar Facebook/LinkedIn card so it's instantly intuitive.
  */
 export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string) => void }) {
-  const { t } = useTranslation(['feed', 'common']);
+  const { t, i18n } = useTranslation(['feed', 'common']);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { uid, setReaction } = useCommunity();
   const { notifyReaction } = useNotifications();
@@ -115,7 +115,7 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
               {isFounding && <PlusBadge label={t('common:plusBadge')} small />}
             </View>
             <Text style={styles.meta} numberOfLines={1}>
-              {timeAgo(post.createdAt)}
+              {relTime(post.createdAt, t, i18n.language)}
               {post.projectTitle ? ` · ${post.projectTitle}` : ''}
             </Text>
           </View>

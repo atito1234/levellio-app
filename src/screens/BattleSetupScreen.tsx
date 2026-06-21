@@ -267,7 +267,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
                 onPress={() => setTechniqueId(tech.id)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
-                accessibilityLabel={t('setup.gadgetA11y', { tag: t('gadgets.' + tech.id + '.tag'), technique: tech.name, duration: gadgetSub(tech.id, customMin) })}
+                accessibilityLabel={t('setup.gadgetA11y', { tag: t('gadgets.' + tech.id + '.tag'), technique: t('techniques:' + tech.id + '.name', { defaultValue: tech.name }), duration: gadgetSub(tech.id, customMin) })}
                 style={[styles.gadgetCard, on && styles.cardOn]}
               >
                 <Text style={styles.gadgetIcon}>{GADGET_ICONS[tech.id]}</Text>

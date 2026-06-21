@@ -1,0 +1,81 @@
+{
+  "verdict": {
+    "start": {
+      "label": "Votre carte commence aujourd'hui",
+      "reason": "Terminez une habitude et votre direction commencera à se dessiner ici."
+    },
+    "onTrack": {
+      "label": "Sur la bonne voie",
+      "reason": "Vous étiez présent·e {{active}} des 7 derniers jours{{trend}}"
+    },
+    "building": {
+      "label": "L'élan se construit",
+      "reason_one": "{{active}} jour actif cette semaine{{trend}} Un peu plus et ça tient.",
+      "reason_other": "{{active}} jours actifs cette semaine{{trend}} Un peu plus et ça tient."
+    },
+    "drifting": {
+      "label": "Le moment d'un petit coup de pouce",
+      "reason": "La semaine a été calme. Une petite victoire aujourd'hui relance l'élan."
+    },
+    "trend": {
+      "up": " — en hausse par rapport à la semaine dernière.",
+      "down": " — en baisse par rapport à la semaine dernière, à surveiller.",
+      "same": "."
+    }
+  },
+  "tier": {
+    "streak": {
+      "title": "Force de la série",
+      "teaser": "Combien de jours d'affilée vous avez été présent·e."
+    },
+    "rhythm": {
+      "title": "Votre rythme",
+      "teaser": "Le jour et l'heure où vous avez le plus de chances d'être présent·e."
+    },
+    "anchor": {
+      "title": "Votre habitude d'ancrage",
+      "teaser": "L'habitude vers laquelle vous revenez le plus — votre fondation."
+    },
+    "mix": {
+      "title": "Ce qui fonctionne",
+      "teaser": "Le domaine de vie qui reçoit votre énergie, et l'objectif qu'il nourrit."
+    },
+    "resilience": {
+      "title": "Votre résilience",
+      "teaser": "Votre plus longue série ininterrompue — la preuve que vous pouvez tenir."
+    },
+    "automatic": {
+      "title": "Devenir automatique",
+      "teaser": "Quand vos habitudes commencent à tourner toutes seules — la science des 66 jours."
+    }
+  },
+  "confidence": {
+    "early_one": "Début · {{count}} jour",
+    "early_other": "Début · {{count}} jours",
+    "building_one": "En construction · {{count}} jour",
+    "building_other": "En construction · {{count}} jours",
+    "confident": "Fiable"
+  },
+  "hourBars": {
+    "mostActive": "Le plus actif autour de {{time}}",
+    "noActivity": "Aucune activité enregistrée",
+    "a11y": "Activité selon l'heure de la journée. {{summary}}."
+  },
+  "trendChart": {
+    "noData": "Pas encore de données",
+    "latest": "Dernier {{value}}{{unit}}",
+    "a11y": "{{label}}. {{detail}}.",
+    "overallAdherence": "Assiduité globale"
+  },
+  "focus": {
+    "capLagging": "{{name}} est à la traîne",
+    "capLaggingReason": "C’est votre capacité la plus faible. « {{habit}} » la renforce le plus vite.",
+    "doHabit": "Faire « {{habit}} »",
+    "groupSlipping": "{{label}} décroche",
+    "groupSlippingReason": "{{pct}} % de ce que vous aviez planifié a été fait.",
+    "focusGroup": "Se concentrer sur {{label}}",
+    "weekdayGap": "Les {{day}} sont votre point faible",
+    "weekdayGapReason": "C’est le jour que vous manquez le plus. Planifiez-le délibérément.",
+    "planDay": "Planifier {{day}}"
+  }
+}

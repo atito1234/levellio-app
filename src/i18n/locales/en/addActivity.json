@@ -23,5 +23,6 @@
   "added": "✓ Added “{{name}}” — add another, or tap Done.",
   "advanced": "⚙️ Advanced options ›",
   "addActivity": "＋ Add activity",
-  "addActivityA11y": "Add activity"
+  "addActivityA11y": "Add activity",
+  "repeatOnA11y": "Repeat on {{day}}"
 }

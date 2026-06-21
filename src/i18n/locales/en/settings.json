@@ -86,6 +86,7 @@
   },
   "about": {
     "title": "About & Legal",
-    "contact": "Contact support"
+    "contact": "Contact support",
+    "emailSupportA11y": "Email support at {{email}}"
   }
 }

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PrimaryButton, ScreenContainer } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
@@ -11,6 +12,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Legal'>;
 
 /** Renders a bundled legal document (Privacy / Terms) in-app, offline. */
 export function LegalScreen({ route, navigation }: Props) {
+  const { t } = useTranslation('common');
   const doc = getLegalDoc(route.params?.doc ?? 'privacy');
   const blocks = useMemo(() => parseMarkdownBlocks(doc.markdown), [doc.markdown]);
 
@@ -20,12 +22,12 @@ export function LegalScreen({ route, navigation }: Props) {
         <Text style={styles.headerTitle} accessibilityRole="header">
           {doc.title}
         </Text>
-        <PrimaryButton label="Close" variant="ghost" onPress={() => navigation.goBack()} />
+        <PrimaryButton label={t('action.close')} variant="ghost" onPress={() => navigation.goBack()} />
       </View>
       <ScrollView
         showsVerticalScrollIndicator
         contentContainerStyle={styles.content}
-        accessibilityLabel={`${doc.title} document`}
+        accessibilityLabel={t('documentA11y', { title: doc.title })}
       >
         {blocks.map((block, i) => (
           <BlockView key={i} block={block} />

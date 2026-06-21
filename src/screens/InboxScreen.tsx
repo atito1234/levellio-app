@@ -6,13 +6,13 @@ import { HeroAvatar, ScreenContainer } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useMessaging } from '@/state/MessagingContext';
 import { isUnread, otherName, otherParticipant } from '@/lib/messaging';
-import { timeAgo } from '@/lib/community';
+import { relTime } from '@/lib/relTime';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Inbox'>;
 
 export function InboxScreen({ navigation }: Props) {
-  const { t } = useTranslation(['messaging', 'common']);
+  const { t, i18n } = useTranslation(['messaging', 'common']);
   const { threads, myUid } = useMessaging();
 
   if (!myUid) {
@@ -47,7 +47,7 @@ export function InboxScreen({ navigation }: Props) {
                   <Text style={[styles.preview, unread && styles.bold]} numberOfLines={1}>{th.lastText}</Text>
                 </View>
                 <View style={styles.rowEnd}>
-                  {th.lastAt > 0 ? <Text style={styles.time}>{timeAgo(th.lastAt)}</Text> : null}
+                  {th.lastAt > 0 ? <Text style={styles.time}>{relTime(th.lastAt, t, i18n.language)}</Text> : null}
                   {unread ? <View style={styles.dot} /> : null}
                 </View>
               </Pressable>

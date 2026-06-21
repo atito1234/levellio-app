@@ -1,0 +1,14 @@
+{
+  "kicker": "¿CÓMO TE FUE?",
+  "hint": {
+    "1": "Un verdadero suplicio",
+    "2": "Algo pesado",
+    "3": "Bien — hecho está",
+    "4": "Se sintió bien",
+    "5": "Me encantó"
+  },
+  "scaleHint": "1 = un suplicio · 5 = me encantó",
+  "starA11y": "{{n}} de 5 — {{hint}}",
+  "skipA11y": "Omitir valoración",
+  "skip": "Omitir"
+}

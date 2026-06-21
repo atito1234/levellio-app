@@ -28,7 +28,7 @@ const MUTED = '#5A5A72';
 const TRACK = '#ECEAE4';
 
 export function QuickCaptureScreen({ route, navigation }: Props) {
-  const { t } = useTranslation('quickCapture');
+  const { t, i18n } = useTranslation('quickCapture');
   const { addQuest } = useGame();
   const { getPlan, togglePlanned } = usePlan();
   const { goals, linkGoal } = useGoals();
@@ -126,7 +126,7 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
             <Text style={styles.sectionLabel}>{t('heard', { count: included.length })}</Text>
             {parsed.map((p) => {
               const off = excluded.has(normalizeTitle(p.title));
-              const timePart = p.scheduledTime !== undefined ? t('chipAt', { time: minutesToLabel(p.scheduledTime) }) : '';
+              const timePart = p.scheduledTime !== undefined ? t('chipAt', { time: minutesToLabel(p.scheduledTime, i18n.language) }) : '';
               return (
                 <Pressable
                   key={normalizeTitle(p.title)}
@@ -143,7 +143,7 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
                     </Text>
                     <Text style={styles.chipMeta}>
                       {t(`categories:${p.category}`)}
-                      {p.scheduledTime !== undefined ? ` · ⏰ ${minutesToLabel(p.scheduledTime)}` : ''}
+                      {p.scheduledTime !== undefined ? ` · ⏰ ${minutesToLabel(p.scheduledTime, i18n.language)}` : ''}
                     </Text>
                   </View>
                   <Text style={[styles.chipMark, off && styles.chipMarkOff]}>{off ? '+' : '✓'}</Text>

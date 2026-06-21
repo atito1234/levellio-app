@@ -45,8 +45,15 @@ export function InterventionOverlay() {
   if (!current) return null;
 
   const dragon = getDragon(current.dragonId ?? 'procrastination', current.dragonName);
+  // Dragon copy lives in the shared `dragons` namespace, keyed by dragon id.
+  const taunt = t('dragons:' + dragon.id + '.taunt', { defaultValue: dragon.taunt });
   const plan = buildCoaching({ dragonId: current.dragonId ?? 'procrastination', goals: [] });
-  const question = plan.questions[0]?.text ?? t('fallbackQuestion');
+  const firstQuestion = plan.questions[0];
+  // Localize the curated Socratic prompt by its stable id; fall back to English
+  // text, then to the chrome fallback question if there is no question at all.
+  const question = firstQuestion
+    ? t('coachingContent:question.' + firstQuestion.id + '.text', { defaultValue: firstQuestion.text })
+    : t('fallbackQuestion');
 
   const onFace = () => {
     const dragonId = current.dragonId ?? 'procrastination';
@@ -60,7 +67,7 @@ export function InterventionOverlay() {
       <View style={styles.scrim}>
         <Animated.View style={[styles.card, { transform: [{ scale }] }]} accessible accessibilityLiveRegion="polite" accessibilityLabel={t('cardA11y')}>
           <Text style={styles.kicker}>{t('kicker')}</Text>
-          <Text style={styles.taunt}>{t('leavingNow', { taunt: dragon.taunt })}</Text>
+          <Text style={styles.taunt}>{t('leavingNow', { taunt })}</Text>
           <Text style={styles.question}>{question}</Text>
           <Pressable onPress={onFace} accessibilityRole="button" accessibilityLabel={t('faceItA11y')} style={styles.faceBtn}>
             <Text style={styles.faceText}>{t('faceIt')}</Text>
