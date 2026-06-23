@@ -109,15 +109,18 @@ export interface PlusSku {
   subLabel?: string;
   /** Anchor the annual plan as the value choice. */
   bestValue?: boolean;
+  /** Whether this plan starts with the free trial (yearly only — maximizes LTV). */
+  trial?: boolean;
 }
 
 /**
- * Levellio Plus price points. Annual is the value anchor (~50% off monthly); a
- * one-time Lifetime answers the common "why no one-time option?" complaint.
- * Shown only when monetization is live; prices are re-resolved from the store.
+ * Levellio Plus price points. Annual is the value anchor (~50% off monthly) AND the
+ * only plan with the free trial (collect upfront → max LTV, the proven pattern). A
+ * one-time Lifetime answers the "why no one-time option?" complaint. Shown only when
+ * monetization is live; prices are re-resolved from the store.
  */
 export const PLUS_SKUS: readonly PlusSku[] = [
-  { id: 'plus_annual', period: 'year', priceLabel: '$29.99 / yr', subLabel: '≈ $2.50 / mo', bestValue: true },
+  { id: 'plus_annual', period: 'year', priceLabel: '$29.99 / yr', subLabel: '≈ $2.50 / mo', bestValue: true, trial: true },
   { id: 'plus_monthly', period: 'month', priceLabel: '$4.99 / mo' },
   { id: 'plus_lifetime', period: 'lifetime', priceLabel: '$79 once', subLabel: 'pay once, yours forever' },
 ];

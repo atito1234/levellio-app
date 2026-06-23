@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AnimatedHero, PressableScale, PrimaryButton, ScreenContainer } from '@/components';
+import { AnimatedHero, PlusPlans, PrimaryButton, ScreenContainer } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
-import { isMonetizationLive, PLUS_SKUS, type PlusSku } from '@/services/monetization';
+import { isMonetizationLive } from '@/services/monetization';
 import { useGame } from '@/state/GameContext';
 import { useSettings } from '@/state/SettingsContext';
-import { useSubscription } from '@/state/SubscriptionContext';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Paywall'>;
@@ -30,30 +29,7 @@ export function PaywallScreen({ navigation }: Props) {
 
 function LivePaywall({ navigation, t }: { navigation: Props['navigation']; t: ReturnType<typeof useTranslation>['t'] }) {
   const { character } = useGame();
-  const { purchase, restore: restoreSub } = useSubscription();
   const plusFeatures = t('plusFeatures', { returnObjects: true }) as unknown as string[];
-  const [sku, setSku] = useState<PlusSku>(PLUS_SKUS.find((s) => s.bestValue) ?? PLUS_SKUS[0]!);
-  const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
-
-  const isLifetime = sku.period === 'lifetime';
-
-  const buy = async () => {
-    setBusy(true);
-    setNotice(null);
-    const res = await purchase(sku.id);
-    setBusy(false);
-    if (res.ok) navigation.goBack();
-    else if (res.reason !== 'cancelled') setNotice(t('live.unavailable')); // honest: nothing charged
-  };
-
-  const restore = async () => {
-    setBusy(true);
-    const res = await restoreSub();
-    setBusy(false);
-    if (res.ok) navigation.goBack();
-    else setNotice(t('live.unavailable'));
-  };
 
   return (
     <ScreenContainer>
@@ -71,35 +47,7 @@ function LivePaywall({ navigation, t }: { navigation: Props['navigation']; t: Re
         <Text style={styles.heading}>{t('live.heading')}</Text>
         <Text style={styles.sub}>{t('live.sub')}</Text>
 
-        {/* Plan selector */}
-        <View style={styles.skuRow}>
-          {PLUS_SKUS.map((s) => {
-            const on = s.id === sku.id;
-            return (
-              <Pressable
-                key={s.id}
-                onPress={() => setSku(s)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: on }}
-                style={[styles.sku, on && styles.skuOn]}
-              >
-                {s.bestValue && <Text style={styles.badge}>{t('live.bestValue')}</Text>}
-                <Text style={[styles.skuPeriod, on && styles.skuPeriodOn]}>{t(`live.period.${s.period}`)}</Text>
-                <Text style={[styles.skuPrice, on && styles.skuPriceOn]}>{s.priceLabel}</Text>
-                {s.subLabel ? <Text style={styles.skuSub}>{s.subLabel}</Text> : null}
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <PressableScale onPress={() => void buy()} disabled={busy} accessibilityRole="button" style={styles.cta}>
-          <Text style={styles.ctaText}>{isLifetime ? t('live.lifetimeCta') : t('live.trialCta')}</Text>
-        </PressableScale>
-        <Text style={styles.terms}>
-          {isLifetime ? t('live.lifetimeThen', { price: sku.priceLabel }) : t('live.trialThen', { price: sku.priceLabel })}
-        </Text>
-        <Text style={styles.terms}>{t('live.cancelAnytime')}</Text>
-        {notice && <Text style={styles.notice}>{notice}</Text>}
+        <PlusPlans onPurchased={() => navigation.goBack()} />
 
         {/* What's included */}
         <View style={[styles.card, styles.plusCard]}>
@@ -114,10 +62,6 @@ function LivePaywall({ navigation, t }: { navigation: Props['navigation']; t: Re
           </View>
           <Text style={styles.impact}>{t('impact')}</Text>
         </View>
-
-        <Pressable onPress={() => void restore()} accessibilityRole="button" style={styles.restore} hitSlop={8}>
-          <Text style={styles.restoreText}>{t('live.restore')}</Text>
-        </Pressable>
       </ScrollView>
     </ScreenContainer>
   );

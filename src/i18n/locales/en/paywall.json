@@ -48,7 +48,9 @@
     "restore": "Restore purchases",
     "includedTitle": "Plus includes",
     "freeTitle": "Always free, forever",
-    "unavailable": "Levellio Plus is almost ready — there’s nothing to charge yet. We’ll never bill you without asking first."
+    "unavailable": "Levellio Plus is almost ready — there’s nothing to charge yet. We’ll never bill you without asking first.",
+    "subscribeCta": "Subscribe · {{price}}",
+    "monthlyThen": "Billed {{price}} · cancel anytime"
   },
   "trialReminderTitle": "Your Levellio Plus trial ends soon",
   "trialReminderBody": "Heads up — your free trial converts in 2 days. Manage or cancel anytime in your store settings."
