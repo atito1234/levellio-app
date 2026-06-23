@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CommunityGate, ScreenContainer } from '@/components';
+import { AppHeader, CommunityGate, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useProjects } from '@/state/ProjectsContext';
@@ -56,6 +56,7 @@ export function ProjectsCatalogScreen() {
   return (
     <ScreenContainer backgroundColor={BG}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <AppHeader />
         <View style={styles.header}>
           <View>
             <Text style={styles.title} accessibilityRole="header">

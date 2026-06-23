@@ -13,6 +13,7 @@ import {
 } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { useCommunity } from '@/state/CommunityContext';
 import { getKit } from '@/data/worldCupKits';
 import type { RootStackParamList } from '@/navigation/types';
 import {
@@ -29,6 +30,7 @@ export function CharacterScreen() {
   const { t } = useTranslation('hero');
   const tierLabel = (tier: HeroTier) => t(`tier.${tier}`);
   const { character } = useGame();
+  const { uid: communityUid } = useCommunity();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   if (!character) {
@@ -100,6 +102,13 @@ export function CharacterScreen() {
             variant="primary"
             onPress={() => navigation.navigate('Progress')}
           />
+          {communityUid && (
+            <PrimaryButton
+              label={t('viewProfile')}
+              variant="ghost"
+              onPress={() => navigation.navigate('Profile', { uid: communityUid })}
+            />
+          )}
         </View>
 
         {/* Companion */}
