@@ -17,6 +17,10 @@ export interface OnboardingAnswers {
   blocker?: string;
   /** How many daily habits to seed (3 / 5 / 7). */
   habitCount?: number;
+  /** Preferred reminder time of day (persisted, not used by the mapping). */
+  reminderTime?: string;
+  /** The user's personal "why" (persisted, not used by the mapping). */
+  why?: string;
 }
 
 export interface StarterPlan {

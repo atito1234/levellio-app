@@ -27,5 +27,92 @@
     "female": "Female",
     "male": "Male",
     "neutral": "Neutral"
+  },
+  "funnel": {
+    "attribution": {
+      "title": "How did you find Levellio?",
+      "subtitle": "This helps us reach more people who need it.",
+      "tiktok": "TikTok",
+      "instagram": "Instagram",
+      "friend": "A friend",
+      "appstore": "App Store",
+      "search": "Web search",
+      "other": "Somewhere else"
+    },
+    "focus": {
+      "title": "What do you want to work on?",
+      "subtitle": "Pick what matters most — we’ll build your plan around it."
+    },
+    "blocker": {
+      "title": "What’s been holding you back?",
+      "subtitle": "We’ll help you face it head-on.",
+      "procrastination": "Procrastination",
+      "fear": "Fear of failing",
+      "doubt": "Self-doubt",
+      "laziness": "Low motivation",
+      "tooold": "“It’s too late”",
+      "unworthiness": "Feeling unworthy"
+    },
+    "count": {
+      "title": "How many daily habits feel right?",
+      "subtitle": "Start small — you can always add more.",
+      "perDay": "{{count}} a day"
+    },
+    "reminder": {
+      "title": "When should we nudge you?",
+      "subtitle": "We’ll time your reminders for then.",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "why": {
+      "title": "What’s your why?",
+      "subtitle": "Your reason shows up when motivation dips (optional).",
+      "placeholder": "e.g. to feel strong for my kids"
+    },
+    "commit": {
+      "title": "Ready to commit?",
+      "subtitle": "A tiny promise to yourself makes it real.",
+      "cta": "I’m in 💪"
+    },
+    "rating": {
+      "title": "Help others find Levellio",
+      "subtitle": "A quick rating means the world to a small team.",
+      "cta": "Rate Levellio",
+      "later": "Maybe later"
+    },
+    "notify": {
+      "title": "Turn on reminders",
+      "subtitle": "A gentle nudge at the right time keeps your streak alive.",
+      "cta": "Enable reminders",
+      "later": "Not now"
+    },
+    "building": {
+      "title": "Building your plan…",
+      "l1": "Choosing your quests…",
+      "l2": "Summoning your dragons…",
+      "l3": "Matching real-world projects…",
+      "l4": "Tuning your hero…"
+    },
+    "reveal": {
+      "kicker": "YOUR PLAN IS READY",
+      "title": "Here’s your personalized plan, {{name}}",
+      "subtitle": "Pre-loaded and ready — tweak anything anytime.",
+      "goalsTitle": "Your goals",
+      "habitsTitle": "Your daily habits",
+      "projectsTitle": "Recommended for you",
+      "cta": "Let’s go"
+    },
+    "prime": {
+      "trialTitle": "Try Levellio Plus free",
+      "trialBody": "Unlock the AI coach, forecast insights, premium themes and unlimited projects — free for 7 days.",
+      "trialCta": "See plans",
+      "remindTitle": "No surprises",
+      "remindBody": "We’ll remind you 2 days before your trial ends. Cancel anytime in Settings.",
+      "remindCta": "Continue",
+      "plansTitle": "Choose your plan",
+      "plansBody": "Start free, keep your momentum.",
+      "later": "Maybe later"
+    }
   }
 }

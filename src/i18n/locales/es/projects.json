@@ -178,5 +178,6 @@
     "notFound": "No se encontró ningún proyecto con ese código. Verifícalo con quien te invitó.",
     "cta": "Unirse al proyecto",
     "ctaA11y": "Unirse al proyecto"
-  }
+  },
+  "recommended": "RECOMENDADO PARA TI"
 }

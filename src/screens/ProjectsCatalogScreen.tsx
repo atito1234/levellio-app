@@ -7,6 +7,7 @@ import { AppHeader, CommunityGate, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useProjects } from '@/state/ProjectsContext';
+import { useSettings } from '@/state/SettingsContext';
 import { useEntitlements } from '@/state/SubscriptionContext';
 import { canUseProjectsUnlimited } from '@/services/monetization';
 import { projectColor, type Project } from '@/lib/projects';
@@ -29,7 +30,14 @@ export function ProjectsCatalogScreen() {
   const navigation = useNavigation<Nav>();
   const { account } = useAuth();
   const { signedIn, isShared, featured, myProjects, refresh } = useProjects();
+  const { settings } = useSettings();
   const entitlements = useEntitlements();
+
+  // Projects recommended from the onboarding questionnaire (not already joined).
+  const recommendedIds = settings.recommendedProjectIds ?? [];
+  const recommended = featured.filter(
+    (p) => recommendedIds.includes(p.id) && !myProjects.some((m) => m.id === p.id),
+  );
 
   const ownedCount = account?.uid ? myProjects.filter((p) => p.ownerUid === account.uid).length : 0;
   const canCreate = canUseProjectsUnlimited(entitlements) || ownedCount < FREE_OWNED_PROJECT_CAP;
@@ -87,10 +95,19 @@ export function ProjectsCatalogScreen() {
           </>
         )}
 
+        {recommended.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>{t('recommended')}</Text>
+            {recommended.map((p) => (
+              <ProjectCard key={p.id} project={p} onPress={() => navigation.navigate('ProjectDetail', { projectId: p.id })} />
+            ))}
+          </>
+        )}
+
         <Text style={styles.sectionLabel}>{t('featured')}</Text>
         {featured.length === 0 && <Text style={styles.empty}>{t('noFeatured')}</Text>}
         {featured
-          .filter((p) => !myProjects.some((m) => m.id === p.id))
+          .filter((p) => !myProjects.some((m) => m.id === p.id) && !recommendedIds.includes(p.id))
           .map((p) => (
             <ProjectCard key={p.id} project={p} onPress={() => navigation.navigate('ProjectDetail', { projectId: p.id })} />
           ))}

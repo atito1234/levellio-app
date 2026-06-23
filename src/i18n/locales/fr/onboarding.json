@@ -27,5 +27,92 @@
     "female": "Femme",
     "male": "Homme",
     "neutral": "Neutre"
+  },
+  "funnel": {
+    "attribution": {
+      "title": "Comment avez-vous découvert Levellio ?",
+      "subtitle": "Cela nous aide à toucher plus de gens qui en ont besoin.",
+      "tiktok": "TikTok",
+      "instagram": "Instagram",
+      "friend": "Un ami",
+      "appstore": "App Store",
+      "search": "Recherche web",
+      "other": "Ailleurs"
+    },
+    "focus": {
+      "title": "Sur quoi voulez-vous travailler ?",
+      "subtitle": "Choisissez l’essentiel — on bâtit votre plan autour."
+    },
+    "blocker": {
+      "title": "Qu’est-ce qui vous freine ?",
+      "subtitle": "On vous aide à l’affronter.",
+      "procrastination": "Procrastination",
+      "fear": "Peur de l’échec",
+      "doubt": "Doute de soi",
+      "laziness": "Manque de motivation",
+      "tooold": "« Trop tard »",
+      "unworthiness": "Sentiment d’indignité"
+    },
+    "count": {
+      "title": "Combien d’habitudes par jour ?",
+      "subtitle": "Commencez petit — vous pourrez en ajouter.",
+      "perDay": "{{count}} par jour"
+    },
+    "reminder": {
+      "title": "Quand vous rappeler ?",
+      "subtitle": "On calera vos rappels à ce moment-là.",
+      "morning": "Matin",
+      "afternoon": "Après-midi",
+      "evening": "Soir"
+    },
+    "why": {
+      "title": "Quel est votre pourquoi ?",
+      "subtitle": "Votre raison réapparaît quand la motivation baisse (facultatif).",
+      "placeholder": "ex. me sentir fort pour mes enfants"
+    },
+    "commit": {
+      "title": "Prêt à vous engager ?",
+      "subtitle": "Une petite promesse à soi rend les choses réelles.",
+      "cta": "Je me lance 💪"
+    },
+    "rating": {
+      "title": "Aidez d’autres à trouver Levellio",
+      "subtitle": "Une note rapide compte énormément pour une petite équipe.",
+      "cta": "Noter Levellio",
+      "later": "Plus tard"
+    },
+    "notify": {
+      "title": "Activer les rappels",
+      "subtitle": "Un petit rappel au bon moment garde votre série en vie.",
+      "cta": "Activer les rappels",
+      "later": "Pas maintenant"
+    },
+    "building": {
+      "title": "Création de votre plan…",
+      "l1": "Choix de vos quêtes…",
+      "l2": "Invocation de vos dragons…",
+      "l3": "Association de projets concrets…",
+      "l4": "Réglage de votre héros…"
+    },
+    "reveal": {
+      "kicker": "VOTRE PLAN EST PRÊT",
+      "title": "Voici votre plan personnalisé, {{name}}",
+      "subtitle": "Préchargé et prêt — modifiez tout à tout moment.",
+      "goalsTitle": "Vos objectifs",
+      "habitsTitle": "Vos habitudes quotidiennes",
+      "projectsTitle": "Recommandé pour vous",
+      "cta": "C’est parti"
+    },
+    "prime": {
+      "trialTitle": "Essayez Levellio Plus gratuitement",
+      "trialBody": "Débloquez le coach IA, les prévisions, les thèmes premium et les projets illimités — gratuit pendant 7 jours.",
+      "trialCta": "Voir les offres",
+      "remindTitle": "Aucune surprise",
+      "remindBody": "On vous préviendra 2 jours avant la fin de l’essai. Annulez à tout moment dans les Réglages.",
+      "remindCta": "Continuer",
+      "plansTitle": "Choisissez votre offre",
+      "plansBody": "Commencez gratuitement, gardez votre élan.",
+      "later": "Plus tard"
+    }
   }
 }
