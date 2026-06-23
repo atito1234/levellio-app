@@ -49,5 +49,7 @@
     "includedTitle": "Plus incluye",
     "freeTitle": "Siempre gratis, para siempre",
     "unavailable": "Levellio Plus está casi listo — todavía no hay nada que cobrar. Nunca te cobraremos sin preguntarte primero."
-  }
+  },
+  "trialReminderTitle": "Tu prueba de Levellio Plus termina pronto",
+  "trialReminderBody": "Aviso — tu prueba gratuita se convierte en 2 días. Gestiona o cancela cuando quieras en los ajustes de tu tienda."
 }

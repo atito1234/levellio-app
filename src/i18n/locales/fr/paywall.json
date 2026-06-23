@@ -49,5 +49,7 @@
     "includedTitle": "Plus comprend",
     "freeTitle": "Toujours gratuit, pour toujours",
     "unavailable": "Levellio Plus est presque prêt — il n’y a encore rien à facturer. Nous ne vous facturerons jamais sans vous demander d’abord."
-  }
+  },
+  "trialReminderTitle": "Votre essai Levellio Plus se termine bientôt",
+  "trialReminderBody": "Petit rappel — votre essai gratuit devient payant dans 2 jours. Gérez ou annulez à tout moment dans les réglages de votre store."
 }

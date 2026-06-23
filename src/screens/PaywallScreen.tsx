@@ -5,9 +5,9 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AnimatedHero, PressableScale, PrimaryButton, ScreenContainer } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { isMonetizationLive, PLUS_SKUS, type PlusSku } from '@/services/monetization';
-import { getSubscriptionService } from '@/services/subscription';
 import { useGame } from '@/state/GameContext';
 import { useSettings } from '@/state/SettingsContext';
+import { useSubscription } from '@/state/SubscriptionContext';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Paywall'>;
@@ -30,6 +30,7 @@ export function PaywallScreen({ navigation }: Props) {
 
 function LivePaywall({ navigation, t }: { navigation: Props['navigation']; t: ReturnType<typeof useTranslation>['t'] }) {
   const { character } = useGame();
+  const { purchase, restore: restoreSub } = useSubscription();
   const plusFeatures = t('plusFeatures', { returnObjects: true }) as unknown as string[];
   const [sku, setSku] = useState<PlusSku>(PLUS_SKUS.find((s) => s.bestValue) ?? PLUS_SKUS[0]!);
   const [busy, setBusy] = useState(false);
@@ -40,15 +41,15 @@ function LivePaywall({ navigation, t }: { navigation: Props['navigation']; t: Re
   const buy = async () => {
     setBusy(true);
     setNotice(null);
-    const res = await getSubscriptionService().purchase('premium');
+    const res = await purchase(sku.id);
     setBusy(false);
     if (res.ok) navigation.goBack();
-    else setNotice(t('live.unavailable')); // honest: nothing charged yet
+    else if (res.reason !== 'cancelled') setNotice(t('live.unavailable')); // honest: nothing charged
   };
 
   const restore = async () => {
     setBusy(true);
-    const res = await getSubscriptionService().restore();
+    const res = await restoreSub();
     setBusy(false);
     if (res.ok) navigation.goBack();
     else setNotice(t('live.unavailable'));

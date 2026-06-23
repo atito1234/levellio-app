@@ -49,5 +49,7 @@
     "includedTitle": "Plus includes",
     "freeTitle": "Always free, forever",
     "unavailable": "Levellio Plus is almost ready — there’s nothing to charge yet. We’ll never bill you without asking first."
-  }
+  },
+  "trialReminderTitle": "Your Levellio Plus trial ends soon",
+  "trialReminderBody": "Heads up — your free trial converts in 2 days. Manage or cancel anytime in your store settings."
 }
