@@ -3,6 +3,7 @@ import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-nativ
 import { useTranslation } from 'react-i18next';
 import { typography } from '@/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useSpotlightTarget } from '@/components/spotlight';
 
 const VIOLET = '#6C4CF1';
 
@@ -24,6 +25,7 @@ export function AddActivityFab({
   highlight?: boolean;
 }) {
   const { t } = useTranslation('addActivity');
+  const fabTarget = useSpotlightTarget('add-fab');
   const reduced = useReducedMotion();
   const pulse = useRef(new Animated.Value(0)).current;
 
@@ -53,7 +55,7 @@ export function AddActivityFab({
           <Text style={styles.labelText}>{t('addActivityA11y')}</Text>
         </View>
       )}
-      <View style={styles.fabWrap} pointerEvents="box-none">
+      <View style={styles.fabWrap} pointerEvents="box-none" {...fabTarget}>
         {highlight && !reduced && (
           <Animated.View
             pointerEvents="none"

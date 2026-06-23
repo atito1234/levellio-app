@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
 import { AddActivityFab, AddActivitySheet, CapacityRing, HeroAvatar, ProjectBadge, ProjectsStrip, ScreenContainer, WorldProjectsStrip } from '@/components';
+import { useSpotlightTarget, useWelcomeTour } from '@/components/spotlight';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
@@ -68,6 +69,8 @@ export function DashboardScreen() {
   const navigation = useNavigation<Nav>();
   const { t, i18n } = useTranslation(['dashboard', 'capacities']);
   const capName = (id: string) => t(`capacities:${id}`);
+  const todayTarget = useSpotlightTarget('today-focus');
+  useWelcomeTour(); // auto-runs the first-time tour once, never on re-login
   const { character, quests, suggestQuest, reorderQuests, status } = useGame();
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
@@ -353,7 +356,7 @@ export function DashboardScreen() {
         {onboardStep === 2 && <Text style={styles.stepHint}>{t('dashboard:step2')}</Text>}
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}
-        <View style={styles.billboard} {...(canBrowse && !gated ? pan.panHandlers : {})}>
+        <View style={styles.billboard} {...todayTarget} {...(canBrowse && !gated ? pan.panHandlers : {})}>
          <View style={styles.billboardClip}>
           <Animated.View
             style={[

@@ -87,6 +87,7 @@
   "about": {
     "title": "Acerca de y legal",
     "contact": "Contactar soporte",
-    "emailSupportA11y": "Escribir al soporte a {{email}}"
+    "emailSupportA11y": "Escribir al soporte a {{email}}",
+    "replayTour": "Repetir el tour de bienvenida"
   }
 }

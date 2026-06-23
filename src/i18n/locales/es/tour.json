@@ -1,0 +1,22 @@
+{
+  "step": "{{current}} de {{total}}",
+  "next": "Siguiente",
+  "done": "Empezar",
+  "skip": "Omitir el tour",
+  "today": {
+    "title": "Tu día de un vistazo",
+    "body": "Este anillo es tu enfoque de hoy. Toca un hábito que brille para completarlo y potenciar a tu héroe."
+  },
+  "add": {
+    "title": "Añade lo que sea en segundos",
+    "body": "Toca aquí para decir o escribir un nuevo hábito, actividad o meta — cuando llegue la inspiración."
+  },
+  "community": {
+    "title": "No estás solo",
+    "body": "Proyectos y Feed están en las pestañas de abajo — tus hábitos diarios impulsan metas reales y una comunidad en el mismo camino."
+  },
+  "finish": {
+    "title": "¡Todo listo! ✨",
+    "body": "Ese fue el tour. Adelante — tu héroe sube de nivel cada vez que apareces."
+  }
+}

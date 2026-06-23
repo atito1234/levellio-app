@@ -1,0 +1,22 @@
+{
+  "step": "{{current}} of {{total}}",
+  "next": "Next",
+  "done": "Start",
+  "skip": "Skip tour",
+  "today": {
+    "title": "Your day, at a glance",
+    "body": "This ring is today's focus. Tap a glowing habit to complete it and power up your hero."
+  },
+  "add": {
+    "title": "Add anything in seconds",
+    "body": "Tap here to speak or type a new habit, activity, or goal — whenever inspiration strikes."
+  },
+  "community": {
+    "title": "You're not alone",
+    "body": "Projects and Feed live in the tabs below — your everyday habits power real-world goals and a community on the same journey."
+  },
+  "finish": {
+    "title": "You're all set ✨",
+    "body": "That's the tour. Dive in — your hero levels up every time you show up."
+  }
+}
