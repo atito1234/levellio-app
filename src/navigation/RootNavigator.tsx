@@ -1,8 +1,11 @@
 import React from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer, DefaultTheme, type LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './types';
 import { colors } from '@/theme';
+import { useSettings } from '@/state/SettingsContext';
+import { useGame } from '@/state/GameContext';
 import { OnboardingScreen } from '@/screens/OnboardingScreen';
 import { QuestCompleteScreen } from '@/screens/QuestCompleteScreen';
 import { QuestEditorScreen } from '@/screens/QuestEditorScreen';
@@ -78,9 +81,27 @@ const linking: LinkingOptions<RootStackParamList> = {
  *   Onboarding -> Main (Dashboard / Character / Settings) + QuestComplete modal.
  */
 export function RootNavigator() {
+  const { settings, ready: settingsReady } = useSettings();
+  const { status, character } = useGame();
+
+  // Wait until settings + game state are known so we pick the right first screen
+  // (and don't flash Onboarding for returning users).
+  if (!settingsReady || status !== 'ready') {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator color={colors.identity} />
+      </View>
+    );
+  }
+
+  // Show the welcome flow only on a genuine first run. Returning users — even
+  // those from before the flag existed — already have a character, so skip it.
+  const initialRouteName: keyof RootStackParamList =
+    settings.onboardingCompleted || character ? 'Main' : 'Onboarding';
+
   return (
     <NavigationContainer ref={navigationRef} theme={navTheme} linking={linking}>
-      <Stack.Navigator initialRouteName="Onboarding" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen
