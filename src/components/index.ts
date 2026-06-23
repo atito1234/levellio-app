@@ -25,6 +25,7 @@ export { FollowButton } from './FollowButton';
 export { PostCard } from './PostCard';
 export { StoriesRail } from './StoriesRail';
 export { PressableScale } from './PressableScale';
+export { CommunityGate } from './CommunityGate';
 export { ReactionBurst } from './ReactionBurst';
 export { AnimatedCount } from './AnimatedCount';
 export { PlusBadge } from './PlusBadge';

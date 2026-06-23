@@ -19,6 +19,12 @@ export interface AccountService {
   onChange(cb: (account: Account | null) => void): () => void;
   signUp(email: string, password: string, displayName: string): Promise<Account>;
   signIn(email: string, password: string): Promise<Account>;
+  /**
+   * One-tap providers. Optional: only implemented by the Firebase backend once
+   * OAuth is configured (needs a dev build). Undefined on the local fallback.
+   */
+  signInWithApple?(): Promise<Account>;
+  signInWithGoogle?(): Promise<Account>;
   signOut(): Promise<void>;
   resetPassword(email: string): Promise<void>;
   /** Re-verify the current user's password (for sensitive actions like deletion). */

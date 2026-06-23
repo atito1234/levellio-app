@@ -3,7 +3,7 @@ import { Animated, Easing, Pressable, RefreshControl, ScrollView, StyleSheet, Te
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HeroAvatar, PostCard, PressableScale, ScreenContainer, StoriesRail } from '@/components';
+import { CommunityGate, HeroAvatar, PostCard, PressableScale, ScreenContainer, StoriesRail } from '@/components';
 import { spacing, typography } from '@/theme';
 import { durations, springs } from '@/theme/motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -117,14 +117,7 @@ export function NewsfeedScreen() {
     return (
       <ScreenContainer backgroundColor={BG}>
         {header}
-        <View style={styles.center}>
-          <Text style={styles.lockEmoji}>🤝</Text>
-          <Text style={styles.lockTitle}>{t('feed:newsfeed.gateSignInTitle')}</Text>
-          <Text style={styles.lockBody}>{t('feed:newsfeed.gateSignInBody')}</Text>
-          <Pressable onPress={() => navigation.navigate('SignIn')} accessibilityRole="button" style={styles.cta}>
-            <Text style={styles.ctaText}>{t('feed:newsfeed.gateSignInCta')}</Text>
-          </Pressable>
-        </View>
+        <CommunityGate onPrimary={() => navigation.navigate('SignIn')} />
       </ScreenContainer>
     );
   }

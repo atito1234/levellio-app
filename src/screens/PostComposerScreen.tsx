@@ -3,7 +3,7 @@ import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, St
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
-import { ScreenContainer } from '@/components';
+import { CommunityGate, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
 import { useProjects } from '@/state/ProjectsContext';
@@ -90,6 +90,15 @@ export function PostComposerScreen({ route, navigation }: Props) {
     : isWin
       ? t('feed:composerScreen.ctaWin')
       : t('common:action.post');
+
+  // Posting needs an account — show the unified gate instead of failing silently.
+  if (!uid) {
+    return (
+      <ScreenContainer backgroundColor={BG}>
+        <CommunityGate onPrimary={() => navigation.navigate('SignIn')} />
+      </ScreenContainer>
+    );
+  }
 
   return (
     <ScreenContainer backgroundColor={BG}>

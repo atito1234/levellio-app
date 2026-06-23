@@ -15,6 +15,9 @@ interface AuthContextValue {
   isReal: boolean;
   signUp: (email: string, password: string, displayName: string) => Promise<{ ok: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  /** One-tap providers. Return `{ ok:false, error:'unavailable' }` until OAuth is wired. */
+  signInWithApple: () => Promise<{ ok: boolean; error?: string }>;
+  signInWithGoogle: () => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
   /**
@@ -62,6 +65,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const signInWithApple = useCallback(async () => {
+    if (!accountService.signInWithApple) return { ok: false, error: 'unavailable' };
+    try {
+      await accountService.signInWithApple();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: errorOf(e) };
+    }
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    if (!accountService.signInWithGoogle) return { ok: false, error: 'unavailable' };
+    try {
+      await accountService.signInWithGoogle();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: errorOf(e) };
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     await accountService.signOut();
   }, []);
@@ -101,8 +124,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<AuthContextValue>(
-    () => ({ ready, account, isReal: accountService.isReal, signUp, signIn, signOut, resetPassword, deleteAccount }),
-    [ready, account, signUp, signIn, signOut, resetPassword, deleteAccount],
+    () => ({ ready, account, isReal: accountService.isReal, signUp, signIn, signInWithApple, signInWithGoogle, signOut, resetPassword, deleteAccount }),
+    [ready, account, signUp, signIn, signInWithApple, signInWithGoogle, signOut, resetPassword, deleteAccount],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
