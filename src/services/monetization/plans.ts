@@ -92,6 +92,45 @@ export const PLAN_CONFIG: MonetizationConfig = {
     'no payment will ever start here. Enjoy everything for free while we build.',
 };
 
+// --- Paid launch config (used by the upgrade surface once monetization is live) ---
+
+/** Free-trial length for Levellio Plus, in days. Mirrors the store product setup. */
+export const PLUS_TRIAL_DAYS = 7;
+
+export type BillingPeriod = 'month' | 'year' | 'lifetime';
+
+export interface PlusSku {
+  /** Store product id (App Store / Play / RevenueCat). */
+  id: string;
+  period: BillingPeriod;
+  /** Fallback display price; at runtime RevenueCat supplies the store-localized price. */
+  priceLabel: string;
+  /** Secondary line, e.g. per-month equivalent or "pay once". */
+  subLabel?: string;
+  /** Anchor the annual plan as the value choice. */
+  bestValue?: boolean;
+}
+
+/**
+ * Levellio Plus price points. Annual is the value anchor (~50% off monthly); a
+ * one-time Lifetime answers the common "why no one-time option?" complaint.
+ * Shown only when monetization is live; prices are re-resolved from the store.
+ */
+export const PLUS_SKUS: readonly PlusSku[] = [
+  { id: 'plus_annual', period: 'year', priceLabel: '$29.99 / yr', subLabel: '≈ $2.50 / mo', bestValue: true },
+  { id: 'plus_monthly', period: 'month', priceLabel: '$4.99 / mo' },
+  { id: 'plus_lifetime', period: 'lifetime', priceLabel: '$79 once', subLabel: 'pay once, yours forever' },
+];
+
+/**
+ * Whether the real, charging upgrade surface (trial + SKUs) should be shown.
+ * Stays false until billing (RevenueCat + store products) is configured and the
+ * founding-free beta ends — the single switch to flip at go-live.
+ */
+export function isMonetizationLive(): boolean {
+  return MONETIZATION_ENABLED;
+}
+
 export function getPlan(id: PlanId): PlanConfig {
   const plan = PLAN_CONFIG.plans.find((p) => p.id === id);
   // Config always contains both plans; fall back to the first defensively.
