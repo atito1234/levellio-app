@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography } from '@/theme';
 
 const MUTED = '#5A5A72';
@@ -20,10 +21,15 @@ export interface RankRow {
  * the group's detail (the CTA).
  */
 export function RankBars({ rows, onPressRow }: { rows: readonly RankRow[]; onPressRow?: (row: RankRow) => void }) {
+  const { t } = useTranslation('charts');
   const maxAbs = Math.max(1, ...rows.map((r) => Math.abs(r.delta)));
 
   return (
-    <View accessible accessibilityRole="image" accessibilityLabel={`Top movers, ${rows.length} items.`}>
+    <View
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={t('rankBars.summary', { count: rows.length })}
+    >
       {rows.map((r) => {
         const frac = Math.abs(r.delta) / maxAbs;
         const up = r.delta >= 0;
@@ -50,7 +56,12 @@ export function RankBars({ rows, onPressRow }: { rows: readonly RankRow[]; onPre
           </View>
         );
         return onPressRow ? (
-          <Pressable key={r.id} onPress={() => onPressRow(r)} accessibilityRole="button" accessibilityLabel={`${r.label}, ${sign}${r.delta}`}>
+          <Pressable
+            key={r.id}
+            onPress={() => onPressRow(r)}
+            accessibilityRole="button"
+            accessibilityLabel={t('rankBars.row', { label: r.label, delta: `${sign}${r.delta}` })}
+          >
             {Row}
           </Pressable>
         ) : (

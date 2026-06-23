@@ -1,0 +1,13 @@
+{
+  "streak_one": "Série de {{count}} jour ! 🔥",
+  "streak_other": "Série de {{count}} jours ! 🔥",
+  "activitySolid": "« {{title}} » est une habitude maintenant 🌱",
+  "capacityFull": "{{name}} complètement chargée ✨",
+  "goalStronger": "Votre objectif « {{title}} » vient de se renforcer {{emoji}}",
+  "projectGoalLabel": "{{title}} a atteint l’objectif de la semaine !",
+  "projectGoalRewardDetail": "Récompense débloquée : {{reward}}",
+  "projectGoalDetail": "Objectif atteint ensemble",
+  "onSitePrefix": "Sur place · ",
+  "projectLabel": "+{{value}} {{unit}} → {{title}}{{pin}}",
+  "projectDetail": "{{prefix}}{{pct}} % de l’objectif de la semaine"
+}

@@ -1,0 +1,81 @@
+{
+  "verdict": {
+    "start": {
+      "label": "Your map starts today",
+      "reason": "Complete one habit and your direction will start to take shape here."
+    },
+    "onTrack": {
+      "label": "Headed in the right direction",
+      "reason": "You showed up {{active}} of the last 7 days{{trend}}"
+    },
+    "building": {
+      "label": "Building momentum",
+      "reason_one": "{{active}} active day this week{{trend}} A little more makes it stick.",
+      "reason_other": "{{active}} active days this week{{trend}} A little more makes it stick."
+    },
+    "drifting": {
+      "label": "Time for a gentle nudge",
+      "reason": "It's been quiet this week. One small win today restarts the momentum."
+    },
+    "trend": {
+      "up": " — up from last week.",
+      "down": " — down from last week, worth a nudge.",
+      "same": "."
+    }
+  },
+  "tier": {
+    "streak": {
+      "title": "Streak strength",
+      "teaser": "How many days in a row you've shown up."
+    },
+    "rhythm": {
+      "title": "Your rhythm",
+      "teaser": "The day and time you're most likely to show up."
+    },
+    "anchor": {
+      "title": "Your anchor habit",
+      "teaser": "The habit you return to most — your foundation."
+    },
+    "mix": {
+      "title": "What's working",
+      "teaser": "Which life area is getting your energy, and the goal it feeds."
+    },
+    "resilience": {
+      "title": "Your resilience",
+      "teaser": "Your longest unbroken run — proof you can sustain it."
+    },
+    "automatic": {
+      "title": "Becoming automatic",
+      "teaser": "When your habits start running on their own — the science of 66 days."
+    }
+  },
+  "confidence": {
+    "early_one": "Early · {{count}} day",
+    "early_other": "Early · {{count}} days",
+    "building_one": "Building · {{count}} day",
+    "building_other": "Building · {{count}} days",
+    "confident": "Confident"
+  },
+  "hourBars": {
+    "mostActive": "Most active around {{time}}",
+    "noActivity": "No activity logged",
+    "a11y": "Time of day activity. {{summary}}."
+  },
+  "trendChart": {
+    "noData": "No data yet",
+    "latest": "Latest {{value}}{{unit}}",
+    "a11y": "{{label}}. {{detail}}.",
+    "overallAdherence": "Overall adherence"
+  },
+  "focus": {
+    "capLagging": "{{name}} is lagging",
+    "capLaggingReason": "It’s your lowest capacity. \"{{habit}}\" builds it fastest.",
+    "doHabit": "Do \"{{habit}}\"",
+    "groupSlipping": "{{label}} is slipping",
+    "groupSlippingReason": "{{pct}}% of what you scheduled got done.",
+    "focusGroup": "Focus {{label}}",
+    "weekdayGap": "{{day}}s are your gap",
+    "weekdayGapReason": "That’s the weekday you miss most. Plan it deliberately.",
+    "planDay": "Plan {{day}}"
+  }
+}

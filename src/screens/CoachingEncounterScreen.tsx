@@ -93,13 +93,28 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
   const tactic = allTactics[tIndex % allTactics.length]!;
   const evidence = getFramework(tactic.frameworkId);
 
+  // Localized content (curated/AI data stays English; we localize at the render
+  // site keyed by stable ids, with the English value as the guaranteed fallback).
+  const blockerLabel = t('coachingContent:blocker.' + plan.blocker.id + '.label', { defaultValue: plan.blocker.label });
+  const blockerTell = t('coachingContent:blocker.' + plan.blocker.id + '.tell', { defaultValue: plan.blocker.tell });
+  const questionText = question
+    ? t('coachingContent:question.' + question.id + '.text', { defaultValue: question.text })
+    : '';
+  const questionFollowUp = question?.followUp
+    ? t('coachingContent:question.' + question.id + '.followUp', { defaultValue: question.followUp })
+    : undefined;
+  const tacticName = t('coachingContent:tactic.' + tactic.id + '.name', { defaultValue: tactic.name });
+  const tacticHow = t('coachingContent:tactic.' + tactic.id + '.how', { defaultValue: tactic.how });
+  const evidencePrinciple = t('coachingContent:framework.' + evidence.id + '.principle', { defaultValue: evidence.principle });
+  const evidenceSource = t('coachingContent:framework.' + evidence.id + '.source', { defaultValue: evidence.source });
+
   const journalThis = () =>
     navigation.navigate('JournalComposer', {
       dragonId,
       dragonName: dragonDisplayName,
       ...(questId ? { questIds: [questId] } : {}),
       ...(plan.context ? { prompt: plan.context.prompt } : {}),
-      teaching: `${t('journalTeaching', { name: tactic.name, how: tactic.how })}${plan.context ? `\n\n${plan.context.teaching}` : ''}`,
+      teaching: `${t('journalTeaching', { name: tacticName, how: tacticHow })}${plan.context ? `\n\n${plan.context.teaching}` : ''}`,
     });
 
   return (
@@ -122,16 +137,16 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
             <Text style={styles.dragonName} numberOfLines={1}>
               {dragonDisplayName}
             </Text>
-            <Text style={styles.blockerLabel}>{t('thisSoundsLike', { label: plan.blocker.label })}</Text>
-            <Text style={styles.blockerTell}>“{plan.blocker.tell}”</Text>
+            <Text style={styles.blockerLabel}>{t('thisSoundsLike', { label: blockerLabel })}</Text>
+            <Text style={styles.blockerTell}>“{blockerTell}”</Text>
           </View>
         </View>
 
         {!revealed ? (
           <View style={[styles.qCard, shadow]}>
             <Text style={styles.qKicker}>{t('thinkItThrough', { current: qIndex + 1, total })}</Text>
-            <Text style={styles.qText}>{question?.text}</Text>
-            {question?.followUp && <Text style={styles.qFollow}>{question.followUp}</Text>}
+            <Text style={styles.qText}>{questionText}</Text>
+            {questionFollowUp && <Text style={styles.qFollow}>{questionFollowUp}</Text>}
             <View style={styles.dots}>
               {plan.questions.map((q, i) => (
                 <View key={q.id} style={[styles.dot, i === qIndex && styles.dotOn]} />
@@ -149,9 +164,9 @@ export function CoachingEncounterScreen({ route, navigation }: Props) {
         ) : (
           <View style={[styles.tacticCard, shadow]}>
             <Text style={styles.qKicker}>{t('tryThis')}</Text>
-            <Text style={styles.tacticName}>{tactic.name}</Text>
-            <Text style={styles.tacticHow}>{tactic.how}</Text>
-            <Text style={styles.evidence}>{t('evidence', { principle: evidence.principle, source: evidence.source })}</Text>
+            <Text style={styles.tacticName}>{tacticName}</Text>
+            <Text style={styles.tacticHow}>{tacticHow}</Text>
+            <Text style={styles.evidence}>{t('evidence', { principle: evidencePrinciple, source: evidenceSource })}</Text>
             {allTactics.length > 1 && (
               <Pressable onPress={() => setTIndex((i) => i + 1)} accessibilityRole="button" accessibilityLabel={t('differentTacticA11y')} hitSlop={8}>
                 <Text style={styles.altLink}>{t('differentTactic')}</Text>

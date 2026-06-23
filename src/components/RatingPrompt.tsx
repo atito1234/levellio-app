@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography } from '@/theme';
 import type { RatingValue } from '@/types';
 
@@ -10,13 +11,6 @@ const MUTED = '#5A5A72';
 const GOLD = '#FFB23E';
 
 const SCALE: readonly RatingValue[] = [1, 2, 3, 4, 5];
-const HINT: Record<RatingValue, string> = {
-  1: 'A real grind',
-  2: 'A bit of a slog',
-  3: 'Fine — got it done',
-  4: 'Felt good',
-  5: 'Loved it',
-};
 
 interface Props {
   visible: boolean;
@@ -32,11 +26,12 @@ interface Props {
  * for any habit, even ones we have no curated metric for.
  */
 export function RatingPrompt({ visible, title, onSelect, onSkip }: Props) {
+  const { t } = useTranslation('rating');
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onSkip}>
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          <Text style={styles.kicker}>HOW DID IT GO?</Text>
+          <Text style={styles.kicker}>{t('kicker')}</Text>
           <Text style={styles.title} numberOfLines={2}>
             {title}
           </Text>
@@ -46,7 +41,7 @@ export function RatingPrompt({ visible, title, onSelect, onSkip }: Props) {
                 key={n}
                 onPress={() => onSelect(n)}
                 accessibilityRole="button"
-                accessibilityLabel={`${n} of 5 — ${HINT[n]}`}
+                accessibilityLabel={t('starA11y', { n, hint: t(`hint.${n}`) })}
                 hitSlop={6}
                 style={styles.starBtn}
               >
@@ -55,9 +50,9 @@ export function RatingPrompt({ visible, title, onSelect, onSkip }: Props) {
               </Pressable>
             ))}
           </View>
-          <Text style={styles.scaleHint}>1 = a grind · 5 = loved it</Text>
-          <Pressable onPress={onSkip} accessibilityRole="button" accessibilityLabel="Skip rating" hitSlop={8}>
-            <Text style={styles.skip}>Skip</Text>
+          <Text style={styles.scaleHint}>{t('scaleHint')}</Text>
+          <Pressable onPress={onSkip} accessibilityRole="button" accessibilityLabel={t('skipA11y')} hitSlop={8}>
+            <Text style={styles.skip}>{t('skip')}</Text>
           </Pressable>
         </View>
       </View>

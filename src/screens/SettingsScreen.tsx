@@ -46,6 +46,7 @@ import {
   isSupportedLocale,
   type LocaleSetting,
 } from '@/i18n/config';
+import { useSpotlight, WELCOME_TOUR } from '@/components/spotlight';
 import { COSMETIC_THEMES, getTheme } from '@/data/cosmetics';
 import { canUseCosmetics } from '@/services/monetization';
 import { useEntitlements } from '@/state/SubscriptionContext';
@@ -67,7 +68,15 @@ export function SettingsScreen() {
   const [nameDraft, setNameDraft] = useState(character?.name ?? '');
   const { account, isReal, signOut, deleteAccount } = useAuth();
   const { settings, ready, update } = useSettings();
+  const { start: startTour } = useSpotlight();
   const entitlements = useEntitlements();
+
+  // Replay the first-run tour on demand: clear the flag, jump to Today, run it.
+  const replayTour = () => {
+    void update({ welcomeTourCompleted: false });
+    navigation.navigate('Main', { screen: 'Dashboard' });
+    setTimeout(() => startTour(WELCOME_TOUR), 350);
+  };
 
   const pickTheme = (id: string) => {
     const theme = getTheme(id);
@@ -401,12 +410,24 @@ export function SettingsScreen() {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Email support at ${CONTACT_EMAIL}`}
+            accessibilityLabel={t('about.emailSupportA11y', { email: CONTACT_EMAIL })}
             onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)}
             style={styles.row}
           >
             <Text style={styles.rowLabel}>{t('about.contact')}</Text>
             <Text style={styles.rowValue}>{CONTACT_EMAIL}</Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('about.replayTour')}
+            onPress={replayTour}
+            style={styles.row}
+          >
+            <Text style={styles.rowLabel}>{t('about.replayTour')}</Text>
+            <Text style={styles.rowChevron} accessibilityElementsHidden>
+              ›
+            </Text>
           </Pressable>
 
           <Text style={styles.mission}>{MISSION}</Text>

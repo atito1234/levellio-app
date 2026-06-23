@@ -26,8 +26,40 @@
     "body": "Le partage de photos et vidéos arrive la semaine prochaine."
   },
   "plusBadge": "Fondateur",
-  "weekdaysShort": ["D", "L", "M", "M", "J", "V", "S"],
-  "weekdaysFull": ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"],
-  "weekdaysAbbr": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
-  "recurrence": { "everyDay": "Chaque jour", "weekdays": "Jours de semaine", "weekends": "Week-ends" }
+  "weekdaysShort": [
+    "D",
+    "L",
+    "M",
+    "M",
+    "J",
+    "V",
+    "S"
+  ],
+  "weekdaysFull": [
+    "Dimanche",
+    "Lundi",
+    "Mardi",
+    "Mercredi",
+    "Jeudi",
+    "Vendredi",
+    "Samedi"
+  ],
+  "weekdaysAbbr": [
+    "Dim",
+    "Lun",
+    "Mar",
+    "Mer",
+    "Jeu",
+    "Ven",
+    "Sam"
+  ],
+  "recurrence": {
+    "everyDay": "Chaque jour",
+    "weekdays": "Jours de semaine",
+    "weekends": "Week-ends"
+  },
+  "time": {
+    "justNow": "à l’instant"
+  },
+  "documentA11y": "Document {{title}}"
 }

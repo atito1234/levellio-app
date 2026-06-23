@@ -17,6 +17,7 @@ import { colors, radii, spacing, typography } from '@/theme';
 import { durations } from '@/theme/motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useGame } from '@/state/GameContext';
+import { useSettings } from '@/state/SettingsContext';
 import type { RootStackParamList } from '@/navigation/types';
 import type { HeroPresentation } from '@/types';
 
@@ -36,6 +37,7 @@ export function OnboardingScreen({ navigation }: Props) {
   const { t } = useTranslation('onboarding');
   const reduced = useReducedMotion();
   const { startGame, setName } = useGame();
+  const { update } = useSettings();
   const [step, setStep] = useState(0);
   const [presentation, setPresentation] = useState<HeroPresentation>('neutral');
   const [heroName, setHeroName] = useState('');
@@ -64,6 +66,8 @@ export function OnboardingScreen({ navigation }: Props) {
       setBusy(true);
       await startGame(presentation);
       if (heroName.trim()) await setName(heroName);
+      // Remember we finished the welcome flow so it never shows again.
+      await update({ onboardingCompleted: true });
       navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } finally {
       setBusy(false);

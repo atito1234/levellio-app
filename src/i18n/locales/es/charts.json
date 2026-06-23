@@ -1,0 +1,52 @@
+{
+  "rankBars": {
+    "summary_one": "Mayores cambios, {{count}} elemento.",
+    "summary_other": "Mayores cambios, {{count}} elementos.",
+    "row": "{{label}}, {{delta}}"
+  },
+  "dotGrid": {
+    "summary_one": "{{done}} de los últimos {{total}} día completado",
+    "summary_other": "{{done}} de los últimos {{total}} días completados"
+  },
+  "calendarHeatmap": {
+    "summary_one": "Mapa de calor del calendario de {{count}} día.",
+    "summary_other": "Mapa de calor del calendario de {{count}} días.",
+    "day": "{{dayKey}}: {{value}}"
+  },
+  "hBarChart": {
+    "row": "{{label}}, {{display}}"
+  },
+  "radarChart": {
+    "summary": "Gráfico de equilibrio. {{a11y}}."
+  },
+  "barHistogram": {
+    "summary_one": "Gráfico de distribución con {{count}} barra.",
+    "summary_other": "Gráfico de distribución con {{count}} barras.",
+    "bar": "{{label}}: {{value}}"
+  },
+  "hero": {
+    "label": "Héroe {{presentation}}, nivel {{tier}}",
+    "labelWithKit": "Héroe {{presentation}}, nivel {{tier}}, camiseta de {{nation}}",
+    "presentation": {
+      "female": "femenino",
+      "male": "masculino",
+      "neutral": "neutro"
+    },
+    "tierLabel": {
+      "novice": "Novato",
+      "pathfinder": "Explorador",
+      "luminary": "Eminencia"
+    }
+  },
+  "wisp": {
+    "label": "Compañero Wisp: {{label}}",
+    "stage": {
+      "spark": "Chispa",
+      "ember": "Brasa",
+      "phoenixling": "Fénix"
+    }
+  },
+  "xp": "{{xp}} de {{needed}} XP",
+  "xpProgress": "Progreso de XP hasta el siguiente nivel",
+  "lvlShort": "NIV"
+}

@@ -14,7 +14,6 @@ import { capacityStore } from '@/services/capacities';
 
 const DANGER = '#C0202C';
 const DANGER_SOFT = '#FCE3E5';
-const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 /**
  * Settings "danger zone" — scoped, destructive data deletion. The scope is ALL
@@ -24,6 +23,8 @@ const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
  */
 export function DataDangerZone() {
   const { t } = useTranslation('danger');
+  const weekShort = t('common:weekdaysShort', { returnObjects: true }) as string[];
+  const weekFull = t('common:weekdaysFull', { returnObjects: true }) as string[];
   const { user, quests, deleteQuests, setRecurrence } = useGame();
   const { plans, clearPlans } = usePlan();
   const [picked, setPicked] = useState<number[]>([]);
@@ -114,7 +115,7 @@ export function DataDangerZone() {
         >
           <Text style={[styles.allChipText, picked.length === 0 && styles.allChipTextOn]}>{t('allDays')}</Text>
         </Pressable>
-        {WEEKDAYS.map((d, i) => {
+        {weekShort.map((d, i) => {
           const on = picked.includes(i);
           return (
             <Pressable
@@ -122,7 +123,7 @@ export function DataDangerZone() {
               onPress={() => toggle(i)}
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
-              accessibilityLabel={`Scope ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i]}`}
+              accessibilityLabel={t('scopeDayA11y', { day: weekFull[i] })}
               style={[styles.dayChip, on && styles.dayChipOn]}
             >
               <Text style={[styles.dayChipText, on && styles.dayChipTextOn]}>{d}</Text>

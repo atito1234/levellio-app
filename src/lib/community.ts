@@ -155,16 +155,20 @@ export function postInScope(post: Post, scope: FeedScope, following: ReadonlySet
 // --- formatting --------------------------------------------------------------
 
 /** Compact "time ago" label (just now / 5m / 3h / 2d / Jan 4). */
-export function timeAgo(ts: number, now: number = Date.now()): string {
+export function timeAgo(
+  ts: number,
+  now: number = Date.now(),
+  opts: { justNow?: string; locale?: string } = {},
+): string {
   const s = Math.max(0, Math.floor((now - ts) / 1000));
-  if (s < 60) return 'just now';
+  if (s < 60) return opts.justNow ?? 'just now';
   const m = Math.floor(s / 60);
   if (m < 60) return `${m}m`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h`;
   const d = Math.floor(h / 24);
   if (d < 7) return `${d}d`;
-  return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return new Date(ts).toLocaleDateString(opts.locale, { month: 'short', day: 'numeric' });
 }
 
 /** Newest-first, bounded slice for display (ties broken by id for stability). */

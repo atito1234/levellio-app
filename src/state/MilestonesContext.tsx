@@ -1,7 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useGame } from '@/state/GameContext';
 import { milestoneStore } from '@/services/milestones';
-import type { Milestone } from '@/lib/milestones';
+import i18n from '@/i18n';
+import { localizeMilestones, type Milestone } from '@/lib/milestones';
 
 interface MilestonesContextValue {
   ready: boolean;
@@ -59,7 +60,13 @@ export function MilestonesProvider({ children }: { children: React.ReactNode }) 
 
   const recordMilestones = useCallback(
     async (milestones: readonly Milestone[]) => {
-      const fresh = milestones.filter((m) => !earnedIds.has(m.id));
+      // Detection runs in a pure helper without a translator; localize the labels
+      // here (via the i18n singleton) at the moment they're earned/persisted, so
+      // milestone user-data is stored already-translated and never re-derived.
+      const fresh = localizeMilestones(
+        milestones.filter((m) => !earnedIds.has(m.id)),
+        i18n.t,
+      );
       if (fresh.length === 0) return;
       const nextEarned = [...earned, ...fresh];
       setEarned(nextEarned);
@@ -71,7 +78,8 @@ export function MilestonesProvider({ children }: { children: React.ReactNode }) 
 
   const celebrate = useCallback((milestones: readonly Milestone[]) => {
     if (milestones.length === 0) return;
-    setQueue((q) => [...q, ...milestones]);
+    // Transient beats (project contributions) are localized at enqueue time.
+    setQueue((q) => [...q, ...localizeMilestones(milestones, i18n.t)]);
   }, []);
 
   const popQueue = useCallback(() => setQueue((q) => q.slice(1)), []);

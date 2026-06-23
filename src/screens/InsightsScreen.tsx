@@ -69,6 +69,7 @@ function dayLabel(key: string, locale: string): string {
 export function InsightsScreen({ route, navigation }: Props) {
   const { t, i18n } = useTranslation('insights');
   const locale = i18n.language;
+  const weekdayNames = t('common:weekdaysAbbr', { returnObjects: true }) as string[];
   const { events, ready } = useActivityLog();
   const activityId = route.params?.activityId;
   const category = route.params?.category;
@@ -152,7 +153,7 @@ export function InsightsScreen({ route, navigation }: Props) {
           <EmptyState scope={isOverview ? 'overview' : activityId ? 'activity' : category ? 'category' : 'day'} t={t} />
         ) : (
           <>
-            <SummaryCard summary={summary} t={t} />
+            <SummaryCard summary={summary} t={t} locale={locale} weekdayNames={weekdayNames} />
 
             {/* Day review: plan-vs-done, minutes by category, and time of day. */}
             {day && planRing && (
@@ -246,7 +247,7 @@ export function InsightsScreen({ route, navigation }: Props) {
                       <Text style={styles.rowTitle}>{categoryLabel(c.category, t)}</Text>
                       <Text style={styles.rowSub}>
                         {t('row.sub', { count: c.summary.count, minutes: formatMinutes(c.summary.totalMin) })}
-                        {c.summary.bestHour !== null ? t('row.bestSuffix', { time: hourLabel(c.summary.bestHour) }) : ''}
+                        {c.summary.bestHour !== null ? t('row.bestSuffix', { time: hourLabel(c.summary.bestHour, locale) }) : ''}
                       </Text>
                     </View>
                     <Text style={styles.rowChevron}>›</Text>
@@ -270,7 +271,7 @@ export function InsightsScreen({ route, navigation }: Props) {
                       <Text style={styles.rowTitle}>{a.title}</Text>
                       <Text style={styles.rowSub}>
                         {t('row.sub', { count: a.summary.count, minutes: formatMinutes(a.summary.totalMin) })}
-                        {a.summary.bestHour !== null ? t('row.bestSuffix', { time: hourLabel(a.summary.bestHour) }) : ''}
+                        {a.summary.bestHour !== null ? t('row.bestSuffix', { time: hourLabel(a.summary.bestHour, locale) }) : ''}
                       </Text>
                     </View>
                     <Text style={styles.rowChevron}>›</Text>
@@ -329,7 +330,7 @@ export function InsightsScreen({ route, navigation }: Props) {
   );
 }
 
-function SummaryCard({ summary, t }: { summary: Summary; t: TFunction }) {
+function SummaryCard({ summary, t, locale, weekdayNames }: { summary: Summary; t: TFunction; locale: string; weekdayNames: string[] }) {
   return (
     <View style={styles.summaryCard}>
       <View style={styles.statGrid}>
@@ -340,13 +341,13 @@ function SummaryCard({ summary, t }: { summary: Summary; t: TFunction }) {
       {(summary.bestHour !== null || summary.bestWeekday !== null) && (
         <View style={styles.bestRow}>
           {summary.bestHour !== null && (
-            <View style={styles.bestPill} accessibilityLabel={t('summary.a11yBestTime', { time: hourLabel(summary.bestHour) })}>
-              <Text style={styles.bestPillText}>{t('summary.bestTime', { time: hourLabel(summary.bestHour) })}</Text>
+            <View style={styles.bestPill} accessibilityLabel={t('summary.a11yBestTime', { time: hourLabel(summary.bestHour, locale) })}>
+              <Text style={styles.bestPillText}>{t('summary.bestTime', { time: hourLabel(summary.bestHour, locale) })}</Text>
             </View>
           )}
           {summary.bestWeekday !== null && (
-            <View style={styles.bestPill} accessibilityLabel={t('summary.a11yBestDay', { day: weekdayLabel(summary.bestWeekday) })}>
-              <Text style={styles.bestPillText}>{t('summary.bestDay', { day: weekdayLabel(summary.bestWeekday) })}</Text>
+            <View style={styles.bestPill} accessibilityLabel={t('summary.a11yBestDay', { day: weekdayLabel(summary.bestWeekday, weekdayNames) })}>
+              <Text style={styles.bestPillText}>{t('summary.bestDay', { day: weekdayLabel(summary.bestWeekday, weekdayNames) })}</Text>
             </View>
           )}
         </View>
@@ -369,7 +370,7 @@ function SessionRow({ session, showDay, t, locale }: { session: ActivitySessionE
   const method = methodLabel(session.method, t);
   const durLabel = session.durationSec > 0 ? formatMinutes(min) : method;
   const title = session.title ?? t('activityFallback');
-  const when = showDay ? `${dayLabel(sessionDay(session), locale)} · ${sessionTimeLabel(session)}` : sessionTimeLabel(session);
+  const when = showDay ? `${dayLabel(sessionDay(session), locale)} · ${sessionTimeLabel(session, locale)}` : sessionTimeLabel(session, locale);
   return (
     <View
       style={styles.sessionRow}

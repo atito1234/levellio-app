@@ -1,0 +1,52 @@
+{
+  "rankBars": {
+    "summary_one": "Top movers, {{count}} item.",
+    "summary_other": "Top movers, {{count}} items.",
+    "row": "{{label}}, {{delta}}"
+  },
+  "dotGrid": {
+    "summary_one": "{{done}} of the last {{total}} day done",
+    "summary_other": "{{done}} of the last {{total}} days done"
+  },
+  "calendarHeatmap": {
+    "summary_one": "Calendar heatmap of {{count}} day.",
+    "summary_other": "Calendar heatmap of {{count}} days.",
+    "day": "{{dayKey}}: {{value}}"
+  },
+  "hBarChart": {
+    "row": "{{label}}, {{display}}"
+  },
+  "radarChart": {
+    "summary": "Balance chart. {{a11y}}."
+  },
+  "barHistogram": {
+    "summary_one": "Distribution chart with {{count}} bar.",
+    "summary_other": "Distribution chart with {{count}} bars.",
+    "bar": "{{label}}: {{value}}"
+  },
+  "hero": {
+    "label": "{{presentation}} hero, {{tier}} tier",
+    "labelWithKit": "{{presentation}} hero, {{tier}} tier, {{nation}} kit",
+    "presentation": {
+      "female": "Female",
+      "male": "Male",
+      "neutral": "Neutral"
+    },
+    "tierLabel": {
+      "novice": "Novice",
+      "pathfinder": "Pathfinder",
+      "luminary": "Luminary"
+    }
+  },
+  "wisp": {
+    "label": "Wisp companion: {{label}}",
+    "stage": {
+      "spark": "Spark",
+      "ember": "Ember",
+      "phoenixling": "Phoenixling"
+    }
+  },
+  "xp": "{{xp}} of {{needed}} XP",
+  "xpProgress": "XP progress to next level",
+  "lvlShort": "LVL"
+}

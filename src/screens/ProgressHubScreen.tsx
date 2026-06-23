@@ -96,13 +96,16 @@ export function ProgressHubScreen({ route, navigation }: Props) {
   // Honest momentum headline (folded in from the old reflective screen).
   const verdict = useMemo(
     () =>
-      directionVerdict({
-        daysDone: daysAccomplished(sessions),
-        streakDays: character?.streakDays ?? 0,
-        activeThisWeek: activeDaysInWindow(sessions, todayKey, 7),
-        activePrevWeek: activeDaysInWindow(sessions, shiftDayKey(todayKey, -7), 7),
-      }),
-    [sessions, character?.streakDays, todayKey],
+      directionVerdict(
+        {
+          daysDone: daysAccomplished(sessions),
+          streakDays: character?.streakDays ?? 0,
+          activeThisWeek: activeDaysInWindow(sessions, todayKey, 7),
+          activePrevWeek: activeDaysInWindow(sessions, shiftDayKey(todayKey, -7), 7),
+        },
+        t,
+      ),
+    [sessions, character?.streakDays, todayKey, t],
   );
 
   const habitStats = useMemo(
@@ -174,8 +177,8 @@ export function ProgressHubScreen({ route, navigation }: Props) {
         levels,
         quests,
         todayKey,
-      }),
-    [goalStats, bucketStats, habitStats, levels, quests, todayKey],
+      }, t),
+    [goalStats, bucketStats, habitStats, levels, quests, todayKey, t],
   );
 
   const goalSeries = useMemo(
@@ -194,13 +197,14 @@ export function ProgressHubScreen({ route, navigation }: Props) {
     [buckets, assignments, quests, sessions, getPlan, trendRange, done],
   );
 
+  const overallLabel = t('momentum:trendChart.overallAdherence');
   const overallTrend = useMemo(
     () =>
       adherenceTrendSeries(
-        { id: 'all', kind: 'habit', label: 'Overall adherence', members: quests, sessions, getPlan, range: trendRange, done },
-        { label: 'Overall adherence' },
+        { id: 'all', kind: 'habit', label: overallLabel, members: quests, sessions, getPlan, range: trendRange, done },
+        { label: overallLabel },
       ),
-    [quests, sessions, getPlan, trendRange, done],
+    [quests, sessions, getPlan, trendRange, done, overallLabel],
   );
 
   // Daily activity (sessions per day) over the trend window → heatmap.

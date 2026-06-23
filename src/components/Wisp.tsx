@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Svg, {
   Circle,
   Defs,
@@ -33,6 +34,7 @@ const C = {
 } as const;
 
 const STAGES: readonly CompanionStage[] = ['spark', 'ember', 'phoenixling'];
+/** English fallbacks used when i18n is not yet initialized (e.g. in tests). */
 const LABEL: Record<CompanionStage, string> = {
   spark: 'Spark',
   ember: 'Ember',
@@ -45,7 +47,9 @@ interface WispProps {
 }
 
 export function Wisp({ stage, size = 96 }: WispProps) {
+  const { t } = useTranslation('charts');
   const safe: CompanionStage = STAGES.includes(stage) ? stage : 'spark';
+  const stageLabel = t(`wisp.stage.${safe}`, { defaultValue: LABEL[safe] });
 
   return (
     <Svg
@@ -53,7 +57,7 @@ export function Wisp({ stage, size = 96 }: WispProps) {
       height={size}
       viewBox="0 0 100 100"
       accessibilityRole="image"
-      accessibilityLabel={`Wisp companion: ${LABEL[safe]}`}
+      accessibilityLabel={t('wisp.label', { label: stageLabel, defaultValue: `Wisp companion: ${stageLabel}` })}
     >
       <Defs>
         <RadialGradient id="wispAura" cx="50%" cy="50%" r="50%">

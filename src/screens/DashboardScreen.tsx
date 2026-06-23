@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
 import { AddActivityFab, AddActivitySheet, CapacityRing, HeroAvatar, ProjectBadge, ProjectsStrip, ScreenContainer, WorldProjectsStrip } from '@/components';
+import { useSpotlightTarget, useWelcomeTour } from '@/components/spotlight';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
@@ -66,8 +67,10 @@ const SWIPE_THRESHOLD = 56;
  */
 export function DashboardScreen() {
   const navigation = useNavigation<Nav>();
-  const { t } = useTranslation(['dashboard', 'capacities']);
+  const { t, i18n } = useTranslation(['dashboard', 'capacities']);
   const capName = (id: string) => t(`capacities:${id}`);
+  const todayTarget = useSpotlightTarget('today-focus');
+  useWelcomeTour(); // auto-runs the first-time tour once, never on re-login
   const { character, quests, suggestQuest, reorderQuests, status } = useGame();
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
@@ -292,20 +295,20 @@ export function DashboardScreen() {
             ) : null}
           </View>
           <View style={styles.pills}>
-            <View style={styles.pill} accessibilityLabel={`${character.streakDays} day streak`}>
+            <View style={styles.pill} accessibilityLabel={t('streakPillA11y', { days: character.streakDays })}>
               <Text style={styles.pillText}>🔥 {character.streakDays}</Text>
             </View>
             {totalSlain > 0 && (
-              <View style={styles.pill} accessibilityLabel={`${totalSlain} dragons slain`}>
+              <View style={styles.pill} accessibilityLabel={t('dragonsSlainA11y', { count: totalSlain })}>
                 <Text style={styles.pillText}>⚔️ {totalSlain}</Text>
               </View>
             )}
             {coins > 0 && (
-              <View style={styles.pill} accessibilityLabel={`${coins} coins`}>
+              <View style={styles.pill} accessibilityLabel={t('coinsA11y', { count: coins })}>
                 <Text style={styles.pillText}>🪙 {coins}</Text>
               </View>
             )}
-            <View style={[styles.pill, styles.pillViolet]} accessibilityLabel={`Level ${character.level}`}>
+            <View style={[styles.pill, styles.pillViolet]} accessibilityLabel={t('levelA11y', { level: character.level })}>
               <Text style={[styles.pillText, { color: VIOLET }]}>Lv {character.level}</Text>
             </View>
           </View>
@@ -353,7 +356,7 @@ export function DashboardScreen() {
         {onboardStep === 2 && <Text style={styles.stepHint}>{t('dashboard:step2')}</Text>}
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}
-        <View style={styles.billboard} {...(canBrowse && !gated ? pan.panHandlers : {})}>
+        <View style={styles.billboard} {...todayTarget} {...(canBrowse && !gated ? pan.panHandlers : {})}>
          <View style={styles.billboardClip}>
           <Animated.View
             style={[
@@ -397,7 +400,7 @@ export function DashboardScreen() {
             <View
               style={styles.focusBlock}
               accessible
-              accessibilityLabel={`Focus activity ${safeIndex + 1} of ${openHabits.length}: ${focus.title}`}
+              accessibilityLabel={t('focusActivityA11y', { index: safeIndex + 1, total: openHabits.length, title: focus.title })}
               accessibilityActions={
                 canBrowse
                   ? [
@@ -418,14 +421,14 @@ export function DashboardScreen() {
                 <ProjectBadge projects={projectsForHabit(focus.id)} />
               )}
               {isValidScheduleMinutes(focus.scheduledTime) && (
-                <Text style={styles.focusTime} accessibilityLabel={`Scheduled for ${minutesToLabel(focus.scheduledTime)}`}>
-                  ⏰ {minutesToLabel(focus.scheduledTime)}
+                <Text style={styles.focusTime} accessibilityLabel={t('scheduledForA11y', { time: minutesToLabel(focus.scheduledTime, i18n.language) })}>
+                  ⏰ {minutesToLabel(focus.scheduledTime, i18n.language)}
                 </Text>
               )}
               <Pressable
                 onPress={() => navigation.navigate('Connections', { questId: focus.id })}
                 accessibilityRole="button"
-                accessibilityLabel={`See how ${focus.title} connects`}
+                accessibilityLabel={t('connectsA11y', { title: focus.title })}
               >
                 <Text style={styles.focusFeeds}>
                   {t('dashboard:strengthens', { caps: rippleForQuest(focus).slice(0, 2).map((d) => capName(d.capacityId)).join(' · ') })}
@@ -445,7 +448,7 @@ export function DashboardScreen() {
                 <Pressable
                   onPress={() => navigation.navigate('BattleSetup', { goalId: selectedGoal.id })}
                   accessibilityRole="button"
-                  accessibilityLabel={`Prepare your war strategy for ${selectedGoal.title}`}
+                  accessibilityLabel={t('warStrategyA11y', { title: selectedGoal.title })}
                   style={styles.focusBtn}
                   hitSlop={8}
                 >
@@ -460,7 +463,7 @@ export function DashboardScreen() {
                     onPress={doPrioritize}
                     disabled={safeIndex === 0}
                     accessibilityRole="button"
-                    accessibilityLabel="Prioritize this activity to be next"
+                    accessibilityLabel={t('prioritizeA11y')}
                     hitSlop={8}
                     style={safeIndex === 0 && styles.navDisabled}
                   >
@@ -555,11 +558,11 @@ export function DashboardScreen() {
                     key={q.id}
                     onPress={() => setFocusIndex(i)}
                     accessibilityRole="button"
-                    accessibilityLabel={`Bring ${q.title} to focus`}
+                    accessibilityLabel={t('bringToFocusA11y', { title: q.title })}
                     style={styles.upNextChip}
                   >
                     {isValidScheduleMinutes(q.scheduledTime) && (
-                      <Text style={styles.upNextTime}>⏰ {minutesToLabel(q.scheduledTime)}</Text>
+                      <Text style={styles.upNextTime}>⏰ {minutesToLabel(q.scheduledTime, i18n.language)}</Text>
                     )}
                     <Text style={styles.upNextChipText} numberOfLines={1}>
                       {q.title}
@@ -735,7 +738,7 @@ function GoalCard({ goal, selected, onPress }: { goal: Goal; selected: boolean; 
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      accessibilityLabel={`${goal.title}. ${progress.doneTodayInGoal} of ${progress.plannedTodayInGoal} done today, ${progress.weeklyConsistencyPct} percent this week.${selected ? ' Selected.' : ''}`}
+      accessibilityLabel={t('goalCardA11y', { title: goal.title, done: progress.doneTodayInGoal, planned: progress.plannedTodayInGoal, pct: progress.weeklyConsistencyPct, selected: selected ? t('goalCardSelected') : '' })}
       style={[styles.goalCard, selected && { borderColor: c.accent, backgroundColor: c.soft, borderWidth: 2 }]}
     >
       <Text style={styles.goalEmoji}>{goal.emoji}</Text>

@@ -6,7 +6,7 @@ import { HeroAvatar, ScreenContainer } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useNotifications } from '@/state/NotificationsContext';
 import { groupByRecency, type AppNotification, type RecencyBucket } from '@/lib/notifications';
-import { timeAgo } from '@/lib/community';
+import { relTime } from '@/lib/relTime';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Notifications'>;
@@ -14,7 +14,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Notifications'>;
 const ORDER: RecencyBucket[] = ['today', 'week', 'earlier'];
 
 export function NotificationsScreen({ navigation }: Props) {
-  const { t } = useTranslation(['notifications', 'common']);
+  const { t, i18n } = useTranslation(['notifications', 'common']);
   const { items, markAllRead } = useNotifications();
 
   // Opening the inbox clears the unread badge.
@@ -52,7 +52,7 @@ export function NotificationsScreen({ navigation }: Props) {
                   <Text style={styles.line} numberOfLines={2}>
                     {t(`notifications:line.${n.type}`, { name: n.actorName, emoji: n.emoji ?? '' })}
                   </Text>
-                  <Text style={styles.time}>{timeAgo(n.createdAt)}</Text>
+                  <Text style={styles.time}>{relTime(n.createdAt, t, i18n.language)}</Text>
                 </Pressable>
               ))}
             </View>

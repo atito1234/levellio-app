@@ -1,0 +1,14 @@
+{
+  "kicker": "COMMENT ÇA S'EST PASSÉ ?",
+  "hint": {
+    "1": "Une vraie corvée",
+    "2": "Un peu pénible",
+    "3": "Correct — c'est fait",
+    "4": "Agréable",
+    "5": "J'ai adoré"
+  },
+  "scaleHint": "1 = une corvée · 5 = adoré",
+  "starA11y": "{{n}} sur 5 — {{hint}}",
+  "skipA11y": "Passer la note",
+  "skip": "Passer"
+}

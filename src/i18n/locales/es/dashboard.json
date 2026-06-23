@@ -1,7 +1,15 @@
 {
-  "greeting": { "morning": "Buenos días", "afternoon": "Buenas tardes", "evening": "Buenas noches", "fallbackName": "tú" },
+  "greeting": {
+    "morning": "Buenos días",
+    "afternoon": "Buenas tardes",
+    "evening": "Buenas noches",
+    "fallbackName": "tú"
+  },
   "openHeroA11y": "Abre tu héroe",
-  "share": { "hint": "Comparte una novedad…", "a11y": "Comparte una novedad con tu comunidad" },
+  "share": {
+    "hint": "Comparte una novedad…",
+    "a11y": "Comparte una novedad con tu comunidad"
+  },
   "step1": "PASO 1 · Tu meta",
   "step1Pick": "PASO 1 · Elige una meta para empezar",
   "step2": "PASO 2 · Toca 🎙️ para añadir tus actividades",
@@ -30,7 +38,13 @@
   "upNextToday": "A continuación hoy",
   "scheduleSubEmpty": "Toca para programar hábitos en tu calendario",
   "scheduleSubCount": "{{count}} planificados hoy",
-  "chips": { "journal": "📓 Diario", "library": "📚 Biblioteca", "buckets": "🗂 Grupos", "connections": "🔗 Conexiones", "suggest": "✨ Sugerir" },
+  "chips": {
+    "journal": "📓 Diario",
+    "library": "📚 Biblioteca",
+    "buckets": "🗂 Grupos",
+    "connections": "🔗 Conexiones",
+    "suggest": "✨ Sugerir"
+  },
   "capacitiesTitle": "Tus capacidades · últimos 7 días",
   "progress": "Progreso ›",
   "goalsEmptyTitle": "¿Qué quieres lograr?",
@@ -40,5 +54,19 @@
   "yourGoals": "TUS METAS",
   "newGoal": "Nueva meta",
   "tapToSwitch": "· toca la meta de nuevo para cambiar",
-  "todayCount": "{{done}}/{{total}} hoy"
+  "todayCount": "{{done}}/{{total}} hoy",
+  "scheduledForA11y": "Programado para las {{time}}",
+  "prioritizeA11y": "Priorizar esta actividad para hacerla a continuación",
+  "streakPillA11y": "racha de {{days}} días",
+  "dragonsSlainA11y_one": "{{count}} dragón derrotado",
+  "dragonsSlainA11y_other": "{{count}} dragones derrotados",
+  "coinsA11y_one": "{{count}} moneda",
+  "coinsA11y_other": "{{count}} monedas",
+  "levelA11y": "Nivel {{level}}",
+  "focusActivityA11y": "Actividad en foco {{index}} de {{total}}: {{title}}",
+  "connectsA11y": "Ver cómo se conecta {{title}}",
+  "warStrategyA11y": "Prepara tu estrategia de guerra para {{title}}",
+  "bringToFocusA11y": "Poner {{title}} en foco",
+  "goalCardA11y": "{{title}}. {{done}} de {{planned}} hechos hoy, {{pct}} por ciento esta semana.{{selected}}",
+  "goalCardSelected": " Seleccionado."
 }

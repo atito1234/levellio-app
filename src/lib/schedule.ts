@@ -47,8 +47,19 @@ export function minutesToParts(min: number): TimeParts {
   return { hour12, minute, meridiem };
 }
 
-/** Human label for a scheduled time, e.g. "7:30 AM" or "9:00 PM". */
-export function minutesToLabel(min: number): string {
-  const { hour12, minute, meridiem } = minutesToParts(min);
-  return `${hour12}:${`${minute}`.padStart(2, '0')} ${meridiem}`;
+/**
+ * Human label for a scheduled time. English uses a 12-hour clock ("7:30 AM");
+ * French/Spanish use a 24-hour clock ("19:30"), which is the local convention.
+ * `locale` defaults to English so pure callers/tests stay stable; pass
+ * `i18n.language` from a component to localize.
+ */
+export function minutesToLabel(min: number, locale = 'en'): string {
+  const base = (locale || 'en').toLowerCase().split('-')[0];
+  const m = clampScheduleMinutes(min);
+  const mm = `${m % 60}`.padStart(2, '0');
+  if (base === 'fr' || base === 'es') {
+    return `${Math.floor(m / 60)}:${mm}`;
+  }
+  const { hour12, meridiem } = minutesToParts(m);
+  return `${hour12}:${mm} ${meridiem}`;
 }

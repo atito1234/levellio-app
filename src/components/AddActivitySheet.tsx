@@ -12,7 +12,6 @@ import { usePlan } from '@/state/PlanContext';
 import { goalColor } from '@/lib/goal';
 import { getBucketColor } from '@/lib/buckets';
 import { dayKey } from '@/lib/dates';
-import { WEEKDAY_LABELS } from '@/lib/calendar';
 import { weekdayOfKey, weekdaysLabel } from '@/lib/recurrence';
 import { recurrenceLabelOpts } from '@/lib/recurrenceLabels';
 import { minutesToLabel } from '@/lib/schedule';
@@ -57,7 +56,9 @@ export function AddActivitySheet({
   /** Pre-link to projects (opens as a daily habit so it powers them every day). */
   defaultProjectIds?: readonly string[] | null;
 }) {
-  const { t } = useTranslation('addActivity');
+  const { t, i18n } = useTranslation('addActivity');
+  const weekShort = t('common:weekdaysShort', { returnObjects: true }) as string[];
+  const weekFull = t('common:weekdaysFull', { returnObjects: true }) as string[];
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { quests, addQuest } = useGame();
   const { goals, linkGoal } = useGoals();
@@ -276,7 +277,7 @@ export function AddActivitySheet({
             {whenMode === 'weekly' && (
               <>
                 <View style={styles.weekRow}>
-                  {WEEKDAY_LABELS.map((d, i) => {
+                  {weekShort.map((d, i) => {
                     const on = weekdays.includes(i);
                     return (
                       <Pressable
@@ -284,7 +285,7 @@ export function AddActivitySheet({
                         onPress={() => toggleWeekday(i)}
                         accessibilityRole="button"
                         accessibilityState={{ selected: on }}
-                        accessibilityLabel={`Repeat on ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i]}`}
+                        accessibilityLabel={t('repeatOnA11y', { day: weekFull[i] })}
                         style={[styles.weekday, on && styles.weekdayOn]}
                       >
                         <Text style={[styles.weekdayText, on && styles.weekdayTextOn]}>{d}</Text>
@@ -308,7 +309,7 @@ export function AddActivitySheet({
               accessibilityState={{ checked: timeOn }}
               style={styles.timeToggle}
             >
-              <Text style={styles.timeToggleText}>⏰ {timeOn ? minutesToLabel(timeMinutes) : t('setTime')}</Text>
+              <Text style={styles.timeToggleText}>⏰ {timeOn ? minutesToLabel(timeMinutes, i18n.language) : t('setTime')}</Text>
               <Text style={styles.timeToggleHint}>{timeOn ? t('tapToRemove') : t('anyTime')}</Text>
             </Pressable>
             {timeOn && <TimePicker minutes={timeMinutes} onChange={setTimeMinutes} />}

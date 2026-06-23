@@ -55,7 +55,7 @@ export function GoalFocusScreen({ route, navigation }: Props) {
 }
 
 function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['navigation'] }) {
-  const { t } = useTranslation('goals');
+  const { t, i18n } = useTranslation('goals');
   const { quests, deleteQuest } = useGame();
   const { events } = useActivityLog();
   const { goals, membershipFor, setSupportingGoals } = useGoals();
@@ -125,7 +125,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
             {j.currentStreak > 0 ? (
               <Text style={styles.rowStreak}>{t('focus.streak', { count: j.currentStreak, suffix: j.graduated ? t('focus.streakGraduated') : j.solidified ? t('focus.streakSolidified') : '' })}</Text>
             ) : quest.scheduledTime !== undefined ? (
-              <Text style={styles.rowTime}>{t('focus.atTime', { time: minutesToLabel(quest.scheduledTime) })}</Text>
+              <Text style={styles.rowTime}>{t('focus.atTime', { time: minutesToLabel(quest.scheduledTime, i18n.language) })}</Text>
             ) : (
               <Text style={styles.rowEdit}>{t('focus.tapToEdit')}</Text>
             )}

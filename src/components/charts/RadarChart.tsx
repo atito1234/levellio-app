@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Line, Polygon, Text as SvgText } from 'react-native-svg';
 import { radarAxisEnds, radarPoints, polygonPath, type Pt } from './chartMath';
 
@@ -33,6 +34,7 @@ export function RadarChart({
   color?: string;
   onPressAxis?: (axis: RadarAxis, index: number) => void;
 }) {
+  const { t } = useTranslation('charts');
   const [w, setW] = useState(size);
   const onLayout = (e: LayoutChangeEvent) => setW(Math.min(size, e.nativeEvent.layout.width));
   const dim = Math.max(120, w);
@@ -46,7 +48,7 @@ export function RadarChart({
   const a11y = axes.map((a) => `${a.label} ${Math.round((a.value / max) * 100)}%`).join(', ');
 
   return (
-    <View onLayout={onLayout} accessible accessibilityRole="image" accessibilityLabel={`Balance chart. ${a11y}.`}>
+    <View onLayout={onLayout} accessible accessibilityRole="image" accessibilityLabel={t('radarChart.summary', { a11y })}>
       <Svg width={dim} height={dim}>
         {rings.map((r) => (
           <Polygon

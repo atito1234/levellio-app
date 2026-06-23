@@ -40,6 +40,10 @@ export interface AppSettings {
   projectPrepLinkMode: PrepLinkMode;
   /** App language: an explicit locale, or 'system' to follow the device. */
   locale: LocaleSetting;
+  /** First-run welcome flow finished — never show the intro cards again. */
+  onboardingCompleted: boolean;
+  /** First-run interactive spotlight tour finished or skipped — runs once only. */
+  welcomeTourCompleted: boolean;
   /** Optional public profile headline (LinkedIn-style one-liner). */
   profileHeadline?: string;
   /** Optional public profile location/country. */
@@ -60,6 +64,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   worldProjectAlerts: false,
   projectPrepLinkMode: 'visual',
   locale: 'system',
+  onboardingCompleted: false,
+  welcomeTourCompleted: false,
 };
 
 const SETTINGS_KEY = 'levellio:settings';
@@ -83,6 +89,8 @@ export function normalizeSettings(raw: unknown): AppSettings {
     worldProjectAlerts: r.worldProjectAlerts === true,
     projectPrepLinkMode: r.projectPrepLinkMode === 'full' ? 'full' : 'visual',
     locale: r.locale === 'system' || isSupportedLocale(r.locale) ? r.locale : 'system',
+    onboardingCompleted: r.onboardingCompleted === true,
+    welcomeTourCompleted: r.welcomeTourCompleted === true,
     ...(typeof r.profileHeadline === 'string' ? { profileHeadline: r.profileHeadline } : {}),
     ...(typeof r.profileCountry === 'string' ? { profileCountry: r.profileCountry } : {}),
   };

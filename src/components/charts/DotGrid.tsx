@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 // Locked palette (gold reserved for reward/100% — never for routine dots).
 const TEAL = '#16C8A8';
@@ -18,13 +19,14 @@ export interface DotCell {
  * from MonthlyProgressScreen but tiny and per-activity.
  */
 export function DotGrid({ cells, size = 14, doneColor = TEAL }: { cells: readonly DotCell[]; size?: number; doneColor?: string }) {
+  const { t } = useTranslation('charts');
   const doneCount = cells.filter((c) => c.done).length;
   return (
     <View
       style={styles.grid}
       accessible
       accessibilityRole="image"
-      accessibilityLabel={`${doneCount} of the last ${cells.length} days done`}
+      accessibilityLabel={t('dotGrid.summary', { count: cells.length, done: doneCount, total: cells.length })}
     >
       {cells.map((c, i) => (
         <View

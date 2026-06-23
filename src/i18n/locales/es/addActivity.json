@@ -23,5 +23,6 @@
   "added": "✓ «{{name}}» añadida — añade otra, o toca Listo.",
   "advanced": "⚙️ Opciones avanzadas ›",
   "addActivity": "＋ Añadir actividad",
-  "addActivityA11y": "Añadir actividad"
+  "addActivityA11y": "Añadir actividad",
+  "repeatOnA11y": "Repetir el {{day}}"
 }

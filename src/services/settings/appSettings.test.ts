@@ -21,6 +21,8 @@ describe('normalizeSettings', () => {
       worldProjectAlerts: false,
       projectPrepLinkMode: 'visual',
       locale: 'system',
+      onboardingCompleted: false,
+      welcomeTourCompleted: false,
     });
   });
 
@@ -90,6 +92,8 @@ describe('SettingsStore', () => {
       worldProjectAlerts: true,
       projectPrepLinkMode: 'full',
       locale: 'fr',
+      onboardingCompleted: true,
+      welcomeTourCompleted: true,
     });
     const loaded = await store.load();
     expect(loaded.bucketViewMode).toBe('buckets');

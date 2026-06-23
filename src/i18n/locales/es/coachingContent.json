@@ -1,0 +1,157 @@
+{
+  "framework": {
+    "com-b": {
+      "label": "Lo que hace falta para actuar",
+      "principle": "Toda acción necesita tres cosas a la vez: la capacidad de hacerla, una oportunidad real de hacerla y motivación en el momento.",
+      "source": "Michie, modelo de comportamiento COM-B"
+    },
+    "fogg-bmap": {
+      "label": "Hazlo fácil y en el momento justo",
+      "principle": "El comportamiento ocurre cuando se alinean motivación, capacidad y un estímulo: cuanto más fácil es la acción, menos motivación necesitas.",
+      "source": "BJ Fogg, modelo del comportamiento"
+    },
+    "cbt-distortions": {
+      "label": "Revisa el pensamiento",
+      "principle": "Las emociones de bloqueo suelen apoyarse en pensamientos distorsionados (todo o nada, leer la mente, adivinar el futuro); nombrarlos y ponerlos a prueba afloja su control.",
+      "source": "Beck & Burns, terapia cognitivo-conductual"
+    },
+    "sdt": {
+      "label": "Reconecta con tu porqué",
+      "principle": "La motivación dura cuando una acción se siente elegida por ti y ligada a lo que valoras, no impuesta.",
+      "source": "Deci & Ryan, teoría de la autodeterminación"
+    },
+    "implementation-intentions": {
+      "label": "Planificación si-entonces",
+      "principle": "Decidir de antemano exactamente cuándo y dónde vas a actuar aumenta marcadamente que lo lleves a cabo.",
+      "source": "Gollwitzer, investigación sobre intenciones de implementación"
+    },
+    "motivational-interviewing": {
+      "label": "Háblate hacia la acción",
+      "principle": "Oír tus propias razones para cambiar —con tus propias palabras— genera más compromiso que recibir órdenes.",
+      "source": "Miller & Rollnick, entrevista motivacional"
+    },
+    "self-compassion": {
+      "label": "Sé amable contigo mismo",
+      "principle": "Recibir un tropiezo con amabilidad en vez de con una dura autocrítica hace más probable que retomes el rumbo.",
+      "source": "Kristin Neff, investigación sobre autocompasión"
+    },
+    "fear-setting": {
+      "label": "Nombra el peor caso",
+      "principle": "Escribir lo que temes, y cómo lo afrontarías, reduce el miedo difuso a algo que puedes manejar.",
+      "source": "Práctica estoica; Tim Ferriss, fear-setting"
+    },
+    "temptation-bundling": {
+      "label": "Combínalo con un gusto",
+      "principle": "Unir un hábito que deberías hacer con algo que disfrutas hace más probable que de verdad lo hagas.",
+      "source": "Milkman, investigación sobre combinación de tentaciones"
+    },
+    "habit-stacking": {
+      "label": "Ánclalo a un hábito existente",
+      "principle": "Pegar un hábito nuevo justo después de uno que ya haces le da una señal fiable e incorporada.",
+      "source": "Fogg & Clear, apilamiento de hábitos"
+    },
+    "environment-design": {
+      "label": "Diseña tu entorno",
+      "principle": "Hacer que la buena elección sea la fácil y obvia —y las distracciones más difíciles— supera a depender de la fuerza de voluntad.",
+      "source": "Investigación sobre diseño conductual del entorno"
+    },
+    "two-minute-rule": {
+      "label": "Comienzo de dos minutos",
+      "principle": "Reducir un hábito a dos minutos baja el coste de empezar, y empezar es la mayor parte de la batalla.",
+      "source": "Clear & Fogg, microhábitos"
+    },
+    "five-second-rule": {
+      "label": "Muévete en cinco segundos",
+      "principle": "Contar 5-4-3-2-1 y moverte interrumpe la duda antes de que tu cerebro te convenza de lo contrario.",
+      "source": "Mel Robbins, la regla de los 5 segundos"
+    },
+    "zeigarnik": {
+      "label": "Solo inicia el bucle",
+      "principle": "Las tareas inacabadas inquietan la mente; una vez que empiezas, las ganas de terminar juegan a tu favor.",
+      "source": "Efecto Zeigarnik"
+    },
+    "loss-aversion": {
+      "label": "Protege lo que has construido",
+      "principle": "Sentimos una pérdida unas dos veces más fuerte que una ganancia, así que no romper una racha que has creado es un fuerte impulso.",
+      "source": "Kahneman & Tversky, aversión a la pérdida"
+    },
+    "timeboxing": {
+      "label": "Sprints cortos y concentrados",
+      "principle": "Los sprints de una sola tarea con un final claro protegen la atención y hacen que empezar resulte seguro.",
+      "source": "Cirillo, técnica Pomodoro; investigación sobre timeboxing"
+    }
+  },
+  "blocker": {
+    "low-energy": { "label": "Sin gota de energía", "tell": "Estoy demasiado cansado para empezar." },
+    "no-cue": { "label": "Se me olvida", "tell": "Simplemente lo olvido o nunca llego a hacerlo." },
+    "too-much-friction": { "label": "Demasiado lío", "tell": "Es demasiado lío ponerme en marcha." },
+    "no-momentum": { "label": "Esperando a tener ganas", "tell": "Empezaré cuando tenga ganas." },
+    "boredom": { "label": "Es aburrido", "tell": "Es tan aburrido que lo evito." },
+    "fear-of-failure": { "label": "Miedo a fracasar", "tell": "¿Y si lo intento y fracaso?" },
+    "fear-of-judgment": { "label": "Miedo a ser juzgado", "tell": "La gente me va a juzgar por esto." },
+    "uncertainty": { "label": "No saber cómo saldrá", "tell": "No sé cómo va a salir esto." },
+    "overwhelm": { "label": "Se siente demasiado grande", "tell": "Se siente demasiado grande para siquiera afrontarlo." },
+    "fear-of-change": { "label": "Miedo a lo que cambia", "tell": "¿Y si esto lo cambia todo?" },
+    "imposter": { "label": "No estoy hecho para esto", "tell": "Realmente no estoy hecho para esto." },
+    "not-deserving": { "label": "No lo merezco", "tell": "No merezco hacer esto por mí mismo." },
+    "comparison": { "label": "Todos van por delante de mí", "tell": "Todos los demás van muy por delante." },
+    "self-criticism": { "label": "Siempre lo estropeo", "tell": "De todas formas, siempre estropeo esto." },
+    "perfection-worth": { "label": "Tiene que ser perfecto", "tell": "Si no es perfecto, no cuenta." },
+    "wont-work": { "label": "No servirá de nada", "tell": "Esto ni siquiera cambiará nada." },
+    "no-proof-yet": { "label": "Nada que mostrar aún", "tell": "No tengo nada que mostrar a cambio." },
+    "tried-before": { "label": "Antes no se mantuvo", "tell": "Ya lo intenté antes y no duró." },
+    "all-or-nothing": { "label": "Todo o nada", "tell": "Si no puedo hacerlo del todo, ¿para qué molestarme?" },
+    "overthinking": { "label": "Atrapado en mi cabeza", "tell": "Sigo analizando en lugar de actuar." },
+    "task-aversion": { "label": "Simplemente no quiero", "tell": "Realmente no quiero empezar." },
+    "waiting-to-feel-ready": { "label": "Esperando a sentirme listo", "tell": "Empezaré cuando me sienta listo." },
+    "present-bias": { "label": "Algo más divertido ahora mismo", "tell": "Preferiría hacer algo divertido ahora mismo." },
+    "vague-plan": { "label": "No sé por dónde empezar", "tell": "No sé por dónde empezar." },
+    "distraction": { "label": "Me distraen constantemente", "tell": "Me distraen constantemente." },
+    "fixed-mindset": { "label": "Demasiado viejo para cambiar", "tell": "Soy demasiado viejo para cambiar ahora." },
+    "sunk-cost": { "label": "Lo dejé para demasiado tarde", "tell": "Lo dejé para demasiado tarde como para que importe." },
+    "low-energy-age": { "label": "Ya no tengo la energía de antes", "tell": "Ya no tengo la energía que solía tener." },
+    "comparison-young": { "label": "Todos son más jóvenes", "tell": "Todos los que empiezan esto son más jóvenes que yo." }
+  },
+  "question": {
+    "q-smallest": { "text": "¿Cuál es la versión más pequeña de esto a la que no podrías decir que no?" },
+    "q-one-step": { "text": "¿Cuál es el primer paso físico de todos? Solo el paso uno." },
+    "q-tiny-promise": { "text": "¿Podrías prometer solo dos minutos y parar después si aún quieres?" },
+    "q-5min-change": { "text": "¿Qué será realmente distinto dentro de cinco minutos que no sea cierto ahora mismo?" },
+    "q-when-where": { "text": "¿Cuándo y dónde exactamente lo harás hoy?", "followUp": "Imagina el momento: lo hace mucho más probable." },
+    "q-after-what": { "text": "¿Después de qué cosa que ya haces cada día podría venir esto?" },
+    "q-evidence": { "text": "¿Cuál es la prueba real de ese pensamiento, y cuál es la prueba en su contra?" },
+    "q-worst-case": { "text": "Si pasara lo peor, ¿cómo lo afrontarías en realidad?" },
+    "q-name-fear": { "text": "Si nombras el miedo en voz alta, ¿de qué se trata realmente?" },
+    "q-future-self": { "text": "¿Qué haría ahora mismo la persona en la que te estás convirtiendo?" },
+    "q-why-matters": { "text": "¿Por qué importaba lo suficiente como para empezar en primer lugar?" },
+    "q-advice-friend": { "text": "¿Qué le dirías a un amigo que se sintiera exactamente así?" },
+    "q-deserve": { "text": "Si de verdad lo merecieras, ¿qué harías a continuación?" },
+    "q-cost-of-skip": { "text": "¿Qué te cuesta en silencio saltártelo hoy?" },
+    "q-treat-pair": { "text": "¿Con qué podrías combinarlo para que sea algo que esperar con ganas?" },
+    "q-remove-friction": { "text": "¿Qué única cosa podrías quitar o preparar para hacer esto más fácil?" },
+    "q-whose-voice": { "text": "¿De quién es esa voz que dice «no puedes», y está diciendo la verdad?" },
+    "q-too-late": { "text": "Si no es ahora, ¿cuándo empieza de verdad el «demasiado tarde»?" },
+    "q-proof": { "text": "¿Qué pequeño experimento mostraría si esto realmente te funciona?" },
+    "q-feel-after": { "text": "¿Cómo te sentirás contigo mismo diez minutos después de haber empezado?" },
+    "q-perfection": { "text": "¿Esto tiene que ser perfecto, o solo necesita estar hecho?" },
+    "q-energy-now": { "text": "¿Qué versión de esto encaja con la energía que de verdad tienes ahora mismo?" },
+    "q-past-win": { "text": "¿Cuándo has superado antes algo parecido a esto?" },
+    "q-reasons": { "text": "Date a ti mismo tres razones honestas por las que vale la pena hacerlo hoy." },
+    "q-resist-what": { "text": "¿A qué te resistes en realidad: a la tarea o a una sensación sobre ella?" }
+  },
+  "tactic": {
+    "two-minute-rule": { "name": "El comienzo de dos minutos", "how": "Prométete solo dos minutos. Empieza por la primera acción más diminuta y deja que el impulso tome el control." },
+    "mini-version": { "name": "Reduce la meta", "how": "Recórtala a una versión tan pequeña que casi parezca ridículo saltársela: una página, una serie, una línea." },
+    "five-second-rule": { "name": "Lanzamiento en cinco segundos", "how": "Cuenta 5-4-3-2-1 y muévete físicamente antes de que la duda pueda crecer." },
+    "if-then": { "name": "Plan si-entonces", "how": "Fija la señal exacta: «Cuando [termine X / sean las 7 p. m.], entonces haré [esto] aquí.»" },
+    "habit-stack": { "name": "Apílalo sobre un hábito", "how": "Pégalo justo después de algo que ya haces cada día, para que el hábito antiguo se convierta en la señal." },
+    "environment-design": { "name": "Prepara el escenario", "how": "Quita un poco de fricción y pon la señal bien a la vista: haz del empezar el camino de menor resistencia." },
+    "temptation-bundle": { "name": "Combínalo con un gusto", "how": "Permítete disfrutar de algo que te encanta (una serie, un pódcast) solo mientras haces esto." },
+    "pomodoro": { "name": "Un sprint de enfoque", "how": "Pon un temporizador corto, haz una sola tarea hasta que suene y luego tómate un descanso de verdad. Un sprint basta para empezar." },
+    "reframe-thought": { "name": "Pon a prueba el pensamiento", "how": "Anota el pensamiento duro, luego enumera las pruebas a favor y en contra. Sustitúyelo por uno más justo." },
+    "self-compassion-break": { "name": "Una pausa de amabilidad", "how": "Di lo que le dirías a un amigo en apuros: esto es difícil, eres humano y un pequeño paso es suficiente." },
+    "fear-setting": { "name": "Nombra el peor caso", "how": "Escribe lo peor que podría pasar, qué probable es y cómo te recuperarías. Mira encogerse el miedo." },
+    "values-anchor": { "name": "Reconecta con tu porqué", "how": "Termina esto en voz alta: «Hago esto porque me importa, ya que…». Deja que la razón tire de ti." },
+    "reasons-out-loud": { "name": "Tres razones, tus palabras", "how": "Di tres razones honestas por las que vale la pena hacerlo hoy. Oír tu propio argumento crea un compromiso real." }
+  }
+}

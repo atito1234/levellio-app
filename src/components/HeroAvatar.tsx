@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Svg, {
   Circle,
   ClipPath,
@@ -47,10 +48,17 @@ const PALETTE = {
 const TIERS: readonly HeroTier[] = ['novice', 'pathfinder', 'luminary'];
 const PRESENTATIONS: readonly HeroPresentation[] = ['female', 'male', 'neutral'];
 
+/** English fallbacks used when i18n is not yet initialized (e.g. in tests). */
 const TIER_LABEL: Record<HeroTier, string> = {
   novice: 'Novice',
   pathfinder: 'Pathfinder',
   luminary: 'Luminary',
+};
+
+const PRESENTATION_LABEL: Record<HeroPresentation, string> = {
+  female: 'Female',
+  male: 'Male',
+  neutral: 'Neutral',
 };
 
 interface HeroAvatarProps {
@@ -62,11 +70,29 @@ interface HeroAvatarProps {
 }
 
 export function HeroAvatar({ presentation, tier, kitId, size = 160 }: HeroAvatarProps) {
+  const { t } = useTranslation('charts');
   const safeTier: HeroTier = TIERS.includes(tier) ? tier : 'novice';
   const kit = getKit(kitId);
   const safePresentation: HeroPresentation = PRESENTATIONS.includes(presentation)
     ? presentation
     : 'neutral';
+
+  const presentationLabel = t(`hero.presentation.${safePresentation}`, {
+    defaultValue: PRESENTATION_LABEL[safePresentation],
+  });
+  const tierLabel = t(`hero.tierLabel.${safeTier}`, { defaultValue: TIER_LABEL[safeTier] });
+  const accessibilityLabel = kit
+    ? t('hero.labelWithKit', {
+        presentation: presentationLabel,
+        tier: tierLabel,
+        nation: kit.nationName,
+        defaultValue: `${presentationLabel} hero, ${tierLabel} tier, ${kit.nationName} kit`,
+      })
+    : t('hero.label', {
+        presentation: presentationLabel,
+        tier: tierLabel,
+        defaultValue: `${presentationLabel} hero, ${tierLabel} tier`,
+      });
 
   return (
     <Svg
@@ -74,9 +100,7 @@ export function HeroAvatar({ presentation, tier, kitId, size = 160 }: HeroAvatar
       height={size}
       viewBox="0 0 100 100"
       accessibilityRole="image"
-      accessibilityLabel={`${cap(safePresentation)} hero, ${TIER_LABEL[safeTier]} tier${
-        kit ? `, ${kit.nationName} kit` : ''
-      }`}
+      accessibilityLabel={accessibilityLabel}
     >
       <Defs>
         <RadialGradient id="heroAura" cx="50%" cy="50%" r="50%">
@@ -301,8 +325,4 @@ function Sparkles() {
 function Star({ cx, cy, r, fill }: { cx: number; cy: number; r: number; fill: string }) {
   const p = `${cx},${cy - r} ${cx + r * 0.32},${cy - r * 0.32} ${cx + r},${cy} ${cx + r * 0.32},${cy + r * 0.32} ${cx},${cy + r} ${cx - r * 0.32},${cy + r * 0.32} ${cx - r},${cy} ${cx - r * 0.32},${cy - r * 0.32}`;
   return <Polygon points={p} fill={fill} />;
-}
-
-function cap(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }

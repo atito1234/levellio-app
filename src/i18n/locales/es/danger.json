@@ -6,9 +6,18 @@
   "allDays": "Todos los días",
   "allDaysLower": "todos los días",
   "targeting": "Objetivo: {{scope}}",
-  "clearSchedule": { "label": "Borrar programación", "sub": "Desprograma hábitos — hábitos y repeticiones quedan" },
-  "clearRules": { "label": "Borrar programación + reglas de repetición", "sub": "También detiene repeticiones — hábitos quedan" },
-  "deleteAll": { "label": "Eliminar todo", "sub": "Hábitos + todo el historial, permanentemente" },
+  "clearSchedule": {
+    "label": "Borrar programación",
+    "sub": "Desprograma hábitos — hábitos y repeticiones quedan"
+  },
+  "clearRules": {
+    "label": "Borrar programación + reglas de repetición",
+    "sub": "También detiene repeticiones — hábitos quedan"
+  },
+  "deleteAll": {
+    "label": "Eliminar todo",
+    "sub": "Hábitos + todo el historial, permanentemente"
+  },
   "cancel": "Cancelar",
   "delete": "Eliminar",
   "clearScheduleTitle": "¿Borrar programación?",
@@ -19,5 +28,6 @@
   "deleteAllMsg": "Elimina permanentemente los hábitos para {{scope}} Y su historial de sesiones/análisis. Esto no se puede deshacer.",
   "scheduleCleared": "Programación borrada para {{scope}}.",
   "rulesCleared": "Programación y reglas de repetición borradas para {{scope}}.",
-  "deletedAll": "Todo eliminado para {{scope}}."
+  "deletedAll": "Todo eliminado para {{scope}}.",
+  "scopeDayA11y": "Alcance {{day}}"
 }

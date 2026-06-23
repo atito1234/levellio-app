@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors, spacing, typography } from '@/theme';
-import { addMonths, buildMonthMatrix, monthLabel, monthOf, WEEKDAY_LABELS, type MonthRef } from '@/lib/calendar';
+import { addMonths, buildMonthMatrix, monthLabel, monthOf, type MonthRef } from '@/lib/calendar';
 
 /**
  * Compact month calendar for picking one or more dates. Reuses the pure calendar
@@ -19,6 +20,8 @@ export function MiniCalendar({
   min?: string;
   todayKey: string;
 }) {
+  const { t, i18n } = useTranslation('scheduler');
+  const weekShort = t('common:weekdaysShort', { returnObjects: true }) as string[];
   const [ref, setRef] = useState<MonthRef>(() => {
     const [y, m] = (min ?? todayKey).split('-').map(Number);
     return monthOf(new Date(y ?? 1970, (m ?? 1) - 1, 1));
@@ -29,17 +32,17 @@ export function MiniCalendar({
   return (
     <View style={styles.wrap}>
       <View style={styles.head}>
-        <Pressable onPress={() => setRef((r) => addMonths(r, -1))} accessibilityRole="button" accessibilityLabel="Previous month" hitSlop={10}>
+        <Pressable onPress={() => setRef((r) => addMonths(r, -1))} accessibilityRole="button" accessibilityLabel={t('prevMonth')} hitSlop={10}>
           <Text style={styles.nav}>‹</Text>
         </Pressable>
-        <Text style={styles.month}>{monthLabel(ref)}</Text>
-        <Pressable onPress={() => setRef((r) => addMonths(r, 1))} accessibilityRole="button" accessibilityLabel="Next month" hitSlop={10}>
+        <Text style={styles.month}>{monthLabel(ref, i18n.language)}</Text>
+        <Pressable onPress={() => setRef((r) => addMonths(r, 1))} accessibilityRole="button" accessibilityLabel={t('nextMonth')} hitSlop={10}>
           <Text style={styles.nav}>›</Text>
         </Pressable>
       </View>
 
       <View style={styles.row}>
-        {WEEKDAY_LABELS.map((d, i) => (
+        {weekShort.map((d, i) => (
           <Text key={i} style={styles.weekday}>
             {d}
           </Text>

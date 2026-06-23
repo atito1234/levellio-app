@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors, spacing, typography } from '@/theme';
 import { useStories } from '@/state/StoriesContext';
-import { timeAgo } from '@/lib/community';
+import { relTime } from '@/lib/relTime';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'StoryViewer'>;
@@ -12,6 +13,7 @@ const STORY_MS = 5000;
 
 /** Full-screen tap-through story viewer with timed progress bars. */
 export function StoryViewerScreen({ route, navigation }: Props) {
+  const { t, i18n } = useTranslation('common');
   const { uid } = route.params;
   const { storiesFor } = useStories();
   const stories = storiesFor(uid);
@@ -74,8 +76,8 @@ export function StoryViewerScreen({ route, navigation }: Props) {
 
       <View style={styles.header}>
         <Text style={styles.name}>{current.displayName}</Text>
-        <Text style={styles.time}>{timeAgo(current.createdAt)}</Text>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Close" hitSlop={12} style={styles.close}>
+        <Text style={styles.time}>{relTime(current.createdAt, t, i18n.language)}</Text>
+        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('action.close')} hitSlop={12} style={styles.close}>
           <Text style={styles.closeText}>✕</Text>
         </Pressable>
       </View>

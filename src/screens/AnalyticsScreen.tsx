@@ -18,6 +18,7 @@ import {
   longestDayStreak,
   nextLockedTier,
   ratingStats,
+  tierTitle,
   weekCells,
   INSIGHT_TIERS,
   type DirectionTone,
@@ -72,7 +73,9 @@ const TONE: Record<DirectionTone, { accent: string; soft: string; emoji: string 
 };
 
 export function AnalyticsScreen({ navigation }: Props) {
-  const { t } = useTranslation('analytics');
+  const { t, i18n } = useTranslation('analytics');
+  const locale = i18n.language;
+  const weekdayNames = t('common:weekdaysAbbr', { returnObjects: true }) as string[];
   const { character } = useGame();
   const { goals } = useGoals();
   const { events, ready } = useActivityLog();
@@ -99,12 +102,15 @@ export function AnalyticsScreen({ navigation }: Props) {
     };
   }, [events, character?.streakDays]);
 
-  const direction = directionVerdict({
-    daysDone: data.daysDone,
-    streakDays: data.streakDays,
-    activeThisWeek: data.activeThisWeek,
-    activePrevWeek: data.activePrevWeek,
-  });
+  const direction = directionVerdict(
+    {
+      daysDone: data.daysDone,
+      streakDays: data.streakDays,
+      activeThisWeek: data.activeThisWeek,
+      activePrevWeek: data.activePrevWeek,
+    },
+    t,
+  );
   const tone = TONE[direction.tone];
   const closedThisWeek = data.cells.filter((c) => c.done).length;
 
@@ -147,7 +153,7 @@ export function AnalyticsScreen({ navigation }: Props) {
                   <View key={c.key} style={styles.weekCell}>
                     <View
                       style={[styles.dot, c.done && styles.dotDone, c.isToday && styles.dotToday]}
-                      accessibilityLabel={c.done ? t('week.a11yActive', { day: weekdayLabel(c.weekday) }) : t('week.a11yRest', { day: weekdayLabel(c.weekday) })}
+                      accessibilityLabel={c.done ? t('week.a11yActive', { day: weekdayLabel(c.weekday, weekdayNames) }) : t('week.a11yRest', { day: weekdayLabel(c.weekday, weekdayNames) })}
                     >
                       {c.done && <Text style={styles.dotCheck}>✓</Text>}
                     </View>
@@ -190,7 +196,7 @@ export function AnalyticsScreen({ navigation }: Props) {
                 trust it based on how many days of data back it. */}
             <View style={styles.nextCard}>
               <Text style={styles.nextText}>
-                📈 <Text style={styles.nextStrong}>{confidenceLabel(data.daysDone)}</Text>
+                📈 <Text style={styles.nextStrong}>{confidenceLabel(data.daysDone, t)}</Text>
               </Text>
               <Text style={styles.nextSub}>
                 {t('confidence.sub', { days: data.daysDone })}
@@ -200,7 +206,7 @@ export function AnalyticsScreen({ navigation }: Props) {
             {/* All insights, ungated (thin data is labelled "early"). */}
             <Text style={styles.sectionLabel}>{t('sections.data')}</Text>
             {INSIGHT_TIERS.map((tier) => (
-              <InsightCard key={tier.id} tier={tier} data={data} goals={goals} t={t} />
+              <InsightCard key={tier.id} tier={tier} data={data} goals={goals} t={t} locale={locale} weekdayNames={weekdayNames} />
             ))}
 
             {/* From repetition to habit — real per-activity journeys. */}
@@ -324,7 +330,7 @@ function ForecastCard({ data, entitled, onUnlock, t }: { data: ScreenData; entit
       </View>
       {next ? (
         <Text style={styles.insightBody}>
-          {t('forecast.nextUnlockPrefix')}<Text style={styles.bodyStrong}>{next.title}</Text>{' '}
+          {t('forecast.nextUnlockPrefix')}<Text style={styles.bodyStrong}>{tierTitle(next.id, t)}</Text>{' '}
           {nextEta != null ? (nextEta === 0 ? t('forecast.etaSoon') : t('forecast.eta', { count: nextEta })) : t('forecast.etaKeepGoing')}.
         </Text>
       ) : (
@@ -348,20 +354,20 @@ function Counter({ value, label, tint = INK }: { value: string; label: string; t
   );
 }
 
-function InsightCard({ tier, data, goals, t }: { tier: InsightTier; data: ScreenData; goals: Goals; t: TFunction }) {
-  const body = renderInsight(tier, data, goals, t);
+function InsightCard({ tier, data, goals, t, locale, weekdayNames }: { tier: InsightTier; data: ScreenData; goals: Goals; t: TFunction; locale: string; weekdayNames: string[] }) {
+  const body = renderInsight(tier, data, goals, t, locale, weekdayNames);
   return (
     <View style={styles.insightCard}>
       <View style={styles.insightHead}>
         <Text style={styles.insightIcon}>{tier.icon}</Text>
-        <Text style={styles.insightTitle}>{tier.title}</Text>
+        <Text style={styles.insightTitle}>{tierTitle(tier.id, t)}</Text>
       </View>
       {body}
     </View>
   );
 }
 
-function renderInsight(tier: InsightTier, data: ScreenData, goals: Goals, t: TFunction): React.ReactNode {
+function renderInsight(tier: InsightTier, data: ScreenData, goals: Goals, t: TFunction, locale: string, weekdayNames: string[]): React.ReactNode {
   const dayWord = (n: number) => t('insight.days', { count: n });
   switch (tier.id) {
     case 'streak':
@@ -377,8 +383,8 @@ function renderInsight(tier: InsightTier, data: ScreenData, goals: Goals, t: TFu
       if (bestWeekday === null && bestHour === null) {
         return <Text style={styles.insightBody}>{t('insight.rhythmEmpty')}</Text>;
       }
-      const day = bestWeekday !== null ? weekdayLabel(bestWeekday) : null;
-      const hr = bestHour !== null ? hourLabel(bestHour) : null;
+      const day = bestWeekday !== null ? weekdayLabel(bestWeekday, weekdayNames) : null;
+      const hr = bestHour !== null ? hourLabel(bestHour, locale) : null;
       const body =
         day && hr
           ? t('insight.rhythmDayTime', { day, hour: hr })

@@ -26,7 +26,7 @@ const VIOLET_SOFT = '#EDE9FE';
 const MUTED = '#5A5A72';
 
 export function CapacityFocusScreen({ route, navigation }: Props) {
-  const { t } = useTranslation('capacityFocus');
+  const { t, i18n } = useTranslation('capacityFocus');
   const capacityId = route.params.capacityId as CapacityId;
   const cap = getCapacity(capacityId);
   const capName = t('capacities:' + capacityId);
@@ -53,7 +53,7 @@ export function CapacityFocusScreen({ route, navigation }: Props) {
         <Text style={styles.rowTitle} numberOfLines={1}>
           {quest.title}
         </Text>
-        {quest.scheduledTime !== undefined && <Text style={styles.rowTime}>{t('scheduledTime', { time: minutesToLabel(quest.scheduledTime) })}</Text>}
+        {quest.scheduledTime !== undefined && <Text style={styles.rowTime}>{t('scheduledTime', { time: minutesToLabel(quest.scheduledTime, i18n.language) })}</Text>}
       </View>
       <Text style={[styles.action, quest.completed && styles.actionDone]}>{quest.completed ? t('done') : t('doIt')}</Text>
     </Pressable>

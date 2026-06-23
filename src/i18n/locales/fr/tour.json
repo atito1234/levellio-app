@@ -1,0 +1,22 @@
+{
+  "step": "{{current}} sur {{total}}",
+  "next": "Suivant",
+  "done": "Commencer",
+  "skip": "Passer le tour",
+  "today": {
+    "title": "Votre journée en un coup d'œil",
+    "body": "Cet anneau, c'est votre objectif du jour. Touchez une habitude qui brille pour la terminer et faire monter votre héros."
+  },
+  "add": {
+    "title": "Ajoutez tout en quelques secondes",
+    "body": "Touchez ici pour dicter ou écrire une nouvelle habitude, activité ou objectif — dès que l'inspiration vient."
+  },
+  "community": {
+    "title": "Vous n'êtes pas seul",
+    "body": "Les Projets et le Fil sont dans les onglets ci-dessous — vos habitudes quotidiennes alimentent des objectifs concrets et une communauté qui avance avec vous."
+  },
+  "finish": {
+    "title": "Tout est prêt ✨",
+    "body": "C'est la fin du tour. Lancez-vous — votre héros progresse à chaque fois que vous êtes au rendez-vous."
+  }
+}

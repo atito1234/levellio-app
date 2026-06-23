@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography } from '@/theme';
 import { getBucketColor, type BucketColorId } from '@/lib/buckets';
 import { weekdayOfKey } from '@/lib/recurrence';
@@ -24,6 +25,7 @@ export function CalendarHeatmap({
   colorId?: BucketColorId;
   onPressDay?: (point: MetricPoint) => void;
 }) {
+  const { t } = useTranslation('charts');
   const accent = getBucketColor(colorId).accent;
   const byDay = new Map(points.map((p) => [p.dayKey, p.value]));
   const max = Math.max(1, ...points.map((p) => p.value));
@@ -49,7 +51,7 @@ export function CalendarHeatmap({
       style={styles.wrap}
       accessible
       accessibilityRole="image"
-      accessibilityLabel={`Calendar heatmap of ${points.length} days.`}
+      accessibilityLabel={t('calendarHeatmap.summary', { count: points.length })}
     >
       <View style={styles.labels} importantForAccessibility="no-hide-descendants">
         {WEEKDAYS.map((d, i) => (
@@ -67,7 +69,12 @@ export function CalendarHeatmap({
               const bg = level === 0 ? EMPTY : accent;
               const cell = <View style={[styles.cell, { backgroundColor: bg, opacity: level === 0 ? 1 : 0.25 + level * 0.1875 }]} />;
               return p && onPressDay ? (
-                <Pressable key={ri} onPress={() => onPressDay(p)} accessibilityRole="button" accessibilityLabel={`${p.dayKey}: ${value}`}>
+                <Pressable
+                  key={ri}
+                  onPress={() => onPressDay(p)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('calendarHeatmap.day', { dayKey: p.dayKey, value })}
+                >
                   {cell}
                 </Pressable>
               ) : (
