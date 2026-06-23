@@ -1,6 +1,14 @@
 {
-  "tier": { "novice": "Novice", "pathfinder": "Éclaireur", "luminary": "Luminaire" },
-  "companion": { "spark": "Étincelle", "ember": "Braise", "phoenixling": "Phénixonnet" },
+  "tier": {
+    "novice": "Novice",
+    "pathfinder": "Éclaireur",
+    "luminary": "Luminaire"
+  },
+  "companion": {
+    "spark": "Étincelle",
+    "ember": "Braise",
+    "phoenixling": "Phénixonnet"
+  },
   "kitTitle": "Tenue",
   "kitClassic": "Classique",
   "changeKit": "Changer de tenue",
@@ -16,5 +24,6 @@
   "toNext_one": "{{count}} niveau avant {{tier}}",
   "toNext_other": "{{count}} niveaux avant {{tier}}",
   "topReached": "Palier maximum atteint — vous êtes un Luminaire !",
-  "journeyTitle": "Votre parcours"
+  "journeyTitle": "Votre parcours",
+  "viewProfile": "Voir votre profil et vos publications"
 }

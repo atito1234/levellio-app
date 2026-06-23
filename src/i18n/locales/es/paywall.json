@@ -28,5 +28,28 @@
   "founding": "Eres un miembro fundador — Plus es gratis durante la beta 💜",
   "impact": "Una parte de cada suscripción Plus financia los proyectos de Fort-Liberté y regala membresías.",
   "priceFree": "Gratis para miembros fundadores",
-  "priceFuture": "luego $4.99 / mes"
+  "priceFuture": "luego $4.99 / mes",
+  "devPreview": "Vista previa de Plus (dev)",
+  "live": {
+    "kicker": "LEVELLIO PLUS",
+    "heading": "Desbloquea todo tu potencial",
+    "sub": "Todo lo que te encanta sigue siendo gratis. Plus añade las herramientas avanzadas — y una parte financia proyectos reales.",
+    "bestValue": "MEJOR VALOR",
+    "period": {
+      "year": "Anual",
+      "month": "Mensual",
+      "lifetime": "De por vida"
+    },
+    "trialCta": "Empezar prueba gratis de 7 días",
+    "lifetimeCta": "Desbloquear Plus de por vida",
+    "trialThen": "7 días gratis, luego {{price}}",
+    "lifetimeThen": "Pago único · {{price}}",
+    "cancelAnytime": "Sin cargos hasta que termine tu prueba · cancela cuando quieras en Ajustes.",
+    "restore": "Restaurar compras",
+    "includedTitle": "Plus incluye",
+    "freeTitle": "Siempre gratis, para siempre",
+    "unavailable": "Levellio Plus está casi listo — todavía no hay nada que cobrar. Nunca te cobraremos sin preguntarte primero."
+  },
+  "trialReminderTitle": "Tu prueba de Levellio Plus termina pronto",
+  "trialReminderBody": "Aviso — tu prueba gratuita se convierte en 2 días. Gestiona o cancela cuando quieras en los ajustes de tu tienda."
 }

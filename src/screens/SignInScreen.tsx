@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AnimatedHero, PressableScale, ScreenContainer } from '@/components';
@@ -21,7 +21,7 @@ const ERR = '#C0202C';
 
 export function SignInScreen({ navigation }: Props) {
   const { t } = useTranslation(['auth', 'common']);
-  const { signIn, signUp, resetPassword, isReal } = useAuth();
+  const { signIn, signUp, resetPassword, signInWithApple, signInWithGoogle, isReal } = useAuth();
   const { character } = useGame();
 
   const [mode, setMode] = useState<'in' | 'up'>('up');
@@ -44,6 +44,15 @@ export function SignInScreen({ navigation }: Props) {
     setBusy(false);
     if (result.ok) navigation.goBack();
     else setError(result.error ?? t('auth:genericError'));
+  };
+
+  const onProvider = async (fn: () => Promise<{ ok: boolean; error?: string }>) => {
+    setBusy(true);
+    setError(null);
+    const result = await fn();
+    setBusy(false);
+    if (result.ok) navigation.goBack();
+    else setError(result.error === 'unavailable' ? t('auth:providerSoon') : result.error ?? t('auth:genericError'));
   };
 
   const onReset = async () => {
@@ -72,8 +81,38 @@ export function SignInScreen({ navigation }: Props) {
             <View style={styles.heroHalo} />
             <AnimatedHero presentation={character?.presentation ?? 'neutral'} tier="pathfinder" size={120} />
           </View>
-          <Text style={styles.title} accessibilityRole="header">{isUp ? t('auth:createTitle') : t('auth:signInTitle')}</Text>
-          <Text style={styles.lead}>{t('auth:lead')}</Text>
+          <Text style={styles.title} accessibilityRole="header">{t('auth:claimTitle')}</Text>
+          <Text style={styles.lead}>{t('auth:claimLead')}</Text>
+        </View>
+
+        {/* One-tap providers (light up once OAuth is configured in the full build). */}
+        <View style={styles.providers}>
+          {Platform.OS === 'ios' && (
+            <PressableScale
+              onPress={() => void onProvider(signInWithApple)}
+              disabled={busy}
+              accessibilityRole="button"
+              accessibilityLabel={t('auth:continueApple')}
+              style={[styles.provider, styles.providerApple]}
+            >
+              <Text style={[styles.providerText, styles.providerTextApple]}>{t('auth:continueApple')}</Text>
+            </PressableScale>
+          )}
+          <PressableScale
+            onPress={() => void onProvider(signInWithGoogle)}
+            disabled={busy}
+            accessibilityRole="button"
+            accessibilityLabel={t('auth:continueGoogle')}
+            style={[styles.provider, styles.providerGoogle]}
+          >
+            <Text style={[styles.providerText, styles.providerTextGoogle]}>{t('auth:continueGoogle')}</Text>
+          </PressableScale>
+        </View>
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>{t('auth:or')}</Text>
+          <View style={styles.dividerLine} />
         </View>
 
         {!isReal && <Text style={styles.note}>{t('auth:offline')}</Text>}
@@ -142,6 +181,8 @@ export function SignInScreen({ navigation }: Props) {
             </Pressable>
           )}
         </View>
+
+        <Text style={styles.trust}>{t('auth:trust')}</Text>
       </ScrollView>
     </ScreenContainer>
   );
@@ -157,6 +198,17 @@ const styles = StyleSheet.create({
   title: { ...typography.heading, color: INK, textAlign: 'center' },
   lead: { ...typography.body, color: MUTED, textAlign: 'center', paddingHorizontal: spacing.sm },
   note: { ...typography.caption, color: MUTED, backgroundColor: '#FFF6E5', padding: spacing.sm, borderRadius: 12 },
+  providers: { gap: spacing.sm, marginTop: spacing.xs },
+  provider: { borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', borderWidth: 1 },
+  providerApple: { backgroundColor: '#000000', borderColor: '#000000' },
+  providerGoogle: { backgroundColor: CARD, borderColor: TRACK },
+  providerText: { ...typography.label, fontWeight: '800' },
+  providerTextApple: { color: '#FFFFFF' },
+  providerTextGoogle: { color: INK },
+  divider: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginVertical: spacing.xs },
+  dividerLine: { flex: 1, height: 1, backgroundColor: TRACK },
+  dividerText: { ...typography.caption, color: MUTED },
+  trust: { ...typography.caption, color: MUTED, textAlign: 'center', marginTop: spacing.sm },
   form: { gap: spacing.sm, marginTop: spacing.sm },
   input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: TRACK },
   error: { ...typography.caption, color: ERR },

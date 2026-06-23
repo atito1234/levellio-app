@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { HeroAvatar, ScreenContainer } from '@/components';
+import { CommunityGate, HeroAvatar, ScreenContainer } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useMessaging } from '@/state/MessagingContext';
 import { isUnread, otherName, otherParticipant } from '@/lib/messaging';
@@ -19,7 +19,7 @@ export function InboxScreen({ navigation }: Props) {
     return (
       <ScreenContainer>
         <Text style={styles.title}>{t('messaging:title')}</Text>
-        <View style={styles.center}><Text style={styles.empty}>{t('messaging:empty')}</Text></View>
+        <CommunityGate onPrimary={() => navigation.navigate('SignIn')} />
       </ScreenContainer>
     );
   }

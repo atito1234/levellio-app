@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { AppHeader, CommunityGate, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useProjects } from '@/state/ProjectsContext';
@@ -45,28 +45,10 @@ export function ProjectsCatalogScreen() {
   if (!signedIn) {
     return (
       <ScreenContainer backgroundColor={BG}>
-        <ScrollView contentContainerStyle={styles.gateContent} showsVerticalScrollIndicator={false}>
-          <Text style={styles.gateEmoji}>🤝</Text>
-          <Text style={styles.gateTitle} accessibilityRole="header">
-            {t('gate.title')}
-          </Text>
-          <Text style={styles.gateLead}>{t('gate.lead')}</Text>
-          <Pressable
-            onPress={() => navigation.navigate('SignIn')}
-            accessibilityRole="button"
-            accessibilityLabel={t('gate.signIn')}
-            style={styles.cta}
-          >
-            <Text style={styles.ctaText}>{t('gate.signIn')}</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => navigation.navigate('JoinProject', {})}
-            accessibilityRole="button"
-            style={styles.ghost}
-          >
-            <Text style={styles.ghostText}>{t('gate.haveCode')}</Text>
-          </Pressable>
-        </ScrollView>
+        <CommunityGate
+          onPrimary={() => navigation.navigate('SignIn')}
+          onSecondary={() => navigation.navigate('JoinProject', {})}
+        />
       </ScreenContainer>
     );
   }
@@ -74,6 +56,7 @@ export function ProjectsCatalogScreen() {
   return (
     <ScreenContainer backgroundColor={BG}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <AppHeader />
         <View style={styles.header}>
           <View>
             <Text style={styles.title} accessibilityRole="header">

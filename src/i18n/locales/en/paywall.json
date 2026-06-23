@@ -28,5 +28,28 @@
   "founding": "You're a founding member — Plus is on us during the beta 💜",
   "impact": "A share of every Plus subscription funds the Fort-Liberté projects and gifts memberships.",
   "priceFree": "Free for founding members",
-  "priceFuture": "then $4.99 / mo"
+  "priceFuture": "then $4.99 / mo",
+  "devPreview": "Preview Plus (dev)",
+  "live": {
+    "kicker": "LEVELLIO PLUS",
+    "heading": "Unlock your full potential",
+    "sub": "Everything you love stays free. Plus adds the power tools — and a share funds real-world projects.",
+    "bestValue": "BEST VALUE",
+    "period": {
+      "year": "Yearly",
+      "month": "Monthly",
+      "lifetime": "Lifetime"
+    },
+    "trialCta": "Start 7-day free trial",
+    "lifetimeCta": "Unlock Plus for life",
+    "trialThen": "7 days free, then {{price}}",
+    "lifetimeThen": "One payment · {{price}}",
+    "cancelAnytime": "No charge until your trial ends · cancel anytime in Settings.",
+    "restore": "Restore purchases",
+    "includedTitle": "Plus includes",
+    "freeTitle": "Always free, forever",
+    "unavailable": "Levellio Plus is almost ready — there’s nothing to charge yet. We’ll never bill you without asking first."
+  },
+  "trialReminderTitle": "Your Levellio Plus trial ends soon",
+  "trialReminderBody": "Heads up — your free trial converts in 2 days. Manage or cancel anytime in your store settings."
 }

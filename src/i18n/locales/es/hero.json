@@ -1,6 +1,14 @@
 {
-  "tier": { "novice": "Novato", "pathfinder": "Explorador", "luminary": "Luminaria" },
-  "companion": { "spark": "Chispa", "ember": "Brasa", "phoenixling": "Fenixito" },
+  "tier": {
+    "novice": "Novato",
+    "pathfinder": "Explorador",
+    "luminary": "Luminaria"
+  },
+  "companion": {
+    "spark": "Chispa",
+    "ember": "Brasa",
+    "phoenixling": "Fenixito"
+  },
   "kitTitle": "Atuendo",
   "kitClassic": "Clásico",
   "changeKit": "Cambiar atuendo",
@@ -16,5 +24,6 @@
   "toNext_one": "{{count}} nivel para {{tier}}",
   "toNext_other": "{{count}} niveles para {{tier}}",
   "topReached": "¡Nivel máximo alcanzado — eres una Luminaria!",
-  "journeyTitle": "Tu viaje"
+  "journeyTitle": "Tu viaje",
+  "viewProfile": "Ver tu perfil y publicaciones"
 }
