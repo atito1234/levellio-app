@@ -89,5 +89,14 @@
     "contact": "Contactar soporte",
     "emailSupportA11y": "Escribir al soporte a {{email}}",
     "replayTour": "Repetir el tour de bienvenida"
+  },
+  "reset": {
+    "title": "Empezar de nuevo",
+    "body": "Borra todo en este dispositivo y repite la experiencia inicial completa: el cuestionario de bienvenida, tu plan inicial y el tour de bienvenida.",
+    "cta": "Restablecer app y reiniciar el inicio",
+    "help": "Borra tu héroe, misiones, metas y ajustes en este dispositivo. Tu cuenta (si la tienes) y los datos de la comunidad no se eliminan. Esto no se puede deshacer.",
+    "confirmTitle": "¿Restablecer y empezar de nuevo?",
+    "confirmBody": "Esto borra tu héroe, misiones, metas y ajustes en este dispositivo y reinicia el inicio. No se puede deshacer.",
+    "confirmCta": "Restablecer app"
   }
 }

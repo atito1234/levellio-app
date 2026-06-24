@@ -3,13 +3,11 @@ import { Animated, Easing, Pressable, RefreshControl, ScrollView, StyleSheet, Te
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CommunityGate, HeroAvatar, PostCard, PressableScale, ScreenContainer, StoriesRail } from '@/components';
+import { AppHeader, CommunityGate, HeroAvatar, PostCard, PressableScale, ScreenContainer, StoriesRail } from '@/components';
 import { spacing, typography } from '@/theme';
 import { durations, springs } from '@/theme/motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useCommunity } from '@/state/CommunityContext';
-import { useNotifications } from '@/state/NotificationsContext';
-import { useMessaging } from '@/state/MessagingContext';
 import { useGame } from '@/state/GameContext';
 import { useCommunityAccess } from '@/services/community/access';
 import { type FeedScope, type Post } from '@/lib/community';
@@ -30,9 +28,7 @@ export function NewsfeedScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation(['feed', 'common', 'messaging']);
   const allowed = useCommunityAccess();
-  const { uid, signedIn, subscribeFeed } = useCommunity();
-  const { unreadCount } = useNotifications();
-  const { unreadCount: msgUnread } = useMessaging();
+  const { signedIn, subscribeFeed } = useCommunity();
   const { character } = useGame();
   const reduced = useReducedMotion();
   const [scope, setScope] = useState<ScopeKey>('all');
@@ -62,39 +58,21 @@ export function NewsfeedScreen() {
     setTimeout(() => setRefreshing(false), 700);
   }, []);
 
+  // Shared chrome (avatar → profile, notifications, inbox) for cross-tab
+  // consistency, plus the Feed's own title + People affordance below it.
   const header = useMemo(
     () => (
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>{t('feed:newsfeed.title')}</Text>
-        <View style={styles.headerActions}>
+      <>
+        <AppHeader />
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>{t('feed:newsfeed.title')}</Text>
           <PressableScale onPress={() => navigation.navigate('People')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.peopleA11y')} style={styles.peopleBtn}>
             <Text style={styles.peopleText}>{t('feed:newsfeed.people')}</Text>
           </PressableScale>
-          <PressableScale onPress={() => navigation.navigate('Notifications')} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.notificationsA11y')} style={styles.bellBtn}>
-            <Text style={styles.bellIcon}>🔔</Text>
-            {unreadCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
-              </View>
-            )}
-          </PressableScale>
-          <PressableScale onPress={() => navigation.navigate('Inbox')} accessibilityRole="button" accessibilityLabel={t('messaging:a11y')} style={styles.bellBtn}>
-            <Text style={styles.bellIcon}>💬</Text>
-            {msgUnread > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{msgUnread > 9 ? '9+' : msgUnread}</Text>
-              </View>
-            )}
-          </PressableScale>
-          {uid && (
-            <PressableScale onPress={() => navigation.navigate('Profile', { uid })} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.meA11y')} style={styles.meBtn}>
-              <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={32} />
-            </PressableScale>
-          )}
         </View>
-      </View>
+      </>
     ),
-    [navigation, t, unreadCount, msgUnread, uid, character?.presentation, character?.tier, character?.kitId],
+    [navigation, t],
   );
 
   if (!allowed) {
@@ -210,15 +188,9 @@ function FeedItem({ index, children }: { index: number; children: React.ReactNod
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, gap: spacing.md },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   title: { ...typography.heading, color: INK },
   peopleBtn: { backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#ECEAE4' },
   peopleText: { ...typography.label, color: VIOLET, fontWeight: '800' },
-  bellBtn: { backgroundColor: CARD, borderRadius: 999, width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#ECEAE4' },
-  bellIcon: { fontSize: 18 },
-  badge: { position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: 999, backgroundColor: '#C0202C', alignItems: 'center', justifyContent: 'center' },
-  badgeText: { ...typography.caption, color: '#FFFFFF', fontWeight: '800', fontSize: 10 },
-  meBtn: { width: 40, height: 40, borderRadius: 999, alignItems: 'center', justifyContent: 'center', backgroundColor: CARD, borderWidth: 1, borderColor: '#ECEAE4', overflow: 'hidden' },
   searchPill: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: '#ECEAE4', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   searchIcon: { fontSize: 16 },
   searchText: { ...typography.body, color: MUTED, flex: 1 },

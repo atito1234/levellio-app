@@ -20,7 +20,12 @@ import type { RootStackParamList } from '@/navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-export function AppHeader() {
+/**
+ * `compact` drops the avatar/streak identity block and shows only the
+ * notifications + inbox actions — for the Today screen, whose greeting row
+ * already presents the hero, so we don't duplicate identity.
+ */
+export function AppHeader({ variant = 'full' }: { variant?: 'full' | 'compact' }) {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation(['feed', 'messaging']);
   const { character } = useGame();
@@ -33,14 +38,16 @@ export function AppHeader() {
 
   return (
     <View style={styles.bar}>
-      <PressableScale onPress={openProfile} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.meA11y')} style={styles.identity}>
-        <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={36} />
-        {(character?.streakDays ?? 0) > 0 && (
-          <View style={styles.streak}>
-            <Text style={styles.streakText}>🔥 {character?.streakDays}</Text>
-          </View>
-        )}
-      </PressableScale>
+      {variant === 'full' && (
+        <PressableScale onPress={openProfile} accessibilityRole="button" accessibilityLabel={t('feed:newsfeed.meA11y')} style={styles.identity}>
+          <HeroAvatar presentation={character?.presentation ?? 'neutral'} tier={character?.tier ?? 'novice'} kitId={character?.kitId} size={36} />
+          {(character?.streakDays ?? 0) > 0 && (
+            <View style={styles.streak}>
+              <Text style={styles.streakText}>🔥 {character?.streakDays}</Text>
+            </View>
+          )}
+        </PressableScale>
+      )}
 
       <View style={styles.spacer} />
 

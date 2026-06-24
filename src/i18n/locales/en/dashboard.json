@@ -1,7 +1,7 @@
 {
   "greeting": { "morning": "Morning", "afternoon": "Afternoon", "evening": "Evening", "fallbackName": "there" },
   "openHeroA11y": "Open your hero",
-  "share": { "hint": "Share an update…", "a11y": "Share an update with your community" },
+  "share": { "hint": "Share an update…", "a11y": "Share an update with your community", "viewFeed": "View feed →", "viewFeedA11y": "Open the community feed" },
   "step1": "STEP 1 · Your goal",
   "step1Pick": "STEP 1 · Pick a goal to begin",
   "step2": "STEP 2 · Tap 🎙️ to add your activities",

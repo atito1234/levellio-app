@@ -18,4 +18,18 @@ export class InMemoryStore implements KeyValueStore {
   async removeItem(key: string): Promise<void> {
     this.map.delete(key);
   }
+
+  async getAllKeys(): Promise<string[]> {
+    return [...this.map.keys()];
+  }
+
+  async clear(prefix?: string): Promise<void> {
+    if (!prefix) {
+      this.map.clear();
+      return;
+    }
+    for (const key of [...this.map.keys()]) {
+      if (key.startsWith(prefix)) this.map.delete(key);
+    }
+  }
 }

@@ -31,6 +31,7 @@ import { useSettings } from '@/state/SettingsContext';
 import { type AIMode, type CloudProvider } from '@/services/settings';
 import type { MetadataPrivacy } from '@/lib/metadata';
 import { clearByoApiKey, getByoApiKey, setByoApiKey } from '@/services/security/secureKeyStore';
+import { reloadApp, resetAppData } from '@/lib/appReset';
 import {
   CONTACT_EMAIL,
   LEGAL_LINKS,
@@ -115,6 +116,18 @@ export function SettingsScreen() {
     Alert.alert(t('account.signOutConfirmTitle'), t('account.signOutConfirmBody'), [
       { text: t('account.cancel'), style: 'cancel' },
       { text: t('account.signOut'), style: 'destructive', onPress: () => void signOut() },
+    ]);
+
+  // Full local wipe → reload → re-run the first-run onboarding funnel + tour.
+  const runResetApp = async () => {
+    await resetAppData();
+    reloadApp();
+  };
+
+  const confirmResetApp = () =>
+    Alert.alert(t('reset.confirmTitle'), t('reset.confirmBody'), [
+      { text: t('account.cancel'), style: 'cancel' },
+      { text: t('reset.confirmCta'), style: 'destructive', onPress: () => void runResetApp() },
     ]);
 
   const runDelete = async () => {
@@ -384,6 +397,21 @@ export function SettingsScreen() {
           <PrivacyToggle label={t('insights.includeTimestamps')} value={settings.metadataPrivacy.includeTimestamps} field="includeTimestamps" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.recordSession')} value={settings.metadataPrivacy.recordSession} field="recordSession" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.includeLocation')} value={settings.metadataPrivacy.includeLocation} field="includeLocation" privacy={settings.metadataPrivacy} update={update} />
+        </View>
+
+        {/* Start over — full local wipe that replays the first-run onboarding. */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{t('reset.title')}</Text>
+          <Text style={styles.note}>{t('reset.body')}</Text>
+          <Pressable
+            onPress={confirmResetApp}
+            accessibilityRole="button"
+            accessibilityLabel={t('reset.cta')}
+            style={styles.deleteBtn}
+          >
+            <Text style={styles.deleteBtnText}>{t('reset.cta')}</Text>
+          </Pressable>
+          <Text style={styles.help}>{t('reset.help')}</Text>
         </View>
 
         {/* Danger zone — scoped, permanent data deletion. */}

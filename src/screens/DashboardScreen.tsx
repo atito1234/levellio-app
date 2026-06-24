@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
-import { AddActivityFab, AddActivitySheet, CapacityRing, HeroAvatar, ProjectBadge, ProjectsStrip, ScreenContainer, WorldProjectsStrip } from '@/components';
+import { AddActivityFab, AddActivitySheet, AppHeader, CapacityRing, HeroAvatar, ProjectBadge, ProjectsStrip, ScreenContainer, WorldProjectsStrip } from '@/components';
 import { useSpotlightTarget, useWelcomeTour } from '@/components/spotlight';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
@@ -275,6 +275,10 @@ export function DashboardScreen() {
         contentContainerStyle={styles.scroll}
         scrollEnabled={!dragging}
       >
+        {/* Shared chrome (notifications + inbox) — compact so it doesn't
+            duplicate the hero identity already shown in the greeting below. */}
+        <AppHeader variant="compact" />
+
         {/* Greeting — real name + real streak + level. */}
         <View style={styles.greetRow}>
           <Pressable
@@ -314,18 +318,30 @@ export function DashboardScreen() {
           </View>
         </View>
 
-        {/* Facebook-style composer — share to the community in one tap from home. */}
+        {/* Facebook-style composer — share to the community in one tap from home,
+            with a quick jump to the full feed (Today ↔ Feed connection). */}
         {signedIn && communityAllowed && (
-          <Pressable
-            onPress={() => navigation.navigate('PostComposer')}
-            accessibilityRole="button"
-            accessibilityLabel={t('dashboard:share.a11y')}
-            style={styles.homeComposer}
-          >
-            <HeroAvatar presentation={character.presentation} tier={character.tier} kitId={character.kitId} size={36} />
-            <Text style={styles.homeComposerHint}>{t('dashboard:share.hint')}</Text>
-            <Text style={styles.homeComposerIcon}>✏️</Text>
-          </Pressable>
+          <View style={styles.homeComposerRow}>
+            <Pressable
+              onPress={() => navigation.navigate('PostComposer')}
+              accessibilityRole="button"
+              accessibilityLabel={t('dashboard:share.a11y')}
+              style={styles.homeComposer}
+            >
+              <HeroAvatar presentation={character.presentation} tier={character.tier} kitId={character.kitId} size={36} />
+              <Text style={styles.homeComposerHint}>{t('dashboard:share.hint')}</Text>
+              <Text style={styles.homeComposerIcon}>✏️</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate('Main', { screen: 'Feed' })}
+              accessibilityRole="button"
+              accessibilityLabel={t('dashboard:share.viewFeedA11y')}
+              hitSlop={8}
+              style={styles.homeComposerFeed}
+            >
+              <Text style={styles.homeComposerFeedText}>{t('dashboard:share.viewFeed')}</Text>
+            </Pressable>
+          </View>
         )}
 
         {/* STEP 1 — pick a goal. It governs the focus below and tints it. */}
@@ -869,9 +885,12 @@ const styles = StyleSheet.create({
   planCtaSub: { ...typography.caption, color: MUTED },
   planCtaChevron: { fontSize: 26, color: VIOLET, fontWeight: '800' },
 
+  homeComposerRow: { gap: spacing.xs },
   homeComposer: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginHorizontal: PAD, backgroundColor: CARD, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#ECEAE4' },
   homeComposerHint: { ...typography.body, color: MUTED, flex: 1 },
   homeComposerIcon: { fontSize: 16 },
+  homeComposerFeed: { alignSelf: 'flex-end', marginHorizontal: PAD, paddingVertical: 2 },
+  homeComposerFeedText: { ...typography.label, color: VIOLET, fontWeight: '800' },
   stepHint: { ...typography.label, color: VIOLET, fontWeight: '800', letterSpacing: 1, paddingHorizontal: PAD },
   gatedWrap: { gap: spacing.lg },
   gatedOff: { opacity: 0.35 },
