@@ -178,5 +178,6 @@
     "notFound": "No project found for that code. Double-check it with whoever invited you.",
     "cta": "Join project",
     "ctaA11y": "Join project"
-  }
+  },
+  "recommended": "RECOMMENDED FOR YOU"
 }

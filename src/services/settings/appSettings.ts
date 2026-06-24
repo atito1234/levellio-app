@@ -19,6 +19,15 @@ export type BucketViewMode = 'list' | 'buckets';
 /** How a personal goal that "prepares" for a project goal links to it. */
 export type PrepLinkMode = 'visual' | 'full';
 
+/** Persisted onboarding questionnaire answers (used to personalize + for later tuning). */
+export interface OnboardingAnswersStored {
+  focus?: string[];
+  blocker?: string;
+  habitCount?: number;
+  why?: string;
+  reminderTime?: string;
+}
+
 export interface AppSettings {
   aiMode: AIMode;
   provider: CloudProvider;
@@ -44,6 +53,16 @@ export interface AppSettings {
   onboardingCompleted: boolean;
   /** First-run interactive spotlight tour finished or skipped — runs once only. */
   welcomeTourCompleted: boolean;
+  /** Where the user said they heard about Levellio (onboarding attribution). */
+  attributionSource?: string;
+  /** Preferred reminder time of day captured in onboarding ('morning'|'afternoon'|'evening'). */
+  reminderTime?: string;
+  /** Raw onboarding questionnaire answers (focus areas, blocker, habit count, why). */
+  onboardingAnswers?: OnboardingAnswersStored;
+  /** Featured project ids recommended from the questionnaire (surfaced in Projects). */
+  recommendedProjectIds?: string[];
+  /** True once we've shown the in-onboarding store-rating prompt (show at most once). */
+  ratingRequested?: boolean;
   /** Optional public profile headline (LinkedIn-style one-liner). */
   profileHeadline?: string;
   /** Optional public profile location/country. */
@@ -91,6 +110,15 @@ export function normalizeSettings(raw: unknown): AppSettings {
     locale: r.locale === 'system' || isSupportedLocale(r.locale) ? r.locale : 'system',
     onboardingCompleted: r.onboardingCompleted === true,
     welcomeTourCompleted: r.welcomeTourCompleted === true,
+    ...(typeof r.attributionSource === 'string' ? { attributionSource: r.attributionSource } : {}),
+    ...(typeof r.reminderTime === 'string' ? { reminderTime: r.reminderTime } : {}),
+    ...(r.onboardingAnswers && typeof r.onboardingAnswers === 'object'
+      ? { onboardingAnswers: r.onboardingAnswers as OnboardingAnswersStored }
+      : {}),
+    ...(Array.isArray(r.recommendedProjectIds)
+      ? { recommendedProjectIds: r.recommendedProjectIds.filter((x): x is string => typeof x === 'string') }
+      : {}),
+    ...(r.ratingRequested === true ? { ratingRequested: true } : {}),
     ...(typeof r.profileHeadline === 'string' ? { profileHeadline: r.profileHeadline } : {}),
     ...(typeof r.profileCountry === 'string' ? { profileCountry: r.profileCountry } : {}),
   };
