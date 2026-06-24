@@ -43,7 +43,7 @@ interface GameState {
 
 type Action =
   | { type: 'loading' }
-  | { type: 'ready'; payload: { user: AuthUser; character: Character | null; quests: Quest[] } }
+  | { type: 'ready'; payload: { user: AuthUser | null; character: Character | null; quests: Quest[] } }
   | { type: 'update'; payload: { character: Character; quests: Quest[] } };
 
 const initialState: GameState = {
@@ -114,7 +114,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     let active = true;
     (async () => {
       const user = await backend.getCurrentUser();
-      if (!user || !active) return;
+      if (!active) return;
+      // Brand-new user (or after a full reset): no saved session yet. Still reach
+      // 'ready' with a null character so RootNavigator can show Onboarding instead
+      // of spinning forever. startGame() creates the user/character later.
+      if (!user) {
+        dispatch({ type: 'ready', payload: { user: null, character: null, quests: [] } });
+        return;
+      }
       const [character, quests] = await Promise.all([
         backend.loadCharacter(user.uid),
         backend.loadQuests(user.uid),
