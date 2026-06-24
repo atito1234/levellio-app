@@ -89,5 +89,14 @@
     "contact": "Contact support",
     "emailSupportA11y": "Email support at {{email}}",
     "replayTour": "Replay welcome tour"
+  },
+  "reset": {
+    "title": "Start over",
+    "body": "Wipe everything on this device and replay the full first-run experience — the onboarding questionnaire, your seeded plan, and the welcome tour.",
+    "cta": "Reset app & restart onboarding",
+    "help": "Clears your hero, quests, goals, and settings on this device. Your account (if any) and community data are not deleted. This can't be undone.",
+    "confirmTitle": "Reset and start over?",
+    "confirmBody": "This wipes your hero, quests, goals, and settings on this device, then restarts onboarding. It can't be undone.",
+    "confirmCta": "Reset app"
   }
 }

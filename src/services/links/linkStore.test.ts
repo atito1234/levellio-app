@@ -13,6 +13,14 @@ class InMemoryStore implements KeyValueStore {
   async removeItem(k: string) {
     this.map.delete(k);
   }
+  async getAllKeys() {
+    return [...this.map.keys()];
+  }
+  async clear(prefix?: string) {
+    for (const k of [...this.map.keys()]) {
+      if (!prefix || k.startsWith(prefix)) this.map.delete(k);
+    }
+  }
 }
 
 describe('LinkStore', () => {

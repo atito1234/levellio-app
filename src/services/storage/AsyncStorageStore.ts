@@ -18,4 +18,17 @@ export class AsyncStorageStore implements KeyValueStore {
   async removeItem(key: string): Promise<void> {
     await AsyncStorage.removeItem(key);
   }
+
+  async getAllKeys(): Promise<string[]> {
+    return [...(await AsyncStorage.getAllKeys())];
+  }
+
+  async clear(prefix?: string): Promise<void> {
+    if (!prefix) {
+      await AsyncStorage.clear();
+      return;
+    }
+    const keys = (await AsyncStorage.getAllKeys()).filter((k) => k.startsWith(prefix));
+    if (keys.length) await AsyncStorage.multiRemove(keys);
+  }
 }

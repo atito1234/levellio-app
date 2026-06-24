@@ -89,5 +89,14 @@
     "contact": "Contacter le support",
     "emailSupportA11y": "Contacter le support par e-mail à {{email}}",
     "replayTour": "Revoir le tour de bienvenue"
+  },
+  "reset": {
+    "title": "Tout recommencer",
+    "body": "Effacez tout sur cet appareil et revivez l'expérience de démarrage complète : le questionnaire d'accueil, votre plan initial et le tour de bienvenue.",
+    "cta": "Réinitialiser l'app et relancer l'accueil",
+    "help": "Efface votre héros, vos quêtes, vos objectifs et vos réglages sur cet appareil. Votre compte (le cas échéant) et les données de la communauté ne sont pas supprimés. Action irréversible.",
+    "confirmTitle": "Réinitialiser et tout recommencer ?",
+    "confirmBody": "Cela efface votre héros, vos quêtes, vos objectifs et vos réglages sur cet appareil, puis relance l'accueil. Action irréversible.",
+    "confirmCta": "Réinitialiser l'app"
   }
 }

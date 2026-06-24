@@ -8,7 +8,9 @@
   "openHeroA11y": "Ouvrir votre héros",
   "share": {
     "hint": "Partagez une actualité…",
-    "a11y": "Partagez une actualité avec votre communauté"
+    "a11y": "Partagez une actualité avec votre communauté",
+    "viewFeed": "Voir le fil →",
+    "viewFeedA11y": "Ouvrir le fil de la communauté"
   },
   "step1": "ÉTAPE 1 · Votre objectif",
   "step1Pick": "ÉTAPE 1 · Choisissez un objectif pour commencer",

@@ -8,7 +8,9 @@
   "openHeroA11y": "Abre tu héroe",
   "share": {
     "hint": "Comparte una novedad…",
-    "a11y": "Comparte una novedad con tu comunidad"
+    "a11y": "Comparte una novedad con tu comunidad",
+    "viewFeed": "Ver feed →",
+    "viewFeedA11y": "Abrir el feed de la comunidad"
   },
   "step1": "PASO 1 · Tu meta",
   "step1Pick": "PASO 1 · Elige una meta para empezar",
