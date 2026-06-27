@@ -14,19 +14,28 @@ export interface LibraryHabit {
   description?: string;
   category: QuestCategory;
   difficulty: QuestDifficulty;
+  /**
+   * Optional personalization tags (e.g. 'env-gym', 'diet-vegan'). Onboarding
+   * follow-up answers carry matching tags; tagged habits are favored when a user
+   * selects the corresponding option. Untagged habits are always eligible.
+   */
+  tags?: string[];
 }
 
 export const HABIT_LIBRARY: readonly LibraryHabit[] = [
   // Fitness
-  { id: 'fit-walk', title: 'Take a 15-minute walk', category: 'fitness', difficulty: 'easy' },
-  { id: 'fit-stretch', title: 'Stretch for 5 minutes', category: 'fitness', difficulty: 'easy' },
+  { id: 'fit-walk', title: 'Take a 15-minute walk', category: 'fitness', difficulty: 'easy', tags: ['level-beginner', 'env-outdoor', 'env-home'] },
+  { id: 'fit-stretch', title: 'Stretch for 5 minutes', category: 'fitness', difficulty: 'easy', tags: ['level-beginner', 'env-home'] },
   { id: 'fit-workout', title: '20-minute workout', category: 'fitness', difficulty: 'medium' },
-  { id: 'fit-steps', title: 'Hit 8,000 steps', category: 'fitness', difficulty: 'medium' },
-  { id: 'fit-run', title: 'Go for a 5km run', category: 'fitness', difficulty: 'hard' },
+  { id: 'fit-steps', title: 'Hit 8,000 steps', category: 'fitness', difficulty: 'medium', tags: ['env-outdoor'] },
+  { id: 'fit-run', title: 'Go for a 5km run', category: 'fitness', difficulty: 'hard', tags: ['env-outdoor'] },
+  { id: 'fit-bodyweight', title: 'Do a 15-minute bodyweight circuit', category: 'fitness', difficulty: 'medium', tags: ['env-home', 'level-beginner'] },
+  { id: 'fit-gym', title: 'Strength session at the gym', category: 'fitness', difficulty: 'hard', tags: ['env-gym'] },
 
   // Mind
   { id: 'mind-meditate', title: 'Meditate for 10 minutes', category: 'mind', difficulty: 'easy' },
-  { id: 'mind-breathe', title: 'Do a 2-minute breathing exercise', category: 'mind', difficulty: 'easy' },
+  { id: 'mind-breathe', title: 'Do a 2-minute breathing exercise', category: 'mind', difficulty: 'easy', tags: ['calm-work', 'calm-overwhelm'] },
+  { id: 'mind-winddown', title: '30-minute screen-free wind-down before bed', category: 'mind', difficulty: 'medium', tags: ['calm-sleep'] },
   { id: 'mind-journal', title: 'Write a journal entry', category: 'mind', difficulty: 'medium' },
   { id: 'mind-gratitude', title: 'List 3 things you are grateful for', category: 'mind', difficulty: 'easy' },
   { id: 'mind-screens', title: 'One hour with no screens', category: 'mind', difficulty: 'hard' },
@@ -43,6 +52,9 @@ export const HABIT_LIBRARY: readonly LibraryHabit[] = [
   { id: 'health-veggies', title: 'Eat 2 servings of vegetables', category: 'health', difficulty: 'easy' },
   { id: 'health-sunlight', title: 'Get 10 minutes of sunlight', category: 'health', difficulty: 'easy' },
   { id: 'health-nosugar', title: 'No added sugar today', category: 'health', difficulty: 'hard' },
+  { id: 'health-plant-protein', title: 'Eat a plant-protein serving (beans, lentils, tofu)', category: 'health', difficulty: 'easy', tags: ['diet-vegan', 'diet-vegetarian'] },
+  { id: 'health-omega3', title: 'Eat a serving of fish or omega-3 food', category: 'health', difficulty: 'easy', tags: ['diet-pescatarian'] },
+  { id: 'health-lean-protein', title: 'Eat a lean-protein serving', category: 'health', difficulty: 'easy', tags: ['diet-omnivore'] },
 
   // Productivity
   { id: 'prod-top-task', title: 'Finish your most important task', category: 'productivity', difficulty: 'medium' },
@@ -54,8 +66,9 @@ export const HABIT_LIBRARY: readonly LibraryHabit[] = [
   // Relationships
   { id: 'rel-reachout', title: 'Message someone you care about', category: 'relationships', difficulty: 'easy' },
   { id: 'rel-call', title: 'Call a friend or family member', category: 'relationships', difficulty: 'medium' },
-  { id: 'rel-quality', title: 'Spend 30 minutes of quality time, phone away', category: 'relationships', difficulty: 'medium' },
-  { id: 'rel-thanks', title: 'Thank someone sincerely', category: 'relationships', difficulty: 'easy' },
+  { id: 'rel-quality', title: 'Spend 30 minutes of quality time, phone away', category: 'relationships', difficulty: 'medium', tags: ['bond-quality'] },
+  { id: 'rel-thanks', title: 'Thank someone sincerely', category: 'relationships', difficulty: 'easy', tags: ['bond-appreciation'] },
+  { id: 'rel-checkin', title: 'Have a 10-minute daily check-in', category: 'relationships', difficulty: 'easy', tags: ['bond-communication'] },
 
   // Creativity
   { id: 'create-sketch', title: 'Sketch or doodle for 10 minutes', category: 'creativity', difficulty: 'easy' },
@@ -66,8 +79,9 @@ export const HABIT_LIBRARY: readonly LibraryHabit[] = [
   // Finance
   { id: 'fin-track', title: 'Log today’s spending', category: 'finance', difficulty: 'easy' },
   { id: 'fin-nospend', title: 'A no-spend day', category: 'finance', difficulty: 'hard' },
-  { id: 'fin-review', title: 'Review your budget', category: 'finance', difficulty: 'medium' },
-  { id: 'fin-save', title: 'Transfer something to savings', category: 'finance', difficulty: 'medium' },
+  { id: 'fin-review', title: 'Review your budget', category: 'finance', difficulty: 'medium', tags: ['money-budget'] },
+  { id: 'fin-save', title: 'Transfer something to savings', category: 'finance', difficulty: 'medium', tags: ['money-save'] },
+  { id: 'fin-debt', title: 'Put something toward debt', category: 'finance', difficulty: 'medium', tags: ['money-debt'] },
 ];
 
 /** Group the library by category, in display order. */

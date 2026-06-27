@@ -1,0 +1,185 @@
+{
+  "screen": {
+    "title": "Recetas",
+    "subtitle": "Adaptadas a tu dieta — guarda tus favoritas y márcalas al cocinar.",
+    "recommended": "Recomendado para ti",
+    "saved": "Guardadas",
+    "empty": "Elige una preferencia alimentaria durante la introducción para obtener recetas a tu medida — o guarda aquí las que te gusten.",
+    "save": "Guardar",
+    "savedLabel": "Guardada ✓",
+    "cook": "Marcar como cocinada",
+    "cookedToday": "Cocinada hoy ✓",
+    "ingredients": "Ingredientes",
+    "steps": "Pasos",
+    "meta": "{{minutes}} min · {{servings}} porciones"
+  },
+  "veg-stirfry": {
+    "title": "Salteado de verduras arcoíris",
+    "desc": "Verduras de temporada crujientes en una salsa sabrosa rápida. Listo en 20 minutos.",
+    "nutrition": "Lleno de fibra y color; naturalmente vegetal.",
+    "ingredients": [
+      "2 tazas de verduras variadas (pimientos, brócoli, zanahoria)",
+      "1 cda de aceite",
+      "1 diente de ajo picado",
+      "1 cda de tamari o salsa de soja sin gluten",
+      "1 taza de arroz cocido"
+    ],
+    "steps": [
+      "Calienta el aceite en una sartén amplia a fuego alto.",
+      "Añade el ajo y luego las verduras; saltea 5–7 minutos hasta que estén tiernas pero crujientes.",
+      "Agrega el tamari, mezcla y sirve sobre el arroz."
+    ]
+  },
+  "chickpea-curry": {
+    "title": "Curry de garbanzos especiado",
+    "desc": "Sustancioso, reconfortante y rico en proteína: ideal para cocinar en lote.",
+    "nutrition": "Rico en proteína vegetal y fibra; estabiliza el azúcar en sangre.",
+    "ingredients": [
+      "1 lata de garbanzos escurridos",
+      "1 lata de tomate triturado",
+      "200 ml de leche de coco",
+      "1 cda de curry en polvo",
+      "1 cebolla en cubos"
+    ],
+    "steps": [
+      "Sofríe la cebolla en un poco de aceite y añade el curry.",
+      "Agrega el tomate, la leche de coco y los garbanzos; cuece a fuego lento 15 minutos.",
+      "Sazona al gusto y sirve con arroz o pan plano."
+    ]
+  },
+  "lentil-soup": {
+    "title": "Sopa reconfortante de lentejas rojas",
+    "desc": "Una sopa de una sola olla, simple, saciante y económica.",
+    "nutrition": "Proteína vegetal y fibra; suave y sin gluten.",
+    "ingredients": [
+      "1 taza de lentejas rojas enjuagadas",
+      "1 zanahoria en cubos",
+      "1 cebolla en cubos",
+      "4 tazas de caldo de verduras",
+      "1 cdta de comino"
+    ],
+    "steps": [
+      "Pocha la cebolla y la zanahoria unos minutos.",
+      "Añade las lentejas, el caldo y el comino; lleva a ebullición.",
+      "Cuece a fuego lento 20 minutos hasta que las lentejas se deshagan, y tritura si quieres."
+    ]
+  },
+  "quinoa-salad": {
+    "title": "Ensalada de quinoa al limón",
+    "desc": "Una ensalada fresca que se transporta bien.",
+    "nutrition": "Proteína vegetal completa; fresca y sin gluten.",
+    "ingredients": [
+      "1 taza de quinoa cocida y fría",
+      "1 pepino en cubos",
+      "Un puñado de tomates cherry partidos",
+      "El jugo de 1 limón",
+      "2 cdas de aceite de oliva"
+    ],
+    "steps": [
+      "Combina la quinoa, el pepino y los tomates en un bol.",
+      "Bate el jugo de limón y el aceite de oliva, y mézclalo.",
+      "Sazona y enfría 10 minutos antes de servir."
+    ]
+  },
+  "overnight-oats": {
+    "title": "Avena de la noche a la mañana",
+    "desc": "Mezcla por la noche, llévatela por la mañana. Preparación en cinco minutos.",
+    "nutrition": "Carbohidratos de liberación lenta y fibra; sin azúcar añadido.",
+    "ingredients": [
+      "1/2 taza de copos de avena",
+      "1/2 taza de leche a elección",
+      "2 cdas de yogur",
+      "1/2 plátano triturado",
+      "Una pizca de canela"
+    ],
+    "steps": [
+      "Mezcla todo en un frasco.",
+      "Tapa y refrigera toda la noche.",
+      "Corona con fruta por la mañana y disfruta fría."
+    ]
+  },
+  "greek-yogurt-bowl": {
+    "title": "Bol de yogur proteico",
+    "desc": "Un desayuno o tentempié alto en proteína en cinco minutos.",
+    "nutrition": "Alto en proteína, bajo en azúcar; te mantiene saciado.",
+    "ingredients": [
+      "1 taza de yogur griego",
+      "Un puñado de frutos rojos",
+      "1 cda de frutos secos picados",
+      "1 cdta de miel (opcional)"
+    ],
+    "steps": [
+      "Sirve el yogur en un bol.",
+      "Cubre con los frutos rojos y los frutos secos.",
+      "Añade un hilo de miel si quieres y sirve."
+    ]
+  },
+  "salmon-bowl": {
+    "title": "Bol de salmón y verduras",
+    "desc": "Salmón rico en omega sobre verduras y cereales.",
+    "nutrition": "Alto en proteína y omega-3; sin gluten.",
+    "ingredients": [
+      "1 filete de salmón",
+      "2 tazas de hojas verdes",
+      "1/2 taza de arroz o quinoa cocida",
+      "1/2 aguacate en rodajas",
+      "Un chorrito de limón"
+    ],
+    "steps": [
+      "Sella o hornea el salmón hasta que esté apenas cocido.",
+      "Arma el bol con las hojas verdes y el cereal.",
+      "Corona con salmón y aguacate, termina con limón."
+    ]
+  },
+  "tuna-salad": {
+    "title": "Ensalada de atún rápida",
+    "desc": "Un almuerzo de despensa en 10 minutos.",
+    "nutrition": "Proteína magra, baja en azúcar; muy rápida.",
+    "ingredients": [
+      "1 lata de atún escurrido",
+      "2 tazas de hojas de ensalada",
+      "1/2 taza de alubias blancas",
+      "1 cda de aceite de oliva",
+      "Un chorrito de limón"
+    ],
+    "steps": [
+      "Desmenuza el atún sobre las hojas de ensalada.",
+      "Añade las alubias.",
+      "Aliña con aceite de oliva y limón, y mezcla."
+    ]
+  },
+  "chicken-veg": {
+    "title": "Pollo y verduras a la bandeja",
+    "desc": "Todo se asa en una sola bandeja: mínima limpieza.",
+    "nutrition": "Alto en proteína magra; sin gluten.",
+    "ingredients": [
+      "2 pechugas de pollo",
+      "3 tazas de verduras troceadas",
+      "1 cda de aceite de oliva",
+      "1 cdta de hierbas mixtas",
+      "Sal y pimienta"
+    ],
+    "steps": [
+      "Calienta el horno a 200 °C / 400 °F.",
+      "Mezcla el pollo y las verduras con aceite y hierbas en una bandeja.",
+      "Asa 25–30 minutos hasta que el pollo esté cocido."
+    ]
+  },
+  "turkey-wrap": {
+    "title": "Wrap de pavo y hummus",
+    "desc": "Un almuerzo rápido, portátil y alto en proteína.",
+    "nutrition": "Proteína magra con fibra para mantenerte saciado.",
+    "ingredients": [
+      "1 tortilla de wrap",
+      "3 lonchas de pavo magro",
+      "2 cdas de hummus",
+      "Un puñado de espinacas",
+      "Tomate en rodajas"
+    ],
+    "steps": [
+      "Unta el hummus sobre el wrap.",
+      "Coloca el pavo, las espinacas y el tomate.",
+      "Enrolla bien apretado, corta por la mitad y sirve."
+    ]
+  }
+}

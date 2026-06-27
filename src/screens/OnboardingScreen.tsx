@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -13,7 +13,8 @@ import {
 import { colors, radii, spacing, typography } from '@/theme';
 import { durations } from '@/theme/motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { GOAL_TEMPLATES } from '@/data/goalTemplates';
+import { GOAL_TEMPLATES, goalTemplateByKey } from '@/data/goalTemplates';
+import { isMonetizationLive } from '@/services/monetization/plans';
 import { useApplyStarterPlan } from '@/lib/onboarding/useApplyStarterPlan';
 import type { StarterPlan } from '@/lib/onboarding/starterPlan';
 import { requestAppReview } from '@/services/reviews/requestReview';
@@ -23,12 +24,13 @@ import type { HeroPresentation } from '@/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
-const STEPS = [
-  'hook', 'attribution', 'focus', 'blocker', 'count', 'reminder', 'why',
-  'choose', 'commit', 'rating', 'notify', 'building', 'reveal',
+/** Steps before the per-focus follow-ups (which are inserted after 'focus'). */
+const PRE_STEPS = ['hook', 'attribution', 'focus'] as const;
+/** Steps after the follow-ups — the rest of the Cal AI-style funnel, unchanged. */
+const POST_STEPS = [
+  'blocker', 'count', 'reminder', 'why', 'choose', 'commit', 'rating', 'notify', 'building', 'reveal',
   'primeTrial', 'primeRemind', 'plans',
 ] as const;
-type Step = (typeof STEPS)[number];
 
 const BLOCKERS = ['procrastination', 'fear', 'doubt', 'laziness', 'tooold', 'unworthiness'] as const;
 const ATTRIB = ['tiktok', 'instagram', 'friend', 'appstore', 'search', 'other'] as const;
@@ -40,14 +42,14 @@ const PRESENTATIONS: HeroPresentation[] = ['female', 'male', 'neutral'];
 export function OnboardingScreen({ navigation }: Props) {
   const { t } = useTranslation('onboarding');
   const reduced = useReducedMotion();
-  const applyStarterPlan = useApplyStarterPlan();
+  const { prepare, seed } = useApplyStarterPlan();
 
   const [index, setIndex] = useState(0);
-  const step: Step = STEPS[index]!;
 
   // Answers
   const [attribution, setAttribution] = useState<string | undefined>();
   const [focus, setFocus] = useState<string[]>([]);
+  const [focusDetail, setFocusDetail] = useState<Record<string, string[]>>({});
   const [blocker, setBlocker] = useState<string | undefined>();
   const [count, setCount] = useState<number>(5);
   const [reminderTime, setReminderTime] = useState<string | undefined>();
@@ -55,11 +57,20 @@ export function OnboardingScreen({ navigation }: Props) {
   const [presentation, setPresentation] = useState<HeroPresentation>('neutral');
   const [heroName, setHeroName] = useState('');
   const [plan, setPlan] = useState<StarterPlan | null>(null);
+  const [seeding, setSeeding] = useState(false);
   const applied = useRef(false);
+
+  // Insert one follow-up step per selected focus that defines one (right after
+  // 'focus'), so the later building/reveal payoff reflects the personalization.
+  const steps = useMemo<string[]>(() => {
+    const detailSteps = focus.filter((k) => goalTemplateByKey(k)?.followUp).map((k) => `detail:${k}`);
+    return [...PRE_STEPS, ...detailSteps, ...POST_STEPS];
+  }, [focus]);
+  const step = steps[Math.min(index, steps.length - 1)]!;
 
   const anim = useRef(new Animated.Value(1)).current;
   const go = (nextIndex: number) => {
-    if (nextIndex < 0 || nextIndex >= STEPS.length) return;
+    if (nextIndex < 0 || nextIndex >= steps.length) return;
     if (reduced) {
       setIndex(nextIndex);
       return;
@@ -74,19 +85,20 @@ export function OnboardingScreen({ navigation }: Props) {
   const back = () => go(index - 1);
   const finish = () => navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
 
-  // Apply the plan when we reach the "building" beat, then reveal it.
+  // Prepare the plan (create hero + persist answers) when we reach "building".
+  // Seeding is deferred to the reveal step, where the user opts in or out.
   useEffect(() => {
     if (step !== 'building' || applied.current) return;
     applied.current = true;
     void (async () => {
-      const result = await applyStarterPlan({
-        answers: { focus, blocker, habitCount: count, reminderTime, why },
+      const result = await prepare({
+        answers: { focus, focusDetail, blocker, habitCount: count, reminderTime, why },
         presentation,
         name: heroName,
         attributionSource: attribution,
       });
       setPlan(result);
-      setTimeout(() => go(index + 1), reduced ? 0 : 1100);
+      setTimeout(() => next(), reduced ? 0 : 1100);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
@@ -94,14 +106,36 @@ export function OnboardingScreen({ navigation }: Props) {
   const toggleFocus = (key: string) =>
     setFocus((cur) => (cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key]));
 
+  const toggleDetail = (focusKey: string, optionId: string, multi?: boolean) =>
+    setFocusDetail((cur) => {
+      const prev = cur[focusKey] ?? [];
+      if (multi) {
+        const nextSel = prev.includes(optionId) ? prev.filter((x) => x !== optionId) : [...prev, optionId];
+        return { ...cur, [focusKey]: nextSel };
+      }
+      return { ...cur, [focusKey]: prev.includes(optionId) ? [] : [optionId] };
+    });
+
+  const acceptPlan = async () => {
+    if (!plan || seeding) return;
+    setSeeding(true);
+    await seed(plan);
+    setSeeding(false);
+    next();
+  };
+
   const animStyle = { opacity: anim, transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] };
+
+  // A per-focus follow-up step (id: "detail:<focusKey>").
+  const detailKey = step.startsWith('detail:') ? step.slice('detail:'.length) : null;
+  const detailTpl = detailKey ? goalTemplateByKey(detailKey) : null;
 
   return (
     <ScreenContainer backgroundColor={colors.background}>
       {/* Progress */}
       {step !== 'building' && (
         <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${((index + 1) / STEPS.length) * 100}%` }]} />
+          <View style={[styles.progressFill, { width: `${((index + 1) / steps.length) * 100}%` }]} />
         </View>
       )}
 
@@ -122,6 +156,26 @@ export function OnboardingScreen({ navigation }: Props) {
             onNext={next} canNext={focus.length > 0}>
             {GOAL_TEMPLATES.map((g) => (
               <Chip key={g.key} label={`${g.emoji} ${t(`goalTemplates:${g.key}`)}`} on={focus.includes(g.key)} onPress={() => toggleFocus(g.key)} />
+            ))}
+          </Picker>
+        )}
+
+        {detailKey && detailTpl?.followUp && (
+          <Picker
+            t={t}
+            title={t(`funnel.focusDetail.${detailKey}.title`)}
+            subtitle={t(`funnel.focusDetail.${detailKey}.subtitle`)}
+            onBack={back}
+            onNext={next}
+            canNext={(focusDetail[detailKey] ?? []).length > 0}
+          >
+            {detailTpl.followUp.options.map((o) => (
+              <Chip
+                key={o.id}
+                label={`${o.emoji ? `${o.emoji} ` : ''}${t(`funnel.focusDetail.${detailKey}.options.${o.id}`)}`}
+                on={(focusDetail[detailKey] ?? []).includes(o.id)}
+                onPress={() => toggleDetail(detailKey, o.id, detailTpl.followUp!.multi)}
+              />
             ))}
           </Picker>
         )}
@@ -204,7 +258,7 @@ export function OnboardingScreen({ navigation }: Props) {
         {step === 'building' && <Building t={t} />}
 
         {step === 'reveal' && plan && (
-          <Reveal t={t} plan={plan} name={heroName.trim()} onNext={next} />
+          <Reveal t={t} plan={plan} name={heroName.trim()} busy={seeding} onAccept={acceptPlan} onDecline={next} />
         )}
 
         {step === 'primeTrial' && (
@@ -221,9 +275,9 @@ export function OnboardingScreen({ navigation }: Props) {
           <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
             <Text style={styles.title}>{t('funnel.prime.plansTitle')}</Text>
             <Text style={styles.subtitle}>{t('funnel.prime.plansBody')}</Text>
-            <PlusPlans onPurchased={finish} />
+            {isMonetizationLive() ? <PlusPlans onPurchased={finish} /> : <BetaPlansCard t={t} />}
             <Pressable onPress={finish} accessibilityRole="button" style={styles.later}>
-              <Text style={styles.laterText}>{t('funnel.prime.later')}</Text>
+              <Text style={styles.laterText}>{isMonetizationLive() ? t('funnel.prime.later') : t('funnel.prime.betaCta')}</Text>
             </Pressable>
           </ScrollView>
         )}
@@ -322,6 +376,20 @@ function CenterCard({ t, kicker, title, body, cta, onCta, later, onLater, onBack
   );
 }
 
+/** Honest beta plan card: Plus is free for founding members; previews the future trial. */
+function BetaPlansCard({ t }: { t: TF }) {
+  return (
+    <View style={styles.betaCard}>
+      <Text style={styles.betaBadge}>{t('funnel.prime.betaBadge')}</Text>
+      <Text style={styles.betaTitle}>{t('funnel.prime.betaTitle')}</Text>
+      <Text style={styles.betaBody}>{t('funnel.prime.betaBody')}</Text>
+      <View style={styles.betaDivider} />
+      <Text style={styles.betaFutureLabel}>{t('funnel.prime.betaFutureLabel')}</Text>
+      <Text style={styles.betaFuture}>{t('funnel.prime.betaFuture')}</Text>
+    </View>
+  );
+}
+
 function Building({ t }: { t: TF }) {
   const lines = [t('funnel.building.l1'), t('funnel.building.l2'), t('funnel.building.l3'), t('funnel.building.l4')];
   const [i, setI] = useState(0);
@@ -339,7 +407,9 @@ function Building({ t }: { t: TF }) {
   );
 }
 
-function Reveal({ t, plan, name, onNext }: { t: TF; plan: StarterPlan; name: string; onNext: () => void }) {
+function Reveal({ t, plan, name, busy, onAccept, onDecline }: {
+  t: TF; plan: StarterPlan; name: string; busy: boolean; onAccept: () => void; onDecline: () => void;
+}) {
   return (
     <View style={styles.flex}>
       <ConfettiBurst />
@@ -350,10 +420,17 @@ function Reveal({ t, plan, name, onNext }: { t: TF; plan: StarterPlan; name: str
 
         <RevealGroup title={t('funnel.reveal.goalsTitle')} items={plan.goalKeys.map((k) => t(`goalTemplates:${k}`))} />
         <RevealGroup title={t('funnel.reveal.habitsTitle')} items={plan.habitIds.map((id) => t(`habits:${id}`, { defaultValue: id }))} />
+        <RevealGroup
+          title={t('funnel.reveal.recipesTitle')}
+          items={plan.recommendedRecipeIds.map((id) => t(`recipes:${id}.title`, { defaultValue: id }))}
+        />
         <RevealGroup title={t('funnel.reveal.projectsTitle')} items={plan.recommendedProjectIds.map((id) => t(`featured:${id}.title`, { defaultValue: id }))} />
       </ScrollView>
       <View style={styles.footerCol}>
-        <PrimaryButton label={t('funnel.reveal.cta')} variant="action" onPress={onNext} />
+        <PrimaryButton label={t('funnel.reveal.addPlanCta')} variant="action" onPress={onAccept} disabled={busy} />
+        <Pressable onPress={onDecline} accessibilityRole="button" style={styles.later} hitSlop={8} disabled={busy}>
+          <Text style={styles.laterText}>{t('funnel.reveal.startFresh')}</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -414,4 +491,12 @@ const styles = StyleSheet.create({
   revealRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   revealDot: { ...typography.label, color: colors.identity },
   revealItem: { ...typography.body, color: colors.textPrimary, flex: 1 },
+
+  betaCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, gap: spacing.xs, borderWidth: 1, borderColor: colors.border },
+  betaBadge: { ...typography.label, letterSpacing: 2, color: colors.violetDeep },
+  betaTitle: { ...typography.title, color: colors.textPrimary },
+  betaBody: { ...typography.body, color: colors.textSecondary },
+  betaDivider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.sm },
+  betaFutureLabel: { ...typography.label, color: colors.textMuted, letterSpacing: 1 },
+  betaFuture: { ...typography.body, color: colors.textSecondary },
 });

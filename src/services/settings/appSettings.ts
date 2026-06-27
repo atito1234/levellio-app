@@ -22,6 +22,10 @@ export type PrepLinkMode = 'visual' | 'full';
 /** Persisted onboarding questionnaire answers (used to personalize + for later tuning). */
 export interface OnboardingAnswersStored {
   focus?: string[];
+  /** Per-focus follow-up answers: focus key → selected option ids. */
+  focusDetail?: Record<string, string[]>;
+  /** Dietary profile chosen for the eat focus (e.g. 'vegan'), if any. */
+  dietaryTag?: string;
   blocker?: string;
   habitCount?: number;
   why?: string;
@@ -61,6 +65,8 @@ export interface AppSettings {
   onboardingAnswers?: OnboardingAnswersStored;
   /** Featured project ids recommended from the questionnaire (surfaced in Projects). */
   recommendedProjectIds?: string[];
+  /** Recipe ids recommended from the dietary follow-up (surfaced in Recipes). */
+  recommendedRecipeIds?: string[];
   /** True once we've shown the in-onboarding store-rating prompt (show at most once). */
   ratingRequested?: boolean;
   /** Optional public profile headline (LinkedIn-style one-liner). */
@@ -117,6 +123,9 @@ export function normalizeSettings(raw: unknown): AppSettings {
       : {}),
     ...(Array.isArray(r.recommendedProjectIds)
       ? { recommendedProjectIds: r.recommendedProjectIds.filter((x): x is string => typeof x === 'string') }
+      : {}),
+    ...(Array.isArray(r.recommendedRecipeIds)
+      ? { recommendedRecipeIds: r.recommendedRecipeIds.filter((x): x is string => typeof x === 'string') }
       : {}),
     ...(r.ratingRequested === true ? { ratingRequested: true } : {}),
     ...(typeof r.profileHeadline === 'string' ? { profileHeadline: r.profileHeadline } : {}),

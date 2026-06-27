@@ -43,6 +43,65 @@
       "title": "What do you want to work on?",
       "subtitle": "Pick what matters most — we’ll build your plan around it."
     },
+    "focusDetail": {
+      "fit": {
+        "title": "How do you like to train?",
+        "subtitle": "We’ll tailor your activities to your setup.",
+        "options": {
+          "beginner": "I’m just starting",
+          "home": "At home",
+          "gym": "At the gym",
+          "outdoor": "Outdoors"
+        }
+      },
+      "eat": {
+        "title": "How do you eat?",
+        "subtitle": "We’ll match recipes and activities to your diet.",
+        "options": {
+          "omnivore": "Everything",
+          "vegetarian": "Vegetarian",
+          "vegan": "Vegan",
+          "pescatarian": "Pescatarian",
+          "glutenfree": "Gluten-free"
+        }
+      },
+      "partner": {
+        "title": "Where do you want to grow together?",
+        "subtitle": "We’ll suggest ways to nurture your relationship.",
+        "options": {
+          "quality": "More quality time",
+          "appreciation": "Showing appreciation",
+          "communication": "Better communication"
+        }
+      },
+      "calm": {
+        "title": "What stresses you most?",
+        "subtitle": "We’ll point your practice where it helps most.",
+        "options": {
+          "work": "Work pressure",
+          "sleep": "Poor sleep",
+          "overwhelm": "Feeling overwhelmed"
+        }
+      },
+      "money": {
+        "title": "What’s your money goal?",
+        "subtitle": "We’ll tailor your money habits to it.",
+        "options": {
+          "save": "Save more",
+          "budget": "Stick to a budget",
+          "debt": "Pay down debt"
+        }
+      },
+      "grow": {
+        "title": "How do you like to grow?",
+        "subtitle": "We’ll shape your learning around it.",
+        "options": {
+          "read": "Reading",
+          "course": "Taking a course",
+          "creative": "Creative practice"
+        }
+      }
+    },
     "blocker": {
       "title": "What’s been holding you back?",
       "subtitle": "We’ll help you face it head-on.",
@@ -97,22 +156,31 @@
     "reveal": {
       "kicker": "YOUR PLAN IS READY",
       "title": "Here’s your personalized plan, {{name}}",
-      "subtitle": "Pre-loaded and ready — tweak anything anytime.",
+      "subtitle": "Add it to your app, or start fresh and build your own.",
       "goalsTitle": "Your goals",
       "habitsTitle": "Your daily habits",
+      "recipesTitle": "Recipes for you",
       "projectsTitle": "Recommended for you",
-      "cta": "Let’s go"
+      "cta": "Let’s go",
+      "addPlanCta": "Add my plan",
+      "startFresh": "I’ll start fresh"
     },
     "prime": {
       "trialTitle": "Try Levellio Plus free",
-      "trialBody": "Unlock the AI coach, forecast insights, premium themes and unlimited projects — free for 7 days.",
+      "trialBody": "Unlock the AI coach, forecast insights, premium themes and unlimited projects. At launch: 7 days free, then $29.99/yr. No charge during your trial — cancel anytime in Settings.",
       "trialCta": "See plans",
       "remindTitle": "No surprises",
       "remindBody": "We’ll remind you 2 days before your trial ends. Cancel anytime in Settings.",
       "remindCta": "Continue",
       "plansTitle": "Choose your plan",
       "plansBody": "Start free, keep your momentum.",
-      "later": "Maybe later"
+      "later": "Maybe later",
+      "betaBadge": "FOUNDING MEMBER",
+      "betaTitle": "Plus is free while we’re in beta",
+      "betaBody": "You’re a founding member — every Plus feature is unlocked, free, with nothing to pay and nothing to set up.",
+      "betaFutureLabel": "WHEN WE LAUNCH",
+      "betaFuture": "A 7-day free trial on the yearly plan, then $29.99/yr. No charge during your trial, a reminder before it ends, and cancel anytime in Settings.",
+      "betaCta": "Start exploring"
     }
   }
 }

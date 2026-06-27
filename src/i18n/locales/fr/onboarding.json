@@ -43,6 +43,65 @@
       "title": "Sur quoi voulez-vous travailler ?",
       "subtitle": "Choisissez l’essentiel — on bâtit votre plan autour."
     },
+    "focusDetail": {
+      "fit": {
+        "title": "Comment aimez-vous vous entraîner ?",
+        "subtitle": "On adaptera vos activités à votre contexte.",
+        "options": {
+          "beginner": "Je débute",
+          "home": "À la maison",
+          "gym": "À la salle",
+          "outdoor": "En plein air"
+        }
+      },
+      "eat": {
+        "title": "Comment mangez-vous ?",
+        "subtitle": "On adaptera les recettes et activités à votre régime.",
+        "options": {
+          "omnivore": "De tout",
+          "vegetarian": "Végétarien",
+          "vegan": "Végan",
+          "pescatarian": "Pescatarien",
+          "glutenfree": "Sans gluten"
+        }
+      },
+      "partner": {
+        "title": "Où voulez-vous grandir ensemble ?",
+        "subtitle": "On suggérera des façons de nourrir votre relation.",
+        "options": {
+          "quality": "Plus de temps de qualité",
+          "appreciation": "Montrer sa gratitude",
+          "communication": "Mieux communiquer"
+        }
+      },
+      "calm": {
+        "title": "Qu’est-ce qui vous stresse le plus ?",
+        "subtitle": "On orientera votre pratique là où elle aide le plus.",
+        "options": {
+          "work": "La pression au travail",
+          "sleep": "Un mauvais sommeil",
+          "overwhelm": "Le sentiment d’être débordé"
+        }
+      },
+      "money": {
+        "title": "Quel est votre objectif financier ?",
+        "subtitle": "On adaptera vos habitudes d’argent à cet objectif.",
+        "options": {
+          "save": "Épargner plus",
+          "budget": "Tenir un budget",
+          "debt": "Rembourser des dettes"
+        }
+      },
+      "grow": {
+        "title": "Comment aimez-vous progresser ?",
+        "subtitle": "On façonnera votre apprentissage autour de cela.",
+        "options": {
+          "read": "La lecture",
+          "course": "Suivre un cours",
+          "creative": "La pratique créative"
+        }
+      }
+    },
     "blocker": {
       "title": "Qu’est-ce qui vous freine ?",
       "subtitle": "On vous aide à l’affronter.",
@@ -97,22 +156,31 @@
     "reveal": {
       "kicker": "VOTRE PLAN EST PRÊT",
       "title": "Voici votre plan personnalisé, {{name}}",
-      "subtitle": "Préchargé et prêt — modifiez tout à tout moment.",
+      "subtitle": "Ajoutez-le à votre app, ou repartez de zéro et créez le vôtre.",
       "goalsTitle": "Vos objectifs",
       "habitsTitle": "Vos habitudes quotidiennes",
+      "recipesTitle": "Des recettes pour vous",
       "projectsTitle": "Recommandé pour vous",
-      "cta": "C’est parti"
+      "cta": "C’est parti",
+      "addPlanCta": "Ajouter mon plan",
+      "startFresh": "Je repars de zéro"
     },
     "prime": {
       "trialTitle": "Essayez Levellio Plus gratuitement",
-      "trialBody": "Débloquez le coach IA, les prévisions, les thèmes premium et les projets illimités — gratuit pendant 7 jours.",
+      "trialBody": "Débloquez le coach IA, les prévisions, les thèmes premium et les projets illimités. Au lancement : 7 jours gratuits, puis 29,99 $/an. Aucun débit pendant l’essai — annulez à tout moment dans les Réglages.",
       "trialCta": "Voir les offres",
       "remindTitle": "Aucune surprise",
       "remindBody": "On vous préviendra 2 jours avant la fin de l’essai. Annulez à tout moment dans les Réglages.",
       "remindCta": "Continuer",
       "plansTitle": "Choisissez votre offre",
       "plansBody": "Commencez gratuitement, gardez votre élan.",
-      "later": "Plus tard"
+      "later": "Plus tard",
+      "betaBadge": "MEMBRE FONDATEUR",
+      "betaTitle": "Plus est gratuit pendant la bêta",
+      "betaBody": "Vous êtes membre fondateur — toutes les fonctionnalités Plus sont débloquées, gratuitement, sans rien à payer ni à configurer.",
+      "betaFutureLabel": "AU LANCEMENT",
+      "betaFuture": "Un essai gratuit de 7 jours sur l’offre annuelle, puis 29,99 $/an. Aucun débit pendant l’essai, un rappel avant la fin, et annulation à tout moment dans les Réglages.",
+      "betaCta": "Commencer à explorer"
     }
   }
 }

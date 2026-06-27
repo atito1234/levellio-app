@@ -344,6 +344,23 @@ export function DashboardScreen() {
           </View>
         )}
 
+        {/* Recipes for you — appears once a dietary plan has been recommended. */}
+        {(settings.recommendedRecipeIds?.length ?? 0) > 0 && (
+          <Pressable
+            onPress={() => navigation.navigate('Recipes')}
+            accessibilityRole="button"
+            accessibilityLabel={t('recipes:screen.title')}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: PAD, paddingVertical: 14, marginHorizontal: PAD, marginBottom: 8, borderWidth: 1, borderColor: '#ECEAE4' }}
+          >
+            <Text style={{ fontSize: 22 }}>🍽️</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ ...typography.label, color: INK, fontWeight: '800' }}>{t('recipes:screen.title')}</Text>
+              <Text style={{ ...typography.caption, color: MUTED }}>{t('recipes:screen.recommended')}</Text>
+            </View>
+            <Text style={{ fontSize: 22, color: MUTED }}>›</Text>
+          </Pressable>
+        )}
+
         {/* STEP 1 — pick a goal. It governs the focus below and tints it. */}
         {goals.length > 0 && (
           <Text style={styles.stepHint}>{gated ? t('dashboard:step1Pick') : t('dashboard:step1')}</Text>
