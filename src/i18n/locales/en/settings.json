@@ -75,6 +75,12 @@
     "prepGoals": "Prep goals feed project progress",
     "prepHelp": "When you pick a personal goal to \"prepare\" for a project goal: ON makes its habits count toward the project goal's progress; OFF just shows it as a reminder."
   },
+  "privacy": {
+    "title": "Privacy",
+    "audienceLabel": "Default audience for new posts",
+    "audienceAsk": "Ask each time",
+    "audienceHelp": "Choose who sees your posts by default. You can always change it per post. Privacy and safety come first."
+  },
   "insights": {
     "title": "Habit insights",
     "note": "Levellio keeps simple notes on your device about how your habits form, so a future update can show you insights. Nothing is uploaded — no analytics, no accounts. You choose exactly what's recorded.",

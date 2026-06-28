@@ -75,6 +75,12 @@
     "prepGoals": "Las metas de preparación alimentan el proyecto",
     "prepHelp": "Cuando eliges una meta personal para \"preparar\" una meta de proyecto: ON hace que sus hábitos cuenten para el progreso del proyecto; OFF solo lo muestra como recordatorio."
   },
+  "privacy": {
+    "title": "Privacidad",
+    "audienceLabel": "Audiencia predeterminada para nuevas publicaciones",
+    "audienceAsk": "Preguntar cada vez",
+    "audienceHelp": "Elige quién ve tus publicaciones de forma predeterminada. Siempre puedes cambiarlo en cada publicación. La privacidad y la seguridad son lo primero."
+  },
   "insights": {
     "title": "Análisis de hábitos",
     "note": "Levellio guarda notas simples en tu dispositivo sobre cómo se forman tus hábitos, para que una futura actualización pueda mostrarte análisis. Nada se sube — sin analíticas, sin cuentas. Tú eliges exactamente qué se registra.",

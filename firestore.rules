@@ -68,8 +68,20 @@ service cloud.firestore {
 
     // Community newsfeed posts (manual shares + contribution posts).
     match /posts/{postId} {
-      // Visible to any signed-in member of the community.
-      allow read: if signedIn();
+      // Audience-scoped visibility: public (or legacy posts with no audience) are
+      // visible to any signed-in user; private only to the author; friends to the
+      // author and to anyone who follows them (their network). This is the
+      // authoritative gate — the client filters too, but rules enforce it.
+      function canRead(p) {
+        return signedIn() && (
+          !('audience' in p) ||
+          p.audience == 'public' ||
+          p.authorUid == request.auth.uid ||
+          (p.audience == 'friends' &&
+            exists(/databases/$(database)/documents/users/$(request.auth.uid)/following/$(p.authorUid)))
+        );
+      }
+      allow read: if canRead(resource.data);
       // Authors create their own posts.
       allow create: if signedIn() && request.resource.data.authorUid == request.auth.uid;
       // The author may edit/delete their post; anyone signed-in may toggle ONLY
@@ -80,12 +92,34 @@ service cloud.firestore {
       );
       allow delete: if signedIn() && resource.data.authorUid == request.auth.uid;
 
-      // The comment thread: any signed-in user may add their own comment.
+      // Comments inherit the post's audience (readable only if the post is). A
+      // commenter manages their own comment; the POST author may also moderate
+      // (delete) any comment on their post.
       match /comments/{commentId} {
-        allow read: if signedIn();
-        allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
-        allow update, delete: if signedIn() && resource.data.uid == request.auth.uid;
+        function parentPost() {
+          return get(/databases/$(database)/documents/posts/$(postId)).data;
+        }
+        allow read: if canReadComment(postId);
+        allow create: if signedIn() && request.resource.data.uid == request.auth.uid && canReadComment(postId);
+        allow update: if signedIn() && resource.data.uid == request.auth.uid;
+        allow delete: if signedIn() && (
+          resource.data.uid == request.auth.uid ||
+          parentPost().authorUid == request.auth.uid
+        );
       }
+    }
+
+    // Whether the signed-in viewer can read a given post's thread (mirrors the
+    // post audience gate; used by the comments subcollection rules above).
+    function canReadComment(postId) {
+      let p = get(/databases/$(database)/documents/posts/$(postId)).data;
+      return signedIn() && (
+        !('audience' in p) ||
+        p.audience == 'public' ||
+        p.authorUid == request.auth.uid ||
+        (p.audience == 'friends' &&
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)/following/$(p.authorUid)))
+      );
     }
 
     match /projects/{projectId} {

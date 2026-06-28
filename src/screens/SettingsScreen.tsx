@@ -32,6 +32,8 @@ import { type AIMode, type CloudProvider } from '@/services/settings';
 import type { MetadataPrivacy } from '@/lib/metadata';
 import { clearByoApiKey, getByoApiKey, setByoApiKey } from '@/services/security/secureKeyStore';
 import { reloadApp, resetAppData } from '@/lib/appReset';
+import { AUDIENCE_CONTROLS_ENABLED } from '@/config/features';
+import type { AppSettings } from '@/services/settings/appSettings';
 import {
   CONTACT_EMAIL,
   LEGAL_LINKS,
@@ -397,6 +399,25 @@ export function SettingsScreen() {
           </View>
           <Text style={styles.help}>{t('community.prepHelp')}</Text>
         </View>
+
+        {/* Privacy — default audience for new posts. */}
+        {AUDIENCE_CONTROLS_ENABLED && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>{t('privacy.title')}</Text>
+            <ChipSelector
+              label={t('privacy.audienceLabel')}
+              options={[
+                { value: 'ask', label: t('privacy.audienceAsk') },
+                { value: 'public', label: t('feed:composerScreen.audience_public') },
+                { value: 'friends', label: t('feed:composerScreen.audience_friends') },
+                { value: 'private', label: t('feed:composerScreen.audience_private') },
+              ] as ChipOption<AppSettings['feedDefaultAudience']>[]}
+              selected={settings.feedDefaultAudience}
+              onSelect={(feedDefaultAudience) => update({ feedDefaultAudience })}
+            />
+            <Text style={styles.help}>{t('privacy.audienceHelp')}</Text>
+          </View>
+        )}
 
         {/* Habit insights & privacy (on-device, opt-in) */}
         <View style={styles.card}>

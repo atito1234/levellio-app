@@ -55,6 +55,11 @@ export interface AppSettings {
   projectPrepLinkMode: PrepLinkMode;
   /** App language: an explicit locale, or 'system' to follow the device. */
   locale: LocaleSetting;
+  /**
+   * Default audience for new community posts. 'ask' = no sticky default (the
+   * composer makes the user choose each time). Privacy-first.
+   */
+  feedDefaultAudience: 'ask' | 'public' | 'friends' | 'private';
   /** First-run welcome flow finished — never show the intro cards again. */
   onboardingCompleted: boolean;
   /** First-run interactive spotlight tour finished or skipped — runs once only. */
@@ -92,6 +97,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   worldProjectAlerts: false,
   projectPrepLinkMode: 'visual',
   locale: 'system',
+  feedDefaultAudience: 'ask',
   onboardingCompleted: false,
   welcomeTourCompleted: false,
 };
@@ -118,6 +124,10 @@ export function normalizeSettings(raw: unknown): AppSettings {
     worldProjectAlerts: r.worldProjectAlerts === true,
     projectPrepLinkMode: r.projectPrepLinkMode === 'full' ? 'full' : 'visual',
     locale: r.locale === 'system' || isSupportedLocale(r.locale) ? r.locale : 'system',
+    feedDefaultAudience:
+      r.feedDefaultAudience === 'public' || r.feedDefaultAudience === 'friends' || r.feedDefaultAudience === 'private'
+        ? r.feedDefaultAudience
+        : 'ask',
     onboardingCompleted: r.onboardingCompleted === true,
     welcomeTourCompleted: r.welcomeTourCompleted === true,
     ...(typeof r.attributionSource === 'string' ? { attributionSource: r.attributionSource } : {}),

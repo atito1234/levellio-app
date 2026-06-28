@@ -75,6 +75,12 @@
     "prepGoals": "Les objectifs de prépa nourrissent le projet",
     "prepHelp": "Quand vous choisissez un objectif personnel pour « préparer » un objectif de projet : ON fait compter ses habitudes dans la progression du projet ; OFF l'affiche seulement comme un rappel."
   },
+  "privacy": {
+    "title": "Confidentialité",
+    "audienceLabel": "Audience par défaut des nouvelles publications",
+    "audienceAsk": "Demander à chaque fois",
+    "audienceHelp": "Choisissez qui voit vos publications par défaut. Vous pouvez toujours le changer pour chaque publication. La confidentialité et la sécurité avant tout."
+  },
   "insights": {
     "title": "Analyses d'habitudes",
     "note": "Levellio garde de simples notes sur votre appareil sur la formation de vos habitudes, pour qu'une future mise à jour puisse vous montrer des analyses. Rien n'est téléversé — pas d'analytique, pas de comptes. Vous choisissez exactement ce qui est enregistré.",

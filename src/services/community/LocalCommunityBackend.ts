@@ -80,6 +80,8 @@ export class LocalCommunityBackend implements CommunityBackend {
       ...(typeof draft.value === 'number' ? { value: draft.value } : {}),
       ...(draft.mode ? { mode: draft.mode } : {}),
       ...(draft.categoryHint ? { categoryHint: draft.categoryHint } : {}),
+      ...(draft.category ? { category: draft.category } : {}),
+      ...(draft.audience ? { audience: draft.audience } : {}),
       ...(draft.media ? { media: draft.media } : {}),
       createdAt: Date.now(),
       reactions: {},

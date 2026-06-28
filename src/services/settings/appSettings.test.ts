@@ -22,6 +22,7 @@ describe('normalizeSettings', () => {
       worldProjectAlerts: false,
       projectPrepLinkMode: 'visual',
       locale: 'system',
+      feedDefaultAudience: 'ask',
       onboardingCompleted: false,
       welcomeTourCompleted: false,
     });
@@ -94,6 +95,7 @@ describe('SettingsStore', () => {
       worldProjectAlerts: true,
       projectPrepLinkMode: 'full',
       locale: 'fr',
+      feedDefaultAudience: 'friends',
       onboardingCompleted: true,
       welcomeTourCompleted: true,
     });
