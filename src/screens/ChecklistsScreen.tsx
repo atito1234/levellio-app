@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { ConfettiBurst, PressableScale, PrimaryButton, ScreenContainer, SelectActivitySheet } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useChecklists } from '@/state/ChecklistsContext';
+import { useGame } from '@/state/GameContext';
+import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { checklistProgress, isItemDone, type Checklist } from '@/lib/checklist';
 import { BUCKET_COLORS } from '@/lib/buckets';
 import { dayKey } from '@/lib/dates';
@@ -19,8 +21,26 @@ const accentOf = (id: Checklist['colorId']) => BUCKET_COLORS.find((b) => b.id ==
 export function ChecklistsScreen() {
   const { t } = useTranslation('checklists');
   const { checklists, doneQuestIds, addChecklist, removeChecklist, addItem, removeItem, toggleItem, checkOut } = useChecklists();
+  const { quests } = useGame();
+  const completeActivity = useCompleteActivity();
   const [newTitle, setNewTitle] = useState('');
   const [confetti, setConfetti] = useState(0);
+
+  // Linked items complete the real activity (needs the navigation-bound
+  // useCompleteActivity, hence here in the screen, not the provider). Text items
+  // toggle their local daily tick.
+  const handleToggle = async (checklist: Checklist, itemId: string) => {
+    const item = checklist.items.find((i) => i.id === itemId);
+    if (item?.questId) {
+      const quest = quests.find((q) => q.id === item.questId);
+      const today = dayKey(new Date());
+      if (quest && !(quest.completed && quest.lastCompletedDate === today)) {
+        await completeActivity(quest, { method: 'manual', durationSec: 0 });
+      }
+      return;
+    }
+    await toggleItem(checklist.id, itemId);
+  };
 
   const create = async () => {
     if (!newTitle.trim()) return;
@@ -68,7 +88,7 @@ export function ChecklistsScreen() {
             checklist={c}
             doneQuestIds={doneQuestIds}
             t={t}
-            onToggle={(itemId) => void toggleItem(c.id, itemId)}
+            onToggle={(itemId) => void handleToggle(c, itemId)}
             onAddText={(label) => void addItem(c.id, label)}
             onAddQuest={(questId, label) => void addItem(c.id, label, questId)}
             onRemoveItem={(itemId) => void removeItem(c.id, itemId)}

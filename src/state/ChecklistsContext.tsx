@@ -6,7 +6,6 @@
  */
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useGame } from '@/state/GameContext';
-import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { ChecklistStore } from '@/services/checklists/checklistStore';
 import { AsyncStorageStore } from '@/services/storage';
 import {
@@ -55,7 +54,6 @@ const ChecklistsContext = createContext<ChecklistsContextValue | null>(null);
 
 export function ChecklistsProvider({ children }: { children: React.ReactNode }) {
   const { user, quests } = useGame();
-  const completeActivity = useCompleteActivity();
   const uid = user?.uid ?? null;
 
   // Quest ids completed today — linked checklist items derive their tick from this.
@@ -157,20 +155,13 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
     async (id: string, itemId: string) => {
       const checklist = checklists.find((c) => c.id === id);
       const item = checklist?.items.find((i) => i.id === itemId);
-      // Linked item → complete the real activity (counts toward streak/XP/group/
-      // goal/project). Completion is one-way for the day; if already done, it's a
-      // no-op and the item stays ticked (state derives from the quest).
-      if (item?.questId) {
-        const quest = quests.find((q) => q.id === item.questId);
-        if (quest && !(quest.completed && quest.lastCompletedDate === dayKey(new Date()))) {
-          await completeActivity(quest, { method: 'manual', durationSec: 0 });
-        }
-        return;
-      }
+      // Linked items are completed by the screen (completion needs the
+      // navigation-bound useCompleteActivity); their tick derives from the quest.
+      if (item?.questId) return;
       // Text item → toggle the local daily tick.
       await update(id, (c) => toggleChecklistItem(c, itemId, dayKey(new Date())));
     },
-    [checklists, quests, completeActivity, update],
+    [checklists, update],
   );
 
   const checkOut = useCallback(
