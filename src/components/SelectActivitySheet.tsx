@@ -18,13 +18,15 @@ import { useGoals } from '@/state/GoalContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { usePlan } from '@/state/PlanContext';
 import { goalHabits } from '@/lib/goal';
-import { dayKey } from '@/lib/dates';
+import { dayKey, shiftDayKey } from '@/lib/dates';
+import { recurringIdsForDay, weekdayOfKey } from '@/lib/recurrence';
 import { CATEGORY_COLOR, CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import type { Quest, QuestCategory } from '@/types';
 
 type Source =
   | { type: 'all' }
   | { type: 'today' }
+  | { type: 'week' }
   | { type: 'group'; id: string }
   | { type: 'goal'; id: string }
   | { type: 'project'; id: string };
@@ -53,6 +55,19 @@ export function SelectActivitySheet({
   const [newCat, setNewCat] = useState<QuestCategory>('health');
   const [busy, setBusy] = useState(false);
 
+  // Quest ids planned across the next 7 days (explicit plan, else recurring).
+  const weekIds = useMemo(() => {
+    const today = dayKey(new Date());
+    const ids = new Set<string>();
+    for (let offset = 0; offset < 7; offset += 1) {
+      const key = shiftDayKey(today, offset);
+      const planned = getPlan(key);
+      if (planned) planned.forEach((id) => ids.add(id));
+      else recurringIdsForDay(quests, weekdayOfKey(key)).forEach((id) => ids.add(id));
+    }
+    return ids;
+  }, [quests, getPlan]);
+
   // Existing quests that match the chosen source.
   const sourceQuests = useMemo<Quest[]>(() => {
     switch (source.type) {
@@ -62,6 +77,8 @@ export function SelectActivitySheet({
         const ids = new Set(getPlan(dayKey(new Date())) ?? []);
         return quests.filter((q) => ids.has(q.id));
       }
+      case 'week':
+        return quests.filter((q) => weekIds.has(q.id));
       case 'group':
         return quests.filter((q) => bucketIdFor(q.id) === source.id);
       case 'goal': {
@@ -73,7 +90,7 @@ export function SelectActivitySheet({
       default:
         return quests;
     }
-  }, [source, quests, getPlan, bucketIdFor, goals, membershipFor, projectsForHabit]);
+  }, [source, quests, getPlan, weekIds, bucketIdFor, goals, membershipFor, projectsForHabit]);
 
   // For a project source: its suggested habits that aren't already a quest — tap
   // to create the quest, link it to the project, and add it to the checklist.
@@ -112,6 +129,7 @@ export function SelectActivitySheet({
   const sources: { key: string; label: string; src: Source }[] = [
     { key: 'all', label: t('srcAll'), src: { type: 'all' } },
     { key: 'today', label: t('srcToday'), src: { type: 'today' } },
+    { key: 'week', label: t('srcWeek'), src: { type: 'week' } },
     ...buckets.map((b) => ({ key: `g-${b.id}`, label: b.name, src: { type: 'group' as const, id: b.id } })),
     ...goals.map((g) => ({ key: `goal-${g.id}`, label: `${g.emoji} ${g.title}`, src: { type: 'goal' as const, id: g.id } })),
     ...myProjects.map((p) => ({ key: `p-${p.id}`, label: `${p.emoji} ${p.title}`, src: { type: 'project' as const, id: p.id } })),

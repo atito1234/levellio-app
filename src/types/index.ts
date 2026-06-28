@@ -66,6 +66,16 @@ export interface Quest {
    * habits we can't science-match. Shown in the War Room and analytics.
    */
   why?: string;
+  /**
+   * Reversal record from the most recent completion (today), so an "uncheck" can
+   * deterministically undo that completion's XP/streak. Cleared on uncomplete.
+   */
+  lastAward?: {
+    totalXp: number;
+    wasNewStreakDay: boolean;
+    prevStreakDays: number;
+    prevLastCompletionDate?: string;
+  };
 }
 
 /** Hero progression tiers. */

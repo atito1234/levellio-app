@@ -17,5 +17,10 @@
   "hideHabits": "Hide your habits ▲",
   "scheduleFrom": "＋ Schedule from your habits ▾",
   "chipAddA11y": "Add {{title}}",
-  "chipRemoveA11y": "Remove {{title}}"
+  "chipRemoveA11y": "Remove {{title}}",
+  "checklists": {
+    "title": "Checklists",
+    "fromDay": "New checklist from this day",
+    "fromDayTitle": "{{day}} checklist"
+  }
 }

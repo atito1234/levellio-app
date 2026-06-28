@@ -26,6 +26,7 @@ export { PostCard } from './PostCard';
 export { StoriesRail } from './StoriesRail';
 export { PressableScale } from './PressableScale';
 export { SelectActivitySheet } from './SelectActivitySheet';
+export { ChecklistPicker } from './ChecklistPicker';
 export { AppHeader } from './AppHeader';
 export { CommunityGate } from './CommunityGate';
 export { PlusPlans } from './PlusPlans';

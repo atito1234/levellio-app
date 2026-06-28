@@ -2,9 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AddActivityFab, AddActivitySheet, ProjectBadge, ScreenContainer } from '@/components';
+import { AddActivityFab, AddActivitySheet, ChecklistPicker, ProjectBadge, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { useChecklists } from '@/state/ChecklistsContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { usePlan } from '@/state/PlanContext';
@@ -49,6 +50,7 @@ export function PlanScreen({ route, navigation }: Props) {
   const { buckets, assignments } = useBuckets();
   const { projectsForHabit } = useProjects();
   const { getPlan, togglePlanned } = usePlan();
+  const { addChecklist } = useChecklists();
   const { events } = useActivityLog();
 
   const todayK = dayKey(new Date());
@@ -91,6 +93,13 @@ export function PlanScreen({ route, navigation }: Props) {
   const openAddFor = (day: string) => {
     setAddDates([day]);
     setAddOpen(true);
+  };
+
+  // Turn the selected day's planned activities into a checklist in one tap.
+  const createChecklistFromDay = async () => {
+    const items = selSummary.scheduled.map((q) => ({ label: q.title, questId: q.id }));
+    await addChecklist({ title: t('checklists.fromDayTitle', { day: dayLabel(selected) }), recurring: false, items });
+    navigation.navigate('Checklists');
   };
 
   return (
@@ -253,6 +262,15 @@ export function PlanScreen({ route, navigation }: Props) {
                 ))}
             </>
           )}
+        </View>
+
+        {/* Checklists — create from this day's plan, or search/open existing. */}
+        <View style={styles.panel}>
+          <Text style={styles.panelTitle}>{t('checklists.title')}</Text>
+          <ChecklistPicker
+            onOpen={() => navigation.navigate('Checklists')}
+            {...(selSummary.scheduled.length > 0 ? { onCreate: () => void createChecklistFromDay(), createLabel: t('checklists.fromDay') } : {})}
+          />
         </View>
       </ScrollView>
 

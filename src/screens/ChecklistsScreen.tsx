@@ -11,6 +11,9 @@ import { ConfettiBurst, PressableScale, PrimaryButton, ScreenContainer, SelectAc
 import { colors, radii, spacing, typography } from '@/theme';
 import { useChecklists } from '@/state/ChecklistsContext';
 import { useGame } from '@/state/GameContext';
+import { useProjects } from '@/state/ProjectsContext';
+import { useGoals } from '@/state/GoalContext';
+import { useBuckets } from '@/state/BucketsContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { checklistProgress, isItemDone, type Checklist } from '@/lib/checklist';
 import { BUCKET_COLORS } from '@/lib/buckets';
@@ -21,10 +24,38 @@ const accentOf = (id: Checklist['colorId']) => BUCKET_COLORS.find((b) => b.id ==
 export function ChecklistsScreen() {
   const { t } = useTranslation('checklists');
   const { checklists, doneQuestIds, addChecklist, removeChecklist, addItem, removeItem, toggleItem, checkOut } = useChecklists();
-  const { quests } = useGame();
+  const { quests, uncompleteQuest } = useGame();
+  const { projectsForHabit } = useProjects();
+  const { goals, goalsForHabit } = useGoals();
+  const { buckets, bucketIdFor } = useBuckets();
   const completeActivity = useCompleteActivity();
   const [newTitle, setNewTitle] = useState('');
+  const [query, setQuery] = useState('');
   const [confetti, setConfetti] = useState(0);
+
+  const q = query.trim().toLowerCase();
+  const shown = q
+    ? checklists.filter(
+        (c) => c.title.toLowerCase().includes(q) || c.items.some((i) => i.label.toLowerCase().includes(q)),
+      )
+    : checklists;
+
+  // Where a linked activity belongs — shown as a small subtitle (project > goal > group).
+  const subtitleForQuest = (questId: string): string | null => {
+    const proj = projectsForHabit(questId)[0];
+    if (proj) return `${proj.emoji} ${proj.title}`;
+    const goalId = goalsForHabit(questId)[0];
+    if (goalId) {
+      const g = goals.find((x) => x.id === goalId);
+      if (g) return `${g.emoji} ${g.title}`;
+    }
+    const bId = bucketIdFor(questId);
+    if (bId) {
+      const b = buckets.find((x) => x.id === bId);
+      if (b) return b.name;
+    }
+    return null;
+  };
 
   // Linked items complete the real activity (needs the navigation-bound
   // useCompleteActivity, hence here in the screen, not the provider). Text items
@@ -33,8 +64,11 @@ export function ChecklistsScreen() {
     const item = checklist.items.find((i) => i.id === itemId);
     if (item?.questId) {
       const quest = quests.find((q) => q.id === item.questId);
-      const today = dayKey(new Date());
-      if (quest && !(quest.completed && quest.lastCompletedDate === today)) {
+      if (!quest) return;
+      const doneToday = quest.completed && quest.lastCompletedDate === dayKey(new Date());
+      if (doneToday) {
+        await uncompleteQuest(quest.id); // tap a done linked item → undo today's completion
+      } else {
         await completeActivity(quest, { method: 'manual', durationSec: 0 });
       }
       return;
@@ -80,13 +114,24 @@ export function ChecklistsScreen() {
           <PrimaryButton label={t('create')} variant="action" onPress={() => void create()} disabled={!newTitle.trim()} />
         </View>
 
+        {checklists.length > 2 && (
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder={t('searchChecklists')}
+            placeholderTextColor={colors.textMuted}
+            style={styles.createInput}
+          />
+        )}
+
         {checklists.length === 0 && <Text style={styles.empty}>{t('empty')}</Text>}
 
-        {checklists.map((c) => (
+        {shown.map((c) => (
           <ChecklistCard
             key={c.id}
             checklist={c}
             doneQuestIds={doneQuestIds}
+            subtitleFor={subtitleForQuest}
             t={t}
             onToggle={(itemId) => void handleToggle(c, itemId)}
             onAddText={(label) => void addItem(c.id, label)}
@@ -104,6 +149,7 @@ export function ChecklistsScreen() {
 function ChecklistCard({
   checklist,
   doneQuestIds,
+  subtitleFor,
   t,
   onToggle,
   onAddText,
@@ -114,6 +160,7 @@ function ChecklistCard({
 }: {
   checklist: Checklist;
   doneQuestIds: ReadonlySet<string>;
+  subtitleFor: (questId: string) => string | null;
   t: ReturnType<typeof useTranslation>['t'];
   onToggle: (itemId: string) => void;
   onAddText: (label: string) => void;
@@ -157,6 +204,7 @@ function ChecklistCard({
       {checklist.items.map((item) => {
         const on = isItemDone(item, checklist.checkedItemIds, doneQuestIds);
         const linked = Boolean(item.questId);
+        const subtitle = item.questId ? subtitleFor(item.questId) : null;
         return (
           <View key={item.id} style={styles.itemRow}>
             {/* Plain Pressable carries the row flex (fixes the prior blank-label
@@ -165,7 +213,10 @@ function ChecklistCard({
               <View style={[styles.checkbox, on && { backgroundColor: accent.accent, borderColor: accent.accent }]}>
                 {on && <Text style={styles.checkmark}>✓</Text>}
               </View>
-              <Text style={[styles.itemLabel, on && styles.itemLabelDone]} numberOfLines={2}>{item.label}</Text>
+              <View style={styles.itemTextCol}>
+                <Text style={[styles.itemLabel, on && styles.itemLabelDone]} numberOfLines={2}>{item.label}</Text>
+                {subtitle ? <Text style={styles.itemSubtitle} numberOfLines={1}>{subtitle}</Text> : null}
+              </View>
               {linked && <Text style={styles.linkTag}>{t('linked')}</Text>}
             </Pressable>
             <Pressable onPress={() => onRemoveItem(item.id)} accessibilityRole="button" accessibilityLabel={t('delete')} hitSlop={8}>
@@ -241,8 +292,10 @@ const styles = StyleSheet.create({
   itemTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: 6 },
   checkbox: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   checkmark: { color: '#FFFFFF', fontWeight: '900', fontSize: 14 },
-  itemLabel: { ...typography.body, color: colors.textPrimary, flexShrink: 1 },
+  itemTextCol: { flexShrink: 1 },
+  itemLabel: { ...typography.body, color: colors.textPrimary },
   itemLabelDone: { color: colors.textMuted, textDecorationLine: 'line-through' },
+  itemSubtitle: { ...typography.caption, color: colors.textMuted, marginTop: 1 },
   linkTag: { ...typography.caption, color: colors.violetDeep, fontWeight: '800' },
   itemRemove: { ...typography.body, color: colors.textMuted },
 
