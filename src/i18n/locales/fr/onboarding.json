@@ -163,7 +163,10 @@
       "projectsTitle": "Recommandé pour vous",
       "cta": "C’est parti",
       "addPlanCta": "Ajouter mon plan",
-      "startFresh": "Je repars de zéro"
+      "startFresh": "Je repars de zéro",
+      "aiGenerate": "✨ Générer plus de recettes avec l’IA",
+      "aiGenerating": "Génération des recettes…",
+      "aiAdded": "{{count}} recettes IA ajoutées à votre collection"
     },
     "prime": {
       "trialTitle": "Essayez Levellio Plus gratuitement",

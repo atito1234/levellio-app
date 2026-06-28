@@ -45,6 +45,8 @@ export interface AppSettings {
   metadataPrivacy: MetadataPrivacy;
   /** Tactile feedback (vibration) on completions & community wins. */
   hapticsEnabled: boolean;
+  /** Opt-in: offer AI-generated recipes (needs a cloud AI engine + key). */
+  aiRecipesEnabled: boolean;
   /** Opt-in: surface the "Around the world" community projects strip on Today. */
   worldProjectsEnabled: boolean;
   /** Opt-in: alerts about world/community project milestones. */
@@ -85,6 +87,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   metadataPrivacy: { ...DEFAULT_METADATA_PRIVACY },
   // Haptics on by default (delightful); world projects opt-in so members feel in control.
   hapticsEnabled: true,
+  aiRecipesEnabled: true,
   worldProjectsEnabled: false,
   worldProjectAlerts: false,
   projectPrepLinkMode: 'visual',
@@ -110,6 +113,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
     bucketViewMode: r.bucketViewMode === 'buckets' ? 'buckets' : 'list',
     metadataPrivacy: normalizeMetadataPrivacy(r.metadataPrivacy),
     hapticsEnabled: r.hapticsEnabled !== false,
+    aiRecipesEnabled: r.aiRecipesEnabled !== false,
     worldProjectsEnabled: r.worldProjectsEnabled === true,
     worldProjectAlerts: r.worldProjectAlerts === true,
     projectPrepLinkMode: r.projectPrepLinkMode === 'full' ? 'full' : 'visual',

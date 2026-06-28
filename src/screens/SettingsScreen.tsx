@@ -304,6 +304,18 @@ export function SettingsScreen() {
               {keySaved && (
                 <PrimaryButton label={t('ai.clearKey')} variant="ghost" onPress={handleClearKey} />
               )}
+              <View style={styles.toggleRow}>
+                <Text style={styles.toggleLabel}>{t('ai.recipesTitle')}</Text>
+                <Switch
+                  value={settings.aiRecipesEnabled}
+                  onValueChange={(v) => void update({ aiRecipesEnabled: v })}
+                  accessibilityLabel={t('ai.recipesTitle')}
+                  accessibilityRole="switch"
+                  trackColor={{ true: colors.identity, false: colors.border }}
+                  thumbColor={colors.surface}
+                />
+              </View>
+              <Text style={styles.help}>{t('ai.recipesHelp')}</Text>
             </>
           )}
 

@@ -16,6 +16,8 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { GOAL_TEMPLATES, goalTemplateByKey } from '@/data/goalTemplates';
 import { isMonetizationLive } from '@/services/monetization/plans';
 import { useApplyStarterPlan } from '@/lib/onboarding/useApplyStarterPlan';
+import { useRecipes } from '@/state/RecipesContext';
+import { useRecipeAi } from '@/hooks/useRecipeAi';
 import type { StarterPlan } from '@/lib/onboarding/starterPlan';
 import { requestAppReview } from '@/services/reviews/requestReview';
 import { requestNotificationPermission } from '@/services/notifications/permission';
@@ -410,6 +412,23 @@ function Building({ t }: { t: TF }) {
 function Reveal({ t, plan, name, busy, onAccept, onDecline }: {
   t: TF; plan: StarterPlan; name: string; busy: boolean; onAccept: () => void; onDecline: () => void;
 }) {
+  const { available: aiAvailable, generate } = useRecipeAi();
+  const { saveCustom } = useRecipes();
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiAdded, setAiAdded] = useState<number | null>(null);
+
+  // Recipes are only relevant when the eat focus was chosen.
+  const showRecipes = plan.goalKeys.includes('eat');
+
+  const generateMore = async () => {
+    if (aiBusy) return;
+    setAiBusy(true);
+    const results = await generate(plan.dietaryTag);
+    for (const r of results) await saveCustom(r);
+    setAiBusy(false);
+    setAiAdded(results.length);
+  };
+
   return (
     <View style={styles.flex}>
       <ConfettiBurst />
@@ -420,10 +439,20 @@ function Reveal({ t, plan, name, busy, onAccept, onDecline }: {
 
         <RevealGroup title={t('funnel.reveal.goalsTitle')} items={plan.goalKeys.map((k) => t(`goalTemplates:${k}`))} />
         <RevealGroup title={t('funnel.reveal.habitsTitle')} items={plan.habitIds.map((id) => t(`habits:${id}`, { defaultValue: id }))} />
-        <RevealGroup
-          title={t('funnel.reveal.recipesTitle')}
-          items={plan.recommendedRecipeIds.map((id) => t(`recipes:${id}.title`, { defaultValue: id }))}
-        />
+        {showRecipes && (
+          <RevealGroup
+            title={t('funnel.reveal.recipesTitle')}
+            items={plan.recommendedRecipeIds.map((id) => t(`recipes:${id}.title`, { defaultValue: id }))}
+          />
+        )}
+        {showRecipes && aiAvailable && (
+          <Pressable onPress={() => void generateMore()} accessibilityRole="button" disabled={aiBusy} style={styles.aiGenerate} hitSlop={8}>
+            <Text style={styles.aiGenerateText}>{aiBusy ? t('funnel.reveal.aiGenerating') : t('funnel.reveal.aiGenerate')}</Text>
+          </Pressable>
+        )}
+        {aiAdded != null && aiAdded > 0 && (
+          <Text style={styles.aiAdded}>{t('funnel.reveal.aiAdded', { count: aiAdded })}</Text>
+        )}
         <RevealGroup title={t('funnel.reveal.projectsTitle')} items={plan.recommendedProjectIds.map((id) => t(`featured:${id}.title`, { defaultValue: id }))} />
       </ScrollView>
       <View style={styles.footerCol}>
@@ -486,6 +515,9 @@ const styles = StyleSheet.create({
   later: { alignItems: 'center', paddingVertical: spacing.sm },
   laterText: { ...typography.label, color: colors.textMuted, fontWeight: '700' },
 
+  aiGenerate: { alignItems: 'center', paddingVertical: spacing.sm, marginTop: spacing.xs },
+  aiGenerateText: { ...typography.label, color: colors.violetDeep, fontWeight: '800' },
+  aiAdded: { ...typography.caption, color: colors.textSecondary, textAlign: 'center' },
   revealGroup: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, gap: spacing.xs, marginTop: spacing.sm, borderWidth: 1, borderColor: colors.border },
   revealGroupTitle: { ...typography.label, color: colors.textMuted, letterSpacing: 1, marginBottom: spacing.xs },
   revealRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

@@ -11,7 +11,12 @@
     "cookedToday": "Cooked today ✓",
     "ingredients": "Ingredients",
     "steps": "Steps",
-    "meta": "{{minutes}} min · {{servings}} servings"
+    "meta": "{{minutes}} min · {{servings}} servings",
+    "generate": "Generate with AI",
+    "generating": "Generating…",
+    "generated": "Generated for you",
+    "aiUnavailable": "Couldn’t generate right now — here are curated recipes.",
+    "aiBadge": "AI"
   },
   "veg-stirfry": {
     "title": "Rainbow veggie stir-fry",

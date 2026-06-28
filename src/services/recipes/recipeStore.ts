@@ -15,6 +15,17 @@ function normalize(raw: unknown): RecipeLogEntry[] {
       recipeId: e.recipeId,
       savedAt: typeof e.savedAt === 'number' ? e.savedAt : 0,
       cookedDates: Array.isArray(e.cookedDates) ? e.cookedDates.filter((d): d is string => typeof d === 'string') : [],
+      ...(e.custom && typeof e.custom === 'object' && typeof e.custom.title === 'string'
+        ? {
+            custom: {
+              title: e.custom.title,
+              description: typeof e.custom.description === 'string' ? e.custom.description : '',
+              ingredients: Array.isArray(e.custom.ingredients) ? e.custom.ingredients.filter((x): x is string => typeof x === 'string') : [],
+              steps: Array.isArray(e.custom.steps) ? e.custom.steps.filter((x): x is string => typeof x === 'string') : [],
+              ...(typeof e.custom.nutritionNote === 'string' ? { nutritionNote: e.custom.nutritionNote } : {}),
+            },
+          }
+        : {}),
     }));
 }
 

@@ -61,6 +61,8 @@
     "keyHelper": "Stockée uniquement dans le trousseau sécurisé de votre appareil. Jamais journalisée ni téléversée.",
     "saveKey": "Enregistrer la clé",
     "clearKey": "Effacer la clé",
+    "recipesTitle": "Recettes générées par IA",
+    "recipesHelp": "Générez des recettes supplémentaires adaptées à votre régime, avec votre clé. Les recettes sélectionnées fonctionnent toujours sans elle.",
     "onDeviceHelp": "Fonctionne en privé sur votre appareil. Aucune clé ni réseau requis.",
     "noKeyHelp": "Vous préférez ne pas gérer de clé ? Le mode sur l'appareil fonctionne sans aucune clé."
   },

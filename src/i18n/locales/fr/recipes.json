@@ -11,7 +11,12 @@
     "cookedToday": "Cuisinée aujourd’hui ✓",
     "ingredients": "Ingrédients",
     "steps": "Étapes",
-    "meta": "{{minutes}} min · {{servings}} portions"
+    "meta": "{{minutes}} min · {{servings}} portions",
+    "generate": "Générer avec l’IA",
+    "generating": "Génération…",
+    "generated": "Générées pour vous",
+    "aiUnavailable": "Impossible de générer pour le moment — voici des recettes sélectionnées.",
+    "aiBadge": "IA"
   },
   "veg-stirfry": {
     "title": "Sauté de légumes arc-en-ciel",

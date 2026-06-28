@@ -11,7 +11,12 @@
     "cookedToday": "Cocinada hoy ✓",
     "ingredients": "Ingredientes",
     "steps": "Pasos",
-    "meta": "{{minutes}} min · {{servings}} porciones"
+    "meta": "{{minutes}} min · {{servings}} porciones",
+    "generate": "Generar con IA",
+    "generating": "Generando…",
+    "generated": "Generadas para ti",
+    "aiUnavailable": "No se pudo generar ahora — aquí tienes recetas seleccionadas.",
+    "aiBadge": "IA"
   },
   "veg-stirfry": {
     "title": "Salteado de verduras arcoíris",

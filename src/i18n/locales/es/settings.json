@@ -61,6 +61,8 @@
     "keyHelper": "Guardada solo en el llavero seguro de tu dispositivo. Nunca registrada ni subida.",
     "saveKey": "Guardar clave",
     "clearKey": "Borrar clave",
+    "recipesTitle": "Recetas generadas por IA",
+    "recipesHelp": "Genera recetas extra adaptadas a tu dieta, usando tu clave. Las recetas seleccionadas funcionan siempre sin ella.",
     "onDeviceHelp": "Funciona de forma privada en tu dispositivo. Sin clave ni red.",
     "noKeyHelp": "¿Prefieres no gestionar una clave? El modo en el dispositivo funciona sin ninguna clave."
   },

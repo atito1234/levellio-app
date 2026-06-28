@@ -138,8 +138,17 @@ export interface Recipe {
 
 /** A saved/cooked recipe entry, recorded per user. */
 export interface RecipeLogEntry {
+  /** Catalog id (resolves in RECIPE_CATALOG), or an `ai-<savedAt>` id for AI recipes. */
   recipeId: string;
   savedAt: number;
   /** Local days (YYYY-MM-DD) the user marked this cooked. */
   cookedDates: string[];
+  /** Inline content for non-catalog (AI-generated/custom) recipes. */
+  custom?: {
+    title: string;
+    description: string;
+    ingredients: string[];
+    steps: string[];
+    nutritionNote?: string;
+  };
 }

@@ -8,6 +8,7 @@ import { useGame } from '@/state/GameContext';
 import { RecipeStore } from '@/services/recipes/recipeStore';
 import { AsyncStorageStore } from '@/services/storage';
 import { dayKey } from '@/lib/dates';
+import type { SuggestedRecipe } from '@/services/ai';
 import type { RecipeLogEntry } from '@/types';
 
 const recipeStore = new RecipeStore(new AsyncStorageStore());
@@ -19,6 +20,8 @@ interface RecipesContextValue {
   save: (recipeId: string) => Promise<void>;
   /** Save several recipes at once (used when seeding the onboarding plan). */
   saveMany: (recipeIds: readonly string[]) => Promise<void>;
+  /** Save an AI-generated/custom recipe (inline content, not in the catalog). */
+  saveCustom: (recipe: SuggestedRecipe) => Promise<void>;
   remove: (recipeId: string) => Promise<void>;
   /** Record that the user cooked a recipe today (auto-saves it if needed). */
   markCooked: (recipeId: string) => Promise<void>;
@@ -80,6 +83,28 @@ export function RecipesProvider({ children }: { children: React.ReactNode }) {
     [saved, commit],
   );
 
+  const saveCustom = useCallback(
+    async (recipe: SuggestedRecipe) => {
+      const now = Date.now();
+      const entry: RecipeLogEntry = {
+        recipeId: `ai-${now}`,
+        savedAt: now,
+        cookedDates: [],
+        custom: {
+          title: recipe.title,
+          description: recipe.description,
+          ingredients: recipe.ingredients,
+          steps: recipe.steps,
+          ...(recipe.nutritionNote ? { nutritionNote: recipe.nutritionNote } : {}),
+        },
+      };
+      // Skip if an identically-titled custom recipe is already saved.
+      if (saved.some((e) => e.custom?.title === recipe.title)) return;
+      await commit([...saved, entry]);
+    },
+    [saved, commit],
+  );
+
   const remove = useCallback(
     async (recipeId: string) => {
       await commit(saved.filter((e) => e.recipeId !== recipeId));
@@ -104,8 +129,8 @@ export function RecipesProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<RecipesContextValue>(
-    () => ({ ready, saved, isSaved, save, saveMany, remove, markCooked }),
-    [ready, saved, isSaved, save, saveMany, remove, markCooked],
+    () => ({ ready, saved, isSaved, save, saveMany, saveCustom, remove, markCooked }),
+    [ready, saved, isSaved, save, saveMany, saveCustom, remove, markCooked],
   );
 
   return <RecipesContext.Provider value={value}>{children}</RecipesContext.Provider>;

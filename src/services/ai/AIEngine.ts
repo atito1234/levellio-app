@@ -45,6 +45,27 @@ export interface CoachSuggestion {
   tactic: { name: string; how: string };
 }
 
+/** Input for AI recipe suggestions, tailored to the user's dietary profile. */
+export interface RecipeSuggestionInput {
+  /** Dietary profile (e.g. 'vegan', 'pescatarian'); free-form is tolerated. */
+  dietary?: string;
+  /** Optional goal/context hint (e.g. 'high-protein, quick weeknight meals'). */
+  goal?: string;
+  /** How many recipes to return (hint). */
+  count?: number;
+  /** Target language code for the generated text (e.g. 'en', 'es', 'fr'). */
+  language?: string;
+}
+
+/** A single AI-generated recipe. Free-form text — never a fabricated citation. */
+export interface SuggestedRecipe {
+  title: string;
+  description: string;
+  ingredients: string[];
+  steps: string[];
+  nutritionNote?: string;
+}
+
 export interface AIHttpResponse {
   ok: boolean;
   status: number;
@@ -86,4 +107,11 @@ export interface AIEngine {
    * throw when unavailable.
    */
   coach?(input: CoachSuggestionInput): Promise<CoachSuggestion>;
+
+  /**
+   * Optional: generate recipes tailored to a dietary profile. Cloud engines with
+   * a key implement it; on-device leaves it undefined (→ curated fallback). May
+   * throw when unavailable.
+   */
+  suggestRecipes?(input: RecipeSuggestionInput): Promise<SuggestedRecipe[]>;
 }

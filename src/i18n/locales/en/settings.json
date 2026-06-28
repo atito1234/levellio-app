@@ -61,6 +61,8 @@
     "keyHelper": "Stored only in your device's secure keychain. Never logged or uploaded.",
     "saveKey": "Save key",
     "clearKey": "Clear key",
+    "recipesTitle": "AI-generated recipes",
+    "recipesHelp": "Generate extra recipes tailored to your diet, using your key. Curated recipes always work without it.",
     "onDeviceHelp": "Runs privately on your device. No key or network required.",
     "noKeyHelp": "Prefer not to manage a key? On-device mode works with no key at all."
   },
