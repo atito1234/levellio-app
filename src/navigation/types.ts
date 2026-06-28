@@ -106,6 +106,10 @@ export type RootStackParamList = {
   Chat: { uid: string; displayName?: string; presentation?: import('@/types').HeroPresentation };
   /** Explainer for Levellio's AI options + running a model on-device. */
   AISetup: undefined;
+  /** Your personalized recipe collection (recommended + saved), matched to your diet. */
+  Recipes: undefined;
+  /** Your checklists — keep lists, tick them off, and check out for a streak. */
+  Checklists: undefined;
 };
 
 declare global {

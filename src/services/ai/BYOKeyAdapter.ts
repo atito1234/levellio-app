@@ -11,7 +11,9 @@ import type {
   AIEngine,
   HttpClient,
   QuestSuggestionInput,
+  RecipeSuggestionInput,
   SuggestedQuest,
+  SuggestedRecipe,
 } from './AIEngine';
 
 export type BYOProvider = 'openai' | 'anthropic' | 'custom';
@@ -51,6 +53,23 @@ export class BYOKeyAdapter implements AIEngine {
 
   async motivate(context: { streakDays: number; level: number }): Promise<string> {
     return mockMotivate(context);
+  }
+
+  async suggestRecipes(input: RecipeSuggestionInput): Promise<SuggestedRecipe[]> {
+    const key = await this.deps.getApiKey();
+    if (!key) throw new AIUnavailableError('No API key provided');
+
+    const http = this.deps.http ?? fetchHttpClient();
+    const res = await http(this.endpoint(), {
+      method: 'POST',
+      headers: this.authHeaders(key),
+      body: JSON.stringify({ dietary: input.dietary, count: input.count ?? 3 }),
+    });
+    if (!res.ok) throw new AIUnavailableError(`${this.deps.provider} request failed (${res.status})`);
+
+    // TODO(day7+): map each provider's response schema -> SuggestedRecipe[].
+    if (!(await res.json())) throw new AIUnavailableError('Empty response');
+    return [];
   }
 
   private endpoint(): string {

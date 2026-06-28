@@ -105,3 +105,50 @@ export interface QuestReward {
   /** Streak (in days) in effect for this completion. */
   streakDays: number;
 }
+
+/**
+ * Dietary profiles used to personalize the food/"eat" focus. A user picks one in
+ * onboarding; recipes are filtered to what's compatible with it.
+ */
+export type DietaryTag =
+  | 'omnivore'
+  | 'vegetarian'
+  | 'vegan'
+  | 'pescatarian'
+  | 'gluten-free'
+  | 'high-protein'
+  | 'low-sugar';
+
+/**
+ * A curated, honest recipe. All user-facing strings live in i18n (recipes.json,
+ * keyed by id) so titles/ingredients/steps localize to en/es/fr; this record holds
+ * only structured, language-neutral metadata used for filtering and display.
+ */
+export interface Recipe {
+  id: string;
+  /** Dietary profiles this recipe is suitable for (drives onboarding matching). */
+  dietaryTags: DietaryTag[];
+  /** Goal-template keys this recipe supports (e.g. ['eat']). */
+  goalKeys: string[];
+  prepTimeMin: number;
+  difficulty: QuestDifficulty;
+  servings: number;
+  emoji: string;
+}
+
+/** A saved/cooked recipe entry, recorded per user. */
+export interface RecipeLogEntry {
+  /** Catalog id (resolves in RECIPE_CATALOG), or an `ai-<savedAt>` id for AI recipes. */
+  recipeId: string;
+  savedAt: number;
+  /** Local days (YYYY-MM-DD) the user marked this cooked. */
+  cookedDates: string[];
+  /** Inline content for non-catalog (AI-generated/custom) recipes. */
+  custom?: {
+    title: string;
+    description: string;
+    ingredients: string[];
+    steps: string[];
+    nutritionNote?: string;
+  };
+}

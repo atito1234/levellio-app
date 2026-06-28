@@ -22,6 +22,8 @@ import { BucketsProvider } from '@/state/BucketsContext';
 import { CapacitiesProvider } from '@/state/CapacitiesContext';
 import { PlanProvider } from '@/state/PlanContext';
 import { GoalProvider } from '@/state/GoalContext';
+import { RecipesProvider } from '@/state/RecipesContext';
+import { ChecklistsProvider } from '@/state/ChecklistsContext';
 import { MilestonesProvider } from '@/state/MilestonesContext';
 import { BattlesProvider } from '@/state/BattlesContext';
 import { JournalProvider } from '@/state/JournalContext';
@@ -42,6 +44,8 @@ export default function App() {
             <CapacitiesProvider>
               <PlanProvider>
                 <GoalProvider>
+                  <RecipesProvider>
+                  <ChecklistsProvider>
                   <MilestonesProvider>
                     <BattlesProvider>
                       <JournalProvider>
@@ -65,6 +69,8 @@ export default function App() {
                       </JournalProvider>
                     </BattlesProvider>
                   </MilestonesProvider>
+                  </ChecklistsProvider>
+                  </RecipesProvider>
                 </GoalProvider>
               </PlanProvider>
             </CapacitiesProvider>

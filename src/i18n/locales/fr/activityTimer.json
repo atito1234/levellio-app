@@ -18,5 +18,7 @@
   "finishAndLog": "Terminer et enregistrer",
   "finishAndLogA11y": "Terminer et enregistrer maintenant",
   "justLogIt": "Juste enregistrer",
-  "justLogItA11y": "Enregistrer sans minuter"
+  "justLogItA11y": "Enregistrer sans minuter",
+  "verified": "✓ Vérifié",
+  "selfReported": "Auto-déclaré"
 }

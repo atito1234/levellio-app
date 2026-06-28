@@ -9,6 +9,24 @@ import type { Quest } from '@/types';
 /** Default Pomodoro focus length (minutes) for open-ended activities. */
 export const POMODORO_MINUTES = 25;
 
+/**
+ * Fraction of a timed activity's target that must actually elapse in-app for the
+ * completion to count as "verified" (vs a self-reported manual log). A small
+ * tolerance below 100% absorbs the user tapping finish a beat early.
+ */
+export const VERIFY_RATIO = 0.9;
+
+/**
+ * Whether a completion is "verified": the real elapsed time met the bar for the
+ * activity's target. `targetSec <= 0` (open-ended) verifies on any real elapsed
+ * time. Pure + deterministic.
+ */
+export function isVerifiedDuration(durationSec: number, targetSec: number): boolean {
+  if (durationSec <= 0) return false;
+  if (targetSec <= 0) return durationSec > 0;
+  return durationSec >= Math.floor(targetSec * VERIFY_RATIO);
+}
+
 /** Parse an implied duration (minutes) from an activity title, or null. */
 export function parseDurationMinutes(title: string): number | null {
   const t = title.toLowerCase();

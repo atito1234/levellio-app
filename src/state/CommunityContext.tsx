@@ -2,7 +2,23 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
 import { communityBackend, type Unsubscribe } from '@/services/community';
-import type { Comment, CommunityIdentity, FeedScope, Post, PostDraft, ReactionEmoji, SuggestedHabit } from '@/lib/community';
+import { AsyncStorageStore } from '@/services/storage';
+import { canViewPost, type Comment, type CommunityIdentity, type FeedScope, type Post, type PostDraft, type ReactionEmoji, type SuggestedHabit } from '@/lib/community';
+
+// Local safety lists (per-uid): people you've blocked + posts you've hidden/reported.
+const safetyStore = new AsyncStorageStore();
+const blockedKey = (uid: string) => `levellio:community:blocked:${uid}`;
+const hiddenKey = (uid: string) => `levellio:community:hidden:${uid}`;
+async function loadList(key: string): Promise<string[]> {
+  const raw = await safetyStore.getItem(key);
+  if (!raw) return [];
+  try {
+    const v = JSON.parse(raw);
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
 
 interface CommunityContextValue {
   ready: boolean;
@@ -20,6 +36,12 @@ interface CommunityContextValue {
   setReaction: (postId: string, emoji: ReactionEmoji | null) => Promise<void>;
   subscribeFeed: (scope: FeedScope, cb: (posts: Post[]) => void) => Unsubscribe;
   subscribeComments: (postId: string, cb: (comments: Comment[]) => void) => Unsubscribe;
+  /** Safety: people you've blocked (their content is hidden everywhere). */
+  isBlocked: (uid: string) => boolean;
+  blockUser: (targetUid: string) => Promise<void>;
+  unblockUser: (targetUid: string) => Promise<void>;
+  /** Hide + flag a single post (report). */
+  reportPost: (postId: string) => Promise<void>;
 }
 
 const CommunityContext = createContext<CommunityContextValue | null>(null);
@@ -30,6 +52,8 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
   const { character } = useGame();
   const uid = account?.uid ?? null;
   const [following, setFollowing] = useState<Set<string>>(new Set());
+  const [blocked, setBlocked] = useState<Set<string>>(new Set());
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [ready, setReady] = useState(false);
 
   const identity = useMemo<CommunityIdentity | null>(() => {
@@ -51,8 +75,39 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
       setFollowing(new Set(ids));
       setReady(true);
     });
+    void loadList(blockedKey(uid)).then((ids) => setBlocked(new Set(ids)));
+    void loadList(hiddenKey(uid)).then((ids) => setHidden(new Set(ids)));
     return unsub;
   }, [uid]);
+
+  const blockUser = useCallback(
+    async (targetUid: string) => {
+      if (!uid) return;
+      const next = new Set(blocked).add(targetUid);
+      setBlocked(next);
+      await safetyStore.setItem(blockedKey(uid), JSON.stringify([...next]));
+    },
+    [uid, blocked],
+  );
+  const unblockUser = useCallback(
+    async (targetUid: string) => {
+      if (!uid) return;
+      const next = new Set(blocked);
+      next.delete(targetUid);
+      setBlocked(next);
+      await safetyStore.setItem(blockedKey(uid), JSON.stringify([...next]));
+    },
+    [uid, blocked],
+  );
+  const reportPost = useCallback(
+    async (postId: string) => {
+      if (!uid) return;
+      const next = new Set(hidden).add(postId);
+      setHidden(next);
+      await safetyStore.setItem(hiddenKey(uid), JSON.stringify([...next]));
+    },
+    [uid, hidden],
+  );
 
   const follow = useCallback(async (targetUid: string) => {
     if (uid) await communityBackend.follow(uid, targetUid);
@@ -82,12 +137,23 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
   );
 
   const subscribeFeed = useCallback(
-    (scope: FeedScope, cb: (posts: Post[]) => void) => communityBackend.subscribeFeed(scope, uid ?? '', following, cb),
-    [uid, following],
+    (scope: FeedScope, cb: (posts: Post[]) => void) =>
+      communityBackend.subscribeFeed(scope, uid ?? '', following, (posts) =>
+        // Audience gate + safety: hide posts the viewer may not see, blocked
+        // authors, and individually reported/hidden posts. (Server rules also
+        // enforce audience; this is the client-side belt-and-suspenders.)
+        cb(
+          posts.filter(
+            (p) => canViewPost(p, uid ?? '', following) && !blocked.has(p.authorUid) && !hidden.has(p.id),
+          ),
+        ),
+      ),
+    [uid, following, blocked, hidden],
   );
   const subscribeComments = useCallback(
-    (postId: string, cb: (comments: Comment[]) => void) => communityBackend.subscribeComments(postId, cb),
-    [],
+    (postId: string, cb: (comments: Comment[]) => void) =>
+      communityBackend.subscribeComments(postId, (comments) => cb(comments.filter((c) => !blocked.has(c.uid)))),
+    [blocked],
   );
 
   const value = useMemo<CommunityContextValue>(
@@ -105,8 +171,12 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
       setReaction,
       subscribeFeed,
       subscribeComments,
+      isBlocked: (id: string) => blocked.has(id),
+      blockUser,
+      unblockUser,
+      reportPost,
     }),
-    [ready, uid, following, follow, unfollow, createPost, addComment, setReaction, subscribeFeed, subscribeComments],
+    [ready, uid, following, blocked, follow, unfollow, createPost, addComment, setReaction, subscribeFeed, subscribeComments, blockUser, unblockUser, reportPost],
   );
 
   return <CommunityContext.Provider value={value}>{children}</CommunityContext.Provider>;

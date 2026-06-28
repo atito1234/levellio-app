@@ -13,7 +13,9 @@ import { getCelebrationTimings } from '@/lib/celebration';
 import { battleStateAt } from '@/lib/battle';
 import { getTechnique, workSeconds } from '@/lib/timeTechniques';
 import { getDragon } from '@/data/dragons';
-import { formatClock } from '@/lib/activityTimer';
+import { activityTiming, formatClock, isVerifiedDuration } from '@/lib/activityTimer';
+import { ACTIVITY_VERIFICATION_ENABLED } from '@/config/features';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Battle'>;
@@ -75,6 +77,7 @@ export function BattleScreen({ route, navigation }: Props) {
       clearInterval(tickRef.current);
       tickRef.current = null;
     }
+    void deactivateKeepAwake();
   }, []);
   useEffect(() => stop, [stop]);
 
@@ -112,7 +115,8 @@ export function BattleScreen({ route, navigation }: Props) {
     let completed = 0;
     let totalXp = 0;
     for (const q of battleQuests) {
-      const reward = await complete(q, { method, durationSec: per });
+      const verified = ACTIVITY_VERIFICATION_ENABLED && isVerifiedDuration(per, activityTiming(q).minutes * 60);
+      const reward = await complete(q, { method, durationSec: per, ...(verified ? { verified: true } : {}) });
       if (reward) {
         completed += 1;
         totalXp += reward.totalXp;
@@ -131,6 +135,7 @@ export function BattleScreen({ route, navigation }: Props) {
   const start = useCallback(() => {
     if (running || won) return;
     setRunning(true);
+    void activateKeepAwakeAsync();
     tickRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
   }, [running, won]);
 

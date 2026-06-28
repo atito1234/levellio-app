@@ -1,0 +1,190 @@
+{
+  "screen": {
+    "title": "Recipes",
+    "subtitle": "Matched to your diet — save the ones you love and tick them off as you cook.",
+    "recommended": "Recommended for you",
+    "saved": "Saved",
+    "empty": "Choose a dietary preference during onboarding to get matched recipes — or save any you like here.",
+    "save": "Save",
+    "savedLabel": "Saved ✓",
+    "cook": "Mark cooked",
+    "cookedToday": "Cooked today ✓",
+    "ingredients": "Ingredients",
+    "steps": "Steps",
+    "meta": "{{minutes}} min · {{servings}} servings",
+    "generate": "Generate with AI",
+    "generating": "Generating…",
+    "generated": "Generated for you",
+    "aiUnavailable": "Couldn’t generate right now — here are curated recipes.",
+    "aiBadge": "AI"
+  },
+  "veg-stirfry": {
+    "title": "Rainbow veggie stir-fry",
+    "desc": "Crisp seasonal vegetables tossed in a quick savory sauce. Ready in 20 minutes.",
+    "nutrition": "Loaded with fiber and color; naturally plant-based.",
+    "ingredients": [
+      "2 cups mixed vegetables (peppers, broccoli, carrot)",
+      "1 tbsp oil",
+      "1 clove garlic, minced",
+      "1 tbsp tamari or gluten-free soy sauce",
+      "1 cup cooked rice"
+    ],
+    "steps": [
+      "Heat the oil in a wide pan over high heat.",
+      "Add garlic, then the vegetables; stir-fry 5–7 minutes until crisp-tender.",
+      "Add the tamari, toss to coat, and serve over rice."
+    ]
+  },
+  "chickpea-curry": {
+    "title": "Spiced chickpea curry",
+    "desc": "Hearty, warming and protein-rich — great for batch cooking.",
+    "nutrition": "High in plant protein and fiber; steadies blood sugar.",
+    "ingredients": [
+      "1 can chickpeas, drained",
+      "1 can chopped tomatoes",
+      "200ml coconut milk",
+      "1 tbsp curry powder",
+      "1 onion, diced"
+    ],
+    "steps": [
+      "Soften the onion in a little oil, then stir in the curry powder.",
+      "Add tomatoes, coconut milk and chickpeas; simmer 15 minutes.",
+      "Season to taste and serve with rice or flatbread."
+    ]
+  },
+  "lentil-soup": {
+    "title": "Cozy red lentil soup",
+    "desc": "A simple one-pot soup that's filling and budget-friendly.",
+    "nutrition": "Plant protein plus fiber; gentle and gluten-free.",
+    "ingredients": [
+      "1 cup red lentils, rinsed",
+      "1 carrot, diced",
+      "1 onion, diced",
+      "4 cups vegetable stock",
+      "1 tsp cumin"
+    ],
+    "steps": [
+      "Sweat the onion and carrot for a few minutes.",
+      "Add lentils, stock and cumin; bring to a boil.",
+      "Simmer 20 minutes until the lentils break down, then blend if you like."
+    ]
+  },
+  "quinoa-salad": {
+    "title": "Lemony quinoa salad",
+    "desc": "Bright, no-cook-after-chilling salad that travels well.",
+    "nutrition": "Complete plant protein; fresh and gluten-free.",
+    "ingredients": [
+      "1 cup cooked quinoa, cooled",
+      "1 cucumber, diced",
+      "Handful cherry tomatoes, halved",
+      "Juice of 1 lemon",
+      "2 tbsp olive oil"
+    ],
+    "steps": [
+      "Combine the quinoa, cucumber and tomatoes in a bowl.",
+      "Whisk the lemon juice and olive oil, then toss through.",
+      "Season and chill for 10 minutes before serving."
+    ]
+  },
+  "overnight-oats": {
+    "title": "Overnight oats",
+    "desc": "Stir at night, grab in the morning. Five-minute prep.",
+    "nutrition": "Slow-release carbs and fiber; no added sugar.",
+    "ingredients": [
+      "1/2 cup rolled oats",
+      "1/2 cup milk of choice",
+      "2 tbsp yogurt",
+      "1/2 banana, mashed",
+      "Pinch of cinnamon"
+    ],
+    "steps": [
+      "Mix everything in a jar.",
+      "Cover and refrigerate overnight.",
+      "Top with fruit in the morning and enjoy cold."
+    ]
+  },
+  "greek-yogurt-bowl": {
+    "title": "Protein yogurt bowl",
+    "desc": "A five-minute high-protein breakfast or snack.",
+    "nutrition": "High protein, low sugar; keeps you full.",
+    "ingredients": [
+      "1 cup Greek yogurt",
+      "Handful of berries",
+      "1 tbsp chopped nuts",
+      "1 tsp honey (optional)"
+    ],
+    "steps": [
+      "Spoon the yogurt into a bowl.",
+      "Top with berries and nuts.",
+      "Drizzle with honey if you like and serve."
+    ]
+  },
+  "salmon-bowl": {
+    "title": "Salmon & greens bowl",
+    "desc": "Omega-rich salmon over greens and grains.",
+    "nutrition": "High protein and omega-3s; gluten-free.",
+    "ingredients": [
+      "1 salmon fillet",
+      "2 cups leafy greens",
+      "1/2 cup cooked rice or quinoa",
+      "1/2 avocado, sliced",
+      "Squeeze of lemon"
+    ],
+    "steps": [
+      "Pan-sear or bake the salmon until just cooked through.",
+      "Build the bowl with greens and grains.",
+      "Top with salmon and avocado, finish with lemon."
+    ]
+  },
+  "tuna-salad": {
+    "title": "Quick tuna salad",
+    "desc": "A 10-minute, fridge-staple lunch.",
+    "nutrition": "Lean protein, low sugar; very quick.",
+    "ingredients": [
+      "1 can tuna, drained",
+      "2 cups salad leaves",
+      "1/2 cup white beans",
+      "1 tbsp olive oil",
+      "Squeeze of lemon"
+    ],
+    "steps": [
+      "Flake the tuna over the salad leaves.",
+      "Add the beans.",
+      "Dress with olive oil and lemon, then toss."
+    ]
+  },
+  "chicken-veg": {
+    "title": "Sheet-pan chicken & veg",
+    "desc": "Everything roasts on one tray — minimal cleanup.",
+    "nutrition": "High lean protein; gluten-free.",
+    "ingredients": [
+      "2 chicken breasts",
+      "3 cups chopped vegetables",
+      "1 tbsp olive oil",
+      "1 tsp mixed herbs",
+      "Salt and pepper"
+    ],
+    "steps": [
+      "Heat the oven to 200°C / 400°F.",
+      "Toss the chicken and vegetables with oil and herbs on a tray.",
+      "Roast 25–30 minutes until the chicken is cooked through."
+    ]
+  },
+  "turkey-wrap": {
+    "title": "Turkey & hummus wrap",
+    "desc": "A fast, portable high-protein lunch.",
+    "nutrition": "Lean protein with fiber to stay full.",
+    "ingredients": [
+      "1 tortilla wrap",
+      "3 slices lean turkey",
+      "2 tbsp hummus",
+      "Handful of spinach",
+      "Sliced tomato"
+    ],
+    "steps": [
+      "Spread the hummus over the wrap.",
+      "Layer the turkey, spinach and tomato.",
+      "Roll up tightly, slice in half and serve."
+    ]
+  }
+}

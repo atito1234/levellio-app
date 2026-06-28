@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -42,12 +42,21 @@ const TRACK = '#ECEAE4';
 export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string) => void }) {
   const { t, i18n } = useTranslation(['feed', 'common']);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { uid, setReaction } = useCommunity();
+  const { uid, setReaction, blockUser, reportPost } = useCommunity();
   const { notifyReaction } = useNotifications();
   const { isFounding } = useSubscription();
   const { settings } = useSettings();
   const reduced = useReducedMotion();
   const openProfile = () => navigation.navigate('Profile', { uid: post.authorUid });
+
+  // Safety: report (hide + flag) or block the author. Surfaced on others' posts.
+  const openModeration = () => {
+    Alert.alert(t('feed:post.moreA11y'), undefined, [
+      { text: t('feed:post.report'), onPress: () => { void reportPost(post.id); Alert.alert(t('feed:post.reportedAck')); } },
+      { text: t('feed:post.block', { name: post.displayName }), style: 'destructive', onPress: () => void blockUser(post.authorUid) },
+      { text: t('common:action.cancel'), style: 'cancel' },
+    ]);
+  };
   const mine = uid ? myReaction(post.reactions, uid) : null;
   const total = reactionTotal(post.reactions);
   const tops = topReactions(post.reactions);
@@ -121,6 +130,11 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
           </View>
         </Pressable>
         {post.authorUid !== uid && <FollowButton targetUid={post.authorUid} />}
+        {post.authorUid !== uid && (
+          <Pressable onPress={openModeration} accessibilityRole="button" accessibilityLabel={t('feed:post.moreA11y')} hitSlop={10} style={styles.moreBtn}>
+            <Text style={styles.moreDots}>⋯</Text>
+          </Pressable>
+        )}
       </View>
 
       {post.kind === 'contribution' && post.habitTitle ? (
@@ -203,6 +217,8 @@ const styles = StyleSheet.create({
   card: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.sm, shadowColor: '#1B1B2A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 2 },
   head: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   headTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  moreBtn: { paddingHorizontal: 6, paddingVertical: 2 },
+  moreDots: { ...typography.title, color: MUTED, fontWeight: '800' },
   headText: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   name: { ...typography.label, color: INK, fontWeight: '800', flexShrink: 1 },

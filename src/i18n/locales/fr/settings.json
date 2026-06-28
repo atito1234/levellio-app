@@ -61,6 +61,8 @@
     "keyHelper": "Stockée uniquement dans le trousseau sécurisé de votre appareil. Jamais journalisée ni téléversée.",
     "saveKey": "Enregistrer la clé",
     "clearKey": "Effacer la clé",
+    "recipesTitle": "Recettes générées par IA",
+    "recipesHelp": "Générez des recettes supplémentaires adaptées à votre régime, avec votre clé. Les recettes sélectionnées fonctionnent toujours sans elle.",
     "onDeviceHelp": "Fonctionne en privé sur votre appareil. Aucune clé ni réseau requis.",
     "noKeyHelp": "Vous préférez ne pas gérer de clé ? Le mode sur l'appareil fonctionne sans aucune clé."
   },
@@ -72,6 +74,12 @@
     "notifyWorld": "M'avertir des jalons mondiaux",
     "prepGoals": "Les objectifs de prépa nourrissent le projet",
     "prepHelp": "Quand vous choisissez un objectif personnel pour « préparer » un objectif de projet : ON fait compter ses habitudes dans la progression du projet ; OFF l'affiche seulement comme un rappel."
+  },
+  "privacy": {
+    "title": "Confidentialité",
+    "audienceLabel": "Audience par défaut des nouvelles publications",
+    "audienceAsk": "Demander à chaque fois",
+    "audienceHelp": "Choisissez qui voit vos publications par défaut. Vous pouvez toujours le changer pour chaque publication. La confidentialité et la sécurité avant tout."
   },
   "insights": {
     "title": "Analyses d'habitudes",

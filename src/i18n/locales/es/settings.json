@@ -61,6 +61,8 @@
     "keyHelper": "Guardada solo en el llavero seguro de tu dispositivo. Nunca registrada ni subida.",
     "saveKey": "Guardar clave",
     "clearKey": "Borrar clave",
+    "recipesTitle": "Recetas generadas por IA",
+    "recipesHelp": "Genera recetas extra adaptadas a tu dieta, usando tu clave. Las recetas seleccionadas funcionan siempre sin ella.",
     "onDeviceHelp": "Funciona de forma privada en tu dispositivo. Sin clave ni red.",
     "noKeyHelp": "¿Prefieres no gestionar una clave? El modo en el dispositivo funciona sin ninguna clave."
   },
@@ -72,6 +74,12 @@
     "notifyWorld": "Avísame sobre hitos del mundo",
     "prepGoals": "Las metas de preparación alimentan el proyecto",
     "prepHelp": "Cuando eliges una meta personal para \"preparar\" una meta de proyecto: ON hace que sus hábitos cuenten para el progreso del proyecto; OFF solo lo muestra como recordatorio."
+  },
+  "privacy": {
+    "title": "Privacidad",
+    "audienceLabel": "Audiencia predeterminada para nuevas publicaciones",
+    "audienceAsk": "Preguntar cada vez",
+    "audienceHelp": "Elige quién ve tus publicaciones de forma predeterminada. Siempre puedes cambiarlo en cada publicación. La privacidad y la seguridad son lo primero."
   },
   "insights": {
     "title": "Análisis de hábitos",

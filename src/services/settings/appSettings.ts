@@ -22,6 +22,10 @@ export type PrepLinkMode = 'visual' | 'full';
 /** Persisted onboarding questionnaire answers (used to personalize + for later tuning). */
 export interface OnboardingAnswersStored {
   focus?: string[];
+  /** Per-focus follow-up answers: focus key → selected option ids. */
+  focusDetail?: Record<string, string[]>;
+  /** Dietary profile chosen for the eat focus (e.g. 'vegan'), if any. */
+  dietaryTag?: string;
   blocker?: string;
   habitCount?: number;
   why?: string;
@@ -41,6 +45,8 @@ export interface AppSettings {
   metadataPrivacy: MetadataPrivacy;
   /** Tactile feedback (vibration) on completions & community wins. */
   hapticsEnabled: boolean;
+  /** Opt-in: offer AI-generated recipes (needs a cloud AI engine + key). */
+  aiRecipesEnabled: boolean;
   /** Opt-in: surface the "Around the world" community projects strip on Today. */
   worldProjectsEnabled: boolean;
   /** Opt-in: alerts about world/community project milestones. */
@@ -49,6 +55,11 @@ export interface AppSettings {
   projectPrepLinkMode: PrepLinkMode;
   /** App language: an explicit locale, or 'system' to follow the device. */
   locale: LocaleSetting;
+  /**
+   * Default audience for new community posts. 'ask' = no sticky default (the
+   * composer makes the user choose each time). Privacy-first.
+   */
+  feedDefaultAudience: 'ask' | 'public' | 'friends' | 'private';
   /** First-run welcome flow finished — never show the intro cards again. */
   onboardingCompleted: boolean;
   /** First-run interactive spotlight tour finished or skipped — runs once only. */
@@ -61,6 +72,8 @@ export interface AppSettings {
   onboardingAnswers?: OnboardingAnswersStored;
   /** Featured project ids recommended from the questionnaire (surfaced in Projects). */
   recommendedProjectIds?: string[];
+  /** Recipe ids recommended from the dietary follow-up (surfaced in Recipes). */
+  recommendedRecipeIds?: string[];
   /** True once we've shown the in-onboarding store-rating prompt (show at most once). */
   ratingRequested?: boolean;
   /** Optional public profile headline (LinkedIn-style one-liner). */
@@ -79,10 +92,12 @@ export const DEFAULT_SETTINGS: AppSettings = {
   metadataPrivacy: { ...DEFAULT_METADATA_PRIVACY },
   // Haptics on by default (delightful); world projects opt-in so members feel in control.
   hapticsEnabled: true,
+  aiRecipesEnabled: true,
   worldProjectsEnabled: false,
   worldProjectAlerts: false,
   projectPrepLinkMode: 'visual',
   locale: 'system',
+  feedDefaultAudience: 'ask',
   onboardingCompleted: false,
   welcomeTourCompleted: false,
 };
@@ -104,10 +119,15 @@ export function normalizeSettings(raw: unknown): AppSettings {
     bucketViewMode: r.bucketViewMode === 'buckets' ? 'buckets' : 'list',
     metadataPrivacy: normalizeMetadataPrivacy(r.metadataPrivacy),
     hapticsEnabled: r.hapticsEnabled !== false,
+    aiRecipesEnabled: r.aiRecipesEnabled !== false,
     worldProjectsEnabled: r.worldProjectsEnabled === true,
     worldProjectAlerts: r.worldProjectAlerts === true,
     projectPrepLinkMode: r.projectPrepLinkMode === 'full' ? 'full' : 'visual',
     locale: r.locale === 'system' || isSupportedLocale(r.locale) ? r.locale : 'system',
+    feedDefaultAudience:
+      r.feedDefaultAudience === 'public' || r.feedDefaultAudience === 'friends' || r.feedDefaultAudience === 'private'
+        ? r.feedDefaultAudience
+        : 'ask',
     onboardingCompleted: r.onboardingCompleted === true,
     welcomeTourCompleted: r.welcomeTourCompleted === true,
     ...(typeof r.attributionSource === 'string' ? { attributionSource: r.attributionSource } : {}),
@@ -117,6 +137,9 @@ export function normalizeSettings(raw: unknown): AppSettings {
       : {}),
     ...(Array.isArray(r.recommendedProjectIds)
       ? { recommendedProjectIds: r.recommendedProjectIds.filter((x): x is string => typeof x === 'string') }
+      : {}),
+    ...(Array.isArray(r.recommendedRecipeIds)
+      ? { recommendedRecipeIds: r.recommendedRecipeIds.filter((x): x is string => typeof x === 'string') }
       : {}),
     ...(r.ratingRequested === true ? { ratingRequested: true } : {}),
     ...(typeof r.profileHeadline === 'string' ? { profileHeadline: r.profileHeadline } : {}),

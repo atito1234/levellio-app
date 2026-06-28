@@ -25,6 +25,7 @@ import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useSettings } from '@/state/SettingsContext';
 import { useCommunityAccess } from '@/services/community/access';
+import { CHECKLISTS_ENABLED } from '@/config/features';
 import { useBattles } from '@/state/BattlesContext';
 import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -342,6 +343,40 @@ export function DashboardScreen() {
               <Text style={styles.homeComposerFeedText}>{t('dashboard:share.viewFeed')}</Text>
             </Pressable>
           </View>
+        )}
+
+        {/* Recipes for you — appears once a dietary plan has been recommended. */}
+        {(settings.recommendedRecipeIds?.length ?? 0) > 0 && (
+          <Pressable
+            onPress={() => navigation.navigate('Recipes')}
+            accessibilityRole="button"
+            accessibilityLabel={t('recipes:screen.title')}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: PAD, paddingVertical: 14, marginHorizontal: PAD, marginBottom: 8, borderWidth: 1, borderColor: '#ECEAE4' }}
+          >
+            <Text style={{ fontSize: 22 }}>🍽️</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ ...typography.label, color: INK, fontWeight: '800' }}>{t('recipes:screen.title')}</Text>
+              <Text style={{ ...typography.caption, color: MUTED }}>{t('recipes:screen.recommended')}</Text>
+            </View>
+            <Text style={{ fontSize: 22, color: MUTED }}>›</Text>
+          </Pressable>
+        )}
+
+        {/* Checklists — keep a list, tick it off, check out for a streak. */}
+        {CHECKLISTS_ENABLED && (
+          <Pressable
+            onPress={() => navigation.navigate('Checklists')}
+            accessibilityRole="button"
+            accessibilityLabel={t('checklists:title')}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: PAD, paddingVertical: 14, marginHorizontal: PAD, marginBottom: 8, borderWidth: 1, borderColor: '#ECEAE4' }}
+          >
+            <Text style={{ fontSize: 22 }}>✅</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ ...typography.label, color: INK, fontWeight: '800' }}>{t('checklists:title')}</Text>
+              <Text style={{ ...typography.caption, color: MUTED }}>{t('checklists:todayTitle')}</Text>
+            </View>
+            <Text style={{ fontSize: 22, color: MUTED }}>›</Text>
+          </Pressable>
         )}
 
         {/* STEP 1 — pick a goal. It governs the focus below and tints it. */}

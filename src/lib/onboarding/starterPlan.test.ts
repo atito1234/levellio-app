@@ -49,4 +49,32 @@ describe('buildStarterPlan', () => {
     expect(buildStarterPlan({ focus: ['fit'], blocker: valid }).dragonId).toBe(valid);
     expect(buildStarterPlan({ focus: ['fit'], blocker: 'bogus' }).dragonId).toBe('procrastination');
   });
+
+  // --- personalization (follow-ups) ----------------------------------------
+
+  it('leaves the legacy output unchanged when no follow-up detail is given', () => {
+    const plan = buildStarterPlan({ focus: ['eat'], habitCount: 3 });
+    expect(plan.recommendedRecipeIds).toEqual([]);
+    expect(plan.dietaryTag).toBeUndefined();
+  });
+
+  it('tailors fit activities by setup (gym vs beginner differ)', () => {
+    const gym = buildStarterPlan({ focus: ['fit'], focusDetail: { fit: ['gym'] }, habitCount: 5 });
+    const beginner = buildStarterPlan({ focus: ['fit'], focusDetail: { fit: ['beginner'] }, habitCount: 5 });
+    expect(gym.habitIds).toContain('fit-gym');
+    expect(beginner.habitIds).not.toContain('fit-gym');
+    expect(beginner.habitIds).toContain('fit-bodyweight');
+  });
+
+  it('seeds plant-protein + vegan recipes for an eat/vegan profile', () => {
+    const plan = buildStarterPlan({ focus: ['eat'], focusDetail: { eat: ['vegan'] }, habitCount: 5 });
+    expect(plan.habitIds).toContain('health-plant-protein');
+    expect(plan.dietaryTag).toBe('vegan');
+    expect(plan.recommendedRecipeIds.length).toBeGreaterThan(0);
+  });
+
+  it('only recommends recipes when the eat focus is chosen', () => {
+    const noEat = buildStarterPlan({ focus: ['fit'], focusDetail: { fit: ['gym'] } });
+    expect(noEat.recommendedRecipeIds).toEqual([]);
+  });
 });

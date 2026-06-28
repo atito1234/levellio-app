@@ -43,6 +43,65 @@
       "title": "¿En qué quieres trabajar?",
       "subtitle": "Elige lo que más importa — armaremos tu plan en torno a ello."
     },
+    "focusDetail": {
+      "fit": {
+        "title": "¿Cómo te gusta entrenar?",
+        "subtitle": "Adaptaremos tus actividades a tu contexto.",
+        "options": {
+          "beginner": "Estoy empezando",
+          "home": "En casa",
+          "gym": "En el gimnasio",
+          "outdoor": "Al aire libre"
+        }
+      },
+      "eat": {
+        "title": "¿Cómo comes?",
+        "subtitle": "Adaptaremos recetas y actividades a tu dieta.",
+        "options": {
+          "omnivore": "De todo",
+          "vegetarian": "Vegetariano",
+          "vegan": "Vegano",
+          "pescatarian": "Pescetariano",
+          "glutenfree": "Sin gluten"
+        }
+      },
+      "partner": {
+        "title": "¿Dónde quieren crecer juntos?",
+        "subtitle": "Sugeriremos formas de cuidar tu relación.",
+        "options": {
+          "quality": "Más tiempo de calidad",
+          "appreciation": "Mostrar aprecio",
+          "communication": "Mejor comunicación"
+        }
+      },
+      "calm": {
+        "title": "¿Qué te estresa más?",
+        "subtitle": "Dirigiremos tu práctica donde más ayuda.",
+        "options": {
+          "work": "Presión en el trabajo",
+          "sleep": "Dormir mal",
+          "overwhelm": "Sentirte abrumado"
+        }
+      },
+      "money": {
+        "title": "¿Cuál es tu meta de dinero?",
+        "subtitle": "Adaptaremos tus hábitos de dinero a ella.",
+        "options": {
+          "save": "Ahorrar más",
+          "budget": "Cumplir un presupuesto",
+          "debt": "Reducir deudas"
+        }
+      },
+      "grow": {
+        "title": "¿Cómo te gusta crecer?",
+        "subtitle": "Daremos forma a tu aprendizaje según ello.",
+        "options": {
+          "read": "Leyendo",
+          "course": "Haciendo un curso",
+          "creative": "Práctica creativa"
+        }
+      }
+    },
     "blocker": {
       "title": "¿Qué te ha estado frenando?",
       "subtitle": "Te ayudaremos a enfrentarlo.",
@@ -97,22 +156,34 @@
     "reveal": {
       "kicker": "TU PLAN ESTÁ LISTO",
       "title": "Aquí está tu plan personalizado, {{name}}",
-      "subtitle": "Precargado y listo — ajusta lo que quieras cuando quieras.",
+      "subtitle": "Añádelo a tu app, o empieza de cero y crea el tuyo.",
       "goalsTitle": "Tus metas",
       "habitsTitle": "Tus hábitos diarios",
+      "recipesTitle": "Recetas para ti",
       "projectsTitle": "Recomendado para ti",
-      "cta": "Vamos"
+      "cta": "Vamos",
+      "addPlanCta": "Añadir mi plan",
+      "startFresh": "Prefiero empezar de cero",
+      "aiGenerate": "✨ Generar más recetas con IA",
+      "aiGenerating": "Generando recetas…",
+      "aiAdded": "Se añadieron {{count}} recetas de IA a tu colección"
     },
     "prime": {
       "trialTitle": "Prueba Levellio Plus gratis",
-      "trialBody": "Desbloquea el coach con IA, las previsiones, los temas premium y los proyectos ilimitados — gratis por 7 días.",
+      "trialBody": "Desbloquea el coach con IA, las previsiones, los temas premium y los proyectos ilimitados. En el lanzamiento: 7 días gratis, luego $29.99/año. Sin cargo durante tu prueba — cancela cuando quieras en Ajustes.",
       "trialCta": "Ver planes",
       "remindTitle": "Sin sorpresas",
       "remindBody": "Te avisaremos 2 días antes de que termine tu prueba. Cancela cuando quieras en Ajustes.",
       "remindCta": "Continuar",
       "plansTitle": "Elige tu plan",
       "plansBody": "Empieza gratis, mantén tu impulso.",
-      "later": "Quizá luego"
+      "later": "Quizá luego",
+      "betaBadge": "MIEMBRO FUNDADOR",
+      "betaTitle": "Plus es gratis durante la beta",
+      "betaBody": "Eres miembro fundador — cada función Plus está desbloqueada, gratis, sin nada que pagar ni configurar.",
+      "betaFutureLabel": "EN EL LANZAMIENTO",
+      "betaFuture": "Una prueba gratis de 7 días en el plan anual, luego $29.99/año. Sin cargo durante la prueba, un aviso antes de que termine, y cancela cuando quieras en Ajustes.",
+      "betaCta": "Empezar a explorar"
     }
   }
 }

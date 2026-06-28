@@ -21,6 +21,13 @@ export const MAX_COMMENT_TEXT = 300;
 
 export type PostKind = 'post' | 'contribution' | 'ask';
 
+/**
+ * Who can see a post. `friends` maps to the user's network (people they follow,
+ * and — once the friends graph ships — confirmed friends). Absent = `public`
+ * (back-compat for posts created before audience controls).
+ */
+export type PostAudience = 'public' | 'friends' | 'private';
+
 /** Attached media on a post. `url` is a hosted (Firebase Storage) download URL. */
 export interface PostMedia {
   url: string;
@@ -58,6 +65,10 @@ export interface Post {
   mode?: ContributionMode;
   /** For 'ask' posts: the life-area the asker wants help with. */
   categoryHint?: QuestCategory;
+  /** Life-area tag for color-coding the feed (any post kind). */
+  category?: QuestCategory;
+  /** Who can see this post. Absent = public (back-compat). */
+  audience?: PostAudience;
   /** Optional attached photo/video (hosted). Off until Firebase Storage/Blaze. */
   media?: PostMedia;
   createdAt: number;
@@ -91,6 +102,8 @@ export interface PostDraft {
   value?: number;
   mode?: ContributionMode;
   categoryHint?: QuestCategory;
+  category?: QuestCategory;
+  audience?: PostAudience;
   media?: PostMedia;
 }
 
@@ -150,6 +163,22 @@ export function postInScope(post: Post, scope: FeedScope, following: ReadonlySet
   if (scope === 'all') return true;
   if (scope === 'network') return post.authorUid === uid || following.has(post.authorUid);
   return post.projectId === scope.projectId;
+}
+
+/**
+ * Audience gate: can this viewer SEE the post at all (independent of feed scope)?
+ * public (or legacy/no audience) → everyone; private → author only; friends →
+ * author or someone in their network. Applied on top of scope + block filtering.
+ */
+export function canViewPost(post: Post, viewerUid: string, following: ReadonlySet<string>): boolean {
+  switch (post.audience) {
+    case 'private':
+      return post.authorUid === viewerUid;
+    case 'friends':
+      return post.authorUid === viewerUid || following.has(post.authorUid);
+    default:
+      return true; // 'public' or undefined
+  }
 }
 
 // --- formatting --------------------------------------------------------------

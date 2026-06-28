@@ -1,4 +1,5 @@
 import {
+  canViewPost,
   isValidCommentText,
   isValidPostText,
   myReaction,
@@ -11,6 +12,23 @@ import {
   topReactions,
   type Post,
 } from './community';
+
+describe('canViewPost (audience gate)', () => {
+  const following = new Set(['alice']);
+  it('public/legacy posts are visible to everyone', () => {
+    expect(canViewPost(post({ authorUid: 'alice' }), 'bob', new Set())).toBe(true);
+    expect(canViewPost(post({ authorUid: 'alice', audience: 'public' }), 'bob', new Set())).toBe(true);
+  });
+  it('private posts are visible only to the author', () => {
+    expect(canViewPost(post({ authorUid: 'alice', audience: 'private' }), 'alice', following)).toBe(true);
+    expect(canViewPost(post({ authorUid: 'alice', audience: 'private' }), 'bob', following)).toBe(false);
+  });
+  it('friends posts are visible to the author and people in their network', () => {
+    expect(canViewPost(post({ authorUid: 'alice', audience: 'friends' }), 'alice', new Set())).toBe(true);
+    expect(canViewPost(post({ authorUid: 'alice', audience: 'friends' }), 'bob', following)).toBe(true); // bob follows alice
+    expect(canViewPost(post({ authorUid: 'alice', audience: 'friends' }), 'carol', new Set())).toBe(false);
+  });
+});
 
 function post(over: Partial<Post> = {}): Post {
   return {

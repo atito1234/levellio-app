@@ -34,5 +34,13 @@
   "fin-track": "Log today’s spending",
   "fin-nospend": "A no-spend day",
   "fin-review": "Review your budget",
-  "fin-save": "Transfer something to savings"
+  "fin-save": "Transfer something to savings",
+  "fit-bodyweight": "Do a 15-minute bodyweight circuit",
+  "fit-gym": "Strength session at the gym",
+  "mind-winddown": "30-minute screen-free wind-down before bed",
+  "health-plant-protein": "Eat a plant-protein serving (beans, lentils, tofu)",
+  "health-omega3": "Eat a serving of fish or omega-3 food",
+  "health-lean-protein": "Eat a lean-protein serving",
+  "rel-checkin": "Have a 10-minute daily check-in",
+  "fin-debt": "Put something toward debt"
 }

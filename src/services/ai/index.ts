@@ -29,7 +29,7 @@ export const defaultAIEngine: AIEngine = createAIEngine('on-device');
 
 export * from './AIEngine';
 export * from './errors';
-export { GeminiAdapter, parseGeminiSuggestions } from './GeminiAdapter';
+export { GeminiAdapter, parseGeminiSuggestions, parseGeminiRecipes } from './GeminiAdapter';
 export { BYOKeyAdapter } from './BYOKeyAdapter';
 export { OnDeviceAdapter } from './OnDeviceAdapter';
 export { buildEngine, type EngineDeps } from './engineFactory';
@@ -42,3 +42,9 @@ export {
   type QuestSource,
 } from './questGenerator';
 export { generateCoaching, type CoachResult, type CoachOptions } from './coachGenerator';
+export {
+  generateRecipes,
+  type GenerateRecipesResult,
+  type GenerateRecipesOptions,
+  type RecipeSource,
+} from './recipeGenerator';

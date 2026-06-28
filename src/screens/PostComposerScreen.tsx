@@ -7,11 +7,12 @@ import { CommunityGate, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
 import { useProjects } from '@/state/ProjectsContext';
+import { useSettings } from '@/state/SettingsContext';
 import { getBucketColor } from '@/lib/buckets';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
-import { MAX_POST_TEXT, isValidPostText, type PostMedia } from '@/lib/community';
+import { MAX_POST_TEXT, isValidPostText, type PostAudience, type PostMedia } from '@/lib/community';
 import { uploadMedia } from '@/services/firebase/storage';
-import { MEDIA_UPLOADS_ENABLED } from '@/config/features';
+import { MEDIA_UPLOADS_ENABLED, AUDIENCE_CONTROLS_ENABLED } from '@/config/features';
 import type { QuestCategory } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -29,6 +30,7 @@ export function PostComposerScreen({ route, navigation }: Props) {
   const { t } = useTranslation(['feed', 'common']);
   const { createPost, uid } = useCommunity();
   const { myProjects } = useProjects();
+  const { settings, update } = useSettings();
   const isAsk = route.params?.kind === 'ask';
   const isWin = route.params?.kind === 'contribution';
   const winHabit = route.params?.habitTitle;
@@ -46,6 +48,11 @@ export function PostComposerScreen({ route, navigation }: Props) {
   const [categoryHint, setCategoryHint] = useState<QuestCategory | null>(route.params?.categoryHint ?? null);
   const [media, setMedia] = useState<PostMedia | null>(null);
   const [posting, setPosting] = useState(false);
+  // Audience: seed from the user's sticky default; 'ask' means they must choose.
+  const [audience, setAudience] = useState<PostAudience | null>(
+    settings.feedDefaultAudience === 'ask' ? null : settings.feedDefaultAudience,
+  );
+  const [setAsDefault, setSetAsDefault] = useState(false);
 
   // Photo/video attach — disabled (shown) until the Firebase Blaze upgrade.
   const pickMedia = async () => {
@@ -62,11 +69,15 @@ export function PostComposerScreen({ route, navigation }: Props) {
     setMedia({ url, type: asset.type === 'video' ? 'video' : 'image' });
   };
 
-  const canPost = isValidPostText(text) && !posting;
+  const needsAudience = AUDIENCE_CONTROLS_ENABLED && audience === null;
+  const canPost = isValidPostText(text) && !posting && !needsAudience;
 
   const submit = async () => {
     if (!canPost) return;
     setPosting(true);
+    if (AUDIENCE_CONTROLS_ENABLED && setAsDefault && audience) {
+      await update({ feedDefaultAudience: audience });
+    }
     const project = myProjects.find((p) => p.id === projectId);
     const ok = await createPost({
       text,
@@ -74,11 +85,18 @@ export function PostComposerScreen({ route, navigation }: Props) {
       ...(isAsk && categoryHint ? { categoryHint } : {}),
       ...(isWin ? { kind: 'contribution' as const, ...(winHabit ? { habitTitle: winHabit } : {}), ...(typeof winValue === 'number' ? { value: winValue } : {}), ...(winMode ? { mode: winMode } : {}) } : {}),
       ...(project ? { projectId: project.id, projectTitle: project.title, projectColorId: project.colorId } : {}),
+      ...(AUDIENCE_CONTROLS_ENABLED && audience ? { audience } : {}),
       ...(media ? { media } : {}),
     });
     if (ok) navigation.goBack();
     else setPosting(false);
   };
+
+  const AUDIENCES: { id: PostAudience; icon: string }[] = [
+    { id: 'public', icon: '🌍' },
+    { id: 'friends', icon: '🤝' },
+    { id: 'private', icon: '🔒' },
+  ];
 
   const headerTitle = isAsk
     ? t('feed:composerScreen.titleAsk')
@@ -141,6 +159,36 @@ export function PostComposerScreen({ route, navigation }: Props) {
             accessibilityLabel={isAsk ? t('feed:composerScreen.a11yAsk') : t('feed:composerScreen.a11yPost')}
           />
           <Text style={styles.counter}>{t('feed:composerScreen.counter', { current: text.length, max: MAX_POST_TEXT })}</Text>
+
+          {/* Audience — who can see this. Privacy-first: must be chosen unless a
+              sticky default is set. */}
+          {AUDIENCE_CONTROLS_ENABLED && (
+            <>
+              <Text style={styles.label}>{t('feed:composerScreen.audienceLabel')}</Text>
+              <View style={styles.chips}>
+                {AUDIENCES.map((a) => {
+                  const on = audience === a.id;
+                  return (
+                    <Pressable
+                      key={a.id}
+                      onPress={() => setAudience(a.id)}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
+                      style={[styles.chip, on && styles.chipOn]}
+                    >
+                      <Text style={[styles.chipText, on && styles.chipTextOn]}>{a.icon} {t(`feed:composerScreen.audience_${a.id}`)}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              {audience && (
+                <Pressable onPress={() => setSetAsDefault((v) => !v)} accessibilityRole="checkbox" accessibilityState={{ checked: setAsDefault }} style={styles.defaultRow}>
+                  <View style={[styles.defaultBox, setAsDefault && styles.defaultBoxOn]}>{setAsDefault && <Text style={styles.defaultCheck}>✓</Text>}</View>
+                  <Text style={styles.defaultText}>{t('feed:composerScreen.setDefault')}</Text>
+                </Pressable>
+              )}
+            </>
+          )}
 
           {/* Photo/video attach — visible but disabled until media is enabled. */}
           <View style={styles.mediaRow}>
@@ -233,4 +281,9 @@ const styles = StyleSheet.create({
   chipOn: { backgroundColor: '#EDE9FE', borderColor: VIOLET },
   chipText: { ...typography.label, color: INK, fontWeight: '600' },
   chipTextOn: { color: VIOLET, fontWeight: '800' },
+  defaultRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs },
+  defaultBox: { width: 20, height: 20, borderRadius: 6, borderWidth: 2, borderColor: TRACK, alignItems: 'center', justifyContent: 'center' },
+  defaultBoxOn: { backgroundColor: VIOLET, borderColor: VIOLET },
+  defaultCheck: { color: '#FFFFFF', fontWeight: '900', fontSize: 12 },
+  defaultText: { ...typography.caption, color: MUTED },
 });

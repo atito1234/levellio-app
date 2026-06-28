@@ -1,0 +1,190 @@
+{
+  "screen": {
+    "title": "Recettes",
+    "subtitle": "Adaptées à votre régime — enregistrez vos préférées et cochez-les en cuisinant.",
+    "recommended": "Recommandé pour vous",
+    "saved": "Enregistrées",
+    "empty": "Choisissez une préférence alimentaire pendant l’intégration pour obtenir des recettes adaptées — ou enregistrez ici celles que vous aimez.",
+    "save": "Enregistrer",
+    "savedLabel": "Enregistrée ✓",
+    "cook": "Marquer comme cuisinée",
+    "cookedToday": "Cuisinée aujourd’hui ✓",
+    "ingredients": "Ingrédients",
+    "steps": "Étapes",
+    "meta": "{{minutes}} min · {{servings}} portions",
+    "generate": "Générer avec l’IA",
+    "generating": "Génération…",
+    "generated": "Générées pour vous",
+    "aiUnavailable": "Impossible de générer pour le moment — voici des recettes sélectionnées.",
+    "aiBadge": "IA"
+  },
+  "veg-stirfry": {
+    "title": "Sauté de légumes arc-en-ciel",
+    "desc": "Des légumes de saison croquants dans une sauce savoureuse rapide. Prêt en 20 minutes.",
+    "nutrition": "Riche en fibres et en couleurs ; naturellement végétal.",
+    "ingredients": [
+      "2 tasses de légumes variés (poivrons, brocoli, carotte)",
+      "1 c. à soupe d'huile",
+      "1 gousse d'ail émincée",
+      "1 c. à soupe de tamari ou sauce soja sans gluten",
+      "1 tasse de riz cuit"
+    ],
+    "steps": [
+      "Chauffez l'huile dans une grande poêle à feu vif.",
+      "Ajoutez l'ail, puis les légumes ; faites sauter 5–7 minutes jusqu'à ce qu'ils soient tendres-croquants.",
+      "Ajoutez le tamari, mélangez et servez sur le riz."
+    ]
+  },
+  "chickpea-curry": {
+    "title": "Curry de pois chiches épicé",
+    "desc": "Nourrissant, réconfortant et riche en protéines — parfait à préparer en grande quantité.",
+    "nutrition": "Riche en protéines végétales et en fibres ; stabilise la glycémie.",
+    "ingredients": [
+      "1 boîte de pois chiches égouttés",
+      "1 boîte de tomates concassées",
+      "200 ml de lait de coco",
+      "1 c. à soupe de poudre de curry",
+      "1 oignon coupé en dés"
+    ],
+    "steps": [
+      "Faites revenir l'oignon dans un peu d'huile, puis ajoutez la poudre de curry.",
+      "Ajoutez les tomates, le lait de coco et les pois chiches ; laissez mijoter 15 minutes.",
+      "Assaisonnez et servez avec du riz ou du pain plat."
+    ]
+  },
+  "lentil-soup": {
+    "title": "Soupe réconfortante aux lentilles corail",
+    "desc": "Une soupe tout-en-un simple, nourrissante et économique.",
+    "nutrition": "Protéines végétales et fibres ; douce et sans gluten.",
+    "ingredients": [
+      "1 tasse de lentilles corail rincées",
+      "1 carotte coupée en dés",
+      "1 oignon coupé en dés",
+      "4 tasses de bouillon de légumes",
+      "1 c. à café de cumin"
+    ],
+    "steps": [
+      "Faites suer l'oignon et la carotte quelques minutes.",
+      "Ajoutez les lentilles, le bouillon et le cumin ; portez à ébullition.",
+      "Laissez mijoter 20 minutes jusqu'à ce que les lentilles se défassent, puis mixez si vous le souhaitez."
+    ]
+  },
+  "quinoa-salad": {
+    "title": "Salade de quinoa au citron",
+    "desc": "Une salade fraîche qui se transporte bien.",
+    "nutrition": "Protéine végétale complète ; fraîche et sans gluten.",
+    "ingredients": [
+      "1 tasse de quinoa cuit et refroidi",
+      "1 concombre coupé en dés",
+      "Une poignée de tomates cerises coupées en deux",
+      "Le jus d'1 citron",
+      "2 c. à soupe d'huile d'olive"
+    ],
+    "steps": [
+      "Mélangez le quinoa, le concombre et les tomates dans un bol.",
+      "Fouettez le jus de citron et l'huile d'olive, puis incorporez.",
+      "Assaisonnez et réfrigérez 10 minutes avant de servir."
+    ]
+  },
+  "overnight-oats": {
+    "title": "Flocons d'avoine de nuit",
+    "desc": "Mélangez le soir, dégustez le matin. Préparation en cinq minutes.",
+    "nutrition": "Glucides à libération lente et fibres ; sans sucre ajouté.",
+    "ingredients": [
+      "1/2 tasse de flocons d'avoine",
+      "1/2 tasse de lait au choix",
+      "2 c. à soupe de yaourt",
+      "1/2 banane écrasée",
+      "Une pincée de cannelle"
+    ],
+    "steps": [
+      "Mélangez le tout dans un bocal.",
+      "Couvrez et réfrigérez toute la nuit.",
+      "Garnissez de fruits le matin et dégustez froid."
+    ]
+  },
+  "greek-yogurt-bowl": {
+    "title": "Bol de yaourt protéiné",
+    "desc": "Un petit-déjeuner ou en-cas riche en protéines en cinq minutes.",
+    "nutrition": "Riche en protéines, pauvre en sucre ; rassasiant.",
+    "ingredients": [
+      "1 tasse de yaourt grec",
+      "Une poignée de baies",
+      "1 c. à soupe de noix concassées",
+      "1 c. à café de miel (facultatif)"
+    ],
+    "steps": [
+      "Versez le yaourt dans un bol.",
+      "Garnissez de baies et de noix.",
+      "Ajoutez un filet de miel si vous le souhaitez et servez."
+    ]
+  },
+  "salmon-bowl": {
+    "title": "Bol de saumon et légumes verts",
+    "desc": "Saumon riche en oméga sur lit de verdure et de céréales.",
+    "nutrition": "Riche en protéines et en oméga-3 ; sans gluten.",
+    "ingredients": [
+      "1 filet de saumon",
+      "2 tasses de légumes verts à feuilles",
+      "1/2 tasse de riz ou de quinoa cuit",
+      "1/2 avocat tranché",
+      "Un filet de citron"
+    ],
+    "steps": [
+      "Poêlez ou faites cuire le saumon au four jusqu'à ce qu'il soit juste cuit.",
+      "Composez le bol avec la verdure et les céréales.",
+      "Garnissez de saumon et d'avocat, terminez avec le citron."
+    ]
+  },
+  "tuna-salad": {
+    "title": "Salade de thon express",
+    "desc": "Un déjeuner de placard en 10 minutes.",
+    "nutrition": "Protéine maigre, pauvre en sucre ; très rapide.",
+    "ingredients": [
+      "1 boîte de thon égoutté",
+      "2 tasses de feuilles de salade",
+      "1/2 tasse de haricots blancs",
+      "1 c. à soupe d'huile d'olive",
+      "Un filet de citron"
+    ],
+    "steps": [
+      "Émiettez le thon sur les feuilles de salade.",
+      "Ajoutez les haricots.",
+      "Assaisonnez d'huile d'olive et de citron, puis mélangez."
+    ]
+  },
+  "chicken-veg": {
+    "title": "Poulet et légumes à la plaque",
+    "desc": "Tout rôtit sur une seule plaque — nettoyage minimal.",
+    "nutrition": "Riche en protéines maigres ; sans gluten.",
+    "ingredients": [
+      "2 blancs de poulet",
+      "3 tasses de légumes coupés",
+      "1 c. à soupe d'huile d'olive",
+      "1 c. à café d'herbes mélangées",
+      "Sel et poivre"
+    ],
+    "steps": [
+      "Préchauffez le four à 200 °C / 400 °F.",
+      "Mélangez le poulet et les légumes avec l'huile et les herbes sur une plaque.",
+      "Faites rôtir 25–30 minutes jusqu'à ce que le poulet soit cuit."
+    ]
+  },
+  "turkey-wrap": {
+    "title": "Wrap dinde et houmous",
+    "desc": "Un déjeuner rapide, riche en protéines et facile à emporter.",
+    "nutrition": "Protéine maigre avec des fibres pour tenir.",
+    "ingredients": [
+      "1 tortilla",
+      "3 tranches de dinde maigre",
+      "2 c. à soupe de houmous",
+      "Une poignée d'épinards",
+      "Tomate tranchée"
+    ],
+    "steps": [
+      "Étalez le houmous sur la tortilla.",
+      "Disposez la dinde, les épinards et la tomate.",
+      "Roulez bien serré, coupez en deux et servez."
+    ]
+  }
+}

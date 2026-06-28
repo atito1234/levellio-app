@@ -18,5 +18,7 @@
   "finishAndLog": "Finish & log",
   "finishAndLogA11y": "Finish and log now",
   "justLogIt": "Just log it",
-  "justLogItA11y": "Log without timing"
+  "justLogItA11y": "Log without timing",
+  "verified": "✓ Verified",
+  "selfReported": "Self-reported"
 }
