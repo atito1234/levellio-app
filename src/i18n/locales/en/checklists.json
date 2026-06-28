@@ -1,0 +1,22 @@
+{
+  "title": "Checklists",
+  "subtitle": "Build a list, tick it off, and check out — your streak grows each day you close it.",
+  "todayTitle": "Your checklists",
+  "empty": "No checklists yet. Create one to turn your routine into a satisfying daily ritual.",
+  "create": "New checklist",
+  "namePlaceholder": "Checklist name (e.g. Morning routine)",
+  "addItem": "Add item",
+  "itemPlaceholder": "Add an item…",
+  "recurring": "Repeats daily",
+  "oneOff": "One-off",
+  "checkOut": "Check out",
+  "checkedOut": "Checked out ✓",
+  "allDone": "All done — check out!",
+  "progress": "{{done}}/{{total}}",
+  "streak": "{{count}}-day streak",
+  "delete": "Delete",
+  "deleteConfirmTitle": "Delete checklist?",
+  "deleteConfirmBody": "This removes the checklist and its items. This can't be undone.",
+  "cancel": "Cancel",
+  "celebrate": "Nice — checked out! 🎉"
+}

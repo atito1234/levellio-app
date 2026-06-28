@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { ScreenContainer, AnimatedHero, RatingPrompt } from '@/components';
 import type { RatingValue } from '@/types';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
-import { activityTiming, formatClock } from '@/lib/activityTimer';
+import { activityTiming, formatClock, isVerifiedDuration } from '@/lib/activityTimer';
+import { ACTIVITY_VERIFICATION_ENABLED } from '@/config/features';
 import { pickFocusQuote } from '@/data/focusQuotes';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -39,9 +41,11 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
   const [remaining, setRemaining] = useState(totalSec);
   const [running, setRunning] = useState(false);
   const [logged, setLogged] = useState(false);
+  const [wasVerified, setWasVerified] = useState(false);
   // When the habit asks for a rating, a finish first parks the duration here and
   // opens the prompt; the real completion runs once a rating is picked/skipped.
   const [pendingSec, setPendingSec] = useState<number | null>(null);
+  const [pendingVerified, setPendingVerified] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopTick = useCallback(() => {
@@ -49,44 +53,55 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    // Release the screen lock whenever the countdown stops.
+    void deactivateKeepAwake();
   }, []);
 
   useEffect(() => stopTick, [stopTick]);
 
   // Persist the completion (optionally with a rating) and hand off to celebration.
   const commit = useCallback(
-    async (durationSec: number, rating?: RatingValue) => {
+    async (durationSec: number, verified: boolean, rating?: RatingValue) => {
       if (logged || !quest || !timing) return;
       setLogged(true);
-      const reward = await complete(quest, { method: timing.method, durationSec, ...(rating ? { rating } : {}) });
+      setWasVerified(verified);
+      const reward = await complete(quest, {
+        method: timing.method,
+        durationSec,
+        ...(rating ? { rating } : {}),
+        ...(ACTIVITY_VERIFICATION_ENABLED && verified ? { verified: true } : {}),
+      });
       if (reward?.leveledUp) navigation.navigate('QuestComplete', { reward });
     },
     [logged, quest, timing, complete, navigation],
   );
 
   const finish = useCallback(
-    async (durationSec: number) => {
+    async (durationSec: number, verified: boolean) => {
       stopTick();
       setRunning(false);
       if (logged || !quest || !timing) return;
       // Rating habits: pause for the quick 1–5 self-report before committing.
       if (quest.metric === 'rating') {
         setPendingSec(durationSec);
+        setPendingVerified(verified);
         return;
       }
-      await commit(durationSec);
+      await commit(durationSec, verified);
     },
     [stopTick, logged, quest, timing, commit],
   );
 
-  // The "alarm": when the countdown reaches zero, auto-log the full session.
+  // The "alarm": when the countdown reaches zero, auto-log the full (verified) session.
   useEffect(() => {
-    if (running && remaining <= 0) void finish(totalSec);
+    if (running && remaining <= 0) void finish(totalSec, true);
   }, [running, remaining, totalSec, finish]);
 
   const start = useCallback(() => {
     if (running || remaining <= 0) return;
     setRunning(true);
+    // Lock the screen on so a timed activity must actually be lived through.
+    void activateKeepAwakeAsync();
     intervalRef.current = setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000);
   }, [running, remaining]);
 
@@ -159,6 +174,11 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
           <View style={styles.clockWrap} pointerEvents="none">
             <Text style={styles.clock}>{logged ? '✓' : formatClock(remaining)}</Text>
             <Text style={styles.clockSub}>{logged ? t('logged') : running ? t('inProgress') : t('ready')}</Text>
+            {logged && ACTIVITY_VERIFICATION_ENABLED && (
+              <Text style={[styles.verifyTag, wasVerified ? styles.verifyOk : styles.verifySelf]}>
+                {wasVerified ? t('verified') : t('selfReported')}
+              </Text>
+            )}
           </View>
         </View>
       </View>
@@ -179,7 +199,7 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
           </Pressable>
           <View style={styles.secondaryRow}>
             <Pressable
-              onPress={() => void finish(elapsed)}
+              onPress={() => void finish(elapsed, isVerifiedDuration(elapsed, totalSec))}
               accessibilityRole="button"
               accessibilityLabel={t('finishAndLogA11y')}
               style={styles.secondaryBtn}
@@ -187,7 +207,7 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
               <Text style={styles.secondaryText}>{t('finishAndLog')}</Text>
             </Pressable>
             <Pressable
-              onPress={() => void finish(0)}
+              onPress={() => void finish(0, false)}
               accessibilityRole="button"
               accessibilityLabel={t('justLogItA11y')}
               style={styles.secondaryBtn}
@@ -204,12 +224,12 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
         onSelect={(rating) => {
           const sec = pendingSec ?? 0;
           setPendingSec(null);
-          void commit(sec, rating);
+          void commit(sec, pendingVerified, rating);
         }}
         onSkip={() => {
           const sec = pendingSec ?? 0;
           setPendingSec(null);
-          void commit(sec);
+          void commit(sec, pendingVerified);
         }}
       />
     </ScreenContainer>
@@ -229,6 +249,9 @@ const styles = StyleSheet.create({
   clockWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   clock: { ...typography.heading, color: INK, fontWeight: '900', fontSize: 52 },
   clockSub: { ...typography.caption, color: MUTED },
+  verifyTag: { ...typography.caption, fontWeight: '800', marginTop: 4 },
+  verifyOk: { color: '#5C9A1B' },
+  verifySelf: { color: MUTED },
   controls: { gap: spacing.sm, marginBottom: spacing.md },
   primaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.lg, alignItems: 'center', marginBottom: spacing.md },
   primaryText: { ...typography.title, color: '#FFFFFF', fontWeight: '800' },

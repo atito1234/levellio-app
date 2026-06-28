@@ -18,5 +18,7 @@
   "finishAndLog": "Terminar y registrar",
   "finishAndLogA11y": "Terminar y registrar ahora",
   "justLogIt": "Solo registrar",
-  "justLogItA11y": "Registrar sin cronometrar"
+  "justLogItA11y": "Registrar sin cronometrar",
+  "verified": "✓ Verificado",
+  "selfReported": "Autoinformado"
 }

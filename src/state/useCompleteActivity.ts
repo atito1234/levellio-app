@@ -27,6 +27,8 @@ export interface CompletionOpts {
   rating?: 1 | 2 | 3 | 4 | 5;
   /** For project-linked habits: where it was done (on-site vs anywhere). */
   contributionMode?: ContributionMode;
+  /** True when verified (timer actually elapsed / sensor-confirmed) vs self-reported. */
+  verified?: boolean;
 }
 
 /**
@@ -63,6 +65,7 @@ export function useCompleteActivity(): (quest: Quest, opts: CompletionOpts) => P
         durationSec: opts.durationSec,
         ...(location ? { location } : {}),
         ...(opts.rating ? { rating: opts.rating } : {}),
+        ...(opts.verified ? { verified: true } : {}),
       });
 
       // Share this completion with any community projects the habit feeds, then

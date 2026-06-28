@@ -76,6 +76,11 @@ export interface ActivitySessionEvent extends BaseEvent {
   location?: LocationSample;
   /** Self-reported "how did it go?" 1–5, when the habit opts into a rating. */
   rating?: 1 | 2 | 3 | 4 | 5;
+  /**
+   * True when the completion was verified (the in-app timer actually elapsed, or
+   * a sensor confirmed it). Absent/false = a self-reported manual log.
+   */
+  verified?: boolean;
 }
 
 export type MetadataEvent = HabitProvenanceEvent | ActivityContributionEvent | ActivitySessionEvent;
@@ -216,6 +221,8 @@ export interface SessionInput {
   location?: LocationSample;
   /** Self-reported 1–5 rating for this completion, when the habit asks for one. */
   rating?: 1 | 2 | 3 | 4 | 5;
+  /** True when the completion was verified (timer elapsed / sensor-confirmed). */
+  verified?: boolean;
 }
 
 /**
@@ -246,5 +253,7 @@ export function buildSessionEvent(
     ...(privacy.includeLocation && input.location ? { location: input.location } : {}),
     // Rating is a non-sensitive self-report — kept whenever the habit provides one.
     ...(input.rating ? { rating: input.rating } : {}),
+    // Trust signal: whether this completion was verified vs self-reported.
+    ...(input.verified ? { verified: true } : {}),
   };
 }

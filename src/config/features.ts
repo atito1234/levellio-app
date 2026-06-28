@@ -16,3 +16,23 @@ export const MEDIA_UPLOADS_ENABLED = false;
  * perks become paid. Core habit-building + community always stay free regardless.
  */
 export const FOUNDING_FREE = true;
+
+// --- Pre-launch remodel flags (staged rollout; land code dark, flip per wave) ---
+
+/** Per-post audience controls (public/friends/private) + privacy defaults. */
+export const AUDIENCE_CONTROLS_ENABLED = true;
+
+/** Reciprocal friends graph (request/accept) layered on one-way follow. */
+export const FRIENDS_GRAPH_ENABLED = false;
+
+/** Verified-vs-self-reported activity completion + keep-awake lock-in. */
+export const ACTIVITY_VERIFICATION_ENABLED = true;
+
+/** Step/motion verification via expo-sensors (Pedometer). */
+export const HEALTH_STEPS_ENABLED = false;
+
+/** Deep HealthKit / Health Connect integration (workouts, HR, sleep). */
+export const HEALTH_CONNECT_ENABLED = false;
+
+/** User checklists + daily "check-out" ritual (retention loop). */
+export const CHECKLISTS_ENABLED = true;

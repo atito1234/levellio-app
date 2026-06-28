@@ -1,0 +1,22 @@
+{
+  "title": "Listas",
+  "subtitle": "Crea una lista, márcala y ciérrala: tu racha crece cada día que la completas.",
+  "todayTitle": "Tus listas",
+  "empty": "Aún no hay listas. Crea una para convertir tu rutina en un ritual diario satisfactorio.",
+  "create": "Nueva lista",
+  "namePlaceholder": "Nombre de la lista (p. ej. Rutina matutina)",
+  "addItem": "Añadir elemento",
+  "itemPlaceholder": "Añade un elemento…",
+  "recurring": "Se repite a diario",
+  "oneOff": "Única vez",
+  "checkOut": "Cerrar lista",
+  "checkedOut": "Cerrada ✓",
+  "allDone": "¡Todo listo — cierra la lista!",
+  "progress": "{{done}}/{{total}}",
+  "streak": "Racha de {{count}} días",
+  "delete": "Eliminar",
+  "deleteConfirmTitle": "¿Eliminar la lista?",
+  "deleteConfirmBody": "Esto elimina la lista y sus elementos. No se puede deshacer.",
+  "cancel": "Cancelar",
+  "celebrate": "¡Bien — lista cerrada! 🎉"
+}

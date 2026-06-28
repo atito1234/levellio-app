@@ -1,0 +1,22 @@
+{
+  "title": "Listes",
+  "subtitle": "Créez une liste, cochez-la et clôturez-la — votre série grandit chaque jour où vous la terminez.",
+  "todayTitle": "Vos listes",
+  "empty": "Pas encore de liste. Créez-en une pour transformer votre routine en un rituel quotidien satisfaisant.",
+  "create": "Nouvelle liste",
+  "namePlaceholder": "Nom de la liste (ex. Routine du matin)",
+  "addItem": "Ajouter un élément",
+  "itemPlaceholder": "Ajouter un élément…",
+  "recurring": "Se répète chaque jour",
+  "oneOff": "Ponctuelle",
+  "checkOut": "Clôturer",
+  "checkedOut": "Clôturée ✓",
+  "allDone": "Tout est fait — clôturez !",
+  "progress": "{{done}}/{{total}}",
+  "streak": "Série de {{count}} jours",
+  "delete": "Supprimer",
+  "deleteConfirmTitle": "Supprimer la liste ?",
+  "deleteConfirmBody": "Cela supprime la liste et ses éléments. Action irréversible.",
+  "cancel": "Annuler",
+  "celebrate": "Bravo — liste clôturée ! 🎉"
+}

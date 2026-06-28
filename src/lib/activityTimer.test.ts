@@ -1,4 +1,4 @@
-import { activityTiming, formatClock, parseDurationMinutes, POMODORO_MINUTES } from './activityTimer';
+import { activityTiming, formatClock, isVerifiedDuration, parseDurationMinutes, POMODORO_MINUTES } from './activityTimer';
 
 describe('parseDurationMinutes', () => {
   it('reads minutes from common phrasings', () => {
@@ -31,6 +31,26 @@ describe('activityTiming', () => {
       minutes: POMODORO_MINUTES,
       method: 'pomodoro',
     });
+  });
+});
+
+describe('isVerifiedDuration', () => {
+  it('is not verified for a zero/manual log', () => {
+    expect(isVerifiedDuration(0, 1200)).toBe(false);
+  });
+
+  it('verifies when at least 90% of the target elapsed', () => {
+    expect(isVerifiedDuration(1080, 1200)).toBe(true); // exactly 90%
+    expect(isVerifiedDuration(1200, 1200)).toBe(true);
+  });
+
+  it('is self-reported when well short of the target', () => {
+    expect(isVerifiedDuration(60, 1200)).toBe(false);
+  });
+
+  it('verifies any real elapsed time for an open-ended (Pomodoro) target', () => {
+    expect(isVerifiedDuration(5, 0)).toBe(true);
+    expect(isVerifiedDuration(0, 0)).toBe(false);
   });
 });
 

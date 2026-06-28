@@ -48,6 +48,7 @@ import { InboxScreen } from '@/screens/InboxScreen';
 import { ChatScreen } from '@/screens/ChatScreen';
 import { AISetupScreen } from '@/screens/AISetupScreen';
 import { RecipesScreen } from '@/screens/RecipesScreen';
+import { ChecklistsScreen } from '@/screens/ChecklistsScreen';
 import { MilestoneCelebration } from '@/components/MilestoneCelebration';
 import { InterventionOverlay } from '@/components/InterventionOverlay';
 import { SpotlightProvider, SpotlightOverlay } from '@/components/spotlight';
@@ -172,6 +173,7 @@ export function RootNavigator() {
         <Stack.Screen name="Chat" component={ChatScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="AISetup" component={AISetupScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Recipes" component={RecipesScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Checklists" component={ChecklistsScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
       {/* Overlays any screen to celebrate earned milestones (queue-driven). */}
       <MilestoneCelebration />

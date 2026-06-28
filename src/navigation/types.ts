@@ -108,6 +108,8 @@ export type RootStackParamList = {
   AISetup: undefined;
   /** Your personalized recipe collection (recommended + saved), matched to your diet. */
   Recipes: undefined;
+  /** Your checklists — keep lists, tick them off, and check out for a streak. */
+  Checklists: undefined;
 };
 
 declare global {
