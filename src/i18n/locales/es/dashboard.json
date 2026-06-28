@@ -47,6 +47,7 @@
     "connections": "🔗 Conexiones",
     "suggest": "✨ Sugerir"
   },
+  "more": { "title": "Más", "openLabel": "Más ▾", "share": "Compartir", "discover": "Descubrir", "close": "Cerrar" },
   "capacitiesTitle": "Tus capacidades · últimos 7 días",
   "progress": "Progreso ›",
   "goalsEmptyTitle": "¿Qué quieres lograr?",

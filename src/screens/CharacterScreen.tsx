@@ -1,9 +1,10 @@
 import React from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
+  CapacityRing,
   CompanionAvatar,
   HeroAvatar,
   PrimaryButton,
@@ -13,7 +14,9 @@ import {
 } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { useCapacities } from '@/state/CapacitiesContext';
 import { useCommunity } from '@/state/CommunityContext';
+import { CAPACITIES } from '@/lib/compounding';
 import { getKit } from '@/data/worldCupKits';
 import type { RootStackParamList } from '@/navigation/types';
 import {
@@ -29,7 +32,9 @@ import type { HeroTier } from '@/types';
 export function CharacterScreen() {
   const { t } = useTranslation('hero');
   const tierLabel = (tier: HeroTier) => t(`tier.${tier}`);
+  const capName = (id: string) => t(`capacities:${id}`);
   const { character } = useGame();
+  const { levels } = useCapacities();
   const { uid: communityUid } = useCommunity();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -109,6 +114,34 @@ export function CharacterScreen() {
               onPress={() => navigation.navigate('Profile', { uid: communityUid })}
             />
           )}
+        </View>
+
+        {/* Your capacities — the shared rings every completion feeds (moved here
+            from Today to keep the home screen calm). */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{t('capacitiesTitle')}</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
+            {CAPACITIES.map((cap) => {
+              const lvl = Math.round(levels[cap.id]);
+              return (
+                <Pressable
+                  key={cap.id}
+                  onPress={() => navigation.navigate('CapacityFocus', { capacityId: cap.id })}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${capName(cap.id)} ${lvl}%`}
+                  style={styles.capCell}
+                >
+                  <View style={styles.capRingWrap}>
+                    <CapacityRing level={lvl} colorId={cap.colorId} size={56} strokeWidth={6} />
+                    <View style={styles.capRingCenter} pointerEvents="none">
+                      <Text style={styles.capRingPct}>{lvl}%</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.capCellName}>{capName(cap.id)}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
 
         {/* Companion */}
@@ -217,6 +250,12 @@ const styles = StyleSheet.create({
     ...typography.title,
     color: colors.textPrimary,
   },
+  capStrip: { gap: spacing.md },
+  capCell: { alignItems: 'center', gap: 4, width: 64 },
+  capRingWrap: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center' },
+  capRingCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  capRingPct: { ...typography.caption, color: colors.textPrimary, fontWeight: '800', fontSize: 11 },
+  capCellName: { ...typography.caption, color: colors.textMuted, fontSize: 11 },
   kitHead: {
     flexDirection: 'row',
     alignItems: 'center',

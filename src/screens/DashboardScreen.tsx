@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
-import { AddActivityFab, AddActivitySheet, AppHeader, CapacityRing, HeroAvatar, ProjectBadge, ProjectsStrip, ScreenContainer, WorldProjectsStrip } from '@/components';
+import { AddActivityFab, AddActivitySheet, AppHeader, HeroAvatar, MoreSheet, ProjectBadge, ProjectsStrip, ScreenContainer } from '@/components';
 import { useSpotlightTarget, useWelcomeTour } from '@/components/spotlight';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
@@ -89,6 +89,7 @@ export function DashboardScreen() {
   const plan = getPlan(todayKey);
   const [suggesting, setSuggesting] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   // Personalized, science-backed line from the user's real history + today.
   const motivation = useMotivation().text;
 
@@ -318,49 +319,6 @@ export function DashboardScreen() {
             </View>
           </View>
         </View>
-
-        {/* Facebook-style composer — share to the community in one tap from home,
-            with a quick jump to the full feed (Today ↔ Feed connection). */}
-        {signedIn && communityAllowed && (
-          <View style={styles.homeComposerRow}>
-            <Pressable
-              onPress={() => navigation.navigate('PostComposer')}
-              accessibilityRole="button"
-              accessibilityLabel={t('dashboard:share.a11y')}
-              style={styles.homeComposer}
-            >
-              <HeroAvatar presentation={character.presentation} tier={character.tier} kitId={character.kitId} size={36} />
-              <Text style={styles.homeComposerHint}>{t('dashboard:share.hint')}</Text>
-              <Text style={styles.homeComposerIcon}>✏️</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => navigation.navigate('Main', { screen: 'Feed' })}
-              accessibilityRole="button"
-              accessibilityLabel={t('dashboard:share.viewFeedA11y')}
-              hitSlop={8}
-              style={styles.homeComposerFeed}
-            >
-              <Text style={styles.homeComposerFeedText}>{t('dashboard:share.viewFeed')}</Text>
-            </Pressable>
-          </View>
-        )}
-
-        {/* Recipes for you — appears once a dietary plan has been recommended. */}
-        {(settings.recommendedRecipeIds?.length ?? 0) > 0 && (
-          <Pressable
-            onPress={() => navigation.navigate('Recipes')}
-            accessibilityRole="button"
-            accessibilityLabel={t('recipes:screen.title')}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: PAD, paddingVertical: 14, marginHorizontal: PAD, marginBottom: 8, borderWidth: 1, borderColor: '#ECEAE4' }}
-          >
-            <Text style={{ fontSize: 22 }}>🍽️</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ ...typography.label, color: INK, fontWeight: '800' }}>{t('recipes:screen.title')}</Text>
-              <Text style={{ ...typography.caption, color: MUTED }}>{t('recipes:screen.recommended')}</Text>
-            </View>
-            <Text style={{ fontSize: 22, color: MUTED }}>›</Text>
-          </Pressable>
-        )}
 
         {/* Checklists — keep a list, tick it off, check out for a streak. */}
         {CHECKLISTS_ENABLED && (
@@ -643,64 +601,24 @@ export function DashboardScreen() {
           </View>
           <Text style={styles.planCtaChevron}>›</Text>
         </Pressable>
-
-        {/* Quick actions — discovery/nav only; the 🎙️ button is the one way to add. */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
-          <QuickChip label={t('dashboard:chips.journal')} onPress={() => navigation.navigate('Journal')} />
-          <QuickChip label={t('dashboard:chips.library')} onPress={() => navigation.navigate('HabitLibrary')} />
-          <QuickChip label={t('dashboard:chips.buckets')} onPress={() => navigation.navigate('Organize')} />
-          <QuickChip label={t('dashboard:chips.connections')} onPress={() => navigation.navigate('Connections')} />
-          <QuickChip label={suggesting ? '…' : t('dashboard:chips.suggest')} onPress={handleSuggest} />
-        </ScrollView>
-
-        {/* Your capacities — the shared rings every completion feeds (real data). */}
-        <View style={styles.capHead}>
-          <Text style={styles.railLabel}>{t('dashboard:capacitiesTitle')}</Text>
-          <Pressable
-            onPress={() => navigation.navigate('Progress')}
-            accessibilityRole="button"
-            accessibilityLabel={t('dashboard:progress')}
-          >
-            <Text style={styles.capLink}>{t('dashboard:progress')}</Text>
-          </Pressable>
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
-          {CAPACITIES.map((cap) => {
-            const lvl = Math.round(levels[cap.id]);
-            return (
-              <Pressable
-                key={cap.id}
-                onPress={() => navigation.navigate('CapacityFocus', { capacityId: cap.id })}
-                accessibilityRole="button"
-                accessibilityLabel={`${capName(cap.id)} ${lvl}%`}
-                style={styles.capCell}
-              >
-                <View style={styles.capRingWrap}>
-                  <CapacityRing level={lvl} colorId={cap.colorId} size={56} strokeWidth={6} />
-                  <View style={styles.capRingCenter} pointerEvents="none">
-                    <Text style={styles.capRingPct}>{lvl}%</Text>
-                  </View>
-                </View>
-                <Text style={styles.capCellName}>{capName(cap.id)}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
         </View>
 
-        {/* Around the world — opt-in discovery of community projects everywhere. */}
-        {settings.worldProjectsEnabled && featured.length > 0 && (
-          <WorldProjectsStrip
-            projects={featured}
-            onOpen={(projectId) => navigation.navigate('ProjectDetail', { projectId })}
-          />
-        )}
+        {/* Everything else lives one tap away in a calm "More" hub. */}
+        <Pressable
+          onPress={() => setMoreOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('dashboard:more.title')}
+          style={styles.moreBtn}
+        >
+          <Text style={styles.moreText}>{t('dashboard:more.openLabel')}</Text>
+        </Pressable>
 
         <View style={{ height: spacing.xl }} />
       </ScrollView>
 
       <AddActivityFab onPress={() => setAddOpen(true)} accent={focusAccent} highlight={onboardStep === 2} />
       <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultGoalId={selectedGoalId} />
+      <MoreSheet visible={moreOpen} onClose={() => setMoreOpen(false)} onSuggest={handleSuggest} canShare={signedIn && communityAllowed} suggesting={suggesting} />
     </ScreenContainer>
   );
 }
@@ -959,6 +877,8 @@ const styles = StyleSheet.create({
   capRingCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   capRingPct: { ...typography.caption, color: INK, fontWeight: '800', fontSize: 11 },
   capCellName: { ...typography.caption, color: MUTED, fontSize: 11 },
+  moreBtn: { alignItems: 'center', paddingVertical: spacing.md, marginHorizontal: PAD },
+  moreText: { ...typography.label, color: MUTED, fontWeight: '700' },
   quickRow: { gap: spacing.sm, paddingHorizontal: PAD },
   quickChip: { backgroundColor: '#FFF', borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#E8E6E0' },
   quickChipText: { ...typography.label, color: INK },

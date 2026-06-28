@@ -31,6 +31,7 @@
   "scheduleSubEmpty": "Tap to schedule habits across your calendar",
   "scheduleSubCount": "{{count}} planned today",
   "chips": { "journal": "📓 Journal", "library": "📚 Library", "buckets": "🗂 Buckets", "connections": "🔗 Connections", "suggest": "✨ Suggest" },
+  "more": { "title": "More", "openLabel": "More ▾", "share": "Share", "discover": "Discover", "close": "Close" },
   "capacitiesTitle": "Your capacities · last 7 days",
   "progress": "Progress ›",
   "goalsEmptyTitle": "What do you want to build toward?",
