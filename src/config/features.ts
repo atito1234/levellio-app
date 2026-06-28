@@ -36,3 +36,6 @@ export const HEALTH_CONNECT_ENABLED = false;
 
 /** User checklists + daily "check-out" ritual (retention loop). */
 export const CHECKLISTS_ENABLED = true;
+
+/** "Focus Lock" — opt-in lock that blocks leaving a running timed activity. */
+export const FOCUS_LOCK_ENABLED = true;

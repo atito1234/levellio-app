@@ -6,6 +6,7 @@
  */
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useGame } from '@/state/GameContext';
+import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { ChecklistStore } from '@/services/checklists/checklistStore';
 import { AsyncStorageStore } from '@/services/storage';
 import {
@@ -29,12 +30,17 @@ export interface NewChecklistInput {
   colorId?: BucketColorId;
   recurring?: boolean;
   items?: { label: string; questId?: string }[];
+  goalId?: string;
+  bucketId?: string;
+  projectId?: string;
 }
 
 interface ChecklistsContextValue {
   ready: boolean;
   /** Active (non-archived) checklists, rolled over to today. */
   checklists: Checklist[];
+  /** Quest ids completed today — drives linked items' "done" state. */
+  doneQuestIds: ReadonlySet<string>;
   addChecklist: (input: NewChecklistInput) => Promise<Checklist | null>;
   removeChecklist: (id: string) => Promise<void>;
   renameChecklist: (id: string, title: string) => Promise<void>;
@@ -48,8 +54,15 @@ interface ChecklistsContextValue {
 const ChecklistsContext = createContext<ChecklistsContextValue | null>(null);
 
 export function ChecklistsProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useGame();
+  const { user, quests } = useGame();
+  const completeActivity = useCompleteActivity();
   const uid = user?.uid ?? null;
+
+  // Quest ids completed today — linked checklist items derive their tick from this.
+  const doneQuestIds = useMemo(() => {
+    const today = dayKey(new Date());
+    return new Set(quests.filter((q) => q.completed && q.lastCompletedDate === today).map((q) => q.id));
+  }, [quests]);
 
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [ready, setReady] = useState(false);
@@ -102,6 +115,9 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
         order: checklists.length,
         checkedItemIds: [],
         checkoutStreak: 0,
+        ...(input.goalId ? { goalId: input.goalId } : {}),
+        ...(input.bucketId ? { bucketId: input.bucketId } : {}),
+        ...(input.projectId ? { projectId: input.projectId } : {}),
       };
       await commit([...checklists, checklist]);
       return checklist;
@@ -138,8 +154,23 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
   );
 
   const toggleItem = useCallback(
-    (id: string, itemId: string) => update(id, (c) => toggleChecklistItem(c, itemId, dayKey(new Date()))),
-    [update],
+    async (id: string, itemId: string) => {
+      const checklist = checklists.find((c) => c.id === id);
+      const item = checklist?.items.find((i) => i.id === itemId);
+      // Linked item → complete the real activity (counts toward streak/XP/group/
+      // goal/project). Completion is one-way for the day; if already done, it's a
+      // no-op and the item stays ticked (state derives from the quest).
+      if (item?.questId) {
+        const quest = quests.find((q) => q.id === item.questId);
+        if (quest && !(quest.completed && quest.lastCompletedDate === dayKey(new Date()))) {
+          await completeActivity(quest, { method: 'manual', durationSec: 0 });
+        }
+        return;
+      }
+      // Text item → toggle the local daily tick.
+      await update(id, (c) => toggleChecklistItem(c, itemId, dayKey(new Date())));
+    },
+    [checklists, quests, completeActivity, update],
   );
 
   const checkOut = useCallback(
@@ -158,8 +189,8 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
   const active = useMemo(() => checklists.filter((c) => !c.archived), [checklists]);
 
   const value = useMemo<ChecklistsContextValue>(
-    () => ({ ready, checklists: active, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut }),
-    [ready, active, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut],
+    () => ({ ready, checklists: active, doneQuestIds, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut }),
+    [ready, active, doneQuestIds, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut],
   );
 
   return <ChecklistsContext.Provider value={value}>{children}</ChecklistsContext.Provider>;

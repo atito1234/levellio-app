@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, Easing, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
+import { Animated, BackHandler, Easing, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst } from '@/components';
 import { radii, spacing, typography } from '@/theme';
@@ -14,7 +14,7 @@ import { battleStateAt } from '@/lib/battle';
 import { getTechnique, workSeconds } from '@/lib/timeTechniques';
 import { getDragon } from '@/data/dragons';
 import { activityTiming, formatClock, isVerifiedDuration } from '@/lib/activityTimer';
-import { ACTIVITY_VERIFICATION_ENABLED } from '@/config/features';
+import { ACTIVITY_VERIFICATION_ENABLED, FOCUS_LOCK_ENABLED } from '@/config/features';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -66,11 +66,14 @@ export function BattleScreen({ route, navigation }: Props) {
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<VictoryResult | null>(null);
+  const [locked, setLocked] = useState(false);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wonRef = useRef(false);
+  const allowLeave = useRef(false);
 
   const state = battleStateAt(totalSec, elapsed);
   const won = result !== null;
+  const lockActive = FOCUS_LOCK_ENABLED && locked && !won;
 
   const stop = useCallback(() => {
     if (tickRef.current) {
@@ -157,7 +160,30 @@ export function BattleScreen({ route, navigation }: Props) {
     );
   }
 
+  const leaveNow = useCallback(() => {
+    allowLeave.current = true;
+    setLocked(false);
+    navigation.goBack();
+  }, [navigation]);
+
+  // Locked attempt-to-leave routes through the "end early?" intervention.
+  const attemptLeave = useCallback(() => {
+    const intervened = guardAbandon({
+      kind: 'activity-locked-exit',
+      ctx: { focusLockedRunning: true },
+      dragonId,
+      ...(dragonName ? { dragonName } : {}),
+      ...(battleQuests[0] ? { questId: battleQuests[0].id } : {}),
+      onProceed: leaveNow,
+    });
+    if (!intervened) leaveNow();
+  }, [guardAbandon, dragonId, dragonName, battleQuests, leaveNow]);
+
   const onRetreat = () => {
+    if (lockActive) {
+      attemptLeave();
+      return;
+    }
     if (
       guardAbandon({
         kind: 'battle-retreat',
@@ -171,6 +197,27 @@ export function BattleScreen({ route, navigation }: Props) {
       return;
     navigation.goBack();
   };
+
+  // Block swipe / back / hardware-back while locked.
+  useEffect(() => {
+    navigation.setOptions({ gestureEnabled: !lockActive });
+  }, [lockActive, navigation]);
+  useEffect(() => {
+    const unsub = navigation.addListener('beforeRemove', (e) => {
+      if (!lockActive || allowLeave.current) return;
+      e.preventDefault();
+      attemptLeave();
+    });
+    return unsub;
+  }, [navigation, lockActive, attemptLeave]);
+  useEffect(() => {
+    if (!lockActive) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      attemptLeave();
+      return true;
+    });
+    return () => sub.remove();
+  }, [lockActive, attemptLeave]);
 
   const clock = totalSec === null ? formatClock(elapsed) : formatClock(state.remainingSec ?? 0);
 
@@ -256,7 +303,7 @@ export function BattleScreen({ route, navigation }: Props) {
           >
             <Text style={styles.primaryText}>{running ? t('battle.pause') : elapsed > 0 ? t('battle.resume') : t('battle.start')}</Text>
           </Pressable>
-          {elapsed > 0 && (
+          {elapsed > 0 && !lockActive && (
             <Pressable
               onPress={() => void winBattle()}
               accessibilityRole="button"
@@ -265,6 +312,17 @@ export function BattleScreen({ route, navigation }: Props) {
             >
               <Text style={styles.secondaryText}>{t('battle.finish')}</Text>
             </Pressable>
+          )}
+          {FOCUS_LOCK_ENABLED && (
+            lockActive ? (
+              <Pressable onPress={attemptLeave} accessibilityRole="button" accessibilityLabel={t('battle.endEarlyA11y')} style={styles.lockRow}>
+                <Text style={styles.lockedText}>{t('battle.lockedEndEarly')}</Text>
+              </Pressable>
+            ) : (
+              <Pressable onPress={() => setLocked(true)} accessibilityRole="button" accessibilityLabel={t('battle.lockMeIn')} style={styles.lockRow}>
+                <Text style={[styles.lockText, { color: accent }]}>{t('battle.lockMeIn')}</Text>
+              </Pressable>
+            )
           )}
         </View>
       )}
@@ -301,4 +359,7 @@ const styles = StyleSheet.create({
   secondaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.md, alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E8E6E0' },
   secondaryText: { ...typography.label, color: INK, fontWeight: '700' },
   sub: { ...typography.body, color: MUTED },
+  lockRow: { alignItems: 'center', paddingVertical: spacing.sm },
+  lockText: { ...typography.label, fontWeight: '800' },
+  lockedText: { ...typography.label, color: MUTED, fontWeight: '700' },
 });

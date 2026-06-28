@@ -14,7 +14,11 @@ import type { BucketColorId } from './buckets';
 export interface ChecklistItem {
   id: string;
   label: string;
-  /** Optional link to an existing activity/quest (for navigation/insight). */
+  /**
+   * When set, this item IS a real activity: checking it completes the quest
+   * (counts toward streak/XP/groups/goals/projects) and its "done today" state
+   * derives from the quest, not from `checkedItemIds`. Text-only items omit it.
+   */
   questId?: string;
 }
 
@@ -37,6 +41,23 @@ export interface Checklist {
   /** Consecutive-day check-out streak. */
   checkoutStreak: number;
   archived?: boolean;
+  /** Optional scope — the list belongs to a goal / group (bucket) / project. */
+  goalId?: string;
+  bucketId?: string;
+  projectId?: string;
+}
+
+/**
+ * Is an item "done today"? Linked items (with a questId) derive from the quest's
+ * real completion (passed in as a Set of quest ids done today), so a tick on
+ * Today and in the checklist stay in sync. Text-only items use `checkedItemIds`.
+ */
+export function isItemDone(
+  item: ChecklistItem,
+  checkedItemIds: readonly string[],
+  doneQuestIds: ReadonlySet<string>,
+): boolean {
+  return item.questId ? doneQuestIds.has(item.questId) : checkedItemIds.includes(item.id);
 }
 
 export interface ChecklistProgress {
@@ -46,10 +67,9 @@ export interface ChecklistProgress {
   complete: boolean;
 }
 
-export function checklistProgress(c: Checklist): ChecklistProgress {
+export function checklistProgress(c: Checklist, doneQuestIds: ReadonlySet<string> = new Set()): ChecklistProgress {
   const total = c.items.length;
-  const valid = new Set(c.items.map((i) => i.id));
-  const done = c.checkedItemIds.filter((id) => valid.has(id)).length;
+  const done = c.items.filter((it) => isItemDone(it, c.checkedItemIds, doneQuestIds)).length;
   return { done, total, pct: total ? Math.round((done / total) * 100) : 0, complete: total > 0 && done >= total };
 }
 

@@ -1,10 +1,35 @@
 import {
   checkOutChecklist,
   checklistProgress,
+  isItemDone,
   rolloverChecklist,
   toggleChecklistItem,
   type Checklist,
 } from './checklist';
+
+describe('isItemDone', () => {
+  it('text items use the daily checked list', () => {
+    expect(isItemDone({ id: 'a', label: 'x' }, ['a'], new Set())).toBe(true);
+    expect(isItemDone({ id: 'b', label: 'y' }, ['a'], new Set())).toBe(false);
+  });
+  it('linked items derive from the quest done-today set (not checkedItemIds)', () => {
+    const linked = { id: 'i1', label: 'Walk', questId: 'q1' };
+    expect(isItemDone(linked, [], new Set(['q1']))).toBe(true);
+    expect(isItemDone(linked, ['i1'], new Set())).toBe(false); // ticking the item id doesn't count
+  });
+});
+
+describe('checklistProgress with linked items', () => {
+  it('counts a linked item as done when its quest is done today', () => {
+    const c: Checklist = {
+      id: 'c', title: 'AM', emoji: '🌅', colorId: 'violet',
+      items: [{ id: 'i1', label: 'Walk', questId: 'q1' }, { id: 'i2', label: 'Water' }],
+      recurring: true, createdAt: 0, order: 0, checkedItemIds: [], checkoutStreak: 0,
+    };
+    expect(checklistProgress(c, new Set(['q1'])).done).toBe(1);
+    expect(checklistProgress({ ...c, checkedItemIds: ['i2'] }, new Set(['q1'])).complete).toBe(true);
+  });
+});
 
 function make(over: Partial<Checklist> = {}): Checklist {
   return {

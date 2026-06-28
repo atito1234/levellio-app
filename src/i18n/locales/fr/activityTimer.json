@@ -20,5 +20,8 @@
   "justLogIt": "Juste enregistrer",
   "justLogItA11y": "Enregistrer sans minuter",
   "verified": "✓ Vérifié",
-  "selfReported": "Auto-déclaré"
+  "selfReported": "Auto-déclaré",
+  "lockMeIn": "🔒 Verrouille-moi",
+  "lockedEndEarly": "🔒 Verrouillé · Terminer plus tôt ?",
+  "endEarlyA11y": "Terminer plus tôt cette activité verrouillée"
 }

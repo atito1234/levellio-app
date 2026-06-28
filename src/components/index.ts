@@ -25,6 +25,7 @@ export { FollowButton } from './FollowButton';
 export { PostCard } from './PostCard';
 export { StoriesRail } from './StoriesRail';
 export { PressableScale } from './PressableScale';
+export { SelectActivitySheet } from './SelectActivitySheet';
 export { AppHeader } from './AppHeader';
 export { CommunityGate } from './CommunityGate';
 export { PlusPlans } from './PlusPlans';

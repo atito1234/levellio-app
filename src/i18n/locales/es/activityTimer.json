@@ -20,5 +20,8 @@
   "justLogIt": "Solo registrar",
   "justLogItA11y": "Registrar sin cronometrar",
   "verified": "✓ Verificado",
-  "selfReported": "Autoinformado"
+  "selfReported": "Autoinformado",
+  "lockMeIn": "🔒 Bloquéame",
+  "lockedEndEarly": "🔒 Bloqueado · ¿Terminar antes?",
+  "endEarlyA11y": "Terminar antes esta actividad bloqueada"
 }

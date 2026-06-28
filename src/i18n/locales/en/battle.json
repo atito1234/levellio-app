@@ -94,6 +94,9 @@
     "resume": "Resume",
     "start": "Start",
     "finishA11y": "Land the final blow and finish",
-    "finish": "⚔️ Finish — slay it"
+    "finish": "⚔️ Finish — slay it",
+    "lockMeIn": "🔒 Lock me in",
+    "lockedEndEarly": "🔒 Locked in · Retreat?",
+    "endEarlyA11y": "Retreat from this locked battle"
   }
 }

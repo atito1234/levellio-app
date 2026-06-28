@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
@@ -9,8 +9,9 @@ import type { RatingValue } from '@/types';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
+import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { activityTiming, formatClock, isVerifiedDuration } from '@/lib/activityTimer';
-import { ACTIVITY_VERIFICATION_ENABLED } from '@/config/features';
+import { ACTIVITY_VERIFICATION_ENABLED, FOCUS_LOCK_ENABLED } from '@/config/features';
 import { pickFocusQuote } from '@/data/focusQuotes';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -46,7 +47,13 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
   // opens the prompt; the real completion runs once a rating is picked/skipped.
   const [pendingSec, setPendingSec] = useState<number | null>(null);
   const [pendingVerified, setPendingVerified] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const guardAbandon = useAbandonGuard();
+  const allowLeave = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Lock is active once engaged and until the session is logged — it survives a
+  // pause so the user can't slip out by pausing.
+  const lockActive = FOCUS_LOCK_ENABLED && locked && !logged;
 
   const stopTick = useCallback(() => {
     if (intervalRef.current) {
@@ -96,6 +103,50 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
   useEffect(() => {
     if (running && remaining <= 0) void finish(totalSec, true);
   }, [running, remaining, totalSec, finish]);
+
+  // --- Focus Lock: block leaving a locked, unfinished session ----------------
+  const attemptLeave = useCallback(() => {
+    const intervened = guardAbandon({
+      kind: 'activity-locked-exit',
+      ctx: { focusLockedRunning: true },
+      ...(quest ? { questId: quest.id } : {}),
+      onProceed: () => {
+        allowLeave.current = true;
+        setLocked(false);
+        navigation.goBack();
+      },
+    });
+    if (!intervened) {
+      allowLeave.current = true;
+      setLocked(false);
+      navigation.goBack();
+    }
+  }, [guardAbandon, quest, navigation]);
+
+  // Disable the iOS swipe-back while locked.
+  useEffect(() => {
+    navigation.setOptions({ gestureEnabled: !lockActive });
+  }, [lockActive, navigation]);
+
+  // Intercept back/pop (chevron, swipe, programmatic) while locked.
+  useEffect(() => {
+    const unsub = navigation.addListener('beforeRemove', (e) => {
+      if (!lockActive || allowLeave.current) return;
+      e.preventDefault();
+      attemptLeave();
+    });
+    return unsub;
+  }, [navigation, lockActive, attemptLeave]);
+
+  // Android hardware back while locked.
+  useEffect(() => {
+    if (!lockActive) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      attemptLeave();
+      return true;
+    });
+    return () => sub.remove();
+  }, [lockActive, attemptLeave]);
 
   const start = useCallback(() => {
     if (running || remaining <= 0) return;
@@ -197,24 +248,41 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
           >
             <Text style={styles.primaryText}>{running ? t('pause') : remaining < totalSec ? t('resume') : t('start')}</Text>
           </Pressable>
-          <View style={styles.secondaryRow}>
-            <Pressable
-              onPress={() => void finish(elapsed, isVerifiedDuration(elapsed, totalSec))}
-              accessibilityRole="button"
-              accessibilityLabel={t('finishAndLogA11y')}
-              style={styles.secondaryBtn}
-            >
-              <Text style={styles.secondaryText}>{t('finishAndLog')}</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => void finish(0, false)}
-              accessibilityRole="button"
-              accessibilityLabel={t('justLogItA11y')}
-              style={styles.secondaryBtn}
-            >
-              <Text style={styles.secondaryText}>{t('justLogIt')}</Text>
-            </Pressable>
-          </View>
+
+          {/* Focus Lock: while locked, the early-exit shortcuts are hidden — the
+              only way out is to finish or go through the "end early?" prompt. */}
+          {FOCUS_LOCK_ENABLED && (
+            lockActive ? (
+              <Pressable onPress={attemptLeave} accessibilityRole="button" accessibilityLabel={t('endEarlyA11y')} style={styles.lockRow}>
+                <Text style={styles.lockedText}>{t('lockedEndEarly')}</Text>
+              </Pressable>
+            ) : (
+              <Pressable onPress={() => setLocked(true)} accessibilityRole="button" accessibilityLabel={t('lockMeIn')} style={styles.lockRow}>
+                <Text style={[styles.lockText, { color: accent }]}>{t('lockMeIn')}</Text>
+              </Pressable>
+            )
+          )}
+
+          {!lockActive && (
+            <View style={styles.secondaryRow}>
+              <Pressable
+                onPress={() => void finish(elapsed, isVerifiedDuration(elapsed, totalSec))}
+                accessibilityRole="button"
+                accessibilityLabel={t('finishAndLogA11y')}
+                style={styles.secondaryBtn}
+              >
+                <Text style={styles.secondaryText}>{t('finishAndLog')}</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => void finish(0, false)}
+                accessibilityRole="button"
+                accessibilityLabel={t('justLogItA11y')}
+                style={styles.secondaryBtn}
+              >
+                <Text style={styles.secondaryText}>{t('justLogIt')}</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
       )}
 
@@ -252,6 +320,9 @@ const styles = StyleSheet.create({
   verifyTag: { ...typography.caption, fontWeight: '800', marginTop: 4 },
   verifyOk: { color: '#5C9A1B' },
   verifySelf: { color: MUTED },
+  lockRow: { alignItems: 'center', paddingVertical: spacing.sm },
+  lockText: { ...typography.label, fontWeight: '800' },
+  lockedText: { ...typography.label, color: MUTED, fontWeight: '700' },
   controls: { gap: spacing.sm, marginBottom: spacing.md },
   primaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.lg, alignItems: 'center', marginBottom: spacing.md },
   primaryText: { ...typography.title, color: '#FFFFFF', fontWeight: '800' },

@@ -94,6 +94,9 @@
     "resume": "Reanudar",
     "start": "Empezar",
     "finishA11y": "Da el golpe final y termina",
-    "finish": "⚔️ Termina — derrótalo"
+    "finish": "⚔️ Termina — derrótalo",
+    "lockMeIn": "🔒 Bloquéame",
+    "lockedEndEarly": "🔒 Bloqueado · ¿Retirarte?",
+    "endEarlyA11y": "Retirarte de esta batalla bloqueada"
   }
 }

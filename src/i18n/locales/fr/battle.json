@@ -94,6 +94,9 @@
     "resume": "Reprendre",
     "start": "Démarrer",
     "finishA11y": "Porter le coup final et terminer",
-    "finish": "⚔️ Terminer — terrasse-le"
+    "finish": "⚔️ Terminer — terrasse-le",
+    "lockMeIn": "🔒 Verrouille-moi",
+    "lockedEndEarly": "🔒 Verrouillé · Battre en retraite ?",
+    "endEarlyA11y": "Battre en retraite de ce combat verrouillé"
   }
 }

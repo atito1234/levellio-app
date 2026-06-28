@@ -5,7 +5,7 @@
  * selected missions, or a real streak). Per-session anti-nag suppression lives in
  * the provider, not here.
  */
-export type AbandonKind = 'battle-retreat' | 'ripple-back' | 'setup-close' | 'unplan' | 'quest-delete';
+export type AbandonKind = 'battle-retreat' | 'ripple-back' | 'setup-close' | 'unplan' | 'quest-delete' | 'activity-locked-exit';
 
 export interface AbandonContext {
   kind: AbandonKind;
@@ -15,6 +15,8 @@ export interface AbandonContext {
   selectedCount?: number;
   /** Whether a battle timer is actively running. */
   battleRunning?: boolean;
+  /** Whether a Focus Lock is active on a running activity. */
+  focusLockedRunning?: boolean;
 }
 
 /** True when quitting is worth a moment's pause. Pure. */
@@ -22,6 +24,8 @@ export function shouldIntervene(ctx: AbandonContext): boolean {
   switch (ctx.kind) {
     case 'battle-retreat':
       return !!ctx.battleRunning;
+    case 'activity-locked-exit':
+      return !!ctx.focusLockedRunning;
     case 'setup-close':
       return (ctx.selectedCount ?? 0) > 0;
     case 'unplan':

@@ -35,6 +35,9 @@ function normalize(raw: unknown): Checklist[] {
       ...(typeof c.lastCheckoutDate === 'string' ? { lastCheckoutDate: c.lastCheckoutDate } : {}),
       checkoutStreak: typeof c.checkoutStreak === 'number' ? c.checkoutStreak : 0,
       ...(c.archived === true ? { archived: true } : {}),
+      ...(typeof c.goalId === 'string' ? { goalId: c.goalId } : {}),
+      ...(typeof c.bucketId === 'string' ? { bucketId: c.bucketId } : {}),
+      ...(typeof c.projectId === 'string' ? { projectId: c.projectId } : {}),
     }));
 }
 
