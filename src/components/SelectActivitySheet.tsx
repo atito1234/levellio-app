@@ -1,9 +1,11 @@
 /**
- * Pick a real activity to add to a checklist — so checking the item completes a
- * real habit and counts everywhere. Lists the user's existing habits (search +
- * tap to pick), or create a brand-new habit inline (title + category) which is
- * persisted via GameContext.addQuest and then linked. Reuses the app's quests,
- * categories, and color system. Falls back gracefully when there are no habits.
+ * The checklist "activity generator": pick a real activity to add to a checklist,
+ * sourced from ANYWHERE in the app that carries activities — all your habits, a
+ * group (bucket), a goal, a community project's suggested habits, or today's plan
+ * — or create a brand-new habit inline. Whatever you pick is a real quest, so
+ * checking it later completes the habit and counts toward streak/XP/group/goal/
+ * project. Reuses GameContext / BucketsContext / GoalContext / ProjectsContext /
+ * PlanContext — no new data layer.
  */
 import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -11,8 +13,21 @@ import { useTranslation } from 'react-i18next';
 import { PressableScale, PrimaryButton } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { useBuckets } from '@/state/BucketsContext';
+import { useGoals } from '@/state/GoalContext';
+import { useProjects } from '@/state/ProjectsContext';
+import { usePlan } from '@/state/PlanContext';
+import { goalHabits } from '@/lib/goal';
+import { dayKey } from '@/lib/dates';
 import { CATEGORY_COLOR, CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import type { Quest, QuestCategory } from '@/types';
+
+type Source =
+  | { type: 'all' }
+  | { type: 'today' }
+  | { type: 'group'; id: string }
+  | { type: 'goal'; id: string }
+  | { type: 'project'; id: string };
 
 export function SelectActivitySheet({
   visible,
@@ -26,16 +41,52 @@ export function SelectActivitySheet({
 }) {
   const { t } = useTranslation('checklists');
   const { quests, addQuest } = useGame();
+  const { buckets, bucketIdFor } = useBuckets();
+  const { goals, membershipFor } = useGoals();
+  const { myProjects, projectsForHabit, linkHabit } = useProjects();
+  const { getPlan } = usePlan();
+
+  const [source, setSource] = useState<Source>({ type: 'all' });
   const [search, setSearch] = useState('');
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newCat, setNewCat] = useState<QuestCategory>('health');
   const [busy, setBusy] = useState(false);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return quests.filter((x) => !q || x.title.toLowerCase().includes(q));
-  }, [quests, search]);
+  // Existing quests that match the chosen source.
+  const sourceQuests = useMemo<Quest[]>(() => {
+    switch (source.type) {
+      case 'all':
+        return quests;
+      case 'today': {
+        const ids = new Set(getPlan(dayKey(new Date())) ?? []);
+        return quests.filter((q) => ids.has(q.id));
+      }
+      case 'group':
+        return quests.filter((q) => bucketIdFor(q.id) === source.id);
+      case 'goal': {
+        const g = goals.find((x) => x.id === source.id);
+        return g ? goalHabits(quests, g, membershipFor(g.id)) : [];
+      }
+      case 'project':
+        return quests.filter((q) => projectsForHabit(q.id).some((p) => p.id === source.id));
+      default:
+        return quests;
+    }
+  }, [source, quests, getPlan, bucketIdFor, goals, membershipFor, projectsForHabit]);
+
+  // For a project source: its suggested habits that aren't already a quest — tap
+  // to create the quest, link it to the project, and add it to the checklist.
+  const suggested = useMemo(() => {
+    if (source.type !== 'project') return [];
+    const proj = myProjects.find((p) => p.id === source.id);
+    if (!proj) return [];
+    const have = new Set(quests.map((q) => q.title.trim().toLowerCase()));
+    return proj.suggestedHabits.filter((h) => !have.has(h.title.trim().toLowerCase()));
+  }, [source, myProjects, quests]);
+
+  const q = search.trim().toLowerCase();
+  const filtered = q ? sourceQuests.filter((x) => x.title.toLowerCase().includes(q)) : sourceQuests;
 
   const create = async () => {
     if (!newTitle.trim() || busy) return;
@@ -47,6 +98,30 @@ export function SelectActivitySheet({
       setCreating(false);
       onPick(quest);
     }
+  };
+
+  const pickSuggested = async (title: string, category: QuestCategory) => {
+    if (busy) return;
+    setBusy(true);
+    const quest = await addQuest({ title, category, difficulty: 'easy' });
+    if (quest && source.type === 'project') await linkHabit(quest.id, source.id);
+    setBusy(false);
+    if (quest) onPick(quest);
+  };
+
+  const sources: { key: string; label: string; src: Source }[] = [
+    { key: 'all', label: t('srcAll'), src: { type: 'all' } },
+    { key: 'today', label: t('srcToday'), src: { type: 'today' } },
+    ...buckets.map((b) => ({ key: `g-${b.id}`, label: b.name, src: { type: 'group' as const, id: b.id } })),
+    ...goals.map((g) => ({ key: `goal-${g.id}`, label: `${g.emoji} ${g.title}`, src: { type: 'goal' as const, id: g.id } })),
+    ...myProjects.map((p) => ({ key: `p-${p.id}`, label: `${p.emoji} ${p.title}`, src: { type: 'project' as const, id: p.id } })),
+  ];
+
+  const isActive = (s: Source) => {
+    if (s.type !== source.type) return false;
+    const sId = 'id' in s ? s.id : undefined;
+    const curId = 'id' in source ? source.id : undefined;
+    return sId === curId;
   };
 
   return (
@@ -76,7 +151,7 @@ export function SelectActivitySheet({
                   const on = newCat === c;
                   return (
                     <Pressable key={c} onPress={() => setNewCat(c)} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.catChip, on && { backgroundColor: CATEGORY_COLOR[c], borderColor: CATEGORY_COLOR[c] }]}>
-                      <Text style={[styles.catText, on && { color: '#fff' }]}>{CATEGORY_META[c].icon}</Text>
+                      <Text style={styles.catText}>{CATEGORY_META[c].icon}</Text>
                     </Pressable>
                   );
                 })}
@@ -86,6 +161,18 @@ export function SelectActivitySheet({
             </View>
           ) : (
             <>
+              {/* Source filter — browse activities from anywhere in the app. */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.srcRow} keyboardShouldPersistTaps="handled">
+                {sources.map((s) => {
+                  const on = isActive(s.src);
+                  return (
+                    <Pressable key={s.key} onPress={() => setSource(s.src)} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.srcChip, on && styles.srcChipOn]}>
+                      <Text style={[styles.srcText, on && styles.srcTextOn]} numberOfLines={1}>{s.label}</Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
               <TextInput
                 value={search}
                 onChangeText={setSearch}
@@ -97,14 +184,29 @@ export function SelectActivitySheet({
                 <Text style={styles.newPlus}>＋</Text>
                 <Text style={styles.newText}>{t('newHabit')}</Text>
               </Pressable>
+
               <ScrollView style={styles.list} keyboardShouldPersistTaps="handled">
-                {filtered.length === 0 && <Text style={styles.empty}>{t('noHabits')}</Text>}
-                {filtered.map((q) => (
-                  <PressableScale key={q.id} onPress={() => onPick(q)} accessibilityRole="button" style={styles.questRow}>
-                    <View style={[styles.dot, { backgroundColor: CATEGORY_COLOR[q.category] }]} />
-                    <Text style={styles.questTitle} numberOfLines={1}>{q.title}</Text>
+                {filtered.map((quest) => (
+                  <PressableScale key={quest.id} onPress={() => onPick(quest)} accessibilityRole="button" style={styles.questRow}>
+                    <View style={[styles.dot, { backgroundColor: CATEGORY_COLOR[quest.category] }]} />
+                    <Text style={styles.questTitle} numberOfLines={1}>{quest.title}</Text>
                   </PressableScale>
                 ))}
+
+                {suggested.length > 0 && (
+                  <>
+                    <Text style={styles.sectionLabel}>{t('fromProject')}</Text>
+                    {suggested.map((h, i) => (
+                      <PressableScale key={`sug-${i}-${h.title}`} onPress={() => void pickSuggested(h.title, h.category)} accessibilityRole="button" style={styles.questRow}>
+                        <View style={[styles.dot, { backgroundColor: CATEGORY_COLOR[h.category] }]} />
+                        <Text style={styles.questTitle} numberOfLines={1}>{h.title}</Text>
+                        <Text style={styles.addGlyph}>＋</Text>
+                      </PressableScale>
+                    ))}
+                  </>
+                )}
+
+                {filtered.length === 0 && suggested.length === 0 && <Text style={styles.empty}>{t('noHabits')}</Text>}
               </ScrollView>
             </>
           )}
@@ -116,19 +218,26 @@ export function SelectActivitySheet({
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: colors.background, borderTopLeftRadius: radii.xl, borderTopRightRadius: radii.xl, padding: spacing.lg, maxHeight: '80%', gap: spacing.sm },
+  sheet: { backgroundColor: colors.background, borderTopLeftRadius: radii.xl, borderTopRightRadius: radii.xl, padding: spacing.lg, maxHeight: '85%', gap: spacing.sm },
   handleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { ...typography.title, color: colors.textPrimary, fontWeight: '800' },
   close: { ...typography.title, color: colors.textMuted },
   input: { ...typography.body, color: colors.textPrimary, backgroundColor: colors.surface, borderRadius: radii.md, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
+  srcRow: { gap: spacing.xs, paddingVertical: spacing.xs },
+  srcChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radii.pill, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, maxWidth: 200 },
+  srcChipOn: { backgroundColor: colors.violetSoft, borderColor: colors.identity },
+  srcText: { ...typography.caption, color: colors.textPrimary, fontWeight: '700' },
+  srcTextOn: { color: colors.violetDeep },
   newRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   newPlus: { ...typography.title, color: colors.violetDeep, fontWeight: '900' },
   newText: { ...typography.label, color: colors.violetDeep, fontWeight: '800' },
-  list: { maxHeight: 360 },
+  list: { maxHeight: 380 },
+  sectionLabel: { ...typography.label, color: colors.textMuted, letterSpacing: 1, marginTop: spacing.md, marginBottom: spacing.xs },
   empty: { ...typography.body, color: colors.textSecondary, paddingVertical: spacing.md },
   questRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   dot: { width: 12, height: 12, borderRadius: 6 },
-  questTitle: { ...typography.body, color: colors.textPrimary, flexShrink: 1 },
+  questTitle: { ...typography.body, color: colors.textPrimary, flex: 1 },
+  addGlyph: { ...typography.title, color: colors.violetDeep, fontWeight: '900' },
   createBox: { gap: spacing.sm },
   catWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   catChip: { width: 40, height: 40, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface },
