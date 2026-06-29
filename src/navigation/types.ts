@@ -50,6 +50,8 @@ export type RootStackParamList = {
   CapacityFocus: { capacityId: string };
   /** Create a life goal (from a template or custom), or edit one (goalId). */
   GoalEditor: { goalId?: string } | undefined;
+  /** Gamified "become" goal creation: pick identity → swipe activities → first vote. */
+  NewGoal: undefined;
   /** A goal's contributing habits + progress. */
   GoalFocus: { goalId: string };
   /** Frictionless typed/dictated capture of one or more habits (optionally pre-filed into a goal/group/project). */

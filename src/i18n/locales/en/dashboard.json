@@ -81,7 +81,9 @@
   "goalCardSelected": " Selected.",
   "ticker": {
     "all": "All",
-    "allA11y": "All habits today, {{pct}} percent done. Show everything."
+    "allA11y": "All habits today, {{pct}} percent done. Show everything.",
+    "addGoal": "Goal",
+    "addGoalA11y": "Create a new goal"
   },
   "habit": {
     "new": "Repeat it daily to make it a habit",

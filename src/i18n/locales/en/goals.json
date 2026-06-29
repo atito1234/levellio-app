@@ -62,5 +62,25 @@
     "tapToEdit": "Tap to edit",
     "slayA11y": "Slay your dragon for {{title}}",
     "removeRowA11y": "Remove {{title}}"
+  },
+  "become": {
+    "title": "Who do you want to become?",
+    "subtitle": "Pick an identity. Small daily reps turn it into who you are.",
+    "pickA11y": "Become {{title}}",
+    "createOwn": "Create your own",
+    "customTitle": "Name your goal",
+    "customPlaceholder": "e.g. Become a calm, present parent",
+    "next": "Next",
+    "pickActivities": "Swipe right to add, left to skip",
+    "add": "ADD",
+    "skip": "SKIP",
+    "addA11y": "Add this activity",
+    "skipA11y": "Skip this activity",
+    "addOwn": "Add your own activity…",
+    "continue": "Continue ({{count}})",
+    "firstVoteTitle": "Cast your first vote",
+    "firstVoteSub": "Every rep is a vote for becoming {{title}}. Do one now.",
+    "firstVoteCta": "Do “{{title}}” now",
+    "later": "Maybe later"
   }
 }

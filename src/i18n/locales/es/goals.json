@@ -62,5 +62,25 @@
     "tapToEdit": "Toca para editar",
     "slayA11y": "Derrota a tu dragón por {{title}}",
     "removeRowA11y": "Quitar {{title}}"
+  },
+  "become": {
+    "title": "¿Quién quieres llegar a ser?",
+    "subtitle": "Elige una identidad. Pequeñas repeticiones diarias la vuelven parte de ti.",
+    "pickA11y": "Convertirte en {{title}}",
+    "createOwn": "Crea la tuya",
+    "customTitle": "Nombra tu meta",
+    "customPlaceholder": "p. ej. Ser un padre tranquilo y presente",
+    "next": "Siguiente",
+    "pickActivities": "Desliza a la derecha para añadir, a la izquierda para omitir",
+    "add": "AÑADIR",
+    "skip": "OMITIR",
+    "addA11y": "Añadir esta actividad",
+    "skipA11y": "Omitir esta actividad",
+    "addOwn": "Añade tu propia actividad…",
+    "continue": "Continuar ({{count}})",
+    "firstVoteTitle": "Emite tu primer voto",
+    "firstVoteSub": "Cada repetición es un voto por convertirte en {{title}}. Haz una ahora.",
+    "firstVoteCta": "Hacer «{{title}}» ahora",
+    "later": "Quizás luego"
   }
 }

@@ -81,7 +81,9 @@
   "goalCardSelected": " Seleccionado.",
   "ticker": {
     "all": "Todo",
-    "allA11y": "Todos los hábitos de hoy, {{pct}} por ciento hechos. Mostrar todo."
+    "allA11y": "Todos los hábitos de hoy, {{pct}} por ciento hechos. Mostrar todo.",
+    "addGoal": "Meta",
+    "addGoalA11y": "Crear una nueva meta"
   },
   "habit": {
     "new": "Repítelo a diario para volverlo un hábito",

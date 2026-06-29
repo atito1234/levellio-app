@@ -324,16 +324,16 @@ export function DashboardScreen() {
         </View>
 
         {/* Goal ticker — a slim, news-feed-style switcher: tap a goal to point the
-            swipable cards + ring at it; "All" returns to every habit. */}
-        {goals.length > 0 && (
-          <GoalTicker
-            goals={goals}
-            selectedId={selectedGoalId}
-            allPct={allProgress.pct}
-            onSelect={(id) => setSelectedGoalId(id)}
-            projectActivityIds={projectActivityIds}
-          />
-        )}
+            swipable cards + ring at it; "All" returns to every habit; "＋" opens the
+            gamified "become" creation flow. Always shown so adding a goal is one tap. */}
+        <GoalTicker
+          goals={goals}
+          selectedId={selectedGoalId}
+          allPct={allProgress.pct}
+          onSelect={(id) => setSelectedGoalId(id)}
+          onAddGoal={() => navigation.navigate('NewGoal')}
+          projectActivityIds={projectActivityIds}
+        />
 
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}

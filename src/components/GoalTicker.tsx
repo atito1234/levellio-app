@@ -19,12 +19,15 @@ export function GoalTicker({
   selectedId,
   allPct,
   onSelect,
+  onAddGoal,
   projectActivityIds,
 }: {
   goals: Goal[];
   selectedId: string | null;
   allPct: number;
   onSelect: (goalId: string | null) => void;
+  /** Open the gamified "become" goal-creation flow. */
+  onAddGoal: () => void;
   projectActivityIds?: ReadonlySet<string>;
 }) {
   const { t } = useTranslation('dashboard');
@@ -55,6 +58,15 @@ export function GoalTicker({
           onPress={() => onSelect(g.id)}
         />
       ))}
+      {/* Always-present entry to create a new goal (the "become" flow). */}
+      <Pressable
+        onPress={onAddGoal}
+        accessibilityRole="button"
+        accessibilityLabel={t('ticker.addGoalA11y')}
+        style={styles.addChip}
+      >
+        <Text style={[styles.chipLabel, { color: VIOLET }]}>＋ {t('ticker.addGoal')}</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -148,6 +160,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E8E6E0',
     maxWidth: 200,
+  },
+  addChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: '#E2DBFB',
+    backgroundColor: '#F4F1FE',
+    borderStyle: 'dashed',
   },
   chipEmoji: { fontSize: 14 },
   chipLabel: { ...typography.caption, color: colors.textPrimary, fontWeight: '800', flexShrink: 1 },

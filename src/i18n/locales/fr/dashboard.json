@@ -81,7 +81,9 @@
   "goalCardSelected": " Sélectionné.",
   "ticker": {
     "all": "Tout",
-    "allA11y": "Toutes les habitudes d'aujourd'hui, {{pct}} pour cent faites. Tout afficher."
+    "allA11y": "Toutes les habitudes d'aujourd'hui, {{pct}} pour cent faites. Tout afficher.",
+    "addGoal": "Objectif",
+    "addGoalA11y": "Créer un nouvel objectif"
   },
   "habit": {
     "new": "Répétez-le chaque jour pour en faire une habitude",

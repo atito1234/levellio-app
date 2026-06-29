@@ -23,6 +23,7 @@ import { InsightsScreen } from '@/screens/InsightsScreen';
 import { PlanScreen } from '@/screens/PlanScreen';
 import { CapacityFocusScreen } from '@/screens/CapacityFocusScreen';
 import { GoalEditorScreen } from '@/screens/GoalEditorScreen';
+import { NewGoalFlowScreen } from '@/screens/NewGoalFlowScreen';
 import { GoalFocusScreen } from '@/screens/GoalFocusScreen';
 import { QuickCaptureScreen } from '@/screens/QuickCaptureScreen';
 import { BattleSetupScreen } from '@/screens/BattleSetupScreen';
@@ -148,6 +149,7 @@ export function RootNavigator() {
         <Stack.Screen name="Plan" component={PlanScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="CapacityFocus" component={CapacityFocusScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="GoalEditor" component={GoalEditorScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="NewGoal" component={NewGoalFlowScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="GoalFocus" component={GoalFocusScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="QuickCapture" component={QuickCaptureScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="BattleSetup" component={BattleSetupScreen} options={{ presentation: 'modal' }} />
