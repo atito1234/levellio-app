@@ -66,6 +66,10 @@ export type RootStackParamList = {
     dragonId: string;
     dragonName?: string;
   };
+  /** A pre-battle mind & soul prep rite (breathe / vow / recall / charge). */
+  PrepareRite: { dragonId: string; dragonName?: string; category?: import('@/types').QuestCategory };
+  /** The Dragon Den — trophies (per-dragon slays + streaks) + the coin Armory. */
+  DragonDen: undefined;
   /** Write a battle-journal reflection (what's stopping you). */
   JournalComposer: { dragonId?: string; dragonName?: string; questIds?: string[]; prompt?: string; teaching?: string } | undefined;
   /** The battle-journal feed (optionally filtered to one dragon). */

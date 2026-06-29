@@ -43,7 +43,10 @@
     "addActivityA11y": "Añadir actividad",
     "add": "Añadir",
     "allIn": "Ya está todo. Escribe una propia arriba.",
-    "addMissionA11y": "Añadir {{title}}"
+    "addMissionA11y": "Añadir {{title}}",
+    "prepareCta": "🧘 Prepara tu mente y alma",
+    "preparedDone": "✓ Listo para la batalla",
+    "denCta": "🐉 Guarida"
   },
   "gadgets": {
     "openEnded": "sin límite",
@@ -97,6 +100,56 @@
     "finish": "⚔️ Termina — derrótalo",
     "lockMeIn": "🔒 Bloquéame",
     "lockedEndEarly": "🔒 Bloqueado · ¿Retirarte?",
-    "endEarlyA11y": "Retirarte de esta batalla bloqueada"
+    "endEarlyA11y": "Retirarte de esta batalla bloqueada",
+    "preparedBadge": "⚜️ La enfrentaste preparado (+25 🪙)"
+  },
+  "den": {
+    "title": "Guarida del Dragón",
+    "back": "Atrás",
+    "lead": "Cada dragón que has enfrentado — y las rachas que mantienes. Has derrotado {{count}} hasta ahora.",
+    "trophies": "TUS TROFEOS",
+    "bested": "Vencido {{count}}×",
+    "streak": "Racha de {{count}} días",
+    "unfought": "Aún sin enfrentar",
+    "armory": "ARMERÍA",
+    "armoryHint": "Gasta las monedas que ganas en batalla.",
+    "owned": "Obtenido ✓",
+    "coinsA11y": "{{count}} monedas",
+    "buyA11y": "Comprar {{name}} por {{cost}} monedas"
+  },
+  "rites": {
+    "title": "Prepara tu mente y alma",
+    "facing": "Enfrentando a {{dragon}}",
+    "theDragon": "tu dragón",
+    "skip": "Omitir",
+    "switch": "O prueba otro rito",
+    "breathe": {
+      "title": "Respira",
+      "blurb": "Sincroniza tu respiración con la esfera: inhala al crecer, exhala al encoger. Tres respiraciones lentas.",
+      "cta": "Estoy centrado"
+    },
+    "vow": {
+      "title": "Voto",
+      "blurb": "Soy alguien que cumple, sobre todo cuando es difícil.",
+      "cta": "Lo prometo"
+    },
+    "recall": {
+      "title": "Recuerda un logro",
+      "blurb": "Recuerda una vez que cumpliste una promesa contigo. Sostén ese sentimiento.",
+      "cta": "Lo recuerdo"
+    },
+    "charge": {
+      "title": "Carga",
+      "blurb": "Toca para cargar a tu Wisp antes de la pelea.",
+      "cta": "Cargado — enfréntalo",
+      "tap": "Cargar ⚡"
+    }
+  },
+  "unlocks": {
+    "wisp-aura-violet": "Aura violeta del Wisp",
+    "wisp-aura-teal": "Aura turquesa del Wisp",
+    "rite-candle": "Vela ritual",
+    "den-banner": "Estandarte de la guarida",
+    "crown-slayer": "Corona del verdugo"
   }
 }

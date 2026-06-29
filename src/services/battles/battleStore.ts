@@ -13,17 +13,36 @@ const NS = 'levellio';
 const battlesKey = (uid: string) => `${NS}:battles:${uid}`;
 const TECHNIQUE_IDS = new Set<TechniqueId>(['pomodoro', 'deepwork', 'quick10', 'custom', 'flowtime']);
 
+/** Per-dragon "kept the streak" record — consecutive days you bested it. */
+export interface DragonStreak {
+  streak: number;
+  lastDate: string;
+}
+
 export interface BattleProgress {
   totalSlain: number;
   /** Victory count keyed by dragon id. */
   perDragon: Record<string, number>;
-  /** Coins earned from battles, spendable on gadgets. */
+  /** Consecutive-day streak per dragon (drives the Dragon Den). */
+  perDragonStreak: Record<string, DragonStreak>;
+  /** Coins earned from battles, spendable on Armory unlocks. */
   coins: number;
+  /** Cosmetic unlocks bought with coins. */
+  ownedUnlocks: string[];
+  /** Lifetime count of pre-battle prep rites performed. */
+  ritesPerformed: number;
   lastTechniqueId?: TechniqueId;
   lastCustomMin?: number;
 }
 
-export const EMPTY_BATTLE_PROGRESS: BattleProgress = { totalSlain: 0, perDragon: {}, coins: 0 };
+export const EMPTY_BATTLE_PROGRESS: BattleProgress = {
+  totalSlain: 0,
+  perDragon: {},
+  perDragonStreak: {},
+  coins: 0,
+  ownedUnlocks: [],
+  ritesPerformed: 0,
+};
 
 export function normalizeBattleProgress(raw: unknown): BattleProgress {
   const r = (raw ?? {}) as Partial<BattleProgress>;
@@ -33,14 +52,27 @@ export function normalizeBattleProgress(raw: unknown): BattleProgress {
       if (typeof n === 'number' && Number.isFinite(n) && n > 0) perDragon[id] = Math.floor(n);
     }
   }
+  const perDragonStreak: Record<string, DragonStreak> = {};
+  if (r.perDragonStreak && typeof r.perDragonStreak === 'object') {
+    for (const [id, s] of Object.entries(r.perDragonStreak as Record<string, unknown>)) {
+      const v = s as Partial<DragonStreak>;
+      if (v && typeof v.streak === 'number' && Number.isFinite(v.streak) && v.streak > 0 && typeof v.lastDate === 'string') {
+        perDragonStreak[id] = { streak: Math.floor(v.streak), lastDate: v.lastDate };
+      }
+    }
+  }
   const totalSlain =
     typeof r.totalSlain === 'number' && Number.isFinite(r.totalSlain) && r.totalSlain >= 0
       ? Math.floor(r.totalSlain)
       : Object.values(perDragon).reduce((a, b) => a + b, 0);
+  const ownedUnlocks = Array.isArray(r.ownedUnlocks) ? r.ownedUnlocks.filter((x): x is string => typeof x === 'string') : [];
   return {
     totalSlain,
     perDragon,
+    perDragonStreak,
     coins: typeof r.coins === 'number' && Number.isFinite(r.coins) && r.coins >= 0 ? Math.floor(r.coins) : 0,
+    ownedUnlocks,
+    ritesPerformed: typeof r.ritesPerformed === 'number' && Number.isFinite(r.ritesPerformed) && r.ritesPerformed >= 0 ? Math.floor(r.ritesPerformed) : 0,
     ...(typeof r.lastTechniqueId === 'string' && TECHNIQUE_IDS.has(r.lastTechniqueId as TechniqueId)
       ? { lastTechniqueId: r.lastTechniqueId as TechniqueId }
       : {}),

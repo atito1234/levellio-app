@@ -43,7 +43,10 @@
     "addActivityA11y": "Ajouter l’activité",
     "add": "Ajouter",
     "allIn": "Tout est ajouté. Saisis-en une perso ci-dessus.",
-    "addMissionA11y": "Ajouter {{title}}"
+    "addMissionA11y": "Ajouter {{title}}",
+    "prepareCta": "🧘 Prépare ton esprit et ton âme",
+    "preparedDone": "✓ Prêt pour la bataille",
+    "denCta": "🐉 Repaire"
   },
   "gadgets": {
     "openEnded": "sans limite",
@@ -97,6 +100,56 @@
     "finish": "⚔️ Terminer — terrasse-le",
     "lockMeIn": "🔒 Verrouille-moi",
     "lockedEndEarly": "🔒 Verrouillé · Battre en retraite ?",
-    "endEarlyA11y": "Battre en retraite de ce combat verrouillé"
+    "endEarlyA11y": "Battre en retraite de ce combat verrouillé",
+    "preparedBadge": "⚜️ Affronté préparé (+25 🪙)"
+  },
+  "den": {
+    "title": "Repaire du Dragon",
+    "back": "Retour",
+    "lead": "Chaque dragon affronté — et les séries que tu maintiens. Tu en as terrassé {{count}} jusqu'ici.",
+    "trophies": "TES TROPHÉES",
+    "bested": "Vaincu {{count}}×",
+    "streak": "Série de {{count}} jours",
+    "unfought": "Pas encore affronté",
+    "armory": "ARMURERIE",
+    "armoryHint": "Dépense les pièces gagnées au combat.",
+    "owned": "Obtenu ✓",
+    "coinsA11y": "{{count}} pièces",
+    "buyA11y": "Acheter {{name}} pour {{cost}} pièces"
+  },
+  "rites": {
+    "title": "Prépare ton esprit et ton âme",
+    "facing": "Face à {{dragon}}",
+    "theDragon": "ton dragon",
+    "skip": "Passer",
+    "switch": "Ou essaie un autre rite",
+    "breathe": {
+      "title": "Respire",
+      "blurb": "Accorde ta respiration à l'orbe — inspire quand il grandit, expire quand il rétrécit. Trois respirations lentes.",
+      "cta": "Je suis centré"
+    },
+    "vow": {
+      "title": "Serment",
+      "blurb": "Je suis quelqu'un qui répond présent — surtout quand c'est dur.",
+      "cta": "Je le jure"
+    },
+    "recall": {
+      "title": "Rappelle une victoire",
+      "blurb": "Souviens-toi d'une fois où tu as tenu une promesse envers toi. Garde ce sentiment.",
+      "cta": "Je m'en souviens"
+    },
+    "charge": {
+      "title": "Charge",
+      "blurb": "Touche pour charger ton Wisp avant le combat.",
+      "cta": "Chargé — affronte-le",
+      "tap": "Charger ⚡"
+    }
+  },
+  "unlocks": {
+    "wisp-aura-violet": "Aura violette du Wisp",
+    "wisp-aura-teal": "Aura turquoise du Wisp",
+    "rite-candle": "Bougie rituelle",
+    "den-banner": "Bannière du repaire",
+    "crown-slayer": "Couronne du pourfendeur"
   }
 }

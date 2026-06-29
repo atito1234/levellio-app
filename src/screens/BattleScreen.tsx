@@ -34,6 +34,8 @@ interface VictoryResult {
   selected: number;
   totalXp: number;
   coins: number;
+  /** True when a pre-battle prep rite was performed (bonus coins). */
+  prepared: boolean;
 }
 
 /** Coins awarded for a victory: a per-habit bounty + a dragon bounty. */
@@ -45,7 +47,8 @@ export function BattleScreen({ route, navigation }: Props) {
   const { t } = useTranslation('battle');
   const { questIds, techniqueId, customMin, dragonId, dragonName } = route.params;
   const { quests, character } = useGame();
-  const { recordVictory } = useBattles();
+  const { recordVictory, preparedRite } = useBattles();
+  const PREP_BONUS = 25;
   const complete = useCompleteActivity();
   const guardAbandon = useAbandonGuard();
   const reduced = useReducedMotion();
@@ -125,10 +128,11 @@ export function BattleScreen({ route, navigation }: Props) {
         totalXp += reward.totalXp;
       }
     }
-    const coins = coinsFor(completed);
-    await recordVictory(dragon.id, coins);
-    setResult({ completed, selected: battleQuests.length, totalXp, coins });
-  }, [stop, reduced, technique.countsUp, battleQuests, elapsed, complete, recordVictory, dragon.id]);
+    const prepared = preparedRite !== null;
+    const coins = coinsFor(completed) + (prepared ? PREP_BONUS : 0);
+    await recordVictory(dragon.id, coins); // consumes the prep rite + advances the dragon streak
+    setResult({ completed, selected: battleQuests.length, totalXp, coins, prepared });
+  }, [stop, reduced, technique.countsUp, battleQuests, elapsed, complete, recordVictory, dragon.id, preparedRite]);
 
   // Auto-slay when a timed block fully elapses.
   useEffect(() => {
@@ -250,6 +254,7 @@ export function BattleScreen({ route, navigation }: Props) {
                 })}
               </Text>
               <Text style={styles.summaryCoins}>{t('battle.summaryCoins', { coins: result!.coins })}</Text>
+              {result!.prepared && <Text style={styles.summaryPrepared}>{t('battle.preparedBadge')}</Text>}
             </View>
           </>
         ) : (
@@ -352,6 +357,7 @@ const styles = StyleSheet.create({
   summary: { marginTop: spacing.md, backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: spacing.lg, paddingVertical: spacing.md, alignItems: 'center', gap: 4 },
   summaryText: { ...typography.body, color: INK, fontWeight: '700' },
   summaryCoins: { ...typography.label, color: '#B8860B', fontWeight: '800' },
+  summaryPrepared: { ...typography.caption, color: '#0A6E5C', fontWeight: '800' },
 
   controls: { gap: spacing.sm, marginBottom: spacing.md },
   primaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.lg, alignItems: 'center', marginBottom: spacing.md },

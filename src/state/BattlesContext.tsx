@@ -1,19 +1,30 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useGame } from '@/state/GameContext';
-import { battleStore, type BattleProgress } from '@/services/battles';
+import { battleStore, EMPTY_BATTLE_PROGRESS, type BattleProgress, type DragonStreak } from '@/services/battles';
+import { recordDragonVictory, buyUnlock as buyUnlockPure } from '@/lib/battleProgress';
+import { unlockById } from '@/data/battleUnlocks';
 import type { TechniqueId } from '@/lib/timeTechniques';
 
 interface BattlesContextValue {
   ready: boolean;
   totalSlain: number;
   perDragon: Record<string, number>;
+  perDragonStreak: Record<string, DragonStreak>;
   coins: number;
+  ownedUnlocks: string[];
+  ritesPerformed: number;
   lastTechniqueId?: TechniqueId;
   lastCustomMin?: number;
-  /** Record a slain dragon + award coins (called on battle victory). */
+  /** The prep rite performed for the NEXT battle (transient, consumed on victory). */
+  preparedRite: string | null;
+  /** Mark a pre-battle prep rite as done (or clear with null). */
+  setPreparedRite: (riteId: string | null) => void;
+  /** Record a slain dragon + award coins; consumes any prepared rite. */
   recordVictory: (dragonId: string, coinsEarned?: number) => Promise<void>;
   /** Spend coins (e.g. unlocking a gadget). Returns false if too few. */
   spendCoins: (amount: number) => Promise<boolean>;
+  /** Buy a cosmetic Armory unlock by id. Returns false if unaffordable/owned. */
+  buyUnlock: (id: string) => Promise<boolean>;
   /** Remember the user's last technique choice for next time. */
   setTechnique: (id: TechniqueId, customMin?: number) => Promise<void>;
 }
@@ -25,13 +36,14 @@ export function BattlesProvider({ children }: { children: React.ReactNode }) {
   const { user } = useGame();
   const uid = user?.uid ?? null;
 
-  const [progress, setProgress] = useState<BattleProgress>({ totalSlain: 0, perDragon: {}, coins: 0 });
+  const [progress, setProgress] = useState<BattleProgress>({ ...EMPTY_BATTLE_PROGRESS });
   const [ready, setReady] = useState(false);
+  const [preparedRite, setPreparedRite] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     if (!uid) {
-      setProgress({ totalSlain: 0, perDragon: {}, coins: 0 });
+      setProgress({ ...EMPTY_BATTLE_PROGRESS });
       setReady(false);
       return;
     }
@@ -55,14 +67,12 @@ export function BattlesProvider({ children }: { children: React.ReactNode }) {
   );
 
   const recordVictory = useCallback(
-    (dragonId: string, coinsEarned = 0) =>
-      commit({
-        ...progress,
-        totalSlain: progress.totalSlain + 1,
-        perDragon: { ...progress.perDragon, [dragonId]: (progress.perDragon[dragonId] ?? 0) + 1 },
-        coins: progress.coins + Math.max(0, Math.floor(coinsEarned)),
-      }),
-    [progress, commit],
+    async (dragonId: string, coinsEarned = 0) => {
+      const prepared = preparedRite !== null;
+      await commit(recordDragonVictory(progress, dragonId, new Date(), { coinsEarned, prepared }));
+      setPreparedRite(null); // consume the rite
+    },
+    [progress, commit, preparedRite],
   );
 
   const spendCoins = useCallback(
@@ -70,6 +80,18 @@ export function BattlesProvider({ children }: { children: React.ReactNode }) {
       const cost = Math.max(0, Math.floor(amount));
       if (progress.coins < cost) return false;
       await commit({ ...progress, coins: progress.coins - cost });
+      return true;
+    },
+    [progress, commit],
+  );
+
+  const buyUnlock = useCallback(
+    async (id: string): Promise<boolean> => {
+      const unlock = unlockById(id);
+      if (!unlock) return false;
+      const next = buyUnlockPure(progress, id, unlock.cost);
+      if (!next) return false;
+      await commit(next);
       return true;
     },
     [progress, commit],
@@ -86,14 +108,20 @@ export function BattlesProvider({ children }: { children: React.ReactNode }) {
       ready,
       totalSlain: progress.totalSlain,
       perDragon: progress.perDragon,
+      perDragonStreak: progress.perDragonStreak,
       coins: progress.coins,
+      ownedUnlocks: progress.ownedUnlocks,
+      ritesPerformed: progress.ritesPerformed,
       lastTechniqueId: progress.lastTechniqueId,
       lastCustomMin: progress.lastCustomMin,
+      preparedRite,
+      setPreparedRite,
       recordVictory,
       spendCoins,
+      buyUnlock,
       setTechnique,
     }),
-    [ready, progress, recordVictory, spendCoins, setTechnique],
+    [ready, progress, preparedRite, recordVictory, spendCoins, buyUnlock, setTechnique],
   );
 
   return <BattlesContext.Provider value={value}>{children}</BattlesContext.Provider>;

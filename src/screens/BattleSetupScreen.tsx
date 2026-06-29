@@ -64,7 +64,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const { assignments, buckets } = useBuckets();
   const { goals, membershipFor } = useGoals();
   const { projectActivityIds } = useProjects();
-  const { lastTechniqueId, lastCustomMin, setTechnique, coins } = useBattles();
+  const { lastTechniqueId, lastCustomMin, setTechnique, coins, preparedRite } = useBattles();
   const { entriesForDragon } = useJournal();
   const guardAbandon = useAbandonGuard();
 
@@ -316,6 +316,28 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         )}
       </ScrollView>
 
+      {/* Prep rite (mind & soul) + the Dragon Den — both optional, additive. */}
+      <View style={styles.prepRow}>
+        <Pressable
+          onPress={() =>
+            navigation.navigate('PrepareRite', {
+              dragonId,
+              ...(dragonId === CUSTOM_DRAGON_ID && dragonName.trim() ? { dragonName: dragonName.trim() } : {}),
+              ...(primary ? { category: primary.category } : {}),
+            })
+          }
+          accessibilityRole="button"
+          style={[styles.prepBtn, preparedRite ? styles.prepBtnDone : null]}
+        >
+          <Text style={[styles.prepText, preparedRite ? styles.prepTextDone : null]}>
+            {preparedRite ? t('setup.preparedDone') : t('setup.prepareCta')}
+          </Text>
+        </Pressable>
+        <Pressable onPress={() => navigation.navigate('DragonDen')} accessibilityRole="button" style={styles.denBtn}>
+          <Text style={styles.denText}>{t('setup.denCta')}</Text>
+        </Pressable>
+      </View>
+
       <Pressable
         onPress={() => void begin()}
         disabled={!canFight}
@@ -435,6 +457,14 @@ const styles = StyleSheet.create({
   cta: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm },
   ctaOff: { opacity: 0.4 },
   ctaText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
+
+  prepRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  prepBtn: { flex: 1, backgroundColor: VIOLET_SOFT, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', borderWidth: 1, borderColor: '#E2DBFB' },
+  prepBtnDone: { backgroundColor: '#EAFBF6', borderColor: '#16C8A8' },
+  prepText: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  prepTextDone: { color: '#0A6E5C' },
+  denBtn: { backgroundColor: CARD, borderRadius: 999, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, alignItems: 'center', borderWidth: 1, borderColor: TRACK },
+  denText: { ...typography.label, color: MUTED, fontWeight: '800' },
 
   // Picker sheet
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(31,41,55,0.45)', justifyContent: 'flex-end' },
