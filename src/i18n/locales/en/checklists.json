@@ -25,6 +25,8 @@
   "allDone": "All done — check out!",
   "progress": "{{done}}/{{total}}",
   "streak": "{{count}}-day streak",
+  "group": "Group",
+  "addGroup": "＋ Group",
   "daily": "Daily",
   "opensOn": "Opens {{date}} — plan ahead, complete on the day",
   "recordedOn": "{{date}}",

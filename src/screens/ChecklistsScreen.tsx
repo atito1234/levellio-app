@@ -20,8 +20,9 @@ import { useProjects } from '@/state/ProjectsContext';
 import { useGoals } from '@/state/GoalContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
-import { checklistDayState, checklistProgress, isItemDone, type Checklist } from '@/lib/checklist';
-import { BUCKET_COLORS } from '@/lib/buckets';
+import { MoveToBucketSheet } from '@/components/MoveToBucketSheet';
+import { checklistDayState, checklistProgress, isItemDone, type ChecklistItem, type Checklist } from '@/lib/checklist';
+import { BUCKET_COLORS, getBucketColor } from '@/lib/buckets';
 import { dayKey, relativeDayLabel, shiftDayKey } from '@/lib/dates';
 
 const accentOf = (id: Checklist['colorId']) => BUCKET_COLORS.find((b) => b.id === id) ?? BUCKET_COLORS[0]!;
@@ -36,11 +37,13 @@ export function ChecklistsScreen() {
   const { quests, uncompleteQuest } = useGame();
   const { projectsForHabit } = useProjects();
   const { goals, goalsForHabit } = useGoals();
-  const { buckets, bucketIdFor } = useBuckets();
+  const { buckets, bucketIdFor, assignActivity } = useBuckets();
   const completeActivity = useCompleteActivity();
   const [newTitle, setNewTitle] = useState('');
   const [query, setQuery] = useState('');
   const [confetti, setConfetti] = useState(0);
+  // The linked item whose group the user is picking (drives MoveToBucketSheet).
+  const [groupTarget, setGroupTarget] = useState<{ questId: string; label: string } | null>(null);
 
   const todayK = dayKey(new Date());
   const [selectedDay, setSelectedDay] = useState(todayK);
@@ -90,6 +93,15 @@ export function ChecklistsScreen() {
       if (b) return b.name;
     }
     return null;
+  };
+
+  // The group (bucket) a linked activity is filed in — drives the group pill.
+  const groupForQuest = (questId: string): { name: string; accent: string; soft: string } | null => {
+    const bId = bucketIdFor(questId);
+    const b = bId ? buckets.find((x) => x.id === bId) : undefined;
+    if (!b) return null;
+    const c = getBucketColor(b.colorId);
+    return { name: b.name, accent: c.accent, soft: c.soft };
   };
 
   // Toggling only happens on today-scoped lists (others render read-only). Flip
@@ -207,6 +219,8 @@ export function ChecklistsScreen() {
             dayState={checklistDayState(c, todayK)}
             dateLabel={c.date ? dayLabel(c.date) : null}
             subtitleFor={subtitleForQuest}
+            groupFor={groupForQuest}
+            onMoveGroup={(item) => item.questId && setGroupTarget({ questId: item.questId, label: item.label })}
             t={t}
             onToggle={(itemId) => void handleToggle(c, itemId)}
             onAddText={(label) => void addItem(c.id, label)}
@@ -217,6 +231,18 @@ export function ChecklistsScreen() {
           />
         ))}
       </ScrollView>
+
+      <MoveToBucketSheet
+        visible={groupTarget !== null}
+        activityTitle={groupTarget?.label ?? ''}
+        buckets={buckets}
+        {...(groupTarget && bucketIdFor(groupTarget.questId) ? { currentBucketId: bucketIdFor(groupTarget.questId) } : {})}
+        onSelect={(bucketId) => {
+          if (groupTarget) void assignActivity(groupTarget.questId, bucketId);
+          setGroupTarget(null);
+        }}
+        onClose={() => setGroupTarget(null)}
+      />
     </ScreenContainer>
   );
 }
@@ -226,6 +252,8 @@ function ChecklistCard({
   dayState,
   dateLabel,
   subtitleFor,
+  groupFor,
+  onMoveGroup,
   t,
   onToggle,
   onAddText,
@@ -238,6 +266,8 @@ function ChecklistCard({
   dayState: 'today' | 'past' | 'future';
   dateLabel: string | null;
   subtitleFor: (questId: string) => string | null;
+  groupFor: (questId: string) => { name: string; accent: string; soft: string } | null;
+  onMoveGroup: (item: ChecklistItem) => void;
   t: ReturnType<typeof useTranslation>['t'];
   onToggle: (itemId: string) => void;
   onAddText: (label: string) => void;
@@ -293,6 +323,7 @@ function ChecklistCard({
         const on = isItemDone(item, checklist.checkedItemIds);
         const linked = Boolean(item.questId);
         const subtitle = item.questId ? subtitleFor(item.questId) : null;
+        const group = item.questId ? groupFor(item.questId) : null;
         return (
           <View key={item.id} style={styles.itemRow}>
             {/* Plain Pressable carries the row flex (fixes the prior blank-label
@@ -310,6 +341,24 @@ function ChecklistCard({
               <View style={styles.itemTextCol}>
                 <Text style={[styles.itemLabel, on && styles.itemLabelDone]} numberOfLines={2}>{item.label}</Text>
                 {subtitle ? <Text style={styles.itemSubtitle} numberOfLines={1}>{subtitle}</Text> : null}
+                {/* Linked items get a tappable group pill to (re)categorize them. */}
+                {linked && interactive && (
+                  <Pressable
+                    onPress={() => onMoveGroup(item)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('group')}
+                    style={[
+                      styles.groupPill,
+                      group
+                        ? { backgroundColor: group.soft, borderColor: group.accent }
+                        : styles.groupPillEmpty,
+                    ]}
+                  >
+                    <Text style={[styles.groupPillText, { color: group ? group.accent : colors.textMuted }]} numberOfLines={1}>
+                      {group ? `🗂️ ${group.name}` : t('addGroup')}
+                    </Text>
+                  </Pressable>
+                )}
               </View>
               {linked && <Text style={styles.linkTag}>{t('linked')}</Text>}
             </Pressable>
@@ -422,6 +471,9 @@ const styles = StyleSheet.create({
   itemLabel: { ...typography.body, color: colors.textPrimary },
   itemLabelDone: { color: colors.textMuted, textDecorationLine: 'line-through' },
   itemSubtitle: { ...typography.caption, color: colors.textMuted, marginTop: 1 },
+  groupPill: { alignSelf: 'flex-start', borderRadius: 999, borderWidth: 1, paddingHorizontal: spacing.sm, paddingVertical: 2, marginTop: 4, maxWidth: 180 },
+  groupPillEmpty: { backgroundColor: colors.surfaceAlt, borderColor: colors.border, borderStyle: 'dashed' },
+  groupPillText: { ...typography.caption, fontWeight: '800', fontSize: 11 },
   linkTag: { ...typography.caption, color: colors.violetDeep, fontWeight: '800' },
   itemRemove: { ...typography.body, color: colors.textMuted },
 

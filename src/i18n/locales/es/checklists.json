@@ -25,6 +25,8 @@
   "allDone": "¡Todo listo — cierra la lista!",
   "progress": "{{done}}/{{total}}",
   "streak": "Racha de {{count}} días",
+  "group": "Grupo",
+  "addGroup": "＋ Grupo",
   "daily": "Diaria",
   "opensOn": "Se abre {{date}} — planifica ahora, complétala ese día",
   "recordedOn": "{{date}}",
