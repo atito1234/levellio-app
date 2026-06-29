@@ -8,7 +8,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { ScreenContainer, ScreenHeader } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useBattles } from '@/state/BattlesContext';
 import { useJournal } from '@/state/JournalContext';
@@ -102,12 +102,7 @@ export function PrepareRiteScreen({ route, navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('rites.skip')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <View style={styles.chevronSpacer} />
-      </View>
+      <ScreenHeader onBack={() => navigation.goBack()} backLabel={t('rites.skip')} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <Text style={styles.h1}>{t('rites.title')}</Text>

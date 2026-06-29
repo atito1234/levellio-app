@@ -7,7 +7,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useBattles } from '@/state/BattlesContext';
 import { DRAGONS } from '@/data/dragons';
@@ -33,20 +33,21 @@ export function DragonDenScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('den.back')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.title} accessibilityRole="header">{t('den.title')}</Text>
-        <View style={styles.coins} accessibilityLabel={t('den.coinsA11y', { count: coins })}>
-          <Text style={styles.coinsText}>🪙 {coins}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        title={t('den.title')}
+        onBack={() => navigation.goBack()}
+        backLabel={t('den.back')}
+        right={
+          <View style={styles.coins} accessibilityLabel={t('den.coinsA11y', { count: coins })}>
+            <Text style={styles.coinsText}>🪙 {coins}</Text>
+          </View>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <Text style={styles.lead}>{t('den.lead', { count: totalSlain })}</Text>
 
-        <Text style={styles.sectionLabel}>{t('den.trophies')}</Text>
+        <SectionLabel>{t('den.trophies')}</SectionLabel>
         <View style={styles.grid}>
           {DRAGONS.map((d) => {
             const count = perDragon[d.id] ?? 0;
@@ -70,7 +71,7 @@ export function DragonDenScreen({ navigation }: Props) {
           })}
         </View>
 
-        <Text style={styles.sectionLabel}>{t('den.armory')}</Text>
+        <SectionLabel>{t('den.armory')}</SectionLabel>
         <Text style={styles.armoryHint}>{t('den.armoryHint')}</Text>
         <View style={styles.armory}>
           {BATTLE_UNLOCKS.map((u) => {
