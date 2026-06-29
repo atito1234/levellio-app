@@ -10,7 +10,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { ScreenContainer, ScreenHeader } from '@/components';
 import { SwipeDeck, type DeckItem } from '@/components/SwipeDeck';
 import { spacing, typography } from '@/theme';
 import { useGoals } from '@/state/GoalContext';
@@ -135,12 +135,7 @@ export function NewGoalFlowScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <View style={styles.chevronSpacer} />
-      </View>
+      <ScreenHeader onBack={() => navigation.goBack()} backLabel={t('back')} />
 
       {step === 'identity' && (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
-import { spacing, typography } from '@/theme';
+import { ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useGoals } from '@/state/GoalContext';
 import { useGame } from '@/state/GameContext';
 import { GOAL_TEMPLATES, type GoalTemplate } from '@/data/goalTemplates';
@@ -89,22 +89,18 @@ export function GoalEditorScreen({ route, navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.title} accessibilityRole="header">
-          {isEditing ? t('editTitle') : t('newTitle')}
-        </Text>
-        <View style={styles.chevronSpacer} />
-      </View>
+      <ScreenHeader
+        title={isEditing ? t('editTitle') : t('newTitle')}
+        onBack={() => navigation.goBack()}
+        backLabel={t('back')}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!isEditing && (
           <>
             <Text style={styles.lead}>{t('lead')}</Text>
 
-            <Text style={styles.sectionLabel}>{t('pickGoal')}</Text>
+            <SectionLabel>{t('pickGoal')}</SectionLabel>
             <View style={styles.templates}>
               {GOAL_TEMPLATES.map((tpl) => (
                 <Pressable
@@ -123,7 +119,7 @@ export function GoalEditorScreen({ route, navigation }: Props) {
               ))}
             </View>
 
-            <Text style={[styles.sectionLabel, { marginTop: spacing.lg }]}>{t('orOwn')}</Text>
+            <SectionLabel style={{ marginTop: spacing.lg }}>{t('orOwn')}</SectionLabel>
           </>
         )}
         <View style={styles.form}>
@@ -220,7 +216,7 @@ const styles = StyleSheet.create({
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
 
   templates: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  templateCard: { width: '48%', backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: 4 },
+  templateCard: { width: '48%', backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, gap: 4, ...shadows.md },
   templateEmoji: { fontSize: 26 },
   templateTitle: { ...typography.body, color: INK, fontWeight: '700' },
   templateAreas: { ...typography.caption, color: MUTED },
