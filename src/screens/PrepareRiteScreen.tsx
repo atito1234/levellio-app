@@ -1,16 +1,17 @@
 /**
- * PrepareRite — a short "mind & soul" rite before facing a dragon. Pick one of a
- * few tiny experiences (breathe / vow / recall a win / charge your Wisp); finishing
- * marks the next battle "prepared" (a small victory bonus). Optional + additive: the
- * normal setup→battle flow is untouched if skipped.
+ * PrepareRite — short "mind & soul" rites before facing a dragon. Pick one of a few
+ * tiny experiences (breathe / vow / recall a real past win / charge / first strike);
+ * finishing marks the next battle "prepared" (a victory bonus). Optional + additive:
+ * the normal setup→battle flow is untouched if skipped.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useBattles } from '@/state/BattlesContext';
+import { useJournal } from '@/state/JournalContext';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { haptics } from '@/services/feedback/haptics';
 import { useSettings } from '@/state/SettingsContext';
@@ -29,23 +30,40 @@ const TRACK = '#ECEAE4';
 const VIOLET_SOFT = '#EDE9FE';
 
 const CHARGE_TARGET = 8;
+const STRIKE_TARGET = 6;
+const randPct = (min: number, max: number) => `${Math.round(min + Math.random() * (max - min))}%` as const;
 
 export function PrepareRiteScreen({ route, navigation }: Props) {
   const { dragonId, dragonName, category } = route.params;
   const { t } = useTranslation(['battle', 'dragons']);
   const { setPreparedRite } = useBattles();
+  const { entries, entriesForDragon } = useJournal();
   const { settings } = useSettings();
   const reduced = useReducedMotion();
 
   const [rite, setRite] = useState<RiteId>(defaultRiteFor(dragonId, category));
   const [charge, setCharge] = useState(0);
+  const [strikeHits, setStrikeHits] = useState(0);
+  const [target, setTarget] = useState<{ top: string; left: string }>({ top: '40%', left: '40%' });
+  const [breathIn, setBreathIn] = useState(true);
 
   const dragon = dragonName ?? t('dragons:' + dragonId + '.name', { defaultValue: t('rites.theDragon') });
+  // Recall pulls a REAL past reflection (this dragon first, else most recent).
+  const recallText = useMemo(() => {
+    const e = entriesForDragon(dragonId)[0] ?? entries[0];
+    return e?.text?.trim() || t('rites.recall.blurb');
+  }, [entriesForDragon, entries, dragonId, t]);
 
-  // Breathing orb — a slow 4s-in / 4s-out loop (skipped under reduced motion).
-  const scale = useRef(new Animated.Value(1)).current;
+  // Reset per-rite state whenever the rite changes.
   useEffect(() => {
     setCharge(0);
+    setStrikeHits(0);
+    if (rite === 'strike') setTarget({ top: randPct(8, 70), left: randPct(6, 78) });
+  }, [rite]);
+
+  // Breathing orb — slow 4s in / 4s out loop + a phase label (skipped if reduced).
+  const scale = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
     if (rite !== 'breathe' || reduced) return;
     const loop = Animated.loop(
       Animated.sequence([
@@ -54,7 +72,11 @@ export function PrepareRiteScreen({ route, navigation }: Props) {
       ]),
     );
     loop.start();
-    return () => loop.stop();
+    const phase = setInterval(() => setBreathIn((v) => !v), 4000);
+    return () => {
+      loop.stop();
+      clearInterval(phase);
+    };
   }, [rite, reduced, scale]);
 
   const finish = () => {
@@ -67,6 +89,16 @@ export function PrepareRiteScreen({ route, navigation }: Props) {
     haptics.tap(settings.hapticsEnabled);
     setCharge((c) => Math.min(CHARGE_TARGET, c + 1));
   };
+
+  const hitTarget = () => {
+    haptics.tap(settings.hapticsEnabled);
+    setStrikeHits((h) => Math.min(STRIKE_TARGET, h + 1));
+    setTarget({ top: randPct(8, 70), left: randPct(6, 78) });
+  };
+
+  const chargeReady = rite === 'charge' && charge >= CHARGE_TARGET;
+  const strikeReady = rite === 'strike' && strikeHits >= STRIKE_TARGET;
+  const finishDisabled = (rite === 'charge' && !chargeReady) || (rite === 'strike' && !strikeReady);
 
   return (
     <ScreenContainer backgroundColor={BG}>
@@ -85,7 +117,7 @@ export function PrepareRiteScreen({ route, navigation }: Props) {
           {rite === 'breathe' && (
             <View style={styles.center}>
               <Animated.View style={[styles.orb, { transform: [{ scale }] }]} />
-              <Text style={styles.riteBlurb}>{t('rites.breathe.blurb')}</Text>
+              <Text style={styles.phase}>{reduced ? t('rites.breathe.blurb') : breathIn ? t('rites.breathe.in') : t('rites.breathe.out')}</Text>
             </View>
           )}
           {rite === 'vow' && (
@@ -97,7 +129,7 @@ export function PrepareRiteScreen({ route, navigation }: Props) {
           {rite === 'recall' && (
             <View style={styles.center}>
               <Text style={styles.vowMark}>🏅</Text>
-              <Text style={styles.vowText}>{t('rites.recall.blurb')}</Text>
+              <Text style={styles.vowText}>“{recallText}”</Text>
             </View>
           )}
           {rite === 'charge' && (
@@ -112,13 +144,29 @@ export function PrepareRiteScreen({ route, navigation }: Props) {
               </Pressable>
             </View>
           )}
+          {rite === 'strike' && (
+            <View style={styles.strikeStage}>
+              <Text style={styles.strikeHint}>{t('rites.strike.blurb')}</Text>
+              <Text style={styles.strikeCount}>{t('rites.strike.hits', { hits: strikeHits, total: STRIKE_TARGET })}</Text>
+              {!strikeReady && (
+                <Pressable
+                  onPress={hitTarget}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('rites.strike.tap')}
+                  style={[styles.strikeTarget, { top: target.top as any, left: target.left as any }]}
+                >
+                  <Text style={styles.strikeTargetText}>🎯</Text>
+                </Pressable>
+              )}
+            </View>
+          )}
         </View>
 
         <Pressable
           onPress={finish}
-          disabled={rite === 'charge' && charge < CHARGE_TARGET}
+          disabled={finishDisabled}
           accessibilityRole="button"
-          style={[styles.primary, rite === 'charge' && charge < CHARGE_TARGET && styles.primaryOff]}
+          style={[styles.primary, finishDisabled && styles.primaryOff]}
         >
           <Text style={styles.primaryText}>{t('rites.' + rite + '.cta')}</Text>
         </Pressable>
@@ -156,9 +204,10 @@ const styles = StyleSheet.create({
   h1: { ...typography.heading, color: INK, fontWeight: '800' },
   facing: { ...typography.body, color: MUTED },
 
-  stage: { minHeight: 240, alignItems: 'center', justifyContent: 'center', backgroundColor: CARD, borderRadius: 24, padding: spacing.lg, borderWidth: 1, borderColor: TRACK },
+  stage: { minHeight: 260, alignItems: 'center', justifyContent: 'center', backgroundColor: CARD, borderRadius: 24, padding: spacing.lg, borderWidth: 1, borderColor: TRACK },
   center: { alignItems: 'center', gap: spacing.md, width: '100%' },
   orb: { width: 120, height: 120, borderRadius: 999, backgroundColor: TEAL, opacity: 0.85 },
+  phase: { ...typography.title, color: MUTED, fontWeight: '700' },
   riteBlurb: { ...typography.body, color: MUTED, textAlign: 'center' },
   vowMark: { fontSize: 48 },
   vowText: { ...typography.title, color: INK, fontWeight: '800', textAlign: 'center' },
@@ -167,6 +216,12 @@ const styles = StyleSheet.create({
   chargeFill: { height: 12, borderRadius: 999, backgroundColor: VIOLET },
   chargeBtn: { backgroundColor: VIOLET_SOFT, borderRadius: 999, paddingHorizontal: spacing.xl, paddingVertical: spacing.md, borderWidth: 1, borderColor: '#E2DBFB' },
   chargeBtnText: { ...typography.label, color: VIOLET, fontWeight: '900' },
+
+  strikeStage: { alignSelf: 'stretch', flex: 1, minHeight: 220, width: '100%' },
+  strikeHint: { ...typography.body, color: MUTED, textAlign: 'center' },
+  strikeCount: { ...typography.label, color: VIOLET, fontWeight: '800', textAlign: 'center', marginTop: 4 },
+  strikeTarget: { position: 'absolute', width: 52, height: 52, borderRadius: 999, backgroundColor: VIOLET_SOFT, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: VIOLET },
+  strikeTargetText: { fontSize: 26 },
 
   primary: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm },
   primaryOff: { opacity: 0.4 },

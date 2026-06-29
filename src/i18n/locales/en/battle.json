@@ -126,7 +126,9 @@
     "breathe": {
       "title": "Breathe",
       "blurb": "Match your breath to the orb — in as it grows, out as it shrinks. Three slow breaths.",
-      "cta": "I'm centered"
+      "cta": "I'm centered",
+      "in": "Breathe in…",
+      "out": "Breathe out…"
     },
     "vow": {
       "title": "Vow",
@@ -143,6 +145,13 @@
       "blurb": "Tap to charge your Wisp before the fight.",
       "cta": "Charged — face it",
       "tap": "Charge ⚡"
+    },
+    "strike": {
+      "title": "First strike",
+      "blurb": "Land the first blow — tap the mark to strike.",
+      "cta": "Strike ready — face it",
+      "tap": "Strike",
+      "hits": "{{hits}} / {{total}} hits"
     }
   },
   "unlocks": {

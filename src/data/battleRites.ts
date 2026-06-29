@@ -6,7 +6,7 @@
  */
 import type { QuestCategory } from '@/types';
 
-export type RiteId = 'breathe' | 'vow' | 'recall' | 'charge';
+export type RiteId = 'breathe' | 'vow' | 'recall' | 'charge' | 'strike';
 
 export interface BattleRite {
   id: RiteId;
@@ -18,6 +18,7 @@ export const BATTLE_RITES: readonly BattleRite[] = [
   { id: 'vow', emoji: '🔥' },
   { id: 'recall', emoji: '🏅' },
   { id: 'charge', emoji: '⚡' },
+  { id: 'strike', emoji: '🎯' },
 ];
 
 /** A sensible default rite for the dragon you face (and the habit's life-area). */
@@ -25,8 +26,10 @@ export function defaultRiteFor(dragonId: string, category?: QuestCategory): Rite
   if (dragonId === 'fear') return 'breathe';
   if (dragonId === 'doubt' || dragonId === 'unworthiness') return 'recall';
   if (dragonId === 'laziness') return 'charge';
-  if (dragonId === 'procrastination' || dragonId === 'tooold') return 'vow';
+  if (dragonId === 'procrastination') return 'strike';
+  if (dragonId === 'tooold') return 'vow';
   if (category === 'mind' || category === 'health') return 'breathe';
   if (category === 'fitness') return 'charge';
+  if (category === 'productivity' || category === 'learning') return 'strike';
   return 'vow';
 }

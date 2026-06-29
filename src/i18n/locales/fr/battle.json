@@ -126,7 +126,9 @@
     "breathe": {
       "title": "Respire",
       "blurb": "Accorde ta respiration à l'orbe — inspire quand il grandit, expire quand il rétrécit. Trois respirations lentes.",
-      "cta": "Je suis centré"
+      "cta": "Je suis centré",
+      "in": "Inspire…",
+      "out": "Expire…"
     },
     "vow": {
       "title": "Serment",
@@ -143,6 +145,13 @@
       "blurb": "Touche pour charger ton Wisp avant le combat.",
       "cta": "Chargé — affronte-le",
       "tap": "Charger ⚡"
+    },
+    "strike": {
+      "title": "Première frappe",
+      "blurb": "Porte le premier coup — touche la cible pour frapper.",
+      "cta": "Prêt — affronte-le",
+      "tap": "Frapper",
+      "hits": "{{hits}} / {{total}} coups"
     }
   },
   "unlocks": {

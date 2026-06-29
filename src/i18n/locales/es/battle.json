@@ -126,7 +126,9 @@
     "breathe": {
       "title": "Respira",
       "blurb": "Sincroniza tu respiración con la esfera: inhala al crecer, exhala al encoger. Tres respiraciones lentas.",
-      "cta": "Estoy centrado"
+      "cta": "Estoy centrado",
+      "in": "Inhala…",
+      "out": "Exhala…"
     },
     "vow": {
       "title": "Voto",
@@ -143,6 +145,13 @@
       "blurb": "Toca para cargar a tu Wisp antes de la pelea.",
       "cta": "Cargado — enfréntalo",
       "tap": "Cargar ⚡"
+    },
+    "strike": {
+      "title": "Primer golpe",
+      "blurb": "Asesta el primer golpe: toca la diana para atacar.",
+      "cta": "Listo — enfréntalo",
+      "tap": "Golpear",
+      "hits": "{{hits}} / {{total}} golpes"
     }
   },
   "unlocks": {
