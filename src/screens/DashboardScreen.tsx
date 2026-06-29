@@ -32,7 +32,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
-import { effectivePlan, goalDayProgress, goalFocusPool, plannedOpen, planProgress } from '@/lib/plan';
+import { effectivePlan, goalMembersOpen, goalMembersProgress, plannedOpen, planProgress } from '@/lib/plan';
 import { sessionsOf } from '@/lib/analytics';
 import { activityJourney } from '@/lib/journey';
 import { SOLIDIFY_DAYS } from '@/lib/activityStreak';
@@ -111,7 +111,7 @@ export function DashboardScreen() {
   );
 
   const progress = useMemo(
-    () => (selectedGoal ? goalDayProgress(quests, plan, selectedGoal, goalLinkedIds, projectActivityIds) : planProgress(quests, plan)),
+    () => (selectedGoal ? goalMembersProgress(quests, selectedGoal, goalLinkedIds, projectActivityIds) : planProgress(quests, plan)),
     [quests, plan, selectedGoal, goalLinkedIds, projectActivityIds],
   );
 
@@ -122,7 +122,7 @@ export function DashboardScreen() {
 
   // The planned, still-open habits (timed first) — filtered to the selected goal.
   const openHabits = useMemo(
-    () => (selectedGoal ? goalFocusPool(quests, plan, selectedGoal, goalLinkedIds, projectActivityIds) : plannedOpen(quests, plan)),
+    () => (selectedGoal ? goalMembersOpen(quests, selectedGoal, goalLinkedIds, projectActivityIds) : plannedOpen(quests, plan)),
     [quests, plan, selectedGoal, goalLinkedIds, projectActivityIds],
   );
   const goalHasActivities = selectedGoal ? goalHabits(quests, selectedGoal, goalLinkedIds, projectActivityIds).length > 0 : true;

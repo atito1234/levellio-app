@@ -128,10 +128,9 @@ export function NewGoalFlowScreen({ navigation }: Props) {
     else setStep('firstVote');
   };
 
-  const castFirstVote = async () => {
-    const first = created?.quests[0];
-    if (first) await completeActivity(first, { method: 'manual', durationSec: 0 });
-    navigation.goBack();
+  const castVote = async (quest: Quest) => {
+    await completeActivity(quest, { method: 'manual', durationSec: 0 });
+    navigation.goBack(); // celebration fires via the app-root MilestoneCelebration
   };
 
   return (
@@ -215,7 +214,9 @@ export function NewGoalFlowScreen({ navigation }: Props) {
       )}
 
       {step === 'deck' && (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        // A fixed (non-scrolling) layout so the deck's horizontal swipe isn't
+        // swallowed by a vertical ScrollView.
+        <View style={[styles.content, styles.deckStep]}>
           <Text style={styles.h1}>{identity.emoji} {identity.title}</Text>
           <Text style={styles.sub}>{t('become.pickActivities')}</Text>
 
@@ -257,7 +258,7 @@ export function NewGoalFlowScreen({ navigation }: Props) {
           >
             <Text style={styles.primaryText}>{t('become.continue', { count: total })}</Text>
           </Pressable>
-        </ScrollView>
+        </View>
       )}
 
       {step === 'firstVote' && created && (
@@ -265,18 +266,22 @@ export function NewGoalFlowScreen({ navigation }: Props) {
           <Text style={styles.voteEmoji}>{created.goal.emoji}</Text>
           <Text style={styles.h1}>{t('become.firstVoteTitle')}</Text>
           <Text style={styles.sub}>{t('become.firstVoteSub', { title: created.goal.title })}</Text>
+          {created.quests.length > 0 && <Text style={styles.voteHint}>{t('become.firstVoteHint')}</Text>}
+          {/* Tap ANY activity to do it right now (cast your vote). */}
           <View style={styles.voteList}>
             {created.quests.map((q) => (
-              <View key={q.id} style={styles.voteChip}>
-                <Text style={styles.voteChipText} numberOfLines={1}>{q.title}</Text>
-              </View>
+              <Pressable
+                key={q.id}
+                onPress={() => void castVote(q)}
+                accessibilityRole="button"
+                accessibilityLabel={t('become.firstVoteCta', { title: q.title })}
+                style={[styles.voteRow, { borderColor: accent }]}
+              >
+                <Text style={styles.voteRowText} numberOfLines={2}>🗳️ {q.title}</Text>
+                <Text style={[styles.voteRowGo, { color: accent }]}>›</Text>
+              </Pressable>
             ))}
           </View>
-          {created.quests[0] && (
-            <Pressable onPress={() => void castFirstVote()} accessibilityRole="button" style={[styles.primary, { backgroundColor: accent }]}>
-              <Text style={styles.primaryText}>🗳️ {t('become.firstVoteCta', { title: created.quests[0].title })}</Text>
-            </Pressable>
-          )}
           <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" style={styles.secondary}>
             <Text style={styles.secondaryText}>{t('become.later')}</Text>
           </Pressable>
@@ -292,6 +297,7 @@ const styles = StyleSheet.create({
   chevronSpacer: { width: 28 },
 
   content: { gap: spacing.md, paddingBottom: spacing.xl },
+  deckStep: { flex: 1, paddingTop: spacing.sm },
   h1: { ...typography.heading, color: INK, fontWeight: '800' },
   sub: { ...typography.body, color: MUTED },
 
@@ -324,7 +330,9 @@ const styles = StyleSheet.create({
   secondaryText: { ...typography.label, color: MUTED, fontWeight: '700' },
 
   voteEmoji: { fontSize: 56, textAlign: 'center', marginTop: spacing.lg },
-  voteList: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center' },
-  voteChip: { backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK, maxWidth: '100%' },
-  voteChipText: { ...typography.label, color: INK, fontWeight: '600' },
+  voteHint: { ...typography.label, color: MUTED, fontWeight: '700', textAlign: 'center' },
+  voteList: { gap: spacing.sm },
+  voteRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: CARD, borderRadius: 16, paddingHorizontal: spacing.lg, paddingVertical: spacing.md, borderWidth: 1.5 },
+  voteRowText: { ...typography.title, color: INK, fontWeight: '700', flex: 1 },
+  voteRowGo: { fontSize: 26, fontWeight: '800' },
 });

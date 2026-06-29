@@ -81,6 +81,7 @@
     "firstVoteTitle": "Vote pour la première fois",
     "firstVoteSub": "Chaque répétition est un vote pour devenir {{title}}. Fais-en une maintenant.",
     "firstVoteCta": "Faire « {{title}} » maintenant",
-    "later": "Plus tard"
+    "later": "Plus tard",
+    "firstVoteHint": "Touchez-en une pour la faire maintenant"
   }
 }

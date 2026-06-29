@@ -20,6 +20,16 @@ export function effectivePlan(quests: readonly Quest[], plannedIds?: readonly st
   return plannedIds.map((id) => byId.get(id)).filter((q): q is Quest => q !== undefined);
 }
 
+/** Order comparator: timed habits first (ascending), then keep prior order (stable). */
+function byTimeThenOrder(a: Quest, b: Quest): number {
+  const at = a.scheduledTime;
+  const bt = b.scheduledTime;
+  if (at !== undefined && bt !== undefined) return at - bt;
+  if (at !== undefined) return -1; // timed before untimed
+  if (bt !== undefined) return 1;
+  return 0; // both untimed → keep prior order (stable sort)
+}
+
 /**
  * Planned & still-open habits for "now", ordered by scheduled time (timed first,
  * ascending) then plan order — drives the home Now card + up-next strip.
@@ -27,14 +37,7 @@ export function effectivePlan(quests: readonly Quest[], plannedIds?: readonly st
 export function plannedOpen(quests: readonly Quest[], plannedIds?: readonly string[]): Quest[] {
   return effectivePlan(quests, plannedIds)
     .filter((q) => !q.completed)
-    .sort((a, b) => {
-      const at = a.scheduledTime;
-      const bt = b.scheduledTime;
-      if (at !== undefined && bt !== undefined) return at - bt;
-      if (at !== undefined) return -1; // timed before untimed
-      if (bt !== undefined) return 1;
-      return 0; // both untimed → keep plan order (stable sort)
-    });
+    .sort(byTimeThenOrder);
 }
 
 /** Today's plan completion (live, from the derived `completed` flag) for the hero ring. */
@@ -56,6 +59,32 @@ export function goalFocusPool(
 ): Quest[] {
   const inGoal = new Set(goalHabits(quests, goal, linkedIds, projectActivityIds).map((q) => q.id));
   return plannedOpen(quests, plannedIds).filter((q) => inGoal.has(q.id));
+}
+
+/**
+ * A selected goal's contributing activities that are still open — ordered timed-first.
+ * Unlike {@link goalFocusPool}, this is NOT restricted to today's plan: tapping a
+ * goal on Home should surface ALL its activities to swipe, even unplanned ones.
+ */
+export function goalMembersOpen(
+  quests: readonly Quest[],
+  goal: Pick<Goal, 'categories' | 'kind'>,
+  linkedIds?: ReadonlySet<string>,
+  projectActivityIds?: ReadonlySet<string>,
+): Quest[] {
+  return goalHabits(quests, goal, linkedIds, projectActivityIds)
+    .filter((q) => !q.completed)
+    .sort(byTimeThenOrder);
+}
+
+/** Today's completion across ALL of a goal's activities (the goal-view hero ring). */
+export function goalMembersProgress(
+  quests: readonly Quest[],
+  goal: Pick<Goal, 'categories' | 'kind'>,
+  linkedIds?: ReadonlySet<string>,
+  projectActivityIds?: ReadonlySet<string>,
+): DayProgress {
+  return dayProgress(goalHabits(quests, goal, linkedIds, projectActivityIds));
 }
 
 /** Today's completion within a goal's planned habits — the goal-scoped hero ring. */

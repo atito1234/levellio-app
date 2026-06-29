@@ -81,6 +81,7 @@
     "firstVoteTitle": "Cast your first vote",
     "firstVoteSub": "Every rep is a vote for becoming {{title}}. Do one now.",
     "firstVoteCta": "Do “{{title}}” now",
-    "later": "Maybe later"
+    "later": "Maybe later",
+    "firstVoteHint": "Tap one to do it now"
   }
 }

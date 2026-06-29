@@ -3,6 +3,8 @@ import {
   gapsFor,
   goalDayProgress,
   goalFocusPool,
+  goalMembersOpen,
+  goalMembersProgress,
   habitsForCapacity,
   plannedOpen,
   planProgress,
@@ -45,6 +47,30 @@ describe('goalFocusPool / goalDayProgress', () => {
 
   it('falls back to all quests when no plan is set', () => {
     expect(goalFocusPool(all, undefined, fitGoal).map((q) => q.id)).toEqual(['q1', 'q3']);
+  });
+});
+
+describe('goalMembersOpen / goalMembersProgress', () => {
+  it('shows ALL the goal’s open activities, ignoring today’s plan (timed first)', () => {
+    const morning = quest({ id: 'm', category: 'fitness', scheduledTime: 450 });
+    const untimed = quest({ id: 'u', category: 'mind' });
+    const other = quest({ id: 'o', category: 'learning' }); // not in goal
+    // No plan restriction: both fitness+mind members appear even though unplanned.
+    const ids = goalMembersOpen([untimed, other, morning], fitGoal).map((q) => q.id);
+    expect(ids).toEqual(['m', 'u']); // timed first, learning excluded
+  });
+
+  it('drops completed members from the swipe pool', () => {
+    const done = quest({ id: 'm', category: 'fitness', completed: true });
+    const open = quest({ id: 'u', category: 'mind' });
+    expect(goalMembersOpen([done, open], fitGoal).map((q) => q.id)).toEqual(['u']);
+  });
+
+  it('counts progress over all the goal’s members (not just planned)', () => {
+    const done = quest({ id: 'm', category: 'fitness', completed: true });
+    const open = quest({ id: 'u', category: 'mind' });
+    const other = quest({ id: 'o', category: 'learning' });
+    expect(goalMembersProgress([done, open, other], fitGoal)).toEqual({ done: 1, total: 2, pct: 50 });
   });
 });
 

@@ -78,6 +78,7 @@ export function SwipeDeck({
 
   const pan = useRef(
     PanResponder.create({
+      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy) * 1.2,
       onMoveShouldSetPanResponderCapture: (_e, g) => Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy) * 1.2,
       onPanResponderMove: (_e, g) => cardX.setValue(g.dx),
       onPanResponderRelease: (_e, g) => {
@@ -123,12 +124,13 @@ export function SwipeDeck({
         </Animated.View>
       </View>
 
+      {/* Big, obvious tap controls — the always-working alternative to swiping. */}
       <View style={styles.buttons}>
         <Pressable onPress={() => decide(false)} accessibilityRole="button" accessibilityLabel={skipA11y} style={[styles.btn, styles.btnSkip]}>
-          <Text style={styles.btnSkipText}>✕</Text>
+          <Text style={styles.btnSkipText}>←  {skipWord}</Text>
         </Pressable>
-        <Pressable onPress={() => decide(true)} accessibilityRole="button" accessibilityLabel={addA11y} style={[styles.btn, { backgroundColor: accent }]}>
-          <Text style={styles.btnAddText}>＋</Text>
+        <Pressable onPress={() => decide(true)} accessibilityRole="button" accessibilityLabel={addA11y} style={[styles.btn, styles.btnAdd, { backgroundColor: accent }]}>
+          <Text style={styles.btnAddText}>{addWord}  →</Text>
         </Pressable>
       </View>
     </View>
@@ -166,9 +168,10 @@ const styles = StyleSheet.create({
   stampSkip: { left: 16, borderColor: '#C9C7C0', transform: [{ rotate: '-12deg' }] },
   stampText: { ...typography.label, fontWeight: '900', letterSpacing: 1 },
 
-  buttons: { flexDirection: 'row', gap: spacing.xl },
-  btn: { width: 64, height: 64, borderRadius: 999, alignItems: 'center', justifyContent: 'center', shadowColor: '#1B1B2A', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.18, shadowRadius: 12, elevation: 5 },
+  buttons: { flexDirection: 'row', gap: spacing.md, alignSelf: 'stretch' },
+  btn: { flex: 1, height: 54, borderRadius: 999, alignItems: 'center', justifyContent: 'center', shadowColor: '#1B1B2A', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.18, shadowRadius: 12, elevation: 5 },
   btnSkip: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
-  btnSkipText: { fontSize: 26, color: colors.textMuted, fontWeight: '900' },
-  btnAddText: { fontSize: 30, color: '#FFFFFF', fontWeight: '900' },
+  btnAdd: {},
+  btnSkipText: { ...typography.label, color: colors.textMuted, fontWeight: '900', letterSpacing: 0.5 },
+  btnAddText: { ...typography.label, color: '#FFFFFF', fontWeight: '900', letterSpacing: 0.5 },
 });
