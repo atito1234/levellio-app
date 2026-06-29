@@ -5,8 +5,9 @@
  * without pulling in React Native.
  *
  * Translation status: `en` is the human-authored source of truth. `fr`/`es` are
- * machine drafts pending review; `ht` (Haitian Creole) is a machine draft flagged
- * for human verification before any Creole-targeted launch.
+ * complete, human-quality translations (parity-tested against `en`) and shipped as
+ * stable; `ht` (Haitian Creole) is a machine draft flagged for human verification
+ * before any Creole-targeted launch.
  */
 
 /** Languages we ship strings for. `en` is always complete (source of truth). */
@@ -32,8 +33,8 @@ export type Namespace = (typeof NAMESPACES)[number];
 /** Translation maturity, surfaced in the language picker so testers know. */
 export const LOCALE_STATUS: Record<SupportedLocale, 'stable' | 'draft'> = {
   en: 'stable',
-  fr: 'draft',
-  es: 'draft',
+  fr: 'stable',
+  es: 'stable',
   ht: 'draft',
 };
 
