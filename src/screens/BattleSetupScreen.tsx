@@ -17,7 +17,7 @@ import { goalHabits } from '@/lib/goal';
 import { plannedOpen } from '@/lib/plan';
 import { moodMeta } from '@/lib/journal';
 import { habitContext } from '@/lib/habitContext';
-import { CATEGORY_META } from '@/lib/categories';
+import { CATEGORY_META, CATEGORY_COLOR } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
 import { TECHNIQUES, clampCustomMinutes, workSeconds, getTechnique, type TechniqueId } from '@/lib/timeTechniques';
 import { DRAGONS, CUSTOM_DRAGON_ID, getDragon } from '@/data/dragons';
@@ -304,7 +304,8 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         ) : (
           <View style={styles.missionChips}>
             {selectedQuests.map((q) => (
-              <Pressable key={q.id} onPress={() => remove(q.id)} accessibilityRole="button" accessibilityLabel={t('setup.removeMissionA11y', { title: q.title })} style={styles.missionChip}>
+              <Pressable key={q.id} onPress={() => remove(q.id)} accessibilityRole="button" accessibilityLabel={t('setup.removeMissionA11y', { title: q.title })} style={[styles.missionChip, { borderColor: CATEGORY_COLOR[q.category] }]}>
+                <View style={[styles.missionDot, { backgroundColor: CATEGORY_COLOR[q.category] }]} />
                 <Text style={styles.missionChipText} numberOfLines={1}>
                   {CATEGORY_META[q.category].icon} {q.title}
                 </Text>
@@ -427,6 +428,7 @@ const styles = StyleSheet.create({
   emptyMissionsText: { ...typography.body, color: MUTED },
   missionChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   missionChip: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: VIOLET_SOFT, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#E2DBFB', maxWidth: '100%' },
+  missionDot: { width: 9, height: 9, borderRadius: 999 },
   missionChipText: { ...typography.label, color: VIOLET, fontWeight: '700', flexShrink: 1 },
   missionChipX: { ...typography.caption, color: VIOLET, fontWeight: '800' },
 

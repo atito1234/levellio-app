@@ -87,5 +87,7 @@
     "adoptedTitle": "Adopted 🌱",
     "adoptedBody": "“{{habit}}” is now a daily habit of yours. Find it on your Today.",
     "adoptedBodyProject": "“{{habit}}” is now a daily habit of yours, powering {{project}}. Find it on your Today."
-  }
+  },
+  "filterAll": "All",
+  "emptyCategory": "No posts in this area yet."
 }

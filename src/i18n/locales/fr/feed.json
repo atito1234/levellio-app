@@ -87,5 +87,7 @@
     "adoptedTitle": "Adoptée 🌱",
     "adoptedBody": "« {{habit}} » est désormais une de vos habitudes quotidiennes. Retrouvez-la dans votre Aujourd'hui.",
     "adoptedBodyProject": "« {{habit}} » est désormais une de vos habitudes quotidiennes, au service de {{project}}. Retrouvez-la dans votre Aujourd'hui."
-  }
+  },
+  "filterAll": "Tout",
+  "emptyCategory": "Pas encore de publications dans ce domaine."
 }
