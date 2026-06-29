@@ -3,9 +3,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { ScreenContainer, ScreenHeader, SectionLabel, StatTile } from '@/components';
 import { DotGrid, Sparkline } from '@/components/charts';
-import { radii, shadows, spacing, typography } from '@/theme';
+import { A, radii, shadows, spacing, typography, STATUS_COLOR, VERDICT_TONE } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals } from '@/state/GoalContext';
 import { useActivityLog } from '@/state/useActivityLog';
@@ -21,13 +21,12 @@ import {
   tierTitle,
   weekCells,
   INSIGHT_TIERS,
-  type DirectionTone,
   type InsightTier,
 } from '@/lib/heroAnalytics';
 import { useEntitlements } from '@/state/SubscriptionContext';
 import { canUseAdvancedInsights } from '@/services/monetization';
 import { confidenceLabel } from '@/lib/metrics/confidence';
-import { activityDayCells, activityJourney, automaticityCurve, JOURNEY_MARKERS, type JourneyStatus } from '@/lib/journey';
+import { activityDayCells, activityJourney, automaticityCurve, JOURNEY_MARKERS } from '@/lib/journey';
 import { CATEGORY_META, resolveCategory } from '@/lib/categories';
 import { RING_SCIENCE } from '@/data/ringScience';
 import { dayKey, shiftDayKey } from '@/lib/dates';
@@ -52,25 +51,10 @@ interface ScreenData {
   ratings: ReturnType<typeof ratingStats>;
 }
 
-// Locked palette (gold stays reserved for 100% rings).
-const INK = '#1F2937';
-const BG = '#F7F6F2';
-const CARD = '#FFFFFF';
-const VIOLET = '#6C4CF1';
-const VIOLET_SOFT = '#EDE9FE';
-const TEAL = '#16C8A8';
-const TEAL_SOFT = '#D6F7EF';
-const MUTED = '#5A5A72';
-const LOCK = '#9A9AAE';
+// Shared analytics palette (single source of truth in src/theme/analytics.ts).
+const { ink: INK, muted: MUTED, card: CARD, bg: BG, violet: VIOLET, violetSoft: VIOLET_SOFT, teal: TEAL, lock: LOCK } = A;
 
 const WEEKDAY_LETTER = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
-
-const TONE: Record<DirectionTone, { accent: string; soft: string; emoji: string }> = {
-  onTrack: { accent: TEAL, soft: TEAL_SOFT, emoji: '🚀' },
-  building: { accent: VIOLET, soft: VIOLET_SOFT, emoji: '📈' },
-  drifting: { accent: '#B5740A', soft: '#FBEFD6', emoji: '🌱' },
-  start: { accent: VIOLET, soft: VIOLET_SOFT, emoji: '🧭' },
-};
 
 export function AnalyticsScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation('analytics');
@@ -111,7 +95,7 @@ export function AnalyticsScreen({ navigation }: Props) {
     },
     t,
   );
-  const tone = TONE[direction.tone];
+  const tone = VERDICT_TONE[direction.tone];
   const closedThisWeek = data.cells.filter((c) => c.done).length;
 
   return (
@@ -153,9 +137,9 @@ export function AnalyticsScreen({ navigation }: Props) {
                 ))}
               </View>
               <View style={styles.counterRow}>
-                <Counter value={`${data.daysDone}`} label={t('counter.daysAccomplished')} />
-                <Counter value={`${data.streakDays}`} label={t('counter.dayStreak')} tint={TEAL} />
-                <Counter value={`${data.activities.length}`} label={t('counter.activities')} tint={VIOLET} />
+                <StatTile value={`${data.daysDone}`} label={t('counter.daysAccomplished')} />
+                <StatTile value={`${data.streakDays}`} label={t('counter.dayStreak')} tint={TEAL} />
+                <StatTile value={`${data.activities.length}`} label={t('counter.activities')} tint={VIOLET} />
               </View>
             </View>
 
@@ -251,13 +235,6 @@ export function AnalyticsScreen({ navigation }: Props) {
   );
 }
 
-const STATUS_COLOR: Record<JourneyStatus, string> = {
-  graduated: '#B5740A',
-  solidified: TEAL,
-  building: VIOLET,
-  new: MUTED,
-};
-
 function JourneyRow({ sessions, today, activityId, title, onPress, t }: { sessions: readonly ActivitySessionEvent[]; today: string; activityId: string; title: string; onPress: () => void; t: TFunction }) {
   const j = activityJourney(sessions, activityId, title, today);
   const cells = activityDayCells(sessions, activityId, today, 28);
@@ -332,15 +309,6 @@ function ForecastCard({ data, entitled, onUnlock, t }: { data: ScreenData; entit
         {autoEta != null ? (autoEta === 0 ? t('forecast.autoWithinReach') : t('forecast.autoAway', { count: autoEta })) : t('forecast.autoBuilds')}
         {t('forecast.autoPace', { count: perWeek })}
       </Text>
-    </View>
-  );
-}
-
-function Counter({ value, label, tint = INK }: { value: string; label: string; tint?: string }) {
-  return (
-    <View style={styles.counter}>
-      <Text style={[styles.counterValue, { color: tint }]}>{value}</Text>
-      <Text style={styles.counterLabel}>{label}</Text>
     </View>
   );
 }
@@ -462,10 +430,7 @@ const styles = StyleSheet.create({
   dayLetter: { ...typography.caption, color: MUTED },
   dayLetterToday: { color: VIOLET, fontWeight: '800' },
 
-  counterRow: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: spacing.xs },
-  counter: { alignItems: 'center', flex: 1, gap: 2 },
-  counterValue: { ...typography.heading, fontWeight: '800' },
-  counterLabel: { ...typography.caption, color: MUTED, textAlign: 'center' },
+  counterRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm, paddingTop: spacing.xs },
 
   forecastCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, borderWidth: 2, borderColor: VIOLET_SOFT, ...shadows.md },
   forecastLocked: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET_SOFT },

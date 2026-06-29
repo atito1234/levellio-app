@@ -4,6 +4,7 @@ import { NavigationContainer, DefaultTheme, type LinkingOptions } from '@react-n
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './types';
 import { colors } from '@/theme';
+import { BUCKETS_ENABLED } from '@/config/features';
 import { useSettings } from '@/state/SettingsContext';
 import { useGame } from '@/state/GameContext';
 import { OnboardingScreen } from '@/screens/OnboardingScreen';
@@ -138,12 +139,9 @@ export function RootNavigator() {
           component={KitSelectScreen}
           options={{ presentation: 'modal' }}
         />
-        <Stack.Screen name="Organize" component={OrganizeScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen
-          name="BucketEdit"
-          component={BucketEditScreen}
-          options={{ presentation: 'modal' }}
-        />
+        {/* Buckets retired from the UI (BUCKETS_ENABLED); code kept for re-enable. */}
+        {BUCKETS_ENABLED && <Stack.Screen name="Organize" component={OrganizeScreen} options={{ presentation: 'modal' }} />}
+        {BUCKETS_ENABLED && <Stack.Screen name="BucketEdit" component={BucketEditScreen} options={{ presentation: 'modal' }} />}
         <Stack.Screen name="Ripple" component={RippleScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="ActivityTimer" component={ActivityTimerScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Connections" component={ConnectionsScreen} options={{ presentation: 'modal' }} />

@@ -1,14 +1,14 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 
 // Locked palette (gold reserved for 100% rings — never on a partial bar).
-const INK = '#1F2937';
-const MUTED = '#5A5A72';
-const TEAL = '#16C8A8';
-const VIOLET = '#6C4CF1';
-const TRACK = '#ECEAE4';
+const INK = colors.textPrimary;
+const MUTED = colors.textSecondary;
+const TEAL = colors.teal;
+const VIOLET = colors.violet;
+const TRACK = colors.track;
 
 export type BarTone = 'violet' | 'teal';
 const COLOR: Record<BarTone, string> = { violet: VIOLET, teal: TEAL };

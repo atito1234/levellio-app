@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CapacityRing, ProjectBadge, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { AnalyticsEmptyState, CapacityRing, ProjectBadge, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
 import {
   CalendarHeatmap,
   RadarChart,
@@ -14,7 +14,7 @@ import {
   type MapNode,
   type RankRow,
 } from '@/components/charts';
-import { radii, shadows, spacing, typography } from '@/theme';
+import { A, radii, shadows, spacing, typography, VERDICT_TONE } from '@/theme';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useAnalyticsRollup } from '@/state/useAnalyticsRollup';
 import { usePlan } from '@/state/PlanContext';
@@ -23,6 +23,7 @@ import { useCapacities } from '@/state/CapacitiesContext';
 import { useGoals } from '@/state/GoalContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { BUCKETS_ENABLED } from '@/config/features';
 import { useInsightAction } from '@/hooks/useInsightAction';
 import { sessionDay, sessionsOf, weekdayLabel } from '@/lib/analytics';
 import { activeDaysInWindow, daysAccomplished, directionVerdict, type Direction } from '@/lib/heroAnalytics';
@@ -53,29 +54,21 @@ import type { RootStackParamList } from '@/navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'Progress'>;
 type Tab = 'overview' | 'goals' | 'buckets' | 'capacities' | 'habits';
 
-const INK = '#1F2937';
-const BG = '#F7F6F2';
-const CARD = '#FFFFFF';
-const VIOLET = '#6C4CF1';
-const TEAL = '#16C8A8';
-const MUTED = '#5A5A72';
+// Shared analytics palette (src/theme/analytics.ts).
+const { ink: INK, muted: MUTED, card: CARD, bg: BG, violet: VIOLET, teal: TEAL } = A;
 
-const TAB_KEYS: Tab[] = ['overview', 'goals', 'buckets', 'capacities', 'habits'];
+// 'buckets' is retired from the UI (BUCKETS_ENABLED); drop it from the tab bar.
+const TAB_KEYS: Tab[] = (['overview', 'goals', 'buckets', 'capacities', 'habits'] as Tab[]).filter(
+  (k) => k !== 'buckets' || BUCKETS_ENABLED,
+);
 
 const RANGE_DAYS = 28;
 const TREND_DAYS = 56;
 
-// Soft tone backgrounds for the momentum verdict (palette-safe, gold reserved).
-const VERDICT_BG: Record<Direction['tone'], string> = {
-  onTrack: '#D6F7EF',
-  building: '#EDE9FE',
-  drifting: '#FCE3EE',
-  start: '#ECECF2',
-};
-
 export function ProgressHubScreen({ route, navigation }: Props) {
   const { t } = useTranslation('progress');
-  const [tab, setTab] = useState<Tab>(route.params?.tab ?? 'overview');
+  const initialTab = route.params?.tab && TAB_KEYS.includes(route.params.tab) ? route.params.tab : 'overview';
+  const [tab, setTab] = useState<Tab>(initialTab);
   const { events, ready } = useActivityLog();
   useAnalyticsRollup(events); // keep durable history fresh while viewing
   const { quests, character } = useGame();
@@ -334,7 +327,7 @@ function Overview({
 
   return (
     <>
-      <View style={[styles.verdictCard, { backgroundColor: VERDICT_BG[verdict.tone] }]} accessibilityRole="header" accessibilityLabel={t('verdictA11y', { label: verdict.label, reason: verdict.reason })}>
+      <View style={[styles.verdictCard, { backgroundColor: VERDICT_TONE[verdict.tone].soft }]} accessibilityRole="header" accessibilityLabel={t('verdictA11y', { label: verdict.label, reason: verdict.reason })}>
         <Text style={styles.verdictLabel}>{verdict.label}</Text>
         <Text style={styles.verdictReason}>{verdict.reason}</Text>
       </View>
@@ -629,19 +622,10 @@ function EmptyNote({ msg }: { msg: string }) {
 
 function EmptyState() {
   const { t } = useTranslation('progress');
-  return (
-    <View style={styles.emptyWrap}>
-      <Text style={styles.emptyEmoji}>📈</Text>
-      <Text style={styles.empty}>{t('emptyState')}</Text>
-    </View>
-  );
+  return <AnalyticsEmptyState message={t('emptyState')} />;
 }
 
 const styles = StyleSheet.create({
-  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm },
-  chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
-  chevronSpacer: { width: 28 },
-  kicker: { ...typography.label, color: MUTED, letterSpacing: 2 },
   content: { gap: spacing.lg, paddingBottom: spacing.xl, paddingTop: spacing.md },
 
   segWrap: { gap: spacing.sm, paddingVertical: spacing.sm },
@@ -651,7 +635,6 @@ const styles = StyleSheet.create({
   segTextActive: { color: '#FFFFFF' },
 
   section: { gap: spacing.sm },
-  sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
   sectionBody: { gap: spacing.sm },
 
   card: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, ...shadows.md },
@@ -660,7 +643,7 @@ const styles = StyleSheet.create({
   focusCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: '#EDE9FE', borderRadius: radii.lg, padding: spacing.md },
   cta: { ...typography.label, color: VIOLET, fontWeight: '800' },
 
-  verdictCard: { borderRadius: 24, padding: spacing.lg, gap: 4 },
+  verdictCard: { borderRadius: radii.xl, padding: spacing.lg, gap: 4 },
   verdictLabel: { ...typography.title, color: INK },
   verdictReason: { ...typography.caption, color: MUTED },
   reflect: { alignSelf: 'center', backgroundColor: '#EDE9FE', borderRadius: 999, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
@@ -693,6 +676,4 @@ const styles = StyleSheet.create({
   soon: { ...typography.caption, color: MUTED, fontWeight: '700', backgroundColor: '#ECECF2', borderRadius: 999, paddingHorizontal: spacing.sm, paddingVertical: 4 },
 
   empty: { ...typography.body, color: MUTED, textAlign: 'center' },
-  emptyWrap: { alignItems: 'center', gap: spacing.md, paddingTop: spacing.xl, paddingHorizontal: spacing.lg },
-  emptyEmoji: { fontSize: 40 },
 });

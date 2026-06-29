@@ -2,9 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { Pill, ScreenContainer, ScreenHeader, StatTile, type PillTone } from '@/components';
 import { DotGrid, Sparkline } from '@/components/charts';
-import { spacing, typography } from '@/theme';
+import { A, radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useLinks } from '@/state/LinksContext';
@@ -19,27 +19,15 @@ import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ActivityJourney'>;
 
-const INK = '#1F2937';
-const BG = '#F7F6F2';
-const CARD = '#FFFFFF';
-const VIOLET = '#6C4CF1';
-const TEAL = '#16C8A8';
-const MUTED = '#5A5A72';
-const TRACK = '#ECEAE4';
+// Shared analytics palette (src/theme/analytics.ts).
+const { ink: INK, muted: MUTED, card: CARD, bg: BG, violet: VIOLET, teal: TEAL, track: TRACK } = A;
 
-const cardShadow = {
-  shadowColor: '#1B1B2A',
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.08,
-  shadowRadius: 16,
-  elevation: 3,
-} as const;
-
-const STATUS_COLOR: Record<JourneyStatus, string> = {
-  graduated: '#B5740A',
-  solidified: TEAL,
-  building: VIOLET,
-  new: MUTED,
+/** Habit-journey status → the matching Pill tone. */
+const STATUS_TONE: Record<JourneyStatus, PillTone> = {
+  graduated: 'gold',
+  solidified: 'teal',
+  building: 'violet',
+  new: 'neutral',
 };
 
 export function ActivityJourneyScreen({ route, navigation }: Props) {
@@ -77,27 +65,18 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
   }, [events, quests, activityId, t]);
 
   const j = data.journey;
-  const statusColor = STATUS_COLOR[j.status];
   const statusLabel = t(`status.${j.status}`);
   const hasHistory = j.totalDays > 0;
   const solidPct = (SOLIDIFY_DAYS / HABIT_DAYS) * 100;
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('a11yBack')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.kicker}>{t('kicker')}</Text>
-        <View style={styles.chevronSpacer} />
-      </View>
-
-      <Text style={styles.title} accessibilityRole="header">
-        {data.title}
-      </Text>
-      <View style={[styles.statusChip, { borderColor: statusColor }]}>
-        <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
-      </View>
+      <ScreenHeader
+        title={data.title}
+        onBack={() => navigation.goBack()}
+        backLabel={t('a11yBack')}
+        right={<Pill tone={STATUS_TONE[j.status]} label={statusLabel} />}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!ready ? (
@@ -150,9 +129,9 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
 
             {/* Honest stat row. */}
             <View style={styles.statsRow}>
-              <Stat value={`${j.currentStreak}`} label={t('stats.dayStreak')} tint={TEAL} />
-              <Stat value={`${j.totalDays}`} label={t('stats.daysClosed')} />
-              <Stat value={`${j.daysSinceStart}`} label={t('stats.daysOnPath')} tint={VIOLET} />
+              <StatTile value={`${j.currentStreak}`} label={t('stats.dayStreak')} tint={TEAL} />
+              <StatTile value={`${j.totalDays}`} label={t('stats.daysClosed')} />
+              <StatTile value={`${j.daysSinceStart}`} label={t('stats.daysOnPath')} tint={VIOLET} />
             </View>
 
             {/* Your chain — explicit links that power the same ripple. */}
@@ -233,26 +212,10 @@ export function ActivityJourneyScreen({ route, navigation }: Props) {
   );
 }
 
-function Stat({ value, label, tint = INK }: { value: string; label: string; tint?: string }) {
-  return (
-    <View style={styles.stat}>
-      <Text style={[styles.statValue, { color: tint }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm },
-  chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
-  chevronSpacer: { width: 28 },
-  kicker: { ...typography.label, color: MUTED, letterSpacing: 2 },
-  title: { ...typography.heading, color: INK },
-  statusChip: { alignSelf: 'flex-start', borderWidth: 1.5, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 4, marginTop: spacing.xs },
-  statusText: { ...typography.caption, fontWeight: '800' },
   content: { gap: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xl },
 
-  card: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, ...cardShadow },
+  card: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, ...shadows.md },
   cardTitle: { ...typography.title, color: INK, fontWeight: '800' },
   cardSub: { ...typography.caption, color: MUTED },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -267,10 +230,7 @@ const styles = StyleSheet.create({
 
   curveWrap: { marginTop: spacing.xs },
 
-  statsRow: { flexDirection: 'row', backgroundColor: CARD, borderRadius: 20, paddingVertical: spacing.lg, ...cardShadow },
-  stat: { flex: 1, alignItems: 'center', gap: 2 },
-  statValue: { ...typography.heading, fontWeight: '800' },
-  statLabel: { ...typography.caption, color: MUTED, textAlign: 'center' },
+  statsRow: { flexDirection: 'row', gap: spacing.sm, backgroundColor: CARD, borderRadius: radii.xl, paddingVertical: spacing.lg, ...shadows.md },
 
   actions: { gap: spacing.sm },
   cta: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center' },
@@ -280,7 +240,7 @@ const styles = StyleSheet.create({
 
   chainEmpty: { ...typography.body, color: MUTED },
   chainList: { gap: spacing.sm },
-  chainRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: BG, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  chainRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: BG, borderRadius: radii.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   chainMain: { flex: 1 },
   chainTitle: { ...typography.body, color: INK, fontWeight: '600' },
   chainRemove: { ...typography.label, color: MUTED, fontWeight: '800' },
@@ -290,12 +250,12 @@ const styles = StyleSheet.create({
   linkBtnText: { ...typography.label, color: VIOLET, fontWeight: '800' },
 
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(31,41,55,0.45)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: BG, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, maxHeight: '80%', gap: spacing.md },
+  sheet: { backgroundColor: BG, borderTopLeftRadius: radii.xl, borderTopRightRadius: radii.xl, padding: spacing.lg, maxHeight: '80%', gap: spacing.md },
   sheetHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sheetTitle: { ...typography.heading, color: INK },
   sheetDone: { ...typography.label, color: VIOLET, fontWeight: '800' },
   sheetListContent: { gap: spacing.sm, paddingBottom: spacing.md },
-  sheetRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: TRACK },
+  sheetRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: TRACK },
   sheetRowIcon: { fontSize: 18 },
   sheetRowTitle: { ...typography.body, color: INK, flex: 1, fontWeight: '600' },
   sheetRowAdd: { fontSize: 20, color: VIOLET, fontWeight: '800' },

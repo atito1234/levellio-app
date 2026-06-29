@@ -3,9 +3,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CapacityRing, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { AnalyticsEmptyState, CapacityRing, Pill, ScreenContainer, ScreenHeader, SectionLabel, StatTile } from '@/components';
 import { HBarChart, HourBars, BarHistogram, type BarDatum, type HistogramBar } from '@/components/charts';
-import { radii, shadows, spacing, typography } from '@/theme';
+import { A, radii, shadows, spacing, typography } from '@/theme';
 import { useActivityLog } from '@/state/useActivityLog';
 import { usePlan } from '@/state/PlanContext';
 import {
@@ -33,13 +33,8 @@ import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Insights'>;
 
-// Locked palette (gold stays reserved for 100% rings — never used here).
-const INK = '#1F2937';
-const BG = '#F7F6F2';
-const CARD = '#FFFFFF';
-const VIOLET = '#6C4CF1';
-const TEAL = '#16C8A8';
-const MUTED = '#5A5A72';
+// Shared analytics palette (src/theme/analytics.ts).
+const { ink: INK, muted: MUTED, card: CARD, bg: BG, violet: VIOLET, teal: TEAL } = A;
 
 function methodLabel(method: ActivitySessionEvent['method'], translate: TFunction): string {
   return translate(`method.${method}`);
@@ -178,14 +173,11 @@ export function InsightsScreen({ route, navigation }: Props) {
                   {dayCaps.map((c) => (
                     <Pressable
                       key={c.id}
-                      style={styles.capChip}
                       onPress={() => navigation.navigate('CapacityFocus', { capacityId: c.id })}
                       accessibilityRole="button"
                       accessibilityLabel={t('cap.a11y', { name: c.name, value: c.value })}
                     >
-                      <Text style={styles.capChipText}>
-                        {t('cap.label', { name: c.name, value: c.value })}
-                      </Text>
+                      <Pill tone="teal" label={t('cap.label', { name: c.name, value: c.value })} />
                     </Pressable>
                   ))}
                 </View>
@@ -321,33 +313,20 @@ function SummaryCard({ summary, t, locale, weekdayNames }: { summary: Summary; t
   return (
     <View style={styles.summaryCard}>
       <View style={styles.statGrid}>
-        <Stat value={`${summary.count}`} label={t('summary.session', { count: summary.count })} />
-        <Stat value={formatMinutes(summary.totalMin)} label={t('summary.totalTime')} />
-        <Stat value={summary.avgMin !== null ? formatMinutes(summary.avgMin) : '—'} label={t('summary.avgPerSession')} />
+        <StatTile value={`${summary.count}`} label={t('summary.session', { count: summary.count })} />
+        <StatTile value={formatMinutes(summary.totalMin)} label={t('summary.totalTime')} />
+        <StatTile value={summary.avgMin !== null ? formatMinutes(summary.avgMin) : '—'} label={t('summary.avgPerSession')} />
       </View>
       {(summary.bestHour !== null || summary.bestWeekday !== null) && (
         <View style={styles.bestRow}>
           {summary.bestHour !== null && (
-            <View style={styles.bestPill} accessibilityLabel={t('summary.a11yBestTime', { time: hourLabel(summary.bestHour, locale) })}>
-              <Text style={styles.bestPillText}>{t('summary.bestTime', { time: hourLabel(summary.bestHour, locale) })}</Text>
-            </View>
+            <Pill tone="violet" label={t('summary.bestTime', { time: hourLabel(summary.bestHour, locale) })} />
           )}
           {summary.bestWeekday !== null && (
-            <View style={styles.bestPill} accessibilityLabel={t('summary.a11yBestDay', { day: weekdayLabel(summary.bestWeekday, weekdayNames) })}>
-              <Text style={styles.bestPillText}>{t('summary.bestDay', { day: weekdayLabel(summary.bestWeekday, weekdayNames) })}</Text>
-            </View>
+            <Pill tone="violet" label={t('summary.bestDay', { day: weekdayLabel(summary.bestWeekday, weekdayNames) })} />
           )}
         </View>
       )}
-    </View>
-  );
-}
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <View style={styles.stat}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
@@ -382,12 +361,7 @@ function SessionRow({ session, showDay, t, locale }: { session: ActivitySessionE
 }
 
 function EmptyState({ scope, t }: { scope: 'overview' | 'activity' | 'category' | 'day'; t: TFunction }) {
-  return (
-    <View style={styles.emptyWrap}>
-      <Text style={styles.emptyEmoji}>📈</Text>
-      <Text style={styles.empty}>{t(`empty.${scope}`)}</Text>
-    </View>
-  );
+  return <AnalyticsEmptyState message={t(`empty.${scope}`)} />;
 }
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
@@ -409,13 +383,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     ...shadows.md,
   },
-  statGrid: { flexDirection: 'row', justifyContent: 'space-between' },
-  stat: { alignItems: 'center', flex: 1, gap: 2 },
-  statValue: { ...typography.heading, color: INK, fontWeight: '800' },
-  statLabel: { ...typography.caption, color: MUTED },
+  statGrid: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm },
   bestRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center' },
-  bestPill: { backgroundColor: '#EDE9FE', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 6 },
-  bestPillText: { ...typography.caption, color: VIOLET, fontWeight: '700' },
 
   planRingCard: {
     flexDirection: 'row',
@@ -437,8 +406,6 @@ const styles = StyleSheet.create({
 
   chartCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  capChip: { backgroundColor: '#D6F7EF', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 8 },
-  capChipText: { ...typography.caption, color: '#0A6E5C', fontWeight: '700' },
 
   row: {
     flexDirection: 'row',
@@ -466,6 +433,4 @@ const styles = StyleSheet.create({
   sessionDur: { ...typography.body, color: TEAL, fontWeight: '800' },
 
   empty: { ...typography.body, color: MUTED, textAlign: 'center' },
-  emptyWrap: { alignItems: 'center', gap: spacing.md, paddingTop: spacing.xl, paddingHorizontal: spacing.lg },
-  emptyEmoji: { fontSize: 40 },
 });

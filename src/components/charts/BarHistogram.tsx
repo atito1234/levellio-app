@@ -1,12 +1,12 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 
-const MUTED = '#5A5A72';
-const TEAL = '#16C8A8';
-const VIOLET = '#6C4CF1';
-const TRACK = '#ECEAE4';
+const MUTED = colors.textSecondary;
+const TEAL = colors.teal;
+const VIOLET = colors.violet;
+const TRACK = colors.track;
 const MAX_H = 96;
 
 export interface HistogramBar {
@@ -79,6 +79,6 @@ const styles = StyleSheet.create({
   colWrap: { flex: 1 },
   col: { alignItems: 'center', justifyContent: 'flex-end' },
   bar: { width: '70%', borderRadius: 5 },
-  value: { ...typography.caption, color: MUTED, fontSize: 10, marginBottom: 2 },
-  tick: { ...typography.caption, color: MUTED, fontSize: 10, marginTop: 4 },
+  value: { ...typography.caption, color: MUTED, fontSize: 11, marginBottom: 2 },
+  tick: { ...typography.caption, color: MUTED, fontSize: 11, marginTop: 4 },
 });

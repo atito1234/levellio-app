@@ -7,6 +7,7 @@ import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals } from '@/state/GoalContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { BUCKETS_ENABLED } from '@/config/features';
 import { useProjects } from '@/state/ProjectsContext';
 import { usePlan } from '@/state/PlanContext';
 import { goalColor } from '@/lib/goal';
@@ -161,7 +162,7 @@ export function AddActivitySheet({
     };
     const quest = await addQuest(draft);
     if (quest) {
-      if (bucketId) await assignActivity(quest.id, bucketId);
+      if (BUCKETS_ENABLED && bucketId) await assignActivity(quest.id, bucketId);
       // File it into the chosen goal (explicit membership works for any kind),
       // and link it to the underlying project for a project goal.
       if (selectedGoal) {
@@ -339,7 +340,7 @@ export function AddActivitySheet({
               </>
             )}
 
-            {buckets.length > 0 && (
+            {BUCKETS_ENABLED && buckets.length > 0 && (
               <>
                 <Text style={styles.label}>{t('groupOptional')}</Text>
                 <View style={styles.chips}>

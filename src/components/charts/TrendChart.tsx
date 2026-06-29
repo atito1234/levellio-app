@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Line, Polyline } from 'react-native-svg';
-import { spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import { getBucketColor } from '@/lib/buckets';
 import { formatDayKey } from '@/lib/dates';
 import { confidenceLabel } from '@/lib/metrics/confidence';
 import { niceMax, scaleY } from './chartMath';
 import type { MetricPoint, MetricSeries } from '@/lib/metrics/types';
 
-const MUTED = '#5A5A72';
-const TRACK = '#ECEAE4';
-const TEAL = '#16C8A8';
+const MUTED = colors.textSecondary;
+const TRACK = colors.track;
+const TEAL = colors.teal;
 
 /**
  * A line chart over a MetricSeries with a 0..nice-max y-axis, gridlines, and
@@ -95,7 +95,7 @@ export function TrendChart({
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs },
   title: { ...typography.label, flexShrink: 1 },
-  chip: { ...typography.caption, color: MUTED, fontSize: 10 },
+  chip: { ...typography.caption, color: MUTED, fontSize: 11 },
   axis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
-  tick: { ...typography.caption, color: MUTED, fontSize: 10 },
+  tick: { ...typography.caption, color: MUTED, fontSize: 11 },
 });

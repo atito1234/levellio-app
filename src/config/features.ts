@@ -46,3 +46,10 @@ export const CERTIFICATE_IMAGE_ENABLED = false;
 
 /** "Focus Lock" — opt-in lock that blocks leaving a running timed activity. */
 export const FOCUS_LOCK_ENABLED = true;
+
+/**
+ * Habit "buckets" (the Organize screen + bucket assignment everywhere). Retired
+ * from the UI — all code stays in place so flipping this back to `true` restores
+ * the feature; the BucketsProvider remains mounted harmlessly while it's off.
+ */
+export const BUCKETS_ENABLED = false;

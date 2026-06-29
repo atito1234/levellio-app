@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CapacityRing, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
-import { spacing, typography } from '@/theme';
+import { A, radii, spacing, typography, HEATMAP_SCALE } from '@/theme';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { CAPACITIES } from '@/lib/compounding';
 import { dayKey } from '@/lib/dates';
@@ -19,11 +19,9 @@ import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MonthlyProgress'>;
 
-const INK = '#1F2937';
-const BG = '#F7F6F2';
-const MUTED = '#5A5A72';
-// Teal heatmap scale (gold stays reserved for 100% rings, never here).
-const HEAT = ['#ECEAE4', '#CDEDE4', '#8FE0CE', '#46CBB0', '#16C8A8'] as const;
+const { ink: INK, muted: MUTED, violet: VIOLET, bg: BG } = A;
+// Shared teal heatmap scale (gold stays reserved for 100% rings, never here).
+const HEAT = HEATMAP_SCALE;
 
 export function MonthlyProgressScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation('monthly');
@@ -143,19 +141,14 @@ export function MonthlyProgressScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm },
-  chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
-  chevronSpacer: { width: 28 },
-  insightsLink: { ...typography.label, color: '#6C4CF1', fontWeight: '700' },
-  title: { ...typography.heading, color: INK },
+  insightsLink: { ...typography.label, color: VIOLET, fontWeight: '700' },
   content: { gap: spacing.md, paddingBottom: spacing.xl },
-  sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
   capStrip: { gap: spacing.md, paddingVertical: spacing.xs },
   capCell: { alignItems: 'center', gap: 4, width: 64 },
   capRingWrap: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center' },
   capRingCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
-  capRingPct: { ...typography.caption, color: INK, fontWeight: '800', fontSize: 11 },
-  capCellName: { ...typography.caption, color: MUTED, fontSize: 11 },
+  capRingPct: { ...typography.caption, color: INK, fontWeight: '800' },
+  capCellName: { ...typography.caption, color: MUTED },
   monthHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.md },
   monthNav: { fontSize: 26, color: INK, width: 36, textAlign: 'center' },
   monthTitle: { ...typography.title, color: INK, fontWeight: '700' },
@@ -163,13 +156,13 @@ const styles = StyleSheet.create({
   weekRow: { flexDirection: 'row', gap: 6 },
   weekday: { ...typography.caption, color: MUTED, flex: 1, textAlign: 'center' },
   grid: { gap: 6 },
-  cell: { flex: 1, aspectRatio: 1, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  cell: { flex: 1, aspectRatio: 1, borderRadius: radii.md, alignItems: 'center', justifyContent: 'center' },
   cellPad: { flex: 1, aspectRatio: 1 },
-  cellToday: { borderWidth: 2, borderColor: '#6C4CF1' },
-  cellDay: { ...typography.caption, color: INK, fontSize: 11, fontWeight: '600' },
+  cellToday: { borderWidth: 2, borderColor: VIOLET },
+  cellDay: { ...typography.caption, color: INK, fontWeight: '600' },
   cellDayOnDark: { color: '#FFFFFF' },
   legend: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: spacing.sm },
-  legendSwatch: { width: 16, height: 16, borderRadius: 4 },
+  legendSwatch: { width: 16, height: 16, borderRadius: radii.sm },
   legendText: { ...typography.caption, color: MUTED },
   footnote: { ...typography.caption, color: MUTED, textAlign: 'center', paddingHorizontal: spacing.md, marginTop: spacing.sm },
 });

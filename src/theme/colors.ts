@@ -44,6 +44,8 @@ const neutral = {
   surface: '#FFFFFF',
   surfaceAlt: '#F0F0F6',
   border: '#E3E3EC',
+  // Neutral "track" gray for chart baselines, progress tracks, empty cells.
+  track: '#ECEAE4',
   textPrimary: '#1B1B2A',
   textSecondary: '#5A5A72',
   // Darkened from #9A9AB0 to meet WCAG AA on white surfaces.

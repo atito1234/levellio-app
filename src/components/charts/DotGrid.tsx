@@ -1,11 +1,12 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { colors } from '@/theme';
 
 // Locked palette (gold reserved for reward/100% — never for routine dots).
-const TEAL = '#16C8A8';
-const TRACK = '#ECEAE4';
-const VIOLET = '#6C4CF1';
+const TEAL = colors.teal;
+const TRACK = colors.track;
+const VIOLET = colors.violet;
 
 export interface DotCell {
   done: boolean;

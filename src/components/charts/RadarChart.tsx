@@ -3,10 +3,11 @@ import { LayoutChangeEvent, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Line, Polygon, Text as SvgText } from 'react-native-svg';
 import { radarAxisEnds, radarPoints, polygonPath, type Pt } from './chartMath';
+import { colors } from '@/theme';
 
-const VIOLET = '#6C4CF1';
-const TRACK = '#E3E3EC';
-const MUTED = '#5A5A72';
+const VIOLET = colors.violet;
+const TRACK = colors.border;
+const MUTED = colors.textSecondary;
 
 export interface RadarAxis {
   label: string;

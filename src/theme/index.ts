@@ -25,6 +25,8 @@ export { spacing } from './spacing';
 export { radii } from './radii';
 export { typography, fontSizes, fontWeights } from './typography';
 export { shadows } from './shadows';
+export { A, STATUS_COLOR, VERDICT_TONE, HEATMAP_SCALE } from './analytics';
+export type { VerdictTone } from './analytics';
 
 export type { Colors, ColorToken } from './colors';
 export type { Spacing, SpacingToken } from './spacing';
