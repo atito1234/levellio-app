@@ -1,7 +1,9 @@
 import {
+  buildChecklistScope,
   checkOutChecklist,
   checklistDayState,
   checklistProgress,
+  checklistShowsOn,
   isItemDone,
   rolloverChecklist,
   toggleChecklistItem,
@@ -26,6 +28,43 @@ describe('checklistDayState', () => {
     expect(checklistDayState(make({ recurring: false, date: '2026-06-28' }), '2026-06-28')).toBe('today');
     expect(checklistDayState(make({ recurring: false, date: '2026-06-27' }), '2026-06-28')).toBe('past');
     expect(checklistDayState(make({ recurring: false, date: '2026-07-01' }), '2026-06-28')).toBe('future');
+  });
+});
+
+describe('buildChecklistScope', () => {
+  // 2026-06-28 = Sun, 06-29 = Mon … 07-04 = Sat.
+  it('maps each choice to the right fields', () => {
+    expect(buildChecklistScope('day', '2026-06-29')).toEqual({ recurring: false, date: '2026-06-29' });
+    expect(buildChecklistScope('everyday', '2026-06-29').scheduledDays).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    expect(buildChecklistScope('weekdays', '2026-06-29').scheduledDays).toEqual([1, 2, 3, 4, 5]);
+    expect(buildChecklistScope('weekends', '2026-06-29').scheduledDays).toEqual([0, 6]);
+    expect(buildChecklistScope('restOfWeek', '2026-06-29')).toMatchObject({ startDate: '2026-06-29', endDate: '2026-07-04' });
+    expect(buildChecklistScope('month', '2026-06-15')).toMatchObject({ startDate: '2026-06-15', endDate: '2026-06-30' });
+    expect(buildChecklistScope('pick', '2026-06-29', [3, 1, 1]).scheduledDays).toEqual([1, 3]);
+  });
+});
+
+describe('checklistShowsOn', () => {
+  it('one-off lists show only on their day', () => {
+    const c = make({ recurring: false, date: '2026-06-29' });
+    expect(checklistShowsOn(c, '2026-06-29')).toBe(true);
+    expect(checklistShowsOn(c, '2026-06-30')).toBe(false);
+  });
+  it('weekly recurrence respects the weekday set', () => {
+    const weekdays = make(buildChecklistScope('weekdays', '2026-06-29'));
+    expect(checklistShowsOn(weekdays, '2026-06-29')).toBe(true); // Mon
+    expect(checklistShowsOn(weekdays, '2026-06-28')).toBe(false); // Sun
+  });
+  it('finite ranges only show within the window', () => {
+    const rest = make(buildChecklistScope('restOfWeek', '2026-06-29'));
+    expect(checklistShowsOn(rest, '2026-06-29')).toBe(true);
+    expect(checklistShowsOn(rest, '2026-06-30')).toBe(true);
+    expect(checklistShowsOn(rest, '2026-06-28')).toBe(false); // before start
+    expect(checklistShowsOn(rest, '2026-07-05')).toBe(false); // after end
+  });
+  it('legacy recurring/undated lists show every day', () => {
+    expect(checklistShowsOn(make(), '2026-06-28')).toBe(true);
+    expect(checklistShowsOn(make(), '2027-01-01')).toBe(true);
   });
 });
 
