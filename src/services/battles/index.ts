@@ -10,4 +10,5 @@ export {
   EMPTY_BATTLE_PROGRESS,
   BATTLE_SCHEMA_VERSION,
   type BattleProgress,
+  type DragonStreak,
 } from './battleStore';

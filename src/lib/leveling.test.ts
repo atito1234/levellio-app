@@ -9,6 +9,8 @@ import {
   levelsToNextTier,
   lifetimeXp,
   applyQuestCompletion,
+  addXp,
+  reverseXp,
   TIER_START_LEVEL,
 } from './leveling';
 import type { Character } from '@/types';
@@ -202,5 +204,24 @@ describe('applyQuestCompletion', () => {
     applyQuestCompletion(character, 500, 'q1');
     expect(character.level).toBe(1);
     expect(character.xp).toBe(0);
+  });
+});
+
+describe('reverseXp', () => {
+  it('round-trips addXp (no level change)', () => {
+    const after = addXp(3, 50, 40); // gain 40 within level 3
+    expect(reverseXp(after.level, after.xp, 40)).toEqual({ level: 3, xp: 50 });
+  });
+
+  it('round-trips addXp across a level-up (level-down on reverse)', () => {
+    const start = { level: 2, xp: 10 };
+    const gain = xpForNextLevel(2); // pushes to level 3
+    const after = addXp(start.level, start.xp, gain);
+    expect(after.level).toBe(3);
+    expect(reverseXp(after.level, after.xp, gain)).toEqual(start);
+  });
+
+  it('clamps at level 1 / 0 xp and never goes negative', () => {
+    expect(reverseXp(1, 5, 9999)).toEqual({ level: 1, xp: 0 });
   });
 });

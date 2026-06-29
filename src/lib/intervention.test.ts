@@ -23,4 +23,9 @@ describe('shouldIntervene', () => {
   it('never nags on a low-stakes ripple back', () => {
     expect(shouldIntervene(ctx({ kind: 'ripple-back', streakDays: 99 }))).toBe(false);
   });
+
+  it('pauses a locked-activity exit only while the lock is engaged', () => {
+    expect(shouldIntervene(ctx({ kind: 'activity-locked-exit', focusLockedRunning: true }))).toBe(true);
+    expect(shouldIntervene(ctx({ kind: 'activity-locked-exit', focusLockedRunning: false }))).toBe(false);
+  });
 });

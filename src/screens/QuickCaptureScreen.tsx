@@ -2,8 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
-import { spacing, typography } from '@/theme';
+import { ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
 import { useGoals } from '@/state/GoalContext';
@@ -91,15 +91,7 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('close')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.title} accessibilityRole="header">
-          {t('title')}
-        </Text>
-        <View style={styles.chevronSpacer} />
-      </View>
+      <ScreenHeader title={t('title')} onBack={() => navigation.goBack()} backLabel={t('close')} />
 
       <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <Text style={styles.lead}>{t('lead')}</Text>
@@ -123,7 +115,7 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
 
         {parsed.length > 0 ? (
           <View style={styles.preview}>
-            <Text style={styles.sectionLabel}>{t('heard', { count: included.length })}</Text>
+            <SectionLabel>{t('heard', { count: included.length })}</SectionLabel>
             {parsed.map((p) => {
               const off = excluded.has(normalizeTitle(p.title));
               const timePart = p.scheduledTime !== undefined ? t('chipAt', { time: minutesToLabel(p.scheduledTime, i18n.language) }) : '';
@@ -189,13 +181,13 @@ const styles = StyleSheet.create({
 
   content: { gap: spacing.md, paddingBottom: spacing.xl },
   lead: { ...typography.body, color: MUTED },
-  scopeBanner: { backgroundColor: VIOLET_SOFT, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  scopeBanner: { backgroundColor: VIOLET_SOFT, borderRadius: radii.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   scopeText: { ...typography.label, color: VIOLET, fontWeight: '800' },
   input: {
     ...typography.body,
     color: INK,
     backgroundColor: CARD,
-    borderRadius: 16,
+    borderRadius: radii.lg,
     padding: spacing.md,
     minHeight: 96,
     textAlignVertical: 'top',
@@ -206,7 +198,7 @@ const styles = StyleSheet.create({
 
   preview: { gap: spacing.sm },
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 16, padding: spacing.md, borderWidth: 1, borderColor: VIOLET_SOFT },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: VIOLET_SOFT },
   chipOff: { opacity: 0.5, borderColor: TRACK },
   chipIcon: { fontSize: 20 },
   chipMain: { flex: 1, gap: 2 },
@@ -216,7 +208,7 @@ const styles = StyleSheet.create({
   chipMark: { ...typography.label, color: VIOLET, fontWeight: '800', width: 22, textAlign: 'center' },
   chipMarkOff: { color: MUTED },
 
-  planRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: CARD, borderRadius: 16, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
+  planRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
   planLabel: { ...typography.body, color: INK, fontWeight: '600' },
 
   cta: { backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm },

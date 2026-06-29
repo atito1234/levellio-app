@@ -20,5 +20,8 @@
   "justLogIt": "Just log it",
   "justLogItA11y": "Log without timing",
   "verified": "✓ Verified",
-  "selfReported": "Self-reported"
+  "selfReported": "Self-reported",
+  "lockMeIn": "🔒 Lock me in",
+  "lockedEndEarly": "🔒 Locked in · End early?",
+  "endEarlyA11y": "End this locked activity early"
 }

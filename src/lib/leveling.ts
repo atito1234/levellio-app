@@ -112,6 +112,22 @@ export function addXp(
 }
 
 /**
+ * Inverse of addXp: remove `amount` XP from a (level, xp) pair, rolling DOWN as
+ * many levels as needed, clamped at level 1 / 0 xp. Computed via lifetime XP so
+ * it exactly round-trips addXp. Used to undo a completion (uncheck).
+ */
+export function reverseXp(level: number, xp: number, amount: number): { level: number; xp: number } {
+  const total = Math.max(0, lifetimeXp({ level, xp }) - Math.max(0, amount));
+  let l = 1;
+  let remaining = total;
+  while (remaining >= xpForNextLevel(l)) {
+    remaining -= xpForNextLevel(l);
+    l += 1;
+  }
+  return { level: l, xp: remaining };
+}
+
+/**
  * Apply a completed quest to a character using the character's current streak.
  * Returns the next character state and a reward summary. Pure — no mutation.
  *

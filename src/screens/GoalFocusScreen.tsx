@@ -2,8 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ActivityTile, AddActivityFab, AddActivitySheet, MiniScheduler, ScreenContainer } from '@/components';
-import { spacing, typography } from '@/theme';
+import { ActivityTile, AddActivityFab, AddActivitySheet, MiniScheduler, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals, useGoalProgress } from '@/state/GoalContext';
 import { useProjects } from '@/state/ProjectsContext';
@@ -149,17 +149,18 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.kicker}>{t('focus.kicker')}</Text>
-        <Pressable onPress={() => navigation.navigate('GoalEditor', { goalId: goal.id })} accessibilityRole="button" accessibilityLabel={t('focus.editGoalA11y')} hitSlop={12}>
-          <Text style={[styles.editGoal, { color: accent }]}>{t('focus.edit')}</Text>
-        </Pressable>
-      </View>
+      <ScreenHeader
+        onBack={() => navigation.goBack()}
+        backLabel={t('back')}
+        right={
+          <Pressable onPress={() => navigation.navigate('GoalEditor', { goalId: goal.id })} accessibilityRole="button" accessibilityLabel={t('focus.editGoalA11y')} hitSlop={12}>
+            <Text style={[styles.editGoal, { color: accent }]}>{t('focus.edit')}</Text>
+          </Pressable>
+        }
+      />
 
       <View style={styles.header}>
+        <Text style={styles.kicker}>{t('focus.kicker')}</Text>
         <Text style={styles.emoji}>{goal.emoji}</Text>
         <Text style={styles.title} accessibilityRole="header">
           {goal.title}
@@ -210,7 +211,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         {/* The ripple: capacities these activities power together. */}
         {capIds.length > 0 && (
           <View style={styles.rippleCard}>
-            <Text style={styles.sectionLabel}>{t('focus.powers')}</Text>
+            <SectionLabel>{t('focus.powers')}</SectionLabel>
             <View style={styles.capChips}>
               {capIds.slice(0, 6).map((id) => (
                 <View key={id} style={styles.capChip}>
@@ -227,7 +228,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
         {/* Prepare a project goal with a personal goal. */}
         {goal.kind === 'project' && personalGoals.length > 0 && (
           <View style={styles.prepCard}>
-            <Text style={styles.sectionLabel}>{t('focus.preparingWith')}</Text>
+            <SectionLabel>{t('focus.preparingWith')}</SectionLabel>
             <View style={styles.prepChips}>
               {personalGoals.filter((g) => supportingIds.includes(g.id)).map((g) => (
                 <Pressable key={g.id} onPress={() => toggleSupporting(g.id)} accessibilityRole="button" accessibilityLabel={t('focus.stopPreparingA11y', { title: g.title })} style={[styles.prepChip, { borderColor: goalColor(g).accent, backgroundColor: goalColor(g).soft }]}>
@@ -255,7 +256,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
           <Text style={styles.empty}>{t('focus.emptyActivities')}</Text>
         ) : (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t('focus.activities', { count: habits.length })}</Text>
+            <SectionLabel>{t('focus.activities', { count: habits.length })}</SectionLabel>
             <View style={styles.rows}>
               {habits.map((q) => (
                 <ManageRow key={q.id} quest={q} />
@@ -266,7 +267,7 @@ function GoalFocusBody({ goal, navigation }: { goal: Goal; navigation: Props['na
 
         {habits.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t('focus.yourCalendar')}</Text>
+            <SectionLabel>{t('focus.yourCalendar')}</SectionLabel>
             <MiniScheduler
               quests={habits}
               getPlan={getPlan}
@@ -318,14 +319,14 @@ const styles = StyleSheet.create({
 
   tileRow: { flexDirection: 'row', gap: spacing.sm },
   calHint: { ...typography.caption, color: MUTED, textAlign: 'center' },
-  prepCard: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.sm },
+  prepCard: { backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm, ...shadows.md },
   prepChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   prepChip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: 4, backgroundColor: CARD, maxWidth: 220 },
   prepChipText: { ...typography.caption, fontWeight: '800' },
   prepAdd: { borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 4, backgroundColor: VIOLET_SOFT },
   prepAddText: { ...typography.caption, color: VIOLET, fontWeight: '800' },
   prepHint: { ...typography.caption, color: MUTED },
-  rippleCard: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.sm },
+  rippleCard: { backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm, ...shadows.md },
   capChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   capChip: { backgroundColor: VIOLET_SOFT, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 4 },
   capChipText: { ...typography.caption, color: VIOLET, fontWeight: '700' },

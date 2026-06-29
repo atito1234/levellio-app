@@ -14,6 +14,7 @@ import type { AuthUser } from '@/services/backend';
 import { backend } from '@/services/backend';
 import { migrateDuplicatesOnce } from '@/services/backend/dedupeMigration';
 import { completeQuest as engineCompleteQuest } from '@/lib/gameEngine';
+import { reverseXp, tierForLevel, companionStageForLevel } from '@/lib/leveling';
 import { buildEngine, generateQuests, suggestedToQuest } from '@/services/ai';
 import { settingsStore } from '@/services/settings';
 import { getByoApiKey } from '@/services/security/secureKeyStore';
@@ -80,6 +81,8 @@ interface GameContextValue extends GameState {
   startGame: (presentation: HeroPresentation) => Promise<void>;
   /** Complete a quest, award XP, persist, and return the reward (or null). */
   completeQuest: (questId: string) => Promise<QuestReward | null>;
+  /** Undo today's completion of a quest (reverse its XP + streak). Returns true if reversed. */
+  uncompleteQuest: (questId: string) => Promise<boolean>;
   /** Generate a quest from a goal via the active AI engine (with fallback). */
   suggestQuest: (goal: string) => Promise<Quest | null>;
   /** Create a quest from a manual draft. Returns null if the draft is invalid. */
@@ -190,14 +193,23 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (!quest || quest.completed) return null;
 
       // Real date-based completion: advances the daily streak and awards XP.
-      const { character: nextCharacter, reward } = engineCompleteQuest(
+      const prevStreakDays = s.character.streakDays;
+      const prevLastCompletionDate = s.character.lastCompletionDate;
+      const { character: nextCharacter, reward, isNewStreakDay } = engineCompleteQuest(
         s.character,
         quest.baseXp,
         questId,
         new Date(),
       );
+      // Record a reversal snapshot so this completion can be cleanly undone today.
+      const lastAward = {
+        totalXp: reward.totalXp,
+        wasNewStreakDay: isNewStreakDay,
+        prevStreakDays,
+        ...(prevLastCompletionDate ? { prevLastCompletionDate } : {}),
+      };
       const nextQuests = questsRef.current.map((q) =>
-        q.id === questId ? { ...q, completed: true, lastCompletedDate: dayKey(new Date()) } : q,
+        q.id === questId ? { ...q, completed: true, lastCompletedDate: dayKey(new Date()), lastAward } : q,
       );
 
       questsRef.current = nextQuests;
@@ -207,6 +219,46 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         backend.saveQuests(s.user.uid, nextQuests),
       ]);
       return reward;
+    },
+    [],
+  );
+
+  const uncompleteQuest = useCallback(
+    async (questId: string): Promise<boolean> => {
+      const s = stateRef.current;
+      if (!s.user || !s.character) return false;
+      const quest = questsRef.current.find((q) => q.id === questId);
+      // Only today's completion can be undone.
+      if (!quest || !quest.completed || quest.lastCompletedDate !== dayKey(new Date())) return false;
+
+      let nextCharacter = s.character;
+      const award = quest.lastAward;
+      if (award) {
+        const { level, xp } = reverseXp(s.character.level, s.character.xp, award.totalXp);
+        nextCharacter = {
+          ...s.character,
+          level,
+          xp,
+          tier: tierForLevel(level),
+          companionStage: companionStageForLevel(level),
+          // Restore the streak only if this completion was the one that advanced it.
+          ...(award.wasNewStreakDay
+            ? { streakDays: award.prevStreakDays, lastCompletionDate: award.prevLastCompletionDate }
+            : {}),
+        };
+      }
+
+      const nextQuests = questsRef.current.map((q) =>
+        q.id === questId ? { ...q, completed: false, lastCompletedDate: undefined, lastAward: undefined } : q,
+      );
+
+      questsRef.current = nextQuests;
+      dispatch({ type: 'update', payload: { character: nextCharacter, quests: nextQuests } });
+      await Promise.all([
+        backend.saveCharacter(s.user.uid, nextCharacter),
+        backend.saveQuests(s.user.uid, nextQuests),
+      ]);
+      return true;
     },
     [],
   );
@@ -357,6 +409,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       ...state,
       startGame,
       completeQuest,
+      uncompleteQuest,
       suggestQuest,
       addQuest,
       updateQuest,
@@ -373,6 +426,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       state,
       startGame,
       completeQuest,
+      uncompleteQuest,
       suggestQuest,
       addQuest,
       updateQuest,

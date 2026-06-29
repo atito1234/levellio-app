@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CapacityRing, ProjectBadge, ScreenContainer } from '@/components';
+import { CapacityRing, ProjectBadge, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
 import {
   CalendarHeatmap,
   RadarChart,
@@ -14,7 +14,7 @@ import {
   type MapNode,
   type RankRow,
 } from '@/components/charts';
-import { spacing, typography } from '@/theme';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useAnalyticsRollup } from '@/state/useAnalyticsRollup';
 import { usePlan } from '@/state/PlanContext';
@@ -231,13 +231,7 @@ export function ProgressHubScreen({ route, navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.kicker}>{t('kicker')}</Text>
-        <View style={styles.chevronSpacer} />
-      </View>
+      <ScreenHeader title={t('kicker')} onBack={() => navigation.goBack()} backLabel={t('back')} />
 
       <Segmented tab={tab} onChange={setTab} />
 
@@ -623,7 +617,7 @@ function ringColorId(colorId?: BucketColorId): 'violet' | 'teal' {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionLabel}>{label}</Text>
+      <SectionLabel>{label}</SectionLabel>
       <View style={styles.sectionBody}>{children}</View>
     </View>
   );
@@ -660,10 +654,10 @@ const styles = StyleSheet.create({
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
   sectionBody: { gap: spacing.sm },
 
-  card: { backgroundColor: CARD, borderRadius: 24, padding: spacing.lg, gap: spacing.sm, shadowColor: '#1B1B2A', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 16, elevation: 3 },
-  cardCenter: { backgroundColor: CARD, borderRadius: 24, padding: spacing.lg, alignItems: 'center', gap: spacing.sm, shadowColor: '#1B1B2A', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 16, elevation: 3 },
+  card: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, ...shadows.md },
+  cardCenter: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, alignItems: 'center', gap: spacing.sm, ...shadows.md },
 
-  focusCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: '#EDE9FE', borderRadius: 18, padding: spacing.md },
+  focusCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: '#EDE9FE', borderRadius: radii.lg, padding: spacing.md },
   cta: { ...typography.label, color: VIOLET, fontWeight: '800' },
 
   verdictCard: { borderRadius: 24, padding: spacing.lg, gap: 4 },
@@ -690,7 +684,7 @@ const styles = StyleSheet.create({
   filterChipOn: { backgroundColor: VIOLET },
   filterChipText: { ...typography.caption, color: MUTED, fontWeight: '700' },
   filterChipTextOn: { color: '#FFFFFF' },
-  habitRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 18, padding: spacing.md },
+  habitRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, ...shadows.sm },
   spark: { width: 72 },
   pct: { ...typography.body, fontWeight: '800', width: 48, textAlign: 'right' },
 

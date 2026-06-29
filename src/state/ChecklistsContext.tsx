@@ -29,12 +29,19 @@ export interface NewChecklistInput {
   colorId?: BucketColorId;
   recurring?: boolean;
   items?: { label: string; questId?: string }[];
+  /** Bind the list to a specific day (YYYY-MM-DD). Absent = routine/today-scoped. */
+  date?: string;
+  goalId?: string;
+  bucketId?: string;
+  projectId?: string;
 }
 
 interface ChecklistsContextValue {
   ready: boolean;
   /** Active (non-archived) checklists, rolled over to today. */
   checklists: Checklist[];
+  /** The existing checklist bound to a given day, if any (for dedupe). */
+  checklistForDate: (day: string) => Checklist | undefined;
   addChecklist: (input: NewChecklistInput) => Promise<Checklist | null>;
   removeChecklist: (id: string) => Promise<void>;
   renameChecklist: (id: string, title: string) => Promise<void>;
@@ -102,6 +109,10 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
         order: checklists.length,
         checkedItemIds: [],
         checkoutStreak: 0,
+        ...(input.date ? { date: input.date } : {}),
+        ...(input.goalId ? { goalId: input.goalId } : {}),
+        ...(input.bucketId ? { bucketId: input.bucketId } : {}),
+        ...(input.projectId ? { projectId: input.projectId } : {}),
       };
       await commit([...checklists, checklist]);
       return checklist;
@@ -138,7 +149,12 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
   );
 
   const toggleItem = useCallback(
-    (id: string, itemId: string) => update(id, (c) => toggleChecklistItem(c, itemId, dayKey(new Date()))),
+    // The tick is ALWAYS the checklist's own local state — for every item, linked
+    // or text. (A today-scoped list also completes the real habit; that side
+    // effect lives in the screen via the navigation-bound useCompleteActivity.)
+    async (id: string, itemId: string) => {
+      await update(id, (c) => toggleChecklistItem(c, itemId, dayKey(new Date())));
+    },
     [update],
   );
 
@@ -157,9 +173,14 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
 
   const active = useMemo(() => checklists.filter((c) => !c.archived), [checklists]);
 
+  const checklistForDate = useCallback(
+    (day: string) => active.find((c) => c.date === day),
+    [active],
+  );
+
   const value = useMemo<ChecklistsContextValue>(
-    () => ({ ready, checklists: active, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut }),
-    [ready, active, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut],
+    () => ({ ready, checklists: active, checklistForDate, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut }),
+    [ready, active, checklistForDate, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut],
   );
 
   return <ChecklistsContext.Provider value={value}>{children}</ChecklistsContext.Provider>;

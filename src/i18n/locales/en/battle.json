@@ -43,7 +43,10 @@
     "addActivityA11y": "Add activity",
     "add": "Add",
     "allIn": "Everything’s in. Type a custom one above.",
-    "addMissionA11y": "Add {{title}}"
+    "addMissionA11y": "Add {{title}}",
+    "prepareCta": "🧘 Prepare your mind & soul",
+    "preparedDone": "✓ Prepared for battle",
+    "denCta": "🐉 Den"
   },
   "gadgets": {
     "openEnded": "open-ended",
@@ -94,6 +97,74 @@
     "resume": "Resume",
     "start": "Start",
     "finishA11y": "Land the final blow and finish",
-    "finish": "⚔️ Finish — slay it"
+    "finish": "⚔️ Finish — slay it",
+    "lockMeIn": "🔒 Lock me in",
+    "lockedEndEarly": "🔒 Locked in · Retreat?",
+    "endEarlyA11y": "Retreat from this locked battle",
+    "preparedBadge": "⚜️ Faced it prepared (+25 🪙)",
+    "returnHome": "Return home",
+    "journey": {
+      "caption": "Day {{day}} of {{total}} — becoming automatic",
+      "solidified": "Locked in 🌱 — keep climbing",
+      "graduated": "Runs on its own 🏁"
+    }
+  },
+  "den": {
+    "title": "Dragon Den",
+    "back": "Back",
+    "lead": "Every dragon you've faced — and the streaks you're keeping. You've slain {{count}} so far.",
+    "trophies": "YOUR TROPHIES",
+    "bested": "Bested {{count}}×",
+    "streak": "{{count}}-day streak",
+    "unfought": "Not yet faced",
+    "armory": "ARMORY",
+    "armoryHint": "Spend the coins you earn in battle.",
+    "owned": "Owned ✓",
+    "coinsA11y": "{{count}} coins",
+    "buyA11y": "Buy {{name}} for {{cost}} coins"
+  },
+  "rites": {
+    "title": "Prepare your mind & soul",
+    "facing": "Facing {{dragon}}",
+    "theDragon": "your dragon",
+    "skip": "Skip",
+    "switch": "Or try another rite",
+    "breathe": {
+      "title": "Breathe",
+      "blurb": "Match your breath to the orb — in as it grows, out as it shrinks. Three slow breaths.",
+      "cta": "I'm centered",
+      "in": "Breathe in…",
+      "out": "Breathe out…"
+    },
+    "vow": {
+      "title": "Vow",
+      "blurb": "I'm someone who shows up — especially when it's hard.",
+      "cta": "I vow"
+    },
+    "recall": {
+      "title": "Recall a win",
+      "blurb": "Remember a time you kept a promise to yourself. Hold that feeling.",
+      "cta": "I remember"
+    },
+    "charge": {
+      "title": "Charge",
+      "blurb": "Tap to charge your Wisp before the fight.",
+      "cta": "Charged — face it",
+      "tap": "Charge ⚡"
+    },
+    "strike": {
+      "title": "First strike",
+      "blurb": "Land the first blow — tap the mark to strike.",
+      "cta": "Strike ready — face it",
+      "tap": "Strike",
+      "hits": "{{hits}} / {{total}} hits"
+    }
+  },
+  "unlocks": {
+    "wisp-aura-violet": "Violet Wisp aura",
+    "wisp-aura-teal": "Teal Wisp aura",
+    "rite-candle": "Ritual candle",
+    "den-banner": "Den banner",
+    "crown-slayer": "Slayer's crown"
   }
 }

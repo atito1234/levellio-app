@@ -50,6 +50,8 @@ export type RootStackParamList = {
   CapacityFocus: { capacityId: string };
   /** Create a life goal (from a template or custom), or edit one (goalId). */
   GoalEditor: { goalId?: string } | undefined;
+  /** Gamified "become" goal creation: pick identity → swipe activities → first vote. */
+  NewGoal: undefined;
   /** A goal's contributing habits + progress. */
   GoalFocus: { goalId: string };
   /** Frictionless typed/dictated capture of one or more habits (optionally pre-filed into a goal/group/project). */
@@ -64,6 +66,10 @@ export type RootStackParamList = {
     dragonId: string;
     dragonName?: string;
   };
+  /** A pre-battle mind & soul prep rite (breathe / vow / recall / charge). */
+  PrepareRite: { dragonId: string; dragonName?: string; category?: import('@/types').QuestCategory };
+  /** The Dragon Den — trophies (per-dragon slays + streaks) + the coin Armory. */
+  DragonDen: undefined;
   /** Write a battle-journal reflection (what's stopping you). */
   JournalComposer: { dragonId?: string; dragonName?: string; questIds?: string[]; prompt?: string; teaching?: string } | undefined;
   /** The battle-journal feed (optionally filtered to one dragon). */

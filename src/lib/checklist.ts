@@ -14,7 +14,12 @@ import type { BucketColorId } from './buckets';
 export interface ChecklistItem {
   id: string;
   label: string;
-  /** Optional link to an existing activity/quest (for navigation/insight). */
+  /**
+   * Optional link to a real activity. The tick is ALWAYS the checklist's own
+   * state (per list, independent of other lists) — but on a today-scoped list,
+   * checking a linked item also completes the real habit (streak/XP/group/goal/
+   * project). Text-only items just omit it.
+   */
   questId?: string;
 }
 
@@ -37,6 +42,27 @@ export interface Checklist {
   /** Consecutive-day check-out streak. */
   checkoutStreak: number;
   archived?: boolean;
+  /** Day this list is bound to (YYYY-MM-DD). Absent = routine/undated (today-scoped). */
+  date?: string;
+  /** Optional scope — the list belongs to a goal / group (bucket) / project. */
+  goalId?: string;
+  bucketId?: string;
+  projectId?: string;
+}
+
+/**
+ * Each item's tick is the checklist's OWN state — independent of other lists and
+ * of the habit's global completion. (A today-scoped list separately completes the
+ * real habit when a linked item is ticked; that side-effect lives in the screen.)
+ */
+export function isItemDone(item: ChecklistItem, checkedItemIds: readonly string[]): boolean {
+  return checkedItemIds.includes(item.id);
+}
+
+/** Where a checklist sits relative to today. Routine/undated lists are always 'today'. */
+export function checklistDayState(c: Checklist, today: string): 'today' | 'past' | 'future' {
+  if (!c.date || c.date === today) return 'today';
+  return c.date < today ? 'past' : 'future';
 }
 
 export interface ChecklistProgress {
@@ -53,8 +79,12 @@ export function checklistProgress(c: Checklist): ChecklistProgress {
   return { done, total, pct: total ? Math.round((done / total) * 100) : 0, complete: total > 0 && done >= total };
 }
 
-/** Reset daily ticks when the stored check-day isn't today (keeps recurring lists fresh). */
+/**
+ * Reset daily ticks for ROUTINE lists (recurring, undated) when the stored
+ * check-day isn't today. Dated lists keep their ticks (a record for that day).
+ */
 export function rolloverChecklist(c: Checklist, today: string): Checklist {
+  if (!c.recurring || c.date) return c;
   if (c.checkedDay === today) return c;
   if (c.checkedItemIds.length === 0 && c.checkedDay === undefined) return c;
   return { ...c, checkedItemIds: [], checkedDay: today };
@@ -91,7 +121,9 @@ export function checkOutChecklist(c: Checklist, now: Date): CheckoutResult {
     ...c,
     lastCheckoutDate: today,
     checkoutStreak: upd.streakDays,
-    ...(c.recurring ? { checkedItemIds: [], checkedDay: today } : { archived: true }),
+    // Routine lists reset for tomorrow; a dated list stays as that day's record;
+    // an undated one-off archives.
+    ...(c.recurring ? { checkedItemIds: [], checkedDay: today } : c.date ? {} : { archived: true }),
   };
   return { checklist: next, streak: upd.streakDays, alreadyDoneToday: false };
 }

@@ -1,7 +1,17 @@
 {
-  "greeting": { "morning": "Morning", "afternoon": "Afternoon", "evening": "Evening", "fallbackName": "there" },
+  "greeting": {
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "fallbackName": "there"
+  },
   "openHeroA11y": "Open your hero",
-  "share": { "hint": "Share an update…", "a11y": "Share an update with your community", "viewFeed": "View feed →", "viewFeedA11y": "Open the community feed" },
+  "share": {
+    "hint": "Share an update…",
+    "a11y": "Share an update with your community",
+    "viewFeed": "View feed →",
+    "viewFeedA11y": "Open the community feed"
+  },
   "step1": "STEP 1 · Your goal",
   "step1Pick": "STEP 1 · Pick a goal to begin",
   "step2": "STEP 2 · Tap 🎙️ to add your activities",
@@ -30,7 +40,21 @@
   "upNextToday": "Up next today",
   "scheduleSubEmpty": "Tap to schedule habits across your calendar",
   "scheduleSubCount": "{{count}} planned today",
-  "chips": { "journal": "📓 Journal", "library": "📚 Library", "buckets": "🗂 Buckets", "connections": "🔗 Connections", "suggest": "✨ Suggest" },
+  "chips": {
+    "journal": "📓 Journal",
+    "library": "📚 Library",
+    "buckets": "🗂 Buckets",
+    "connections": "🔗 Connections",
+    "suggest": "✨ Suggest"
+  },
+  "more": {
+    "title": "More",
+    "openLabel": "More ▾",
+    "share": "Share",
+    "discover": "Discover",
+    "close": "Close",
+    "community": "Community"
+  },
   "capacitiesTitle": "Your capacities · last 7 days",
   "progress": "Progress ›",
   "goalsEmptyTitle": "What do you want to build toward?",
@@ -54,5 +78,19 @@
   "warStrategyA11y": "Prepare your war strategy for {{title}}",
   "bringToFocusA11y": "Bring {{title}} to focus",
   "goalCardA11y": "{{title}}. {{done}} of {{planned}} done today, {{pct}} percent this week.{{selected}}",
-  "goalCardSelected": " Selected."
+  "goalCardSelected": " Selected.",
+  "ticker": {
+    "all": "All",
+    "allA11y": "All habits today, {{pct}} percent done. Show everything.",
+    "addGoal": "Goal",
+    "addGoalA11y": "Create a new goal"
+  },
+  "habit": {
+    "new": "Repeat it daily to make it a habit",
+    "building": "Day {{streak}} — {{left}} days to locked-in 🌱",
+    "solidified": "Locked in 🌱 — keep it on autopilot",
+    "graduated": "Runs on its own 🏅",
+    "viewJourneyA11y": "See {{title}}'s journey from repetition to habit"
+  },
+  "addToGoal": "Add activity to {{goal}}"
 }

@@ -45,7 +45,6 @@ export default function App() {
               <PlanProvider>
                 <GoalProvider>
                   <RecipesProvider>
-                  <ChecklistsProvider>
                   <MilestonesProvider>
                     <BattlesProvider>
                       <JournalProvider>
@@ -57,7 +56,11 @@ export default function App() {
                                   <ProfileProvider>
                                     <StoriesProvider>
                                       <MessagingProvider>
-                                        <RootNavigator />
+                                        {/* ChecklistsProvider sits here (below Projects/Milestones/etc.)
+                                            because it uses useCompleteActivity, which depends on them. */}
+                                        <ChecklistsProvider>
+                                          <RootNavigator />
+                                        </ChecklistsProvider>
                                       </MessagingProvider>
                                     </StoriesProvider>
                                   </ProfileProvider>
@@ -69,7 +72,6 @@ export default function App() {
                       </JournalProvider>
                     </BattlesProvider>
                   </MilestonesProvider>
-                  </ChecklistsProvider>
                   </RecipesProvider>
                 </GoalProvider>
               </PlanProvider>

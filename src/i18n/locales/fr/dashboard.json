@@ -47,6 +47,14 @@
     "connections": "🔗 Connexions",
     "suggest": "✨ Suggérer"
   },
+  "more": {
+    "title": "Plus",
+    "openLabel": "Plus ▾",
+    "share": "Partager",
+    "discover": "Découvrir",
+    "close": "Fermer",
+    "community": "Communauté"
+  },
   "capacitiesTitle": "Vos capacités · 7 derniers jours",
   "progress": "Progrès ›",
   "goalsEmptyTitle": "Que voulez-vous accomplir ?",
@@ -70,5 +78,19 @@
   "warStrategyA11y": "Préparez votre stratégie de guerre pour {{title}}",
   "bringToFocusA11y": "Mettre {{title}} en priorité",
   "goalCardA11y": "{{title}}. {{done}} sur {{planned}} faits aujourd’hui, {{pct}} pour cent cette semaine.{{selected}}",
-  "goalCardSelected": " Sélectionné."
+  "goalCardSelected": " Sélectionné.",
+  "ticker": {
+    "all": "Tout",
+    "allA11y": "Toutes les habitudes d'aujourd'hui, {{pct}} pour cent faites. Tout afficher.",
+    "addGoal": "Objectif",
+    "addGoalA11y": "Créer un nouvel objectif"
+  },
+  "habit": {
+    "new": "Répétez-le chaque jour pour en faire une habitude",
+    "building": "Jour {{streak}} — {{left}} jours avant ancrage 🌱",
+    "solidified": "Ancré 🌱 — gardez-le en pilote automatique",
+    "graduated": "Fonctionne tout seul 🏅",
+    "viewJourneyA11y": "Voir le parcours de {{title}} de la répétition à l'habitude"
+  },
+  "addToGoal": "Ajouter une activité à {{goal}}"
 }

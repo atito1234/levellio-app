@@ -4,34 +4,57 @@
     "region": "Fort-Liberté, Haití",
     "summary": "Detén la malaria en su origen. Drena y limpia el agua estancada donde se reproducen los mosquitos — cada foco eliminado protege a tus vecinos.",
     "unit": "focos limpiados",
-    "reward": "Mosquiteros + larvicida para las zonas más afectadas"
+    "reward": "Mosquiteros + larvicida para las zonas más afectadas",
+    "habits": {
+      "0": "Limpiar un sitio de agua estancada",
+      "1": "Cubrir un recipiente de agua",
+      "2": "Reportar un foco de cría"
+    }
   },
   "proj-gardens": {
     "title": "Huertos comunitarios · Huertos",
     "region": "Ouanaminthe, Haití",
     "summary": "Cultiva alimento y resiliencia. Cuida los huertos compartidos para que las familias tengan verduras frescas y plántulas que compartir.",
     "unit": "parcelas cuidadas",
-    "reward": "Semillas, herramientas y un barril de agua de lluvia para el huerto"
+    "reward": "Semillas, herramientas y un barril de agua de lluvia para el huerto",
+    "habits": {
+      "0": "Regar el huerto",
+      "1": "Plantar 5 plántulas",
+      "2": "Compostar restos de comida"
+    }
   },
   "proj-water": {
     "title": "Agua limpia juntos",
     "region": "Cap-Haïtien, Haití",
     "summary": "Agua segura, cada día. Trata el agua del hogar y mantén limpios los puntos de recolección para reducir las enfermedades por agua.",
     "unit": "hogares tratando agua",
-    "reward": "Filtros de agua de cerámica para los hogares participantes"
+    "reward": "Filtros de agua de cerámica para los hogares participantes",
+    "habits": {
+      "0": "Tratar el agua del hogar",
+      "1": "Limpiar un punto de recolección de agua"
+    }
   },
   "proj-waste": {
     "title": "Reducción de residuos del barrio",
     "region": "Port-de-Paix, Haití",
     "summary": "Un barrio más limpio es un barrio más sano. Recoge, separa y desecha bien los residuos para mantener despejados desagües y calles.",
     "unit": "bolsas recogidas",
-    "reward": "Contenedores comunitarios + una recogida mensual"
+    "reward": "Contenedores comunitarios + una recogida mensual",
+    "habits": {
+      "0": "Recoger una bolsa de basura",
+      "1": "Desbloquear un desagüe"
+    }
   },
   "proj-school": {
     "title": "Útiles escolares para cada niño",
     "region": "Gonaïves, Haití",
     "summary": "Que los niños sigan aprendiendo. Ayuda a los niños a estudiar a diario y prepara kits para que cada uno empiece el trimestre listo.",
     "unit": "sesiones de estudio registradas",
-    "reward": "Kits escolares (cuadernos, bolígrafos, mochilas) para el grupo"
+    "reward": "Kits escolares (cuadernos, bolígrafos, mochilas) para el grupo",
+    "habits": {
+      "0": "Ayudar a un niño a estudiar",
+      "1": "Leer en voz alta 15 min",
+      "2": "Armar un kit escolar"
+    }
   }
 }

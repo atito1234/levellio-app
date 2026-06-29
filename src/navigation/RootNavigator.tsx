@@ -23,10 +23,13 @@ import { InsightsScreen } from '@/screens/InsightsScreen';
 import { PlanScreen } from '@/screens/PlanScreen';
 import { CapacityFocusScreen } from '@/screens/CapacityFocusScreen';
 import { GoalEditorScreen } from '@/screens/GoalEditorScreen';
+import { NewGoalFlowScreen } from '@/screens/NewGoalFlowScreen';
 import { GoalFocusScreen } from '@/screens/GoalFocusScreen';
 import { QuickCaptureScreen } from '@/screens/QuickCaptureScreen';
 import { BattleSetupScreen } from '@/screens/BattleSetupScreen';
 import { BattleScreen } from '@/screens/BattleScreen';
+import { PrepareRiteScreen } from '@/screens/PrepareRiteScreen';
+import { DragonDenScreen } from '@/screens/DragonDenScreen';
 import { JournalComposerScreen } from '@/screens/JournalComposerScreen';
 import { JournalScreen } from '@/screens/JournalScreen';
 import { AnalyticsScreen } from '@/screens/AnalyticsScreen';
@@ -148,10 +151,13 @@ export function RootNavigator() {
         <Stack.Screen name="Plan" component={PlanScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="CapacityFocus" component={CapacityFocusScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="GoalEditor" component={GoalEditorScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="NewGoal" component={NewGoalFlowScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="GoalFocus" component={GoalFocusScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="QuickCapture" component={QuickCaptureScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="BattleSetup" component={BattleSetupScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Battle" component={BattleScreen} options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="PrepareRite" component={PrepareRiteScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="DragonDen" component={DragonDenScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="JournalComposer" component={JournalComposerScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Journal" component={JournalScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Analytics" component={AnalyticsScreen} options={{ presentation: 'modal' }} />

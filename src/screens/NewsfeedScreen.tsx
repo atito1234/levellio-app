@@ -11,6 +11,8 @@ import { useCommunity } from '@/state/CommunityContext';
 import { useGame } from '@/state/GameContext';
 import { useCommunityAccess } from '@/services/community/access';
 import { type FeedScope, type Post } from '@/lib/community';
+import { CATEGORY_COLOR, CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
+import type { QuestCategory } from '@/types';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -34,6 +36,9 @@ export function NewsfeedScreen() {
   const [scope, setScope] = useState<ScopeKey>('all');
   const [posts, setPosts] = useState<Post[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  // Life-area filter (null = all). Posts carry an optional `category`.
+  const [cat, setCat] = useState<QuestCategory | null>(null);
+  const shown = useMemo(() => (cat ? posts.filter((p) => p.category === cat) : posts), [posts, cat]);
 
   // Sliding scope-tab indicator.
   const [tabsW, setTabsW] = useState(0);
@@ -142,15 +147,46 @@ export function NewsfeedScreen() {
           })}
         </View>
 
-        {posts.length === 0 ? (
+        {/* Life-area filter chips — color-coded; tap to focus one category. */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+          <Pressable
+            onPress={() => setCat(null)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: !cat }}
+            style={[styles.filterChip, !cat && styles.filterChipOn]}
+          >
+            <Text style={[styles.filterText, !cat && styles.filterTextOn]}>{t('feed:filterAll')}</Text>
+          </Pressable>
+          {CATEGORY_ORDER.map((c) => {
+            const on = cat === c;
+            const color = CATEGORY_COLOR[c];
+            return (
+              <Pressable
+                key={c}
+                onPress={() => setCat(on ? null : c)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: on }}
+                accessibilityLabel={t('categories:' + c)}
+                style={[styles.filterChip, on && { backgroundColor: `${color}1A`, borderColor: color }]}
+              >
+                <View style={[styles.filterDot, { backgroundColor: color }]} />
+                <Text style={[styles.filterText, on && { color, fontWeight: '800' }]}>{CATEGORY_META[c].icon} {t('categories:' + c)}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        {shown.length === 0 ? (
           <Text style={styles.empty}>
-            {scope === 'network'
-              ? t('feed:newsfeed.emptyNetwork')
-              : t('feed:newsfeed.emptyAll')}
+            {cat
+              ? t('feed:emptyCategory')
+              : scope === 'network'
+                ? t('feed:newsfeed.emptyNetwork')
+                : t('feed:newsfeed.emptyAll')}
           </Text>
         ) : (
           <View style={styles.list}>
-            {posts.map((p, i) => (
+            {shown.map((p, i) => (
               <FeedItem key={p.id} index={i}>
                 <PostCard post={p} onOpen={(postId) => navigation.navigate('PostDetail', { postId })} />
               </FeedItem>
@@ -204,6 +240,13 @@ const styles = StyleSheet.create({
   tab: { flex: 1, paddingVertical: spacing.sm, borderRadius: 999, alignItems: 'center' },
   tabText: { ...typography.label, color: MUTED, fontWeight: '700' },
   tabTextOn: { color: VIOLET },
+
+  filterRow: { gap: spacing.sm, paddingVertical: 2, paddingRight: spacing.md },
+  filterChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#ECEAE4' },
+  filterChipOn: { backgroundColor: '#EDE9FE', borderColor: VIOLET },
+  filterDot: { width: 9, height: 9, borderRadius: 999 },
+  filterText: { ...typography.caption, color: MUTED, fontWeight: '700' },
+  filterTextOn: { color: VIOLET, fontWeight: '800' },
 
   list: { gap: spacing.md },
   empty: { ...typography.body, color: MUTED, textAlign: 'center', paddingVertical: spacing.xl },

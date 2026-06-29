@@ -18,6 +18,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { haptics } from '@/services/feedback/haptics';
 import type { RootStackParamList } from '@/navigation/types';
 import { getBucketColor } from '@/lib/buckets';
+import { CATEGORY_COLOR, CATEGORY_META } from '@/lib/categories';
 import {
   REACTIONS,
   myReaction,
@@ -61,6 +62,8 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
   const total = reactionTotal(post.reactions);
   const tops = topReactions(post.reactions);
   const projectColor = post.projectColorId ? getBucketColor(post.projectColorId).accent : VIOLET;
+  // Life-area colour-coding: a left accent stripe + a small tinted category tag.
+  const catColor = post.category ? CATEGORY_COLOR[post.category] : null;
 
   const [burst, setBurst] = useState<{ emoji: string; key: number } | null>(null);
   const heart = useRef(new Animated.Value(0)).current;
@@ -114,7 +117,7 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
   };
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, catColor ? { borderLeftWidth: 3, borderLeftColor: catColor } : null]}>
       <View style={styles.head}>
         <Pressable onPress={openProfile} accessibilityRole="button" accessibilityLabel={t('feed:post.openProfileA11y', { name: post.displayName })} style={styles.headTap}>
           <HeroAvatar presentation={post.presentation ?? 'neutral'} tier="novice" size={40} />
@@ -126,6 +129,9 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string
             <Text style={styles.meta} numberOfLines={1}>
               {relTime(post.createdAt, t, i18n.language)}
               {post.projectTitle ? ` · ${post.projectTitle}` : ''}
+              {post.category && catColor ? (
+                <Text style={{ color: catColor, fontWeight: '800' }}>{` · ${CATEGORY_META[post.category].icon} ${t('categories:' + post.category)}`}</Text>
+              ) : null}
             </Text>
           </View>
         </Pressable>

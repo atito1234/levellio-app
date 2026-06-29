@@ -3,8 +3,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AppHeader, CommunityGate, ScreenContainer } from '@/components';
-import { spacing, typography } from '@/theme';
+import { AppHeader, CommunityGate, ScreenContainer, SectionLabel } from '@/components';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useSettings } from '@/state/SettingsContext';
@@ -88,7 +88,7 @@ export function ProjectsCatalogScreen() {
 
         {myProjects.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>{t('myProjects')}</Text>
+            <SectionLabel>{t('myProjects')}</SectionLabel>
             {myProjects.map((p) => (
               <ProjectCard key={p.id} project={p} onPress={() => navigation.navigate('ProjectDetail', { projectId: p.id })} joined />
             ))}
@@ -97,14 +97,14 @@ export function ProjectsCatalogScreen() {
 
         {recommended.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>{t('recommended')}</Text>
+            <SectionLabel>{t('recommended')}</SectionLabel>
             {recommended.map((p) => (
               <ProjectCard key={p.id} project={p} onPress={() => navigation.navigate('ProjectDetail', { projectId: p.id })} />
             ))}
           </>
         )}
 
-        <Text style={styles.sectionLabel}>{t('featured')}</Text>
+        <SectionLabel>{t('featured')}</SectionLabel>
         {featured.length === 0 && <Text style={styles.empty}>{t('noFeatured')}</Text>}
         {featured
           .filter((p) => !myProjects.some((m) => m.id === p.id) && !recommendedIds.includes(p.id))
@@ -126,7 +126,7 @@ function ProjectCard({ project, onPress, joined }: { project: Project; onPress: 
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${text.title}, ${members}`}
-      style={[styles.card, { borderLeftColor: c.accent }]}
+      style={[styles.card, { borderColor: `${c.accent}33` }]}
     >
       <View style={styles.cardHead}>
         <View style={[styles.emojiBadge, { backgroundColor: c.soft }]}>
@@ -165,14 +165,13 @@ const styles = StyleSheet.create({
   actionBtn: { flex: 1, backgroundColor: VIOLET, borderRadius: 999, paddingVertical: spacing.sm, alignItems: 'center' },
   actionGhost: { backgroundColor: '#EDE9FE' },
   actionText: { ...typography.label, color: '#FFFFFF', fontWeight: '800' },
-  sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2, marginTop: spacing.md },
   empty: { ...typography.body, color: MUTED },
 
-  card: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.xs, borderLeftWidth: 4 },
-  cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  emojiBadge: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  emoji: { fontSize: 24 },
-  cardTitle: { ...typography.body, color: INK, fontWeight: '800' },
+  card: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, borderWidth: 1, ...shadows.md },
+  cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  emojiBadge: { width: 56, height: 56, borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center' },
+  emoji: { fontSize: 28 },
+  cardTitle: { ...typography.title, color: INK, fontWeight: '800' },
   cardMeta: { ...typography.caption, color: MUTED, marginTop: 2 },
   joinedPill: { borderRadius: 999, paddingHorizontal: spacing.sm, paddingVertical: 4 },
   joinedText: { ...typography.caption, fontWeight: '800' },

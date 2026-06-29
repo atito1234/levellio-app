@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
-import { spacing, typography } from '@/theme';
+import { ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useProjects } from '@/state/ProjectsContext';
 import { captureLocationSafely } from '@/services/sensors/deviceContext';
 import { DEFAULT_GEOFENCE_KM, PROJECT_COLOR_IDS, validateProjectDraft, type ProjectSuggestedHabit } from '@/lib/projects';
@@ -95,15 +95,7 @@ export function ProjectEditorScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('editor.close')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.title} accessibilityRole="header">
-          {t('editor.title')}
-        </Text>
-        <View style={{ width: 28 }} />
-      </View>
+      <ScreenHeader title={t('editor.title')} onBack={() => navigation.goBack()} backLabel={t('editor.close')} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.lead}>{t('editor.lead')}</Text>
@@ -150,7 +142,7 @@ export function ProjectEditorScreen({ navigation }: Props) {
           ))}
         </View>
 
-        <Text style={styles.fieldLabel}>{t('editor.suggestedHabits')}</Text>
+        <SectionLabel>{t('editor.suggestedHabits')}</SectionLabel>
         {habits.map((h, i) => (
           <View key={`${h.title}-${i}`} style={styles.habitRow}>
             <Text style={styles.habitText} numberOfLines={1}>
@@ -191,16 +183,16 @@ const styles = StyleSheet.create({
   content: { gap: spacing.sm, paddingBottom: spacing.xl },
   lead: { ...typography.body, color: MUTED, marginBottom: spacing.xs },
   fieldLabel: { ...typography.label, color: MUTED, marginTop: spacing.xs },
-  input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: TRACK },
+  input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: TRACK },
   multiline: { minHeight: 76, textAlignVertical: 'top' },
   row: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-end' },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  emojiCell: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: CARD, borderWidth: 1, borderColor: TRACK },
+  emojiCell: { width: 44, height: 44, borderRadius: radii.md, alignItems: 'center', justifyContent: 'center', backgroundColor: CARD, borderWidth: 1, borderColor: TRACK },
   emojiCellOn: { borderColor: VIOLET, backgroundColor: VIOLET_SOFT },
   emojiText: { fontSize: 22 },
   swatch: { width: 36, height: 36, borderRadius: 999, borderWidth: 3, borderColor: 'transparent' },
   swatchOn: { borderColor: INK },
-  habitRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: CARD, borderRadius: 12, padding: spacing.md, gap: spacing.sm },
+  habitRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: CARD, borderRadius: radii.md, padding: spacing.md, gap: spacing.sm, ...shadows.sm },
   habitText: { ...typography.label, color: INK, flex: 1 },
   remove: { ...typography.label, color: MUTED, fontSize: 16 },
   habitAdder: { flexDirection: 'row', gap: spacing.sm },

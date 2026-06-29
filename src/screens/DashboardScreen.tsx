@@ -15,24 +15,27 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
-import { AddActivityFab, AddActivitySheet, AppHeader, CapacityRing, HeroAvatar, ProjectBadge, ProjectsStrip, ScreenContainer, WorldProjectsStrip } from '@/components';
+import { AddActivityFab, AddActivitySheet, AppHeader, HeroAvatar, MoreSheet, ProjectBadge, ScreenContainer } from '@/components';
+import { GoalTicker } from '@/components/GoalTicker';
 import { useSpotlightTarget, useWelcomeTour } from '@/components/spotlight';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { usePlan } from '@/state/PlanContext';
-import { useGoals, useGoalProgress } from '@/state/GoalContext';
+import { useGoals } from '@/state/GoalContext';
+import { useActivityLog } from '@/state/useActivityLog';
 import { useProjects } from '@/state/ProjectsContext';
 import { useSettings } from '@/state/SettingsContext';
 import { useCommunityAccess } from '@/services/community/access';
-import { CHECKLISTS_ENABLED } from '@/config/features';
-import { useBattles } from '@/state/BattlesContext';
 import { useMotivation } from '@/state/useMotivation';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
-import { effectivePlan, goalDayProgress, goalFocusPool, plannedOpen, planProgress } from '@/lib/plan';
+import { effectivePlan, goalMembersOpen, goalMembersProgress, plannedOpen, planProgress } from '@/lib/plan';
+import { sessionsOf } from '@/lib/analytics';
+import { activityJourney } from '@/lib/journey';
+import { SOLIDIFY_DAYS } from '@/lib/activityStreak';
 import { CAPACITIES } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { isValidScheduleMinutes, minutesToLabel } from '@/lib/schedule';
@@ -76,10 +79,10 @@ export function DashboardScreen() {
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
   const { goals, membershipFor } = useGoals();
-  const { signedIn, myProjects, featured, projectsForHabit, projectActivityIds } = useProjects();
+  const { events } = useActivityLog();
+  const { signedIn, projectsForHabit, projectActivityIds } = useProjects();
   const { settings } = useSettings();
   const communityAllowed = useCommunityAccess();
-  const { totalSlain, coins } = useBattles();
   const reduced = useReducedMotion();
 
   // The home reflects only TODAY'S PLAN (so it stays glanceable). No plan yet →
@@ -89,14 +92,15 @@ export function DashboardScreen() {
   const plan = getPlan(todayKey);
   const [suggesting, setSuggesting] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   // Personalized, science-backed line from the user's real history + today.
   const motivation = useMotivation().text;
 
-  // Guided flow: a SELECTED goal governs the central focus. Default null so each
-  // open starts at Step 1 ("pick a goal"). Gating only applies once goals exist.
+  // Today shows ALL planned habits by default (no goal grid on Home). An optional
+  // focus goal — chosen from the More hub's "Focus a goal" picker — scopes the ring
+  // and activity to that goal. null = all habits.
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const selectedGoal = goals.find((g) => g.id === selectedGoalId) ?? null;
-  const gated = goals.length > 0 && !selectedGoal;
   const focusAccent = selectedGoal ? goalColor(selectedGoal).accent : TEAL;
 
   // Effective members of the selected goal (explicit links + supporting goals in
@@ -107,23 +111,33 @@ export function DashboardScreen() {
   );
 
   const progress = useMemo(
-    () => (selectedGoal ? goalDayProgress(quests, plan, selectedGoal, goalLinkedIds, projectActivityIds) : planProgress(quests, plan)),
+    () => (selectedGoal ? goalMembersProgress(quests, selectedGoal, goalLinkedIds, projectActivityIds) : planProgress(quests, plan)),
     [quests, plan, selectedGoal, goalLinkedIds, projectActivityIds],
   );
 
+  // Plan-wide today % for the ticker's "All" chip (independent of any goal focus).
+  const allProgress = useMemo(() => planProgress(quests, plan), [quests, plan]);
+  // Real session log → the honest "from repetition to habit" journey per activity.
+  const sessions = useMemo(() => sessionsOf(events), [events]);
+
   // The planned, still-open habits (timed first) — filtered to the selected goal.
   const openHabits = useMemo(
-    () => (selectedGoal ? goalFocusPool(quests, plan, selectedGoal, goalLinkedIds, projectActivityIds) : plannedOpen(quests, plan)),
+    () => (selectedGoal ? goalMembersOpen(quests, selectedGoal, goalLinkedIds, projectActivityIds) : plannedOpen(quests, plan)),
     [quests, plan, selectedGoal, goalLinkedIds, projectActivityIds],
   );
   const goalHasActivities = selectedGoal ? goalHabits(quests, selectedGoal, goalLinkedIds, projectActivityIds).length > 0 : true;
-  // Guided first-run: 1 pick a goal → 2 add activities → 3 schedule habits (0 = done).
-  const onboardStep: 0 | 1 | 2 | 3 =
-    goals.length === 0 || gated ? 1 : !goalHasActivities ? 2 : plan === undefined ? 3 : 0;
+  // First-run nudges (goals no longer gate the Home): add a first habit, then plan.
+  const needsHabit = quests.length === 0;
+  const needsPlan = quests.length > 0 && plan === undefined;
   const [focusIndex, setFocusIndex] = useState(0);
   const safeIndex = openHabits.length ? Math.min(focusIndex, openHabits.length - 1) : 0;
   const focus = openHabits[safeIndex] ?? null;
   const canBrowse = openHabits.length > 1;
+  // The honest "from repetition to habit" journey for the activity in focus.
+  const focusJourney = useMemo(
+    () => (focus ? activityJourney(sessions, focus.id, focus.title, todayKey) : null),
+    [focus, sessions, todayKey],
+  );
 
   const cardX = useRef(new Animated.Value(0)).current;
   const flash = useRef(new Animated.Value(0)).current; // "Up next!" flourish
@@ -303,111 +317,42 @@ export function DashboardScreen() {
             <View style={styles.pill} accessibilityLabel={t('streakPillA11y', { days: character.streakDays })}>
               <Text style={styles.pillText}>🔥 {character.streakDays}</Text>
             </View>
-            {totalSlain > 0 && (
-              <View style={styles.pill} accessibilityLabel={t('dragonsSlainA11y', { count: totalSlain })}>
-                <Text style={styles.pillText}>⚔️ {totalSlain}</Text>
-              </View>
-            )}
-            {coins > 0 && (
-              <View style={styles.pill} accessibilityLabel={t('coinsA11y', { count: coins })}>
-                <Text style={styles.pillText}>🪙 {coins}</Text>
-              </View>
-            )}
             <View style={[styles.pill, styles.pillViolet]} accessibilityLabel={t('levelA11y', { level: character.level })}>
               <Text style={[styles.pillText, { color: VIOLET }]}>Lv {character.level}</Text>
             </View>
           </View>
         </View>
 
-        {/* Facebook-style composer — share to the community in one tap from home,
-            with a quick jump to the full feed (Today ↔ Feed connection). */}
-        {signedIn && communityAllowed && (
-          <View style={styles.homeComposerRow}>
-            <Pressable
-              onPress={() => navigation.navigate('PostComposer')}
-              accessibilityRole="button"
-              accessibilityLabel={t('dashboard:share.a11y')}
-              style={styles.homeComposer}
-            >
-              <HeroAvatar presentation={character.presentation} tier={character.tier} kitId={character.kitId} size={36} />
-              <Text style={styles.homeComposerHint}>{t('dashboard:share.hint')}</Text>
-              <Text style={styles.homeComposerIcon}>✏️</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => navigation.navigate('Main', { screen: 'Feed' })}
-              accessibilityRole="button"
-              accessibilityLabel={t('dashboard:share.viewFeedA11y')}
-              hitSlop={8}
-              style={styles.homeComposerFeed}
-            >
-              <Text style={styles.homeComposerFeedText}>{t('dashboard:share.viewFeed')}</Text>
-            </Pressable>
-          </View>
-        )}
-
-        {/* Recipes for you — appears once a dietary plan has been recommended. */}
-        {(settings.recommendedRecipeIds?.length ?? 0) > 0 && (
-          <Pressable
-            onPress={() => navigation.navigate('Recipes')}
-            accessibilityRole="button"
-            accessibilityLabel={t('recipes:screen.title')}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: PAD, paddingVertical: 14, marginHorizontal: PAD, marginBottom: 8, borderWidth: 1, borderColor: '#ECEAE4' }}
-          >
-            <Text style={{ fontSize: 22 }}>🍽️</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ ...typography.label, color: INK, fontWeight: '800' }}>{t('recipes:screen.title')}</Text>
-              <Text style={{ ...typography.caption, color: MUTED }}>{t('recipes:screen.recommended')}</Text>
-            </View>
-            <Text style={{ fontSize: 22, color: MUTED }}>›</Text>
-          </Pressable>
-        )}
-
-        {/* Checklists — keep a list, tick it off, check out for a streak. */}
-        {CHECKLISTS_ENABLED && (
-          <Pressable
-            onPress={() => navigation.navigate('Checklists')}
-            accessibilityRole="button"
-            accessibilityLabel={t('checklists:title')}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: CARD, borderRadius: radii.lg, paddingHorizontal: PAD, paddingVertical: 14, marginHorizontal: PAD, marginBottom: 8, borderWidth: 1, borderColor: '#ECEAE4' }}
-          >
-            <Text style={{ fontSize: 22 }}>✅</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ ...typography.label, color: INK, fontWeight: '800' }}>{t('checklists:title')}</Text>
-              <Text style={{ ...typography.caption, color: MUTED }}>{t('checklists:todayTitle')}</Text>
-            </View>
-            <Text style={{ fontSize: 22, color: MUTED }}>›</Text>
-          </Pressable>
-        )}
-
-        {/* STEP 1 — pick a goal. It governs the focus below and tints it. */}
-        {goals.length > 0 && (
-          <Text style={styles.stepHint}>{gated ? t('dashboard:step1Pick') : t('dashboard:step1')}</Text>
-        )}
-        <GoalsStrip
+        {/* Goal ticker — a slim, news-feed-style switcher: tap a goal to point the
+            swipable cards + ring at it; "All" returns to every habit; "＋" opens the
+            gamified "become" creation flow. Always shown so adding a goal is one tap. */}
+        <GoalTicker
           goals={goals}
           selectedId={selectedGoalId}
-          onSelect={(id) => setSelectedGoalId((prev) => (prev === id ? null : id))}
-          onManage={(id) => navigation.navigate('GoalFocus', { goalId: id })}
-          onNew={() => navigation.navigate('GoalEditor')}
+          allPct={allProgress.pct}
+          onSelect={(id) => setSelectedGoalId(id)}
+          onAddGoal={() => navigation.navigate('NewGoal')}
+          projectActivityIds={projectActivityIds}
         />
 
-        {/* Community — the member's projects, live. Outside the goal gate so the
-            collective momentum is always visible (drives the daily ritual). */}
-        {signedIn && myProjects.length > 0 && (
-          <ProjectsStrip
-            projects={myProjects}
-            onOpen={(projectId) => navigation.navigate('ProjectDetail', { projectId })}
-            onBrowse={() => navigation.navigate('Main', { screen: 'Projects' })}
-          />
+        {/* With a goal selected, a one-tap way to add an activity straight into it
+            (the sheet is pre-filed via defaultGoalId below). */}
+        {selectedGoal && (
+          <Pressable
+            onPress={() => setAddOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('dashboard:addToGoal', { goal: selectedGoal.title })}
+            style={[styles.addToGoal, { borderColor: focusAccent }]}
+          >
+            <Text style={[styles.addToGoalText, { color: focusAccent }]} numberOfLines={1}>
+              ＋ {t('dashboard:addToGoal', { goal: selectedGoal.title })}
+            </Text>
+          </Pressable>
         )}
 
-        {/* Everything below is governed by the chosen goal — faded until picked. */}
-        <View style={[styles.gatedWrap, gated && styles.gatedOff]} pointerEvents={gated ? 'none' : 'auto'}>
-        {/* STEP 2 — once a goal is chosen but empty, point to the mic Add button. */}
-        {onboardStep === 2 && <Text style={styles.stepHint}>{t('dashboard:step2')}</Text>}
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}
-        <View style={styles.billboard} {...todayTarget} {...(canBrowse && !gated ? pan.panHandlers : {})}>
+        <View style={styles.billboard} {...todayTarget} {...(canBrowse ? pan.panHandlers : {})}>
          <View style={styles.billboardClip}>
           <Animated.View
             style={[
@@ -486,6 +431,28 @@ export function DashboardScreen() {
                   {'  '}🔗
                 </Text>
               </Pressable>
+              {/* The core story: every rep moves this activity toward automatic. */}
+              {focusJourney && (
+                <Pressable
+                  onPress={() => navigation.navigate('ActivityJourney', { activityId: focus.id })}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('dashboard:habit.viewJourneyA11y', { title: focus.title })}
+                  style={styles.habitCue}
+                >
+                  <View style={styles.habitTrack}>
+                    <View style={[styles.habitFill, { width: `${Math.max(3, focusJourney.progressPct)}%`, backgroundColor: focusJourney.graduated ? GOLD : focusAccent }]} />
+                  </View>
+                  <Text style={[styles.habitLabel, { color: focusAccent }]} numberOfLines={1}>
+                    {focusJourney.status === 'graduated'
+                      ? t('dashboard:habit.graduated')
+                      : focusJourney.status === 'solidified'
+                        ? t('dashboard:habit.solidified')
+                        : focusJourney.status === 'building'
+                          ? t('dashboard:habit.building', { streak: focusJourney.currentStreak, left: Math.max(0, SOLIDIFY_DAYS - focusJourney.currentStreak) })
+                          : t('dashboard:habit.new')}
+                  </Text>
+                </Pressable>
+              )}
               {/* Fitts: large, full-width, thumb-reachable primary action. */}
               <Pressable
                 onPress={() => openHabit(focus.id)}
@@ -625,15 +592,15 @@ export function DashboardScreen() {
           </View>
         )}
 
-        {/* STEP 3 — activities exist; guide the user to curate today's plan. */}
-        {onboardStep === 3 && <Text style={styles.stepHint}>{t('dashboard:step3')}</Text>}
+        {/* STEP — activities exist but no plan yet; guide to curate today. */}
+        {needsPlan && <Text style={styles.stepHint}>{t('dashboard:step3')}</Text>}
         {/* Plan CTA — the one place to curate today/tomorrow (declutters home). */}
         <Pressable
           onPress={() => navigation.navigate('Plan')}
           accessibilityRole="button"
           accessibilityLabel={t('dashboard:scheduleHabits')}
           accessibilityHint={t('dashboard:scheduleSubEmpty')}
-          style={[styles.planCta, onboardStep === 3 && styles.planCtaHi]}
+          style={[styles.planCta, needsPlan && styles.planCtaHi]}
         >
           <View style={styles.planCtaMain}>
             <Text style={styles.planCtaTitle}>{t('dashboard:scheduleHabits')}</Text>
@@ -644,165 +611,29 @@ export function DashboardScreen() {
           <Text style={styles.planCtaChevron}>›</Text>
         </Pressable>
 
-        {/* Quick actions — discovery/nav only; the 🎙️ button is the one way to add. */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
-          <QuickChip label={t('dashboard:chips.journal')} onPress={() => navigation.navigate('Journal')} />
-          <QuickChip label={t('dashboard:chips.library')} onPress={() => navigation.navigate('HabitLibrary')} />
-          <QuickChip label={t('dashboard:chips.buckets')} onPress={() => navigation.navigate('Organize')} />
-          <QuickChip label={t('dashboard:chips.connections')} onPress={() => navigation.navigate('Connections')} />
-          <QuickChip label={suggesting ? '…' : t('dashboard:chips.suggest')} onPress={handleSuggest} />
-        </ScrollView>
-
-        {/* Your capacities — the shared rings every completion feeds (real data). */}
-        <View style={styles.capHead}>
-          <Text style={styles.railLabel}>{t('dashboard:capacitiesTitle')}</Text>
-          <Pressable
-            onPress={() => navigation.navigate('Progress')}
-            accessibilityRole="button"
-            accessibilityLabel={t('dashboard:progress')}
-          >
-            <Text style={styles.capLink}>{t('dashboard:progress')}</Text>
-          </Pressable>
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
-          {CAPACITIES.map((cap) => {
-            const lvl = Math.round(levels[cap.id]);
-            return (
-              <Pressable
-                key={cap.id}
-                onPress={() => navigation.navigate('CapacityFocus', { capacityId: cap.id })}
-                accessibilityRole="button"
-                accessibilityLabel={`${capName(cap.id)} ${lvl}%`}
-                style={styles.capCell}
-              >
-                <View style={styles.capRingWrap}>
-                  <CapacityRing level={lvl} colorId={cap.colorId} size={56} strokeWidth={6} />
-                  <View style={styles.capRingCenter} pointerEvents="none">
-                    <Text style={styles.capRingPct}>{lvl}%</Text>
-                  </View>
-                </View>
-                <Text style={styles.capCellName}>{capName(cap.id)}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-        </View>
-
-        {/* Around the world — opt-in discovery of community projects everywhere. */}
-        {settings.worldProjectsEnabled && featured.length > 0 && (
-          <WorldProjectsStrip
-            projects={featured}
-            onOpen={(projectId) => navigation.navigate('ProjectDetail', { projectId })}
-          />
-        )}
+        {/* Everything else lives one tap away in a calm "More" hub. */}
+        <Pressable
+          onPress={() => setMoreOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('dashboard:more.title')}
+          style={styles.moreBtn}
+        >
+          <Text style={styles.moreText}>{t('dashboard:more.openLabel')}</Text>
+        </Pressable>
 
         <View style={{ height: spacing.xl }} />
       </ScrollView>
 
-      <AddActivityFab onPress={() => setAddOpen(true)} accent={focusAccent} highlight={onboardStep === 2} />
+      <AddActivityFab onPress={() => setAddOpen(true)} accent={focusAccent} highlight={needsHabit} />
       <AddActivitySheet visible={addOpen} onClose={() => setAddOpen(false)} defaultGoalId={selectedGoalId} />
+      <MoreSheet
+        visible={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        onSuggest={handleSuggest}
+        canShare={signedIn && communityAllowed}
+        suggesting={suggesting}
+      />
     </ScreenContainer>
-  );
-}
-
-function QuickChip({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.quickChip}>
-      <Text style={styles.quickChipText}>{label}</Text>
-    </Pressable>
-  );
-}
-
-/** The horizontal strip of life goals — selecting one governs the focus below. */
-function GoalsStrip({
-  goals,
-  selectedId,
-  onSelect,
-  onManage,
-  onNew,
-}: {
-  goals: Goal[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-  onManage: (id: string) => void;
-  onNew: () => void;
-}) {
-  const { t } = useTranslation('dashboard');
-  if (goals.length === 0) {
-    return (
-      <Pressable
-        onPress={onNew}
-        accessibilityRole="button"
-        accessibilityLabel={t('setGoalA11y')}
-        style={styles.goalEmpty}
-      >
-        <Text style={styles.goalEmojiLg}>🎯</Text>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.goalEmptyTitle}>{t('goalsEmptyTitle')}</Text>
-          <Text style={styles.goalEmptySub}>{t('goalsEmptySub')}</Text>
-        </View>
-        <Text style={styles.goalChevron}>›</Text>
-      </Pressable>
-    );
-  }
-  const projectGoals = goals.filter((g) => g.kind === 'project');
-  const personalGoals = goals.filter((g) => g.kind !== 'project');
-  return (
-    <View style={styles.goalsWrap}>
-      {projectGoals.length > 0 && (
-        <>
-          <Text style={styles.goalsRowLabel}>{t('projectGoals')}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalsRow}>
-            {projectGoals.map((g) => (
-              <GoalCard key={g.id} goal={g} selected={g.id === selectedId} onPress={() => onSelect(g.id)} />
-            ))}
-          </ScrollView>
-        </>
-      )}
-      {projectGoals.length > 0 && <Text style={styles.goalsRowLabel}>{t('yourGoals')}</Text>}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalsRow}>
-        {personalGoals.map((g) => (
-          <GoalCard key={g.id} goal={g} selected={g.id === selectedId} onPress={() => onSelect(g.id)} />
-        ))}
-        <Pressable onPress={onNew} accessibilityRole="button" accessibilityLabel={t('newGoal')} style={styles.goalNew}>
-          <Text style={styles.goalNewPlus}>＋</Text>
-          <Text style={styles.goalNewText}>{t('newGoal')}</Text>
-        </Pressable>
-      </ScrollView>
-      {selectedId && (
-        <Pressable onPress={() => onManage(selectedId)} accessibilityRole="button" accessibilityLabel={t('editActivities')} style={styles.manageRow} hitSlop={8}>
-          <Text style={styles.manageText}>{t('editActivities')}</Text>
-          <Text style={styles.manageHint}>{t('tapToSwitch')}</Text>
-        </Pressable>
-      )}
-    </View>
-  );
-}
-
-function GoalCard({ goal, selected, onPress }: { goal: Goal; selected: boolean; onPress: () => void }) {
-  const { t } = useTranslation('dashboard');
-  const { projectActivityIds } = useProjects();
-  const progress = useGoalProgress(goal, projectActivityIds);
-  const c = goalColor(goal);
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{ selected }}
-      accessibilityLabel={t('goalCardA11y', { title: goal.title, done: progress.doneTodayInGoal, planned: progress.plannedTodayInGoal, pct: progress.weeklyConsistencyPct, selected: selected ? t('goalCardSelected') : '' })}
-      style={[styles.goalCard, selected && { borderColor: c.accent, backgroundColor: c.soft, borderWidth: 2 }]}
-    >
-      <Text style={styles.goalEmoji}>{goal.emoji}</Text>
-      <Text style={styles.goalTitle} numberOfLines={2}>
-        {goal.title}
-      </Text>
-      <View style={styles.goalBar}>
-        <View style={[styles.goalBarFill, { backgroundColor: c.accent, width: `${Math.max(3, progress.weeklyConsistencyPct)}%` }]} />
-      </View>
-      <Text style={styles.goalMeta}>
-        {t('todayCount', { done: progress.doneTodayInGoal, total: progress.plannedTodayInGoal })}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -818,6 +649,14 @@ const styles = StyleSheet.create({
   pill: { backgroundColor: '#FFF', borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4, borderWidth: 1, borderColor: '#E8E6E0' },
   pillViolet: { borderColor: '#E2DBFB', backgroundColor: '#F4F1FE' },
   pillText: { ...typography.caption, color: INK, fontWeight: '800' },
+
+  addToGoal: { alignSelf: 'flex-start', marginHorizontal: PAD, borderRadius: radii.pill, borderWidth: 1, borderStyle: 'dashed', paddingHorizontal: spacing.md, paddingVertical: 7, backgroundColor: CARD, maxWidth: SCREEN_W - PAD * 2 },
+  addToGoalText: { ...typography.label, fontWeight: '800' },
+
+  habitCue: { alignSelf: 'stretch', alignItems: 'center', gap: 4, marginTop: spacing.xs },
+  habitTrack: { alignSelf: 'stretch', height: 5, borderRadius: 3, backgroundColor: '#ECEAE4', overflow: 'hidden' },
+  habitFill: { height: 5, borderRadius: 3 },
+  habitLabel: { ...typography.caption, fontWeight: '800' },
 
   billboard: {
     marginHorizontal: PAD,
@@ -959,6 +798,8 @@ const styles = StyleSheet.create({
   capRingCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
   capRingPct: { ...typography.caption, color: INK, fontWeight: '800', fontSize: 11 },
   capCellName: { ...typography.caption, color: MUTED, fontSize: 11 },
+  moreBtn: { alignItems: 'center', paddingVertical: spacing.md, marginHorizontal: PAD },
+  moreText: { ...typography.label, color: MUTED, fontWeight: '700' },
   quickRow: { gap: spacing.sm, paddingHorizontal: PAD },
   quickChip: { backgroundColor: '#FFF', borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: '#E8E6E0' },
   quickChipText: { ...typography.label, color: INK },

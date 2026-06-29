@@ -47,6 +47,14 @@
     "connections": "🔗 Conexiones",
     "suggest": "✨ Sugerir"
   },
+  "more": {
+    "title": "Más",
+    "openLabel": "Más ▾",
+    "share": "Compartir",
+    "discover": "Descubrir",
+    "close": "Cerrar",
+    "community": "Comunidad"
+  },
   "capacitiesTitle": "Tus capacidades · últimos 7 días",
   "progress": "Progreso ›",
   "goalsEmptyTitle": "¿Qué quieres lograr?",
@@ -70,5 +78,19 @@
   "warStrategyA11y": "Prepara tu estrategia de guerra para {{title}}",
   "bringToFocusA11y": "Poner {{title}} en foco",
   "goalCardA11y": "{{title}}. {{done}} de {{planned}} hechos hoy, {{pct}} por ciento esta semana.{{selected}}",
-  "goalCardSelected": " Seleccionado."
+  "goalCardSelected": " Seleccionado.",
+  "ticker": {
+    "all": "Todo",
+    "allA11y": "Todos los hábitos de hoy, {{pct}} por ciento hechos. Mostrar todo.",
+    "addGoal": "Meta",
+    "addGoalA11y": "Crear una nueva meta"
+  },
+  "habit": {
+    "new": "Repítelo a diario para volverlo un hábito",
+    "building": "Día {{streak}} — {{left}} días para fijarlo 🌱",
+    "solidified": "Fijado 🌱 — mantenlo en piloto automático",
+    "graduated": "Funciona solo 🏅",
+    "viewJourneyA11y": "Ver el camino de {{title}} de la repetición al hábito"
+  },
+  "addToGoal": "Añadir actividad a {{goal}}"
 }

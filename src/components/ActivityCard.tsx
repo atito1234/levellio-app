@@ -28,7 +28,12 @@ export function OwnedActivityCard({
   inGoalIds,
   onToggleGoal,
   onNewGoal,
-  onDo,
+  onAddToday,
+  onToday,
+  groupName,
+  groupAccent,
+  groupSoft,
+  onMoveGroup,
   onBattle,
   onEdit,
   onRemove,
@@ -41,29 +46,75 @@ export function OwnedActivityCard({
   inGoalIds: Set<string>;
   onToggleGoal: (goalId: string) => void;
   onNewGoal: () => void;
-  onDo: () => void;
+  /** Schedule this activity onto Home's Today ring (doing lives on Home). */
+  onAddToday: () => void;
+  /** True when the activity is already on today's plan. */
+  onToday: boolean;
+  /** Current group (bucket) name, if filed. */
+  groupName?: string | null;
+  groupAccent?: string;
+  groupSoft?: string;
+  /** Open the group picker (MoveToBucketSheet) for this activity. */
+  onMoveGroup: () => void;
   onBattle: () => void;
   onEdit: () => void;
   onRemove: () => void;
 }) {
   const { t } = useTranslation('projects');
   const [pickOpen, setPickOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const inGoals = goals.filter((g) => inGoalIds.has(g.id));
+  // One accent per card: the group's colour when filed, else the project accent.
+  const cardAccent = groupAccent ?? accent;
 
   return (
-    <View style={[styles.card, { borderColor: `${accent}33` }]}>
+    <View style={[styles.card, { borderColor: `${cardAccent}29` }]}>
       <View style={styles.head}>
-        <View style={[styles.emojiWrap, { backgroundColor: `${accent}1A` }]}>
+        <View style={[styles.emojiWrap, { backgroundColor: `${cardAccent}1A` }]}>
           <Text style={styles.emoji}>{emoji}</Text>
         </View>
         <View style={styles.headText}>
           <Text style={styles.title} numberOfLines={2}>{title}</Text>
-          {contribution ? <Text style={[styles.contrib, { color: accent }]}>{contribution}</Text> : null}
+          {contribution ? <Text style={[styles.contrib, { color: cardAccent }]}>{contribution}</Text> : null}
         </View>
+        <Pressable
+          onPress={() => setMenuOpen((v) => !v)}
+          accessibilityRole="button"
+          accessibilityLabel={t('card.moreA11y', { title })}
+          accessibilityState={{ expanded: menuOpen }}
+          style={[styles.moreBtn, menuOpen && styles.moreBtnOn]}
+          hitSlop={6}
+        >
+          <Text style={styles.moreDots}>•••</Text>
+        </Pressable>
       </View>
 
-      {/* Goals this activity ladders into — tap to add/remove. */}
+      {/* Overflow: the secondary actions live here so the card stays calm. */}
+      {menuOpen && (
+        <View style={styles.menu}>
+          <MenuRow icon="⚔️" label={t('card.battle')} onPress={() => { setMenuOpen(false); onBattle(); }} />
+          <MenuRow icon="✎" label={t('card.edit')} onPress={() => { setMenuOpen(false); onEdit(); }} />
+          <MenuRow icon="✕" label={t('card.remove')} tint={ROSE} onPress={() => { setMenuOpen(false); onRemove(); }} />
+        </View>
+      )}
+
+      {/* Organize chips: group (bucket) + the goals this activity ladders into. */}
       <View style={styles.goalRow}>
+        <Pressable
+          onPress={onMoveGroup}
+          accessibilityRole="button"
+          accessibilityLabel={t('card.groupA11y', { title })}
+          style={[
+            styles.groupChip,
+            groupName
+              ? { backgroundColor: groupSoft ?? '#F4F1FE', borderColor: groupAccent ?? VIOLET }
+              : styles.groupChipEmpty,
+          ]}
+        >
+          <Text style={[styles.groupChipText, { color: groupName ? groupAccent ?? VIOLET : MUTED }]} numberOfLines={1}>
+            {groupName ? `🗂️ ${groupName}` : t('card.addGroup')}
+          </Text>
+        </Pressable>
         {inGoals.map((g) => {
           const c = goalColor(g);
           return (
@@ -99,21 +150,28 @@ export function OwnedActivityCard({
         </View>
       )}
 
-      <View style={styles.actions}>
-        <Pressable onPress={onDo} accessibilityRole="button" accessibilityLabel={t('card.doNowA11y', { title })} style={[styles.primary, { backgroundColor: TEAL }]}>
-          <Text style={styles.primaryText}>{t('card.doNow')}</Text>
-        </Pressable>
-        <Pressable onPress={onBattle} accessibilityRole="button" accessibilityLabel={t('card.battleA11y', { title })} style={styles.ghost} hitSlop={6}>
-          <Text style={styles.ghostText}>⚔️</Text>
-        </Pressable>
-        <Pressable onPress={onEdit} accessibilityRole="button" accessibilityLabel={t('card.editA11y', { title })} style={styles.ghost} hitSlop={6}>
-          <Text style={styles.ghostText}>✎</Text>
-        </Pressable>
-        <Pressable onPress={onRemove} accessibilityRole="button" accessibilityLabel={t('card.removeA11y', { title })} style={styles.ghost} hitSlop={6}>
-          <Text style={[styles.ghostText, { color: ROSE }]}>✕</Text>
-        </Pressable>
-      </View>
+      {/* One clear action: send it to Home, where the doing happens. */}
+      <Pressable
+        onPress={onAddToday}
+        accessibilityRole="button"
+        accessibilityState={{ selected: onToday }}
+        accessibilityLabel={onToday ? t('card.onTodayA11y', { title }) : t('card.addTodayA11y', { title })}
+        style={[styles.primary, onToday ? styles.primaryOn : { backgroundColor: TEAL }]}
+      >
+        <Text style={[styles.primaryText, onToday && styles.primaryTextOn]}>
+          {onToday ? t('card.onToday') : t('card.addToday')}
+        </Text>
+      </Pressable>
     </View>
+  );
+}
+
+function MenuRow({ icon, label, tint = VIOLET, onPress }: { icon: string; label: string; tint?: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.menuRow}>
+      <Text style={[styles.menuIcon, { color: tint }]}>{icon}</Text>
+      <Text style={[styles.menuLabel, { color: tint }]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -170,14 +228,26 @@ export function ActivityTile({ icon, label, sub, onPress, tint = VIOLET }: { ico
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.md, borderWidth: 1, borderColor: TRACK, ...shadows.md },
+  card: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, borderWidth: 1, borderColor: TRACK, ...shadows.md },
   suggested: { borderStyle: 'dashed' },
   head: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  emojiWrap: { width: 52, height: 52, borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center' },
+  emojiWrap: { width: 56, height: 56, borderRadius: radii.xl, alignItems: 'center', justifyContent: 'center' },
   emoji: { fontSize: 28 },
   headText: { flex: 1, gap: 2 },
   title: { ...typography.title, color: INK, fontWeight: '800' },
   contrib: { ...typography.caption, fontWeight: '800' },
+
+  moreBtn: { width: 36, height: 36, borderRadius: radii.md, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F6F5FB' },
+  moreBtnOn: { backgroundColor: '#ECE9FA' },
+  moreDots: { ...typography.label, color: MUTED, fontWeight: '900', letterSpacing: 1 },
+  menu: { backgroundColor: '#FAFAFD', borderRadius: radii.md, padding: spacing.xs, gap: 2 },
+  menuRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.sm, paddingHorizontal: spacing.sm, borderRadius: radii.sm },
+  menuIcon: { fontSize: 16, width: 22, textAlign: 'center' },
+  menuLabel: { ...typography.body, fontWeight: '700' },
+
+  groupChip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: spacing.sm, paddingVertical: 3, maxWidth: 180 },
+  groupChipEmpty: { backgroundColor: '#F4F4F7', borderColor: TRACK, borderStyle: 'dashed' },
+  groupChipText: { ...typography.caption, fontWeight: '800', fontSize: 11 },
 
   goalRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.xs },
   goalChip: { borderRadius: 999, borderWidth: 1, paddingHorizontal: spacing.sm, paddingVertical: 3, maxWidth: 180 },
@@ -190,11 +260,10 @@ const styles = StyleSheet.create({
   pickNew: { borderRadius: 999, paddingHorizontal: spacing.sm, paddingVertical: 4, backgroundColor: VIOLET },
   pickNewText: { ...typography.caption, color: '#FFFFFF', fontWeight: '800', fontSize: 11 },
 
-  actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  primary: { flex: 1, borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center' },
+  primary: { borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center', marginTop: 2 },
+  primaryOn: { backgroundColor: '#EAFBF6' },
   primaryText: { ...typography.label, color: '#0B3D33', fontWeight: '800' },
-  ghost: { width: 44, height: 44, borderRadius: radii.md, backgroundColor: '#F4F1FE', alignItems: 'center', justifyContent: 'center' },
-  ghostText: { ...typography.title, color: VIOLET, fontWeight: '800' },
+  primaryTextOn: { color: '#0A6E5C' },
 
   adopt: { borderRadius: 999, paddingVertical: spacing.md, alignItems: 'center' },
   adoptDone: { backgroundColor: '#EAFBF6' },

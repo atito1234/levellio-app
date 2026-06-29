@@ -2,9 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AddActivityFab, AddActivitySheet, ProjectBadge, ScreenContainer } from '@/components';
-import { spacing, typography } from '@/theme';
+import { AddActivityFab, AddActivitySheet, ChecklistPicker, ProjectBadge, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
+import { useChecklists } from '@/state/ChecklistsContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { usePlan } from '@/state/PlanContext';
@@ -49,6 +50,7 @@ export function PlanScreen({ route, navigation }: Props) {
   const { buckets, assignments } = useBuckets();
   const { projectsForHabit } = useProjects();
   const { getPlan, togglePlanned } = usePlan();
+  const { addChecklist, checklistForDate } = useChecklists();
   const { events } = useActivityLog();
 
   const todayK = dayKey(new Date());
@@ -93,17 +95,20 @@ export function PlanScreen({ route, navigation }: Props) {
     setAddOpen(true);
   };
 
+  // Turn the selected day's planned activities into a checklist in one tap.
+  const createChecklistFromDay = async () => {
+    // One list per day: if this day already has a list, open it instead of
+    // creating a duplicate.
+    if (!checklistForDate(selected)) {
+      const items = selSummary.scheduled.map((q) => ({ label: q.title, questId: q.id }));
+      await addChecklist({ title: t('checklists.fromDayTitle', { day: dayLabel(selected) }), recurring: false, date: selected, items });
+    }
+    navigation.navigate('Checklists');
+  };
+
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('back')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.title} accessibilityRole="header">
-          {t('title')}
-        </Text>
-        <View style={styles.chevronSpacer} />
-      </View>
+      <ScreenHeader title={t('title')} onBack={() => navigation.goBack()} backLabel={t('back')} />
 
       {/* Month / Year view toggle. */}
       <View style={styles.viewBar} accessibilityRole="tablist">
@@ -228,7 +233,7 @@ export function PlanScreen({ route, navigation }: Props) {
               {showLibrary &&
                 rails.map((rail) => (
                   <View key={rail.id} style={styles.librarySection}>
-                    <Text style={styles.sectionLabel}>{rail.label.toUpperCase()}</Text>
+                    <SectionLabel>{rail.label.toUpperCase()}</SectionLabel>
                     <View style={styles.chips}>
                       {rail.habits.map((q) => {
                         const on = plannedSet.has(q.id);
@@ -253,6 +258,15 @@ export function PlanScreen({ route, navigation }: Props) {
                 ))}
             </>
           )}
+        </View>
+
+        {/* Checklists — create from this day's plan, or search/open existing. */}
+        <View style={styles.panel}>
+          <Text style={styles.panelTitle}>{t('checklists.title')}</Text>
+          <ChecklistPicker
+            onOpen={() => navigation.navigate('Checklists')}
+            {...(selSummary.scheduled.length > 0 ? { onCreate: () => void createChecklistFromDay(), createLabel: t('checklists.fromDay') } : {})}
+          />
         </View>
       </ScrollView>
 
@@ -439,7 +453,7 @@ const styles = StyleSheet.create({
 
   content: { gap: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xl },
 
-  calCard: { backgroundColor: CARD, borderRadius: 24, padding: spacing.md, gap: 6 },
+  calCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.md, gap: 6, ...shadows.md },
   calHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.xs },
   nav: { ...typography.heading, color: VIOLET, width: 32, textAlign: 'center' },
   month: { ...typography.title, color: INK, fontWeight: '800' },
@@ -470,7 +484,7 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   legendText: { ...typography.caption, color: MUTED, fontSize: 10 },
 
-  panel: { backgroundColor: CARD, borderRadius: 24, padding: spacing.lg, gap: spacing.md },
+  panel: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.md, ...shadows.md },
   panelHead: { gap: 2 },
   panelTitle: { ...typography.title, color: INK, fontWeight: '800' },
   panelCount: { ...typography.caption, color: MUTED },

@@ -17,5 +17,10 @@
   "hideHabits": "Masquer vos habitudes ▲",
   "scheduleFrom": "＋ Planifier depuis vos habitudes ▾",
   "chipAddA11y": "Ajouter {{title}}",
-  "chipRemoveA11y": "Retirer {{title}}"
+  "chipRemoveA11y": "Retirer {{title}}",
+  "checklists": {
+    "title": "Listes",
+    "fromDay": "Nouvelle liste de ce jour",
+    "fromDayTitle": "Liste du {{day}}"
+  }
 }

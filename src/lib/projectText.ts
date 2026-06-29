@@ -25,3 +25,16 @@ export function localizeProject(
     reward: field('reward', project.reward),
   };
 }
+
+/**
+ * Localized title for a featured project's suggested habit (by index), falling back
+ * to the English title stored on the seed for member-created projects.
+ */
+export function localizeFeaturedHabit(
+  t: TFunction,
+  projectId: string,
+  index: number,
+  fallback: string,
+): string {
+  return t(`featured:${projectId}.habits.${index}`, { defaultValue: fallback }) as string;
+}
