@@ -9,6 +9,8 @@ export const fontWeights = {
   medium: '500',
   semibold: '600',
   bold: '700',
+  /** Emphasis weight for marquee numbers / stat values across analytics. */
+  extraBold: '800',
 } as const;
 
 export const fontSizes = {

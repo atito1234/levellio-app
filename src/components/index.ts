@@ -42,3 +42,6 @@ export { AddActivityFab } from './AddActivityFab';
 export { AddActivitySheet } from './AddActivitySheet';
 export { TimePicker } from './TimePicker';
 export { MiniCalendar } from './MiniCalendar';
+export { StatTile } from './analytics/StatTile';
+export { Pill, type PillTone } from './analytics/Pill';
+export { AnalyticsEmptyState } from './analytics/EmptyState';
