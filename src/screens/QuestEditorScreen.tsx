@@ -10,7 +10,7 @@ import {
   TimePicker,
   type ChipOption,
 } from '@/components';
-import { colors, spacing, typography } from '@/theme';
+import { colors, radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useGoals } from '@/state/GoalContext';
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   weekday: {
     flex: 1,
     aspectRatio: 1,
-    borderRadius: 12,
+    borderRadius: radii.md,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
