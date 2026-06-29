@@ -3,9 +3,9 @@ import { Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } f
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ActivityTile, AddActivitySheet, MiniScheduler, OwnedActivityCard, ProgressBar, ScreenContainer, SuggestedActivityCard } from '@/components';
+import { ActivityTile, AddActivitySheet, MiniScheduler, OwnedActivityCard, ProgressBar, ScreenContainer, ScreenHeader, SectionLabel, SuggestedActivityCard } from '@/components';
 import { MoveToBucketSheet } from '@/components/MoveToBucketSheet';
-import { spacing, typography } from '@/theme';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
 import { useProjects } from '@/state/ProjectsContext';
@@ -274,7 +274,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         {joined && (
           <>
             <View style={styles.sectionRow}>
-              <Text style={styles.sectionLabel}>{t('detail.yourActivities')}</Text>
+              <SectionLabel>{t('detail.yourActivities')}</SectionLabel>
               {myQuests.length > 1 && (
                 <Pressable
                   onPress={() => navigation.navigate('BattleSetup', { questIds: myQuests.map((q) => q.id) })}
@@ -325,7 +325,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
 
             {myQuests.length > 0 && (
               <>
-                <Text style={styles.sectionLabel}>{t('detail.yourCalendar')}</Text>
+                <SectionLabel>{t('detail.yourCalendar')}</SectionLabel>
                 <MiniScheduler
                   quests={myQuests}
                   getPlan={getPlan}
@@ -345,7 +345,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         {/* Suggested activities — big adopt cards (daily habit, reuse by name). */}
         {project.suggestedHabits.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>{t('detail.suggested')}</Text>
+            <SectionLabel>{t('detail.suggested')}</SectionLabel>
             <View style={styles.cardList}>
               {project.suggestedHabits.map((h, i) => {
                 const owned = questByTitle(h.title);
@@ -380,7 +380,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         )}
 
         {/* Activity feed */}
-        <Text style={styles.sectionLabel}>{t('detail.liveActivity')}</Text>
+        <SectionLabel>{t('detail.liveActivity')}</SectionLabel>
         {(snap?.feed.length ?? 0) === 0 ? (
           <Text style={styles.empty}>{t('detail.noActivity')}</Text>
         ) : (
@@ -397,7 +397,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
         )}
 
         {/* Members */}
-        <Text style={styles.sectionLabel}>{t('detail.members', { count: snap?.members.length ?? 0 })}</Text>
+        <SectionLabel>{t('detail.members', { count: snap?.members.length ?? 0 })}</SectionLabel>
         {snap?.members.map((m) => (
           <View key={m.uid} style={styles.memberRow}>
             <Text style={styles.memberName} numberOfLines={1}>
@@ -445,21 +445,18 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
 function Topbar({ onBack, title, onInvite }: { onBack: () => void; title: string; onInvite?: () => void }) {
   const { t } = useTranslation('projects');
   return (
-    <View style={styles.topbar}>
-      <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel={t('detail.close')} hitSlop={12}>
-        <Text style={styles.chevron}>‹</Text>
-      </Pressable>
-      <Text style={styles.topTitle} accessibilityRole="header">
-        {title}
-      </Text>
-      {onInvite ? (
-        <Pressable onPress={onInvite} accessibilityRole="button" accessibilityLabel={t('detail.inviteA11y')} hitSlop={12}>
-          <Text style={styles.invite}>{t('detail.invite')}</Text>
-        </Pressable>
-      ) : (
-        <View style={{ width: 44 }} />
-      )}
-    </View>
+    <ScreenHeader
+      title={title}
+      onBack={onBack}
+      backLabel={t('detail.close')}
+      right={
+        onInvite ? (
+          <Pressable onPress={onInvite} accessibilityRole="button" accessibilityLabel={t('detail.inviteA11y')} hitSlop={12}>
+            <Text style={styles.invite}>{t('detail.invite')}</Text>
+          </Pressable>
+        ) : undefined
+      }
+    />
   );
 }
 
@@ -471,13 +468,13 @@ const styles = StyleSheet.create({
   loading: { ...typography.body, color: MUTED, paddingVertical: spacing.xl },
 
   content: { gap: spacing.sm, paddingBottom: spacing.xl },
-  hero: { borderRadius: 20, padding: spacing.lg, gap: 4, alignItems: 'center' },
+  hero: { borderRadius: radii.xl, padding: spacing.lg, gap: 4, alignItems: 'center', ...shadows.md },
   heroEmoji: { fontSize: 44 },
   heroTitle: { ...typography.heading, color: INK, textAlign: 'center' },
   heroMeta: { ...typography.caption, color: MUTED },
   heroSummary: { ...typography.body, color: INK, textAlign: 'center', marginTop: spacing.xs },
 
-  card: { backgroundColor: CARD, borderRadius: 18, padding: spacing.md, gap: spacing.sm },
+  card: { backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.lg, gap: spacing.sm, ...shadows.md },
   progressTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   progressPct: { ...typography.heading, color: INK, fontWeight: '900' },
   progressCycle: { ...typography.caption, color: MUTED },
@@ -503,7 +500,7 @@ const styles = StyleSheet.create({
   makeGoal: { alignSelf: 'flex-start', backgroundColor: '#F4F1FE', borderRadius: 999, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, marginTop: spacing.xs },
   makeGoalText: { ...typography.label, color: VIOLET, fontWeight: '800' },
 
-  habitRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: CARD, borderRadius: 14, padding: spacing.md, gap: spacing.sm },
+  habitRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm, ...shadows.sm },
   habitText: { ...typography.label, color: INK, flex: 1 },
   habitVal: { color: MUTED, fontWeight: '700' },
   adoptBtn: { backgroundColor: '#EDE9FE', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 6 },
@@ -516,7 +513,7 @@ const styles = StyleSheet.create({
   ownEdit: { ...typography.label, color: VIOLET, fontWeight: '800' },
   ownRemove: { ...typography.label, color: '#C0202C', fontWeight: '800', fontSize: 16 },
 
-  feedRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: CARD, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  feedRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: CARD, borderRadius: radii.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, ...shadows.sm },
   feedDot: { width: 8, height: 8, borderRadius: 4 },
   feedText: { ...typography.caption, color: INK, flex: 1 },
   feedName: { fontWeight: '800' },

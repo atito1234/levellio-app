@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
-import { spacing, typography } from '@/theme';
+import { ScreenContainer, ScreenHeader } from '@/components';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useProjects } from '@/state/ProjectsContext';
 import { isValidInviteCode, normalizeInviteCode } from '@/lib/projects';
 import type { RootStackParamList } from '@/navigation/types';
@@ -40,15 +40,7 @@ export function JoinProjectScreen({ route, navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('join.close')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.title} accessibilityRole="header">
-          {t('join.title')}
-        </Text>
-        <View style={{ width: 28 }} />
-      </View>
+      <ScreenHeader title={t('join.title')} onBack={() => navigation.goBack()} backLabel={t('join.close')} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.lead}>{t('join.lead')}</Text>
@@ -99,14 +91,14 @@ const styles = StyleSheet.create({
     ...typography.heading,
     color: INK,
     backgroundColor: CARD,
-    borderRadius: 16,
+    borderRadius: radii.lg,
     padding: spacing.lg,
     borderWidth: 1,
     borderColor: TRACK,
     textAlign: 'center',
     letterSpacing: 4,
   },
-  consent: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: 16, padding: spacing.md },
+  consent: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, ...shadows.sm },
   consentTitle: { ...typography.label, color: INK, fontWeight: '700' },
   consentBody: { ...typography.caption, color: MUTED, marginTop: 2 },
   error: { ...typography.caption, color: ERR },
