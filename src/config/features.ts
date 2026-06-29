@@ -37,5 +37,12 @@ export const HEALTH_CONNECT_ENABLED = false;
 /** User checklists + daily "check-out" ritual (retention loop). */
 export const CHECKLISTS_ENABLED = true;
 
+/**
+ * Capture + save/share the achievement certificate AS AN IMAGE. Needs native libs
+ * (react-native-view-shot + expo-media-library/expo-sharing) → a custom EAS dev
+ * build, so it's off in Expo Go. Text-share works regardless.
+ */
+export const CERTIFICATE_IMAGE_ENABLED = false;
+
 /** "Focus Lock" — opt-in lock that blocks leaving a running timed activity. */
 export const FOCUS_LOCK_ENABLED = true;

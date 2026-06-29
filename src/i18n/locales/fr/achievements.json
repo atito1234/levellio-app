@@ -1,0 +1,113 @@
+{
+  "title": "Succès",
+  "back": "Retour",
+  "progress": "{{unlocked}} sur {{total}} débloqués",
+  "unlocked": "Débloqué",
+  "locked": "Verrouillé",
+  "group": {
+    "journey": "TON PARCOURS",
+    "habits": "HABITUDES FORMÉES",
+    "capacities": "CAPACITÉS",
+    "goals": "OBJECTIFS",
+    "battles": "COMBATS",
+    "community": "COMMUNAUTÉ"
+  },
+  "stat": {
+    "bestStreak": "Meilleure série",
+    "daysShownUp": "Jours assidus",
+    "currentStreak": "Série actuelle",
+    "bestDay": "Meilleur jour",
+    "bestTime": "Meilleure heure",
+    "streak": "Série",
+    "consistency": "Régularité",
+    "totalReps": "Répétitions",
+    "habitsFormed": "Habitudes formées",
+    "capacity": "Capacité",
+    "level": "Niveau",
+    "goals": "Objectifs",
+    "slain": "Dragons vaincus",
+    "rites": "Rites",
+    "projects": "Projets",
+    "reps": "Répétitions"
+  },
+  "cert": {
+    "unlocked": "SUCCÈS DÉBLOQUÉ",
+    "achievedBy": "Réussi par {{name}}",
+    "brand": "Levellio",
+    "howYouDidIt": "COMMENT TU AS RÉUSSI",
+    "share": "Partager",
+    "download": "Télécharger",
+    "downloadSoonTitle": "Téléchargement image bientôt",
+    "downloadSoonBody": "Enregistrer le certificat en image arrive dans la prochaine mise à jour. Pour l’instant, touche Partager pour annoncer la nouvelle.",
+    "close": "Fermer",
+    "you": "Toi"
+  },
+  "shareText": "J’ai débloqué « {{title}} » sur Levellio — {{headline}} 🏆",
+  "items": {
+    "first-step": {
+      "title": "Premier pas",
+      "desc": "Termine ta première activité",
+      "takeaway": "Chaque habitude commence par une répétition — tu l’as faite."
+    },
+    "rhythm-3": {
+      "title": "Trouver ton rythme",
+      "desc": "3 jours d’affilée",
+      "takeaway": "Trois jours d’affilée, c’est ainsi que naît l’élan."
+    },
+    "two-weeks-14": {
+      "title": "Deux semaines solides",
+      "desc": "Une série de 14 jours",
+      "takeaway": "Deux semaines — l’habitude prend racine."
+    },
+    "resilient-30": {
+      "title": "Résilient",
+      "desc": "Une série de 30 jours",
+      "takeaway": "Un mois d’assiduité — la preuve que tu peux tenir."
+    },
+    "locked-in": {
+      "title": "Ancré",
+      "desc": "Une habitude a atteint 21 jours",
+      "takeaway": "Vers ~21 jours, une habitude s’ancre. La régularité, pas l’intensité, t’a mené ici."
+    },
+    "automatic-66": {
+      "title": "Automatique",
+      "desc": "Une habitude a atteint 66 jours",
+      "takeaway": "~66 jours, c’est quand les habitudes tournent seules. Elle fait partie de toi."
+    },
+    "habit-collector": {
+      "title": "Collectionneur d’habitudes",
+      "desc": "3 habitudes ancrées",
+      "takeaway": "Trois habitudes qui se cumulent — ton système fonctionne."
+    },
+    "fully-charged": {
+      "title": "Pleine charge",
+      "desc": "Une capacité a atteint 100%",
+      "takeaway": "Tes petites répétitions ont rempli une capacité à fond."
+    },
+    "goal-setter": {
+      "title": "Définis ton objectif",
+      "desc": "Crée ton premier objectif",
+      "takeaway": "Nommer le rêve est la première étape pour en faire une habitude."
+    },
+    "dragon-slayer": {
+      "title": "Tueur de dragons",
+      "desc": "Terrasse ton premier dragon",
+      "takeaway": "Tu as affronté ce qui te freinait — et tu as avancé."
+    },
+    "dragon-hunter": {
+      "title": "Chasseur de dragons",
+      "desc": "Terrasse 10 dragons",
+      "takeaway": "Dix combats gagnés — vaincre la résistance devient ton habitude."
+    },
+    "prepared-mind": {
+      "title": "Esprit préparé",
+      "desc": "Termine un rite de préparation",
+      "takeaway": "Préparer l’esprit d’abord rend le travail plus facile."
+    },
+    "team-player": {
+      "title": "Esprit d’équipe",
+      "desc": "Rejoins un projet communautaire",
+      "takeaway": "L’élan partagé te porte les jours difficiles."
+    }
+  }
+}

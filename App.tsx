@@ -26,6 +26,7 @@ import { RecipesProvider } from '@/state/RecipesContext';
 import { ChecklistsProvider } from '@/state/ChecklistsContext';
 import { MilestonesProvider } from '@/state/MilestonesContext';
 import { BattlesProvider } from '@/state/BattlesContext';
+import { AchievementsProvider } from '@/state/AchievementsContext';
 import { JournalProvider } from '@/state/JournalContext';
 import { LinksProvider } from '@/state/LinksContext';
 import { InterventionProvider } from '@/state/InterventionContext';
@@ -47,6 +48,7 @@ export default function App() {
                   <RecipesProvider>
                   <MilestonesProvider>
                     <BattlesProvider>
+                      <AchievementsProvider>
                       <JournalProvider>
                         <LinksProvider>
                           <InterventionProvider>
@@ -70,6 +72,7 @@ export default function App() {
                           </InterventionProvider>
                         </LinksProvider>
                       </JournalProvider>
+                      </AchievementsProvider>
                     </BattlesProvider>
                   </MilestonesProvider>
                   </RecipesProvider>

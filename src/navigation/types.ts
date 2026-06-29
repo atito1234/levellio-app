@@ -70,6 +70,8 @@ export type RootStackParamList = {
   PrepareRite: { dragonId: string; dragonName?: string; category?: import('@/types').QuestCategory };
   /** The Dragon Den — trophies (per-dragon slays + streaks) + the coin Armory. */
   DragonDen: undefined;
+  /** Achievements gallery + shareable, analytics-backed certificates. */
+  Achievements: undefined;
   /** Write a battle-journal reflection (what's stopping you). */
   JournalComposer: { dragonId?: string; dragonName?: string; questIds?: string[]; prompt?: string; teaching?: string } | undefined;
   /** The battle-journal feed (optionally filtered to one dragon). */

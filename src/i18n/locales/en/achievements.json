@@ -1,0 +1,113 @@
+{
+  "title": "Achievements",
+  "back": "Back",
+  "progress": "{{unlocked}} of {{total}} unlocked",
+  "unlocked": "Unlocked",
+  "locked": "Locked",
+  "group": {
+    "journey": "YOUR JOURNEY",
+    "habits": "HABITS FORMED",
+    "capacities": "CAPACITIES",
+    "goals": "GOALS",
+    "battles": "BATTLES",
+    "community": "COMMUNITY"
+  },
+  "stat": {
+    "bestStreak": "Best streak",
+    "daysShownUp": "Days shown up",
+    "currentStreak": "Current streak",
+    "bestDay": "Best day",
+    "bestTime": "Best time",
+    "streak": "Streak",
+    "consistency": "Consistency",
+    "totalReps": "Total reps",
+    "habitsFormed": "Habits formed",
+    "capacity": "Capacity",
+    "level": "Level",
+    "goals": "Goals",
+    "slain": "Dragons slain",
+    "rites": "Prep rites",
+    "projects": "Projects",
+    "reps": "Reps"
+  },
+  "cert": {
+    "unlocked": "ACHIEVEMENT UNLOCKED",
+    "achievedBy": "Achieved by {{name}}",
+    "brand": "Levellio",
+    "howYouDidIt": "HOW YOU DID IT",
+    "share": "Share",
+    "download": "Download",
+    "downloadSoonTitle": "Image download coming soon",
+    "downloadSoonBody": "Saving the certificate as an image arrives in the next app update. For now, tap Share to share the news!",
+    "close": "Close",
+    "you": "You"
+  },
+  "shareText": "I unlocked \"{{title}}\" on Levellio — {{headline}} 🏆",
+  "items": {
+    "first-step": {
+      "title": "First step",
+      "desc": "Complete your first activity",
+      "takeaway": "Every habit starts with one rep — you took it."
+    },
+    "rhythm-3": {
+      "title": "Finding your rhythm",
+      "desc": "3 days in a row",
+      "takeaway": "Three days in a row is how momentum is born."
+    },
+    "two-weeks-14": {
+      "title": "Two weeks strong",
+      "desc": "A 14-day streak",
+      "takeaway": "Two weeks in — the habit is taking root."
+    },
+    "resilient-30": {
+      "title": "Resilient",
+      "desc": "A 30-day streak",
+      "takeaway": "A month of showing up — proof you can sustain it."
+    },
+    "locked-in": {
+      "title": "Locked in",
+      "desc": "A habit reached 21 days",
+      "takeaway": "At ~21 days a habit locks in. Consistency, not intensity, got you here."
+    },
+    "automatic-66": {
+      "title": "Automatic",
+      "desc": "A habit reached 66 days",
+      "takeaway": "~66 days is where habits run on their own. It is part of you now."
+    },
+    "habit-collector": {
+      "title": "Habit collector",
+      "desc": "3 habits locked in",
+      "takeaway": "Three habits compounding at once — your system is working."
+    },
+    "fully-charged": {
+      "title": "Fully charged",
+      "desc": "A capacity hit 100%",
+      "takeaway": "Your small reps rippled into a maxed-out capacity."
+    },
+    "goal-setter": {
+      "title": "Goal setter",
+      "desc": "Set your first goal",
+      "takeaway": "Naming the dream is step one to landing it as a habit."
+    },
+    "dragon-slayer": {
+      "title": "Dragon slayer",
+      "desc": "Slay your first dragon",
+      "takeaway": "You faced what was stopping you — and moved anyway."
+    },
+    "dragon-hunter": {
+      "title": "Dragon hunter",
+      "desc": "Slay 10 dragons",
+      "takeaway": "Ten battles won — beating resistance is becoming your habit."
+    },
+    "prepared-mind": {
+      "title": "Prepared mind",
+      "desc": "Complete a prep rite",
+      "takeaway": "Preparing your mind first makes the work easier."
+    },
+    "team-player": {
+      "title": "Team player",
+      "desc": "Join a community project",
+      "takeaway": "Shared momentum keeps you going on the hard days."
+    }
+  }
+}
