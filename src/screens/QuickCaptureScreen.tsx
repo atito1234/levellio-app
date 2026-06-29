@@ -8,6 +8,7 @@ import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
 import { useGoals } from '@/state/GoalContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { BUCKETS_ENABLED } from '@/config/features';
 import { useProjects } from '@/state/ProjectsContext';
 import { parseCapture } from '@/lib/captureParse';
 import { normalizeTitle } from '@/lib/questForm';
@@ -82,7 +83,7 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
         await linkGoal(quest.id, ctxGoal.id);
         if (ctxGoal.kind === 'project' && ctxGoal.projectId) await linkHabit(quest.id, ctxGoal.projectId);
       }
-      if (ctxBucketId) await assignActivity(quest.id, ctxBucketId);
+      if (BUCKETS_ENABLED && ctxBucketId) await assignActivity(quest.id, ctxBucketId);
       for (const pid of ctxProjectIds) await linkHabit(quest.id, pid);
       if (planToday || projectScoped) await togglePlanned(today, quest.id);
     }

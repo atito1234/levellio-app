@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, radii, spacing, typography } from '@/theme';
-import { MEDIA_UPLOADS_ENABLED } from '@/config/features';
+import { BUCKETS_ENABLED, MEDIA_UPLOADS_ENABLED } from '@/config/features';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -45,7 +45,7 @@ export function MoreSheet({
     { key: 'recipes', icon: '🍽️', label: t('recipes:screen.title'), onPress: () => go(() => navigation.navigate('Recipes')) },
     { key: 'journal', icon: '📓', label: t('dashboard:chips.journal'), onPress: () => go(() => navigation.navigate('Journal')) },
     { key: 'library', icon: '📚', label: t('dashboard:chips.library'), onPress: () => go(() => navigation.navigate('HabitLibrary')) },
-    { key: 'buckets', icon: '🗂️', label: t('dashboard:chips.buckets'), onPress: () => go(() => navigation.navigate('Organize')) },
+    { key: 'buckets', icon: '🗂️', label: t('dashboard:chips.buckets'), onPress: () => go(() => navigation.navigate('Organize')), show: BUCKETS_ENABLED },
     { key: 'connections', icon: '🔗', label: t('dashboard:chips.connections'), onPress: () => go(() => navigation.navigate('Connections')) },
     { key: 'discover', icon: '🌍', label: t('dashboard:more.discover'), onPress: () => go(() => navigation.navigate('Discover')) },
     { key: 'suggest', icon: '✨', label: suggesting ? '…' : t('dashboard:chips.suggest'), onPress: () => go(onSuggest) },

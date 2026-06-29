@@ -15,6 +15,7 @@ import { useGame } from '@/state/GameContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useGoals } from '@/state/GoalContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { BUCKETS_ENABLED } from '@/config/features';
 import { usePlan } from '@/state/PlanContext';
 import { dayKey } from '@/lib/dates';
 import { getBucketColor } from '@/lib/buckets';
@@ -114,7 +115,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
           await linkGoal(id, ctxGoal.id);
           if (ctxGoal.kind === 'project' && ctxGoal.projectId) await linkHabit(id, ctxGoal.projectId);
         }
-        if (ctxBucketId) await assignActivity(id, ctxBucketId);
+        if (BUCKETS_ENABLED && ctxBucketId) await assignActivity(id, ctxBucketId);
         if (projectScoped && !(getPlan(todayK) ?? []).includes(id)) await togglePlanned(todayK, id);
       }
       navigation.goBack();

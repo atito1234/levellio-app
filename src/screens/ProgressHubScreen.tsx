@@ -23,6 +23,7 @@ import { useCapacities } from '@/state/CapacitiesContext';
 import { useGoals } from '@/state/GoalContext';
 import { useProjects } from '@/state/ProjectsContext';
 import { useBuckets } from '@/state/BucketsContext';
+import { BUCKETS_ENABLED } from '@/config/features';
 import { useInsightAction } from '@/hooks/useInsightAction';
 import { sessionDay, sessionsOf, weekdayLabel } from '@/lib/analytics';
 import { activeDaysInWindow, daysAccomplished, directionVerdict, type Direction } from '@/lib/heroAnalytics';
@@ -56,14 +57,18 @@ type Tab = 'overview' | 'goals' | 'buckets' | 'capacities' | 'habits';
 // Shared analytics palette (src/theme/analytics.ts).
 const { ink: INK, muted: MUTED, card: CARD, bg: BG, violet: VIOLET, teal: TEAL } = A;
 
-const TAB_KEYS: Tab[] = ['overview', 'goals', 'buckets', 'capacities', 'habits'];
+// 'buckets' is retired from the UI (BUCKETS_ENABLED); drop it from the tab bar.
+const TAB_KEYS: Tab[] = (['overview', 'goals', 'buckets', 'capacities', 'habits'] as Tab[]).filter(
+  (k) => k !== 'buckets' || BUCKETS_ENABLED,
+);
 
 const RANGE_DAYS = 28;
 const TREND_DAYS = 56;
 
 export function ProgressHubScreen({ route, navigation }: Props) {
   const { t } = useTranslation('progress');
-  const [tab, setTab] = useState<Tab>(route.params?.tab ?? 'overview');
+  const initialTab = route.params?.tab && TAB_KEYS.includes(route.params.tab) ? route.params.tab : 'overview';
+  const [tab, setTab] = useState<Tab>(initialTab);
   const { events, ready } = useActivityLog();
   useAnalyticsRollup(events); // keep durable history fresh while viewing
   const { quests, character } = useGame();
