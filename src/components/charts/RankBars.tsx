@@ -1,12 +1,12 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 
-const MUTED = '#5A5A72';
-const UP = '#16C8A8'; // teal — improving
-const DOWN = '#C0202C'; // danger — slipping
-const TRACK = '#ECEAE4';
+const MUTED = colors.textSecondary;
+const UP = colors.teal; // teal — improving
+const DOWN = colors.danger; // danger — slipping
+const TRACK = colors.track;
 
 export interface RankRow {
   id: string;

@@ -1,14 +1,14 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import { getBucketColor, type BucketColorId } from '@/lib/buckets';
 import { weekdayOfKey } from '@/lib/recurrence';
 import { intensityLevel } from './chartMath';
 import type { MetricPoint } from '@/lib/metrics/types';
 
-const MUTED = '#5A5A72';
-const EMPTY = '#ECEAE4';
+const MUTED = colors.textSecondary;
+const EMPTY = colors.track;
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 /**
@@ -92,7 +92,7 @@ const CELL = 14;
 const styles = StyleSheet.create({
   wrap: { flexDirection: 'row', gap: spacing.xs },
   labels: { justifyContent: 'space-between' },
-  weekday: { ...typography.caption, color: MUTED, fontSize: 9, height: CELL, lineHeight: CELL },
+  weekday: { ...typography.caption, color: MUTED, fontSize: 11, height: CELL, lineHeight: CELL },
   grid: { flexDirection: 'row', gap: 3, flex: 1, flexWrap: 'wrap' },
   column: { gap: 3 },
   cell: { width: CELL, height: CELL, borderRadius: 3 },

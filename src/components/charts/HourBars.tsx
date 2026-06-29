@@ -1,14 +1,14 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import { hourLabel } from '@/lib/analytics';
 
 // Locked palette (gold reserved for 100% rings — never here).
-const MUTED = '#5A5A72';
-const TEAL = '#16C8A8';
-const VIOLET = '#6C4CF1';
-const TRACK = '#ECEAE4';
+const MUTED = colors.textSecondary;
+const TEAL = colors.teal;
+const VIOLET = colors.violet;
+const TRACK = colors.track;
 
 const AXIS = [0, 6, 12, 18, 23];
 const MAX_H = 64;
@@ -57,5 +57,5 @@ const styles = StyleSheet.create({
   col: { flex: 1, justifyContent: 'flex-end' },
   bar: { borderRadius: 3, width: '100%' },
   axis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
-  tick: { ...typography.caption, color: MUTED, fontSize: 10 },
+  tick: { ...typography.caption, color: MUTED, fontSize: 11 },
 });

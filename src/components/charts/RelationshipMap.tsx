@@ -3,10 +3,11 @@ import { LayoutChangeEvent, View } from 'react-native';
 import Svg, { Circle, G, Line, Text as SvgText } from 'react-native-svg';
 import { getBucketColor, type BucketColorId } from '@/lib/buckets';
 import { radialPositions, type Pt } from './chartMath';
+import { colors } from '@/theme';
 
-const MUTED = '#5A5A72';
+const MUTED = colors.textSecondary;
 const TRACK = '#D6D6E0';
-const VIOLET = '#6C4CF1';
+const VIOLET = colors.violet;
 
 export interface MapNode {
   id: string;
@@ -54,7 +55,7 @@ export function RelationshipMap({
           return (
             <G key={n.id} onPress={onPressNode ? () => onPressNode(n) : undefined}>
               <Circle cx={p.x} cy={p.y} r={r} fill={accent} fillOpacity={0.18} stroke={accent} strokeWidth={2} />
-              <SvgText x={p.x} y={p.y + r + 12} fontSize={10} fill={MUTED} textAnchor="middle">
+              <SvgText x={p.x} y={p.y + r + 12} fontSize={11} fill={MUTED} textAnchor="middle">
                 {truncate(n.label)}
               </SvgText>
             </G>

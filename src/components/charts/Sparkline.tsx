@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Polyline } from 'react-native-svg';
-import { spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 
-const TEAL = '#16C8A8';
-const MUTED = '#5A5A72';
+const TEAL = colors.teal;
+const MUTED = colors.textSecondary;
 
 export interface SparkMarker {
   /** Position along the x axis, 0..1. */
@@ -56,5 +56,5 @@ export function Sparkline({ values, height = 96, color = TEAL, markers = [] }: {
 
 const styles = StyleSheet.create({
   labels: { height: 16, marginTop: spacing.xs },
-  label: { ...typography.caption, color: MUTED, position: 'absolute', transform: [{ translateX: -16 }], fontSize: 10 },
+  label: { ...typography.caption, color: MUTED, position: 'absolute', transform: [{ translateX: -16 }], fontSize: 11 },
 });
