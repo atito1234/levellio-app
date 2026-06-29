@@ -3,9 +3,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CapacityRing, ScreenContainer } from '@/components';
+import { CapacityRing, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
 import { HBarChart, HourBars, BarHistogram, type BarDatum, type HistogramBar } from '@/components/charts';
-import { spacing, typography } from '@/theme';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useActivityLog } from '@/state/useActivityLog';
 import { usePlan } from '@/state/PlanContext';
 import {
@@ -119,32 +119,19 @@ export function InsightsScreen({ route, navigation }: Props) {
   );
 
   let heading = t('heading.default');
-  let kicker = t('heading.kickerOverview');
   if (activityId) {
     heading = scoped[scoped.length - 1]?.title ?? t('heading.activity');
-    kicker = t('heading.kickerActivity');
   } else if (category) {
     heading = categoryLabel(category, t);
-    kicker = t('heading.kickerCategory');
   } else if (day) {
     heading = dayLabel(day, locale);
-    kicker = t('heading.kickerDay');
   }
 
   const isOverview = !activityId && !category && !day;
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('a11yBack')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.kicker}>{kicker}</Text>
-        <View style={styles.chevronSpacer} />
-      </View>
-      <Text style={styles.title} accessibilityRole="header">
-        {heading}
-      </Text>
+      <ScreenHeader title={heading} onBack={() => navigation.goBack()} backLabel={t('a11yBack')} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!ready ? (
@@ -289,7 +276,7 @@ export function InsightsScreen({ route, navigation }: Props) {
                   accessibilityRole="button"
                   accessibilityLabel={showSessions ? t('details.a11yHide') : t('details.a11yShow')}
                 >
-                  <Text style={styles.sectionLabel}>{showSessions ? t('details.hide') : t('details.show', { count: scoped.length })}</Text>
+                  <SectionLabel>{showSessions ? t('details.hide') : t('details.show', { count: scoped.length })}</SectionLabel>
                 </Pressable>
                 {showSessions && (
                   <View style={styles.sectionBody}>
@@ -406,30 +393,21 @@ function EmptyState({ scope, t }: { scope: 'overview' | 'activity' | 'category' 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionLabel}>{label}</Text>
+      <SectionLabel>{label}</SectionLabel>
       <View style={styles.sectionBody}>{children}</View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm },
-  chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
-  chevronSpacer: { width: 28 },
-  kicker: { ...typography.label, color: MUTED, letterSpacing: 2 },
-  title: { ...typography.heading, color: INK, marginBottom: spacing.sm },
   content: { gap: spacing.lg, paddingBottom: spacing.xl },
 
   summaryCard: {
     backgroundColor: CARD,
-    borderRadius: 24,
+    borderRadius: radii.xl,
     padding: spacing.lg,
     gap: spacing.md,
-    shadowColor: '#1B1B2A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 3,
+    ...shadows.md,
   },
   statGrid: { flexDirection: 'row', justifyContent: 'space-between' },
   stat: { alignItems: 'center', flex: 1, gap: 2 },
@@ -444,13 +422,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.lg,
     backgroundColor: CARD,
-    borderRadius: 24,
+    borderRadius: radii.xl,
     padding: spacing.lg,
-    shadowColor: '#1B1B2A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 3,
+    ...shadows.md,
   },
   planRingWrap: { width: 72, height: 72, alignItems: 'center', justifyContent: 'center' },
   planRingCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
@@ -459,10 +433,9 @@ const styles = StyleSheet.create({
   planTomorrowText: { ...typography.label, color: VIOLET, fontWeight: '700' },
 
   section: { gap: spacing.sm },
-  sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
   sectionBody: { gap: spacing.sm },
 
-  chartCard: { backgroundColor: CARD, borderRadius: 24, padding: spacing.lg },
+  chartCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   capChip: { backgroundColor: '#D6F7EF', borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: 8 },
   capChipText: { ...typography.caption, color: '#0A6E5C', fontWeight: '700' },
@@ -472,7 +445,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     backgroundColor: CARD,
-    borderRadius: 18,
+    borderRadius: radii.lg,
     padding: spacing.md,
   },
   rowIcon: { fontSize: 22 },
@@ -486,7 +459,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     backgroundColor: CARD,
-    borderRadius: 18,
+    borderRadius: radii.lg,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
   },

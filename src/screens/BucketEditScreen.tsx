@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { PrimaryButton, ScreenContainer, TextField } from '@/components';
+import { PrimaryButton, ScreenContainer, SectionLabel, TextField } from '@/components';
 import { BucketIcon } from '@/components/BucketIcon';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useBuckets } from '@/state/BucketsContext';
@@ -85,7 +85,7 @@ export function BucketEditScreen({ route, navigation }: Props) {
           error={error}
         />
 
-        <Text style={styles.sectionLabel}>{t('iconSection')}</Text>
+        <SectionLabel>{t('iconSection')}</SectionLabel>
         <View style={styles.iconGrid} accessibilityRole="radiogroup" accessibilityLabel={t('iconGroupA11y')}>
           {BUCKET_ICONS.map((icon) => {
             const selected = icon.id === iconId;
@@ -104,7 +104,7 @@ export function BucketEditScreen({ route, navigation }: Props) {
           })}
         </View>
 
-        <Text style={styles.sectionLabel}>{t('colorSection')}</Text>
+        <SectionLabel>{t('colorSection')}</SectionLabel>
         <View style={styles.colorRow} accessibilityRole="radiogroup" accessibilityLabel={t('colorGroupA11y')}>
           {BUCKET_COLORS.map((c) => {
             const selected = c.id === colorId;
@@ -150,7 +150,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   previewName: { ...typography.title, color: colors.textPrimary },
-  sectionLabel: { ...typography.label, color: colors.textSecondary, marginTop: spacing.sm },
   iconGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   iconTile: {
     width: 48,

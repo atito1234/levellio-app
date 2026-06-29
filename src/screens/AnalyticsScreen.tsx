@@ -3,9 +3,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer } from '@/components';
+import { ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
 import { DotGrid, Sparkline } from '@/components/charts';
-import { spacing, typography } from '@/theme';
+import { radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useGoals } from '@/state/GoalContext';
 import { useActivityLog } from '@/state/useActivityLog';
@@ -116,16 +116,7 @@ export function AnalyticsScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('a11yBack')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.kicker}>{t('kicker')}</Text>
-        <View style={styles.chevronSpacer} />
-      </View>
-      <Text style={styles.title} accessibilityRole="header">
-        {t('title')}
-      </Text>
+      <ScreenHeader title={t('title')} onBack={() => navigation.goBack()} backLabel={t('a11yBack')} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {!ready ? (
@@ -204,7 +195,7 @@ export function AnalyticsScreen({ navigation }: Props) {
             </View>
 
             {/* All insights, ungated (thin data is labelled "early"). */}
-            <Text style={styles.sectionLabel}>{t('sections.data')}</Text>
+            <SectionLabel>{t('sections.data')}</SectionLabel>
             {INSIGHT_TIERS.map((tier) => (
               <InsightCard key={tier.id} tier={tier} data={data} goals={goals} t={t} locale={locale} weekdayNames={weekdayNames} />
             ))}
@@ -212,7 +203,7 @@ export function AnalyticsScreen({ navigation }: Props) {
             {/* From repetition to habit — real per-activity journeys. */}
             {data.activities.length > 0 && (
               <>
-                <Text style={styles.sectionLabel}>{t('sections.repetition')}</Text>
+                <SectionLabel>{t('sections.repetition')}</SectionLabel>
                 {data.activities.slice(0, 5).map((a) => (
                   <JourneyRow
                     key={a.activityId}
@@ -228,7 +219,7 @@ export function AnalyticsScreen({ navigation }: Props) {
             )}
 
             {/* Why the ring works — the science, honestly. */}
-            <Text style={styles.sectionLabel}>{t('sections.ring')}</Text>
+            <SectionLabel>{t('sections.ring')}</SectionLabel>
             {RING_SCIENCE.map((c) => (
               <View key={c.id} style={styles.scienceCard}>
                 <View style={styles.insightHead}>
@@ -449,29 +440,16 @@ function renderInsight(tier: InsightTier, data: ScreenData, goals: Goals, t: TFu
   }
 }
 
-const cardShadow = {
-  shadowColor: '#1B1B2A',
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.08,
-  shadowRadius: 16,
-  elevation: 3,
-} as const;
-
 const styles = StyleSheet.create({
-  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm },
-  chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
-  chevronSpacer: { width: 28 },
-  kicker: { ...typography.label, color: MUTED, letterSpacing: 2 },
-  title: { ...typography.heading, color: INK, marginBottom: spacing.sm },
   content: { gap: spacing.lg, paddingBottom: spacing.xl },
   empty: { ...typography.body, color: MUTED, textAlign: 'center', paddingTop: spacing.xl },
 
-  verdictCard: { borderRadius: 24, padding: spacing.lg, gap: 6, borderLeftWidth: 5, ...cardShadow },
+  verdictCard: { borderRadius: radii.xl, padding: spacing.lg, gap: 6, borderLeftWidth: 5, ...shadows.md },
   verdictEmoji: { fontSize: 28 },
   verdictLabel: { ...typography.title, fontWeight: '800' },
   verdictReason: { ...typography.body, color: INK },
 
-  weekCard: { backgroundColor: CARD, borderRadius: 24, padding: spacing.lg, gap: spacing.md, ...cardShadow },
+  weekCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.md, ...shadows.md },
   weekHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   cardTitle: { ...typography.title, color: INK, fontWeight: '700' },
   weekCount: { ...typography.label, color: MUTED },
@@ -489,12 +467,12 @@ const styles = StyleSheet.create({
   counterValue: { ...typography.heading, fontWeight: '800' },
   counterLabel: { ...typography.caption, color: MUTED, textAlign: 'center' },
 
-  forecastCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, borderWidth: 2, borderColor: VIOLET_SOFT, ...cardShadow },
+  forecastCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, borderWidth: 2, borderColor: VIOLET_SOFT, ...shadows.md },
   forecastLocked: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET_SOFT },
   forecastCta: { ...typography.label, color: VIOLET, fontWeight: '800' },
   plusTag: { ...typography.caption, color: VIOLET, fontWeight: '800' },
 
-  nextCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, ...cardShadow },
+  nextCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, ...shadows.md },
   nextText: { ...typography.body, color: INK },
   nextStrong: { fontWeight: '800' },
   nextSub: { ...typography.caption, color: MUTED },
@@ -503,25 +481,24 @@ const styles = StyleSheet.create({
   trackFill: { height: 8, borderRadius: 4, backgroundColor: VIOLET },
   trackFillLock: { backgroundColor: LOCK },
 
-  sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2, marginTop: spacing.xs },
 
-  insightCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, ...cardShadow },
+  insightCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, ...shadows.md },
   insightHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   insightIcon: { fontSize: 22 },
   insightTitle: { ...typography.title, color: INK, fontWeight: '700', flex: 1 },
   insightBody: { ...typography.body, color: INK },
   bodyStrong: { fontWeight: '800', color: VIOLET },
 
-  feelCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, ...cardShadow },
+  feelCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, ...shadows.md },
   feelAvg: { ...typography.title, color: '#B5740A', fontWeight: '800' },
 
-  journeyCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.sm, ...cardShadow },
+  journeyCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, ...shadows.md },
   journeyHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   journeyTitle: { ...typography.title, color: INK, fontWeight: '800', flex: 1 },
   journeyStatus: { ...typography.caption, fontWeight: '800' },
   journeySub: { ...typography.caption, color: MUTED },
 
-  scienceCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.lg, gap: spacing.xs, ...cardShadow },
+  scienceCard: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.xs, ...shadows.md },
   scienceTag: { ...typography.caption, color: MUTED, letterSpacing: 2, fontWeight: '800' },
   scienceTitle: { ...typography.title, color: INK, fontWeight: '800' },
   curveWrap: { marginTop: spacing.sm },
