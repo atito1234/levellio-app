@@ -53,7 +53,6 @@
     "share": "Compartir",
     "discover": "Descubrir",
     "close": "Cerrar",
-    "focusGoal": "Enfocar una meta",
     "community": "Comunidad"
   },
   "capacitiesTitle": "Tus capacidades · últimos 7 días",
@@ -80,10 +79,15 @@
   "bringToFocusA11y": "Poner {{title}} en foco",
   "goalCardA11y": "{{title}}. {{done}} de {{planned}} hechos hoy, {{pct}} por ciento esta semana.{{selected}}",
   "goalCardSelected": " Seleccionado.",
-  "focusPicker": {
-    "title": "Enfoca el día en…",
-    "allHabits": "Todos los hábitos",
-    "closeA11y": "Cerrar selector de enfoque"
+  "ticker": {
+    "all": "Todo",
+    "allA11y": "Todos los hábitos de hoy, {{pct}} por ciento hechos. Mostrar todo."
   },
-  "focusChipA11y": "Enfocado en {{goal}}. Toca para ver todos los hábitos."
+  "habit": {
+    "new": "Repítelo a diario para volverlo un hábito",
+    "building": "Día {{streak}} — {{left}} días para fijarlo 🌱",
+    "solidified": "Fijado 🌱 — mantenlo en piloto automático",
+    "graduated": "Funciona solo 🏅",
+    "viewJourneyA11y": "Ver el camino de {{title}} de la repetición al hábito"
+  }
 }

@@ -53,7 +53,6 @@
     "share": "Partager",
     "discover": "Découvrir",
     "close": "Fermer",
-    "focusGoal": "Cibler un objectif",
     "community": "Communauté"
   },
   "capacitiesTitle": "Vos capacités · 7 derniers jours",
@@ -80,10 +79,15 @@
   "bringToFocusA11y": "Mettre {{title}} en priorité",
   "goalCardA11y": "{{title}}. {{done}} sur {{planned}} faits aujourd’hui, {{pct}} pour cent cette semaine.{{selected}}",
   "goalCardSelected": " Sélectionné.",
-  "focusPicker": {
-    "title": "Concentrer la journée sur…",
-    "allHabits": "Toutes les habitudes",
-    "closeA11y": "Fermer le sélecteur de focus"
+  "ticker": {
+    "all": "Tout",
+    "allA11y": "Toutes les habitudes d'aujourd'hui, {{pct}} pour cent faites. Tout afficher."
   },
-  "focusChipA11y": "Concentré sur {{goal}}. Touchez pour voir toutes les habitudes."
+  "habit": {
+    "new": "Répétez-le chaque jour pour en faire une habitude",
+    "building": "Jour {{streak}} — {{left}} jours avant ancrage 🌱",
+    "solidified": "Ancré 🌱 — gardez-le en pilote automatique",
+    "graduated": "Fonctionne tout seul 🏅",
+    "viewJourneyA11y": "Voir le parcours de {{title}} de la répétition à l'habitude"
+  }
 }

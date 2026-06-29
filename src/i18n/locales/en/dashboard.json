@@ -53,7 +53,6 @@
     "share": "Share",
     "discover": "Discover",
     "close": "Close",
-    "focusGoal": "Focus a goal",
     "community": "Community"
   },
   "capacitiesTitle": "Your capacities · last 7 days",
@@ -80,10 +79,15 @@
   "bringToFocusA11y": "Bring {{title}} to focus",
   "goalCardA11y": "{{title}}. {{done}} of {{planned}} done today, {{pct}} percent this week.{{selected}}",
   "goalCardSelected": " Selected.",
-  "focusPicker": {
-    "title": "Focus today on…",
-    "allHabits": "All habits",
-    "closeA11y": "Close focus picker"
+  "ticker": {
+    "all": "All",
+    "allA11y": "All habits today, {{pct}} percent done. Show everything."
   },
-  "focusChipA11y": "Focused on {{goal}}. Tap to show all habits."
+  "habit": {
+    "new": "Repeat it daily to make it a habit",
+    "building": "Day {{streak}} — {{left}} days to locked-in 🌱",
+    "solidified": "Locked in 🌱 — keep it on autopilot",
+    "graduated": "Runs on its own 🏅",
+    "viewJourneyA11y": "See {{title}}'s journey from repetition to habit"
+  }
 }

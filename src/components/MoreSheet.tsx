@@ -18,15 +18,12 @@ export function MoreSheet({
   visible,
   onClose,
   onSuggest,
-  onFocusGoal,
   canShare,
   suggesting,
 }: {
   visible: boolean;
   onClose: () => void;
   onSuggest: () => void;
-  /** Open the "focus a goal" picker on the Home (keeps goal UI off the Today screen). */
-  onFocusGoal: () => void;
   canShare: boolean;
   suggesting: boolean;
 }) {
@@ -39,7 +36,6 @@ export function MoreSheet({
   };
 
   const tiles: { key: string; icon: string; label: string; onPress: () => void; show?: boolean }[] = [
-    { key: 'focusGoal', icon: '🎯', label: t('dashboard:more.focusGoal'), onPress: () => go(onFocusGoal) },
     { key: 'checklists', icon: '✅', label: t('checklists:title'), onPress: () => go(() => navigation.navigate('Checklists')) },
     { key: 'community', icon: '🤝', label: t('dashboard:more.community'), onPress: () => go(() => navigation.navigate('Main', { screen: 'Projects' })) },
     { key: 'share', icon: '✏️', label: t('dashboard:more.share'), onPress: () => go(() => navigation.navigate('PostComposer')), show: canShare },

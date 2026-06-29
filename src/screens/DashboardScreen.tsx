@@ -16,13 +16,14 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
 import { AddActivityFab, AddActivitySheet, AppHeader, HeroAvatar, MoreSheet, ProjectBadge, ScreenContainer } from '@/components';
-import { GoalFocusPicker } from '@/components/GoalFocusPicker';
+import { GoalTicker } from '@/components/GoalTicker';
 import { useSpotlightTarget, useWelcomeTour } from '@/components/spotlight';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { usePlan } from '@/state/PlanContext';
 import { useGoals } from '@/state/GoalContext';
+import { useActivityLog } from '@/state/useActivityLog';
 import { useProjects } from '@/state/ProjectsContext';
 import { useSettings } from '@/state/SettingsContext';
 import { useCommunityAccess } from '@/services/community/access';
@@ -32,6 +33,9 @@ import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { goalColor, goalHabits, type Goal } from '@/lib/goal';
 import { prioritizeAfterFirstOpen } from '@/lib/dashboard';
 import { effectivePlan, goalDayProgress, goalFocusPool, plannedOpen, planProgress } from '@/lib/plan';
+import { sessionsOf } from '@/lib/analytics';
+import { activityJourney } from '@/lib/journey';
+import { SOLIDIFY_DAYS } from '@/lib/activityStreak';
 import { CAPACITIES } from '@/lib/compounding';
 import { rippleForQuest } from '@/lib/habitCapacity';
 import { isValidScheduleMinutes, minutesToLabel } from '@/lib/schedule';
@@ -75,6 +79,7 @@ export function DashboardScreen() {
   const { levels } = useCapacities();
   const { getPlan, reorderPlan } = usePlan();
   const { goals, membershipFor } = useGoals();
+  const { events } = useActivityLog();
   const { signedIn, projectsForHabit, projectActivityIds } = useProjects();
   const { settings } = useSettings();
   const communityAllowed = useCommunityAccess();
@@ -96,7 +101,6 @@ export function DashboardScreen() {
   // and activity to that goal. null = all habits.
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const selectedGoal = goals.find((g) => g.id === selectedGoalId) ?? null;
-  const [focusPickerOpen, setFocusPickerOpen] = useState(false);
   const focusAccent = selectedGoal ? goalColor(selectedGoal).accent : TEAL;
 
   // Effective members of the selected goal (explicit links + supporting goals in
@@ -111,6 +115,11 @@ export function DashboardScreen() {
     [quests, plan, selectedGoal, goalLinkedIds, projectActivityIds],
   );
 
+  // Plan-wide today % for the ticker's "All" chip (independent of any goal focus).
+  const allProgress = useMemo(() => planProgress(quests, plan), [quests, plan]);
+  // Real session log → the honest "from repetition to habit" journey per activity.
+  const sessions = useMemo(() => sessionsOf(events), [events]);
+
   // The planned, still-open habits (timed first) — filtered to the selected goal.
   const openHabits = useMemo(
     () => (selectedGoal ? goalFocusPool(quests, plan, selectedGoal, goalLinkedIds, projectActivityIds) : plannedOpen(quests, plan)),
@@ -124,6 +133,11 @@ export function DashboardScreen() {
   const safeIndex = openHabits.length ? Math.min(focusIndex, openHabits.length - 1) : 0;
   const focus = openHabits[safeIndex] ?? null;
   const canBrowse = openHabits.length > 1;
+  // The honest "from repetition to habit" journey for the activity in focus.
+  const focusJourney = useMemo(
+    () => (focus ? activityJourney(sessions, focus.id, focus.title, todayKey) : null),
+    [focus, sessions, todayKey],
+  );
 
   const cardX = useRef(new Animated.Value(0)).current;
   const flash = useRef(new Animated.Value(0)).current; // "Up next!" flourish
@@ -309,22 +323,16 @@ export function DashboardScreen() {
           </View>
         </View>
 
-        {/* Optional focus — only shows once the user picks a goal from the More
-            hub; tap ✕ to return to all of today's habits. Keeps Home goal-free. */}
-        {selectedGoal && (
-          <View style={styles.focusChipRow}>
-            <Pressable
-              onPress={() => setSelectedGoalId(null)}
-              accessibilityRole="button"
-              accessibilityLabel={t('dashboard:focusChipA11y', { goal: selectedGoal.title })}
-              style={[styles.focusChip, { borderColor: focusAccent, backgroundColor: goalColor(selectedGoal).soft }]}
-            >
-              <Text style={[styles.focusChipText, { color: focusAccent }]} numberOfLines={1}>
-                🎯 {selectedGoal.title}
-              </Text>
-              <Text style={[styles.focusChipX, { color: focusAccent }]}>✕</Text>
-            </Pressable>
-          </View>
+        {/* Goal ticker — a slim, news-feed-style switcher: tap a goal to point the
+            swipable cards + ring at it; "All" returns to every habit. */}
+        {goals.length > 0 && (
+          <GoalTicker
+            goals={goals}
+            selectedId={selectedGoalId}
+            allPct={allProgress.pct}
+            onSelect={(id) => setSelectedGoalId(id)}
+            projectActivityIds={projectActivityIds}
+          />
         )}
 
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
@@ -408,6 +416,28 @@ export function DashboardScreen() {
                   {'  '}🔗
                 </Text>
               </Pressable>
+              {/* The core story: every rep moves this activity toward automatic. */}
+              {focusJourney && (
+                <Pressable
+                  onPress={() => navigation.navigate('ActivityJourney', { activityId: focus.id })}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('dashboard:habit.viewJourneyA11y', { title: focus.title })}
+                  style={styles.habitCue}
+                >
+                  <View style={styles.habitTrack}>
+                    <View style={[styles.habitFill, { width: `${Math.max(3, focusJourney.progressPct)}%`, backgroundColor: focusJourney.graduated ? GOLD : focusAccent }]} />
+                  </View>
+                  <Text style={[styles.habitLabel, { color: focusAccent }]} numberOfLines={1}>
+                    {focusJourney.status === 'graduated'
+                      ? t('dashboard:habit.graduated')
+                      : focusJourney.status === 'solidified'
+                        ? t('dashboard:habit.solidified')
+                        : focusJourney.status === 'building'
+                          ? t('dashboard:habit.building', { streak: focusJourney.currentStreak, left: Math.max(0, SOLIDIFY_DAYS - focusJourney.currentStreak) })
+                          : t('dashboard:habit.new')}
+                  </Text>
+                </Pressable>
+              )}
               {/* Fitts: large, full-width, thumb-reachable primary action. */}
               <Pressable
                 onPress={() => openHabit(focus.id)}
@@ -585,19 +615,8 @@ export function DashboardScreen() {
         visible={moreOpen}
         onClose={() => setMoreOpen(false)}
         onSuggest={handleSuggest}
-        onFocusGoal={() => setFocusPickerOpen(true)}
         canShare={signedIn && communityAllowed}
         suggesting={suggesting}
-      />
-      <GoalFocusPicker
-        visible={focusPickerOpen}
-        goals={goals}
-        selectedId={selectedGoalId}
-        onSelect={(id) => {
-          setSelectedGoalId(id);
-          setFocusPickerOpen(false);
-        }}
-        onClose={() => setFocusPickerOpen(false)}
       />
     </ScreenContainer>
   );
@@ -616,10 +635,10 @@ const styles = StyleSheet.create({
   pillViolet: { borderColor: '#E2DBFB', backgroundColor: '#F4F1FE' },
   pillText: { ...typography.caption, color: INK, fontWeight: '800' },
 
-  focusChipRow: { paddingHorizontal: PAD, flexDirection: 'row' },
-  focusChip: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, borderRadius: radii.pill, borderWidth: 1, paddingHorizontal: spacing.md, paddingVertical: 6, maxWidth: '100%' },
-  focusChipText: { ...typography.label, fontWeight: '800', flexShrink: 1 },
-  focusChipX: { ...typography.label, fontWeight: '900' },
+  habitCue: { alignSelf: 'stretch', alignItems: 'center', gap: 4, marginTop: spacing.xs },
+  habitTrack: { alignSelf: 'stretch', height: 5, borderRadius: 3, backgroundColor: '#ECEAE4', overflow: 'hidden' },
+  habitFill: { height: 5, borderRadius: 3 },
+  habitLabel: { ...typography.caption, fontWeight: '800' },
 
   billboard: {
     marginHorizontal: PAD,
