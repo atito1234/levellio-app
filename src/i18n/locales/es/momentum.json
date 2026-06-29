@@ -10,8 +10,7 @@
     },
     "building": {
       "label": "Ganando impulso",
-      "reason_one": "{{active}} día activo esta semana{{trend}} Un poco más y se afianza.",
-      "reason_other": "{{active}} días activos esta semana{{trend}} Un poco más y se afianza."
+      "reason": "{{active}} días activos esta semana{{trend}} Un poco más y se afianza."
     },
     "drifting": {
       "label": "Hora de un pequeño empujón",

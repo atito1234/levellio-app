@@ -10,8 +10,7 @@
     },
     "building": {
       "label": "Building momentum",
-      "reason_one": "{{active}} active day this week{{trend}} A little more makes it stick.",
-      "reason_other": "{{active}} active days this week{{trend}} A little more makes it stick."
+      "reason": "{{active}} active days this week{{trend}} A little more makes it stick."
     },
     "drifting": {
       "label": "Time for a gentle nudge",
