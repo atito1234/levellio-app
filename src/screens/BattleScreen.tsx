@@ -210,24 +210,33 @@ export function BattleScreen({ route, navigation }: Props) {
     if (!intervened) leaveNow();
   }, [guardAbandon, dragonId, dragonName, battleQuests, leaveNow]);
 
-  const onRetreat = () => {
+  // Frictionless exit: leave the battle anytime and go straight to the activity.
+  // Only the opt-in Focus Lock adds friction (the user chose it); otherwise no
+  // "think twice" guard and no penalty — the session is optional.
+  const backToActivity = useCallback(() => {
+    allowLeave.current = true;
+    setLocked(false);
+    stop();
+    const qid = battleQuests[0]?.id;
+    if (battleQuests.length === 1 && qid) navigation.replace('Ripple', { questId: qid });
+    else navigation.navigate('Main', { screen: 'Dashboard' });
+  }, [navigation, battleQuests, stop]);
+
+  const onExit = () => {
     if (lockActive) {
       attemptLeave();
       return;
     }
-    if (
-      guardAbandon({
-        kind: 'battle-retreat',
-        ctx: { battleRunning: running },
-        dragonId,
-        ...(dragonName ? { dragonName } : {}),
-        ...(battleQuests[0] ? { questId: battleQuests[0].id } : {}),
-        onProceed: () => navigation.goBack(),
-      })
-    )
-      return;
-    navigation.goBack();
+    backToActivity();
   };
+
+  // Open the Brain Break mind-game (over the battle) — returns here on close.
+  const openBrainBreak = () =>
+    navigation.navigate('PrepareRite', {
+      dragonId,
+      ...(dragonName ? { dragonName } : {}),
+      ...(battleQuests[0] ? { category: battleQuests[0].category } : {}),
+    });
 
   // Block swipe / back / hardware-back while locked.
   useEffect(() => {
@@ -257,8 +266,8 @@ export function BattleScreen({ route, navigation }: Props) {
       {won && timings.confetti && <ConfettiBurst />}
       <View style={styles.topbar}>
         {!won && (
-          <Pressable onPress={onRetreat} accessibilityRole="button" accessibilityLabel={t('battle.retreatA11y')} hitSlop={12}>
-            <Text style={styles.retreat}>{t('battle.retreat')}</Text>
+          <Pressable onPress={onExit} accessibilityRole="button" accessibilityLabel={t('battle.backToActivityA11y')} hitSlop={12}>
+            <Text style={styles.retreat}>{t('battle.backToActivity')}</Text>
           </Pressable>
         )}
       </View>
@@ -375,6 +384,18 @@ export function BattleScreen({ route, navigation }: Props) {
               </Pressable>
             )
           )}
+
+          {/* Optional mind-games during the battle (was pre-battle on setup). */}
+          {!lockActive && (
+            <View style={styles.miniGames}>
+              <Pressable onPress={openBrainBreak} accessibilityRole="button" accessibilityLabel={t('battle.brainBreakA11y')} style={styles.miniBtn}>
+                <Text style={styles.miniText}>🧠 {t('battle.brainBreak')}</Text>
+              </Pressable>
+              <Pressable onPress={() => navigation.navigate('DragonDen')} accessibilityRole="button" accessibilityLabel={t('battle.denA11y')} style={styles.miniBtn}>
+                <Text style={styles.miniText}>🐉 {t('battle.den')}</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
       )}
     </ScreenContainer>
@@ -413,6 +434,9 @@ const styles = StyleSheet.create({
   secondaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.md, alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E8E6E0' },
   secondaryText: { ...typography.label, color: INK, fontWeight: '700' },
   sub: { ...typography.body, color: MUTED },
+  miniGames: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
+  miniBtn: { flex: 1, borderRadius: radii.pill, paddingVertical: spacing.sm, alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E8E6E0' },
+  miniText: { ...typography.label, color: INK, fontWeight: '700' },
   lockRow: { alignItems: 'center', paddingVertical: spacing.sm },
   lockText: { ...typography.label, fontWeight: '800' },
   lockedText: { ...typography.label, color: MUTED, fontWeight: '700' },

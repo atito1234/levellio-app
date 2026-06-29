@@ -76,6 +76,12 @@
     "goBack": "Retour",
     "retreatA11y": "Battre en retraite",
     "retreat": "Retraite",
+    "backToActivity": "← Revenir à l'activité",
+    "backToActivityA11y": "Quitter et revenir à ton activité",
+    "brainBreak": "Pause mentale",
+    "brainBreakA11y": "Jouer à un mini-jeu de Pause mentale",
+    "den": "Antre",
+    "denA11y": "Ouvrir l'Antre du Dragon",
     "victoryA11y": "Victoire",
     "victory": "⚔️ Victoire !",
     "summary_one": "{{completed}}/{{selected}} habitude faite{{xp}}",
@@ -124,7 +130,7 @@
     "buyA11y": "Acheter {{name}} pour {{cost}} pièces"
   },
   "rites": {
-    "title": "Prépare ton esprit et ton âme",
+    "title": "Pause mentale",
     "facing": "Face à {{dragon}}",
     "theDragon": "ton dragon",
     "skip": "Passer",

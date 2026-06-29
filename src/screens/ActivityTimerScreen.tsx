@@ -29,7 +29,7 @@ const R = (RING - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
 
 export function ActivityTimerScreen({ route, navigation }: Props) {
-  const { t } = useTranslation('activityTimer');
+  const { t } = useTranslation(['activityTimer', 'battle']);
   const { quests, character } = useGame();
   const complete = useCompleteActivity();
   const quest = quests.find((q) => q.id === route.params.questId);
@@ -283,6 +283,19 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
                 <Text style={styles.secondaryText}>{t('justLogIt')}</Text>
               </Pressable>
             </View>
+          )}
+
+          {/* Brain Break — a short mind-game, playable before/during/after. The
+              timer keeps running underneath; closing the break returns here. */}
+          {!lockActive && (
+            <Pressable
+              onPress={() => navigation.navigate('PrepareRite', { category: quest.category })}
+              accessibilityRole="button"
+              accessibilityLabel={t('battle:brainBreakA11y')}
+              style={styles.lockRow}
+            >
+              <Text style={[styles.lockText, { color: accent }]}>🧠 {t('battle:brainBreak')}</Text>
+            </Pressable>
           )}
         </View>
       )}

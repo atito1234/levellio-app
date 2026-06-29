@@ -66,8 +66,9 @@ export type RootStackParamList = {
     dragonId: string;
     dragonName?: string;
   };
-  /** A pre-battle mind & soul prep rite (breathe / vow / recall / charge). */
-  PrepareRite: { dragonId: string; dragonName?: string; category?: import('@/types').QuestCategory };
+  /** "Brain Break" mind-games (breathe / vow / recall / charge / strike). Standalone
+   *  when no dragon context (playable before/during/after an activity). */
+  PrepareRite: { dragonId?: string; dragonName?: string; category?: import('@/types').QuestCategory } | undefined;
   /** The Dragon Den — trophies (per-dragon slays + streaks) + the coin Armory. */
   DragonDen: undefined;
   /** Achievements gallery + shareable, analytics-backed certificates. */

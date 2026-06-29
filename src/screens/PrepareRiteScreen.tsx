@@ -34,23 +34,23 @@ const STRIKE_TARGET = 6;
 const randPct = (min: number, max: number) => `${Math.round(min + Math.random() * (max - min))}%` as const;
 
 export function PrepareRiteScreen({ route, navigation }: Props) {
-  const { dragonId, dragonName, category } = route.params;
+  const { dragonId, dragonName, category } = route.params ?? {};
   const { t } = useTranslation(['battle', 'dragons']);
   const { setPreparedRite } = useBattles();
   const { entries, entriesForDragon } = useJournal();
   const { settings } = useSettings();
   const reduced = useReducedMotion();
 
-  const [rite, setRite] = useState<RiteId>(defaultRiteFor(dragonId, category));
+  const [rite, setRite] = useState<RiteId>(defaultRiteFor(dragonId ?? '', category));
   const [charge, setCharge] = useState(0);
   const [strikeHits, setStrikeHits] = useState(0);
   const [target, setTarget] = useState<{ top: string; left: string }>({ top: '40%', left: '40%' });
   const [breathIn, setBreathIn] = useState(true);
 
-  const dragon = dragonName ?? t('dragons:' + dragonId + '.name', { defaultValue: t('rites.theDragon') });
+  const dragon = dragonName ?? (dragonId ? t('dragons:' + dragonId + '.name', { defaultValue: t('rites.theDragon') }) : '');
   // Recall pulls a REAL past reflection (this dragon first, else most recent).
   const recallText = useMemo(() => {
-    const e = entriesForDragon(dragonId)[0] ?? entries[0];
+    const e = (dragonId ? entriesForDragon(dragonId)[0] : undefined) ?? entries[0];
     return e?.text?.trim() || t('rites.recall.blurb');
   }, [entriesForDragon, entries, dragonId, t]);
 
@@ -80,7 +80,8 @@ export function PrepareRiteScreen({ route, navigation }: Props) {
   }, [rite, reduced, scale]);
 
   const finish = () => {
-    setPreparedRite(rite);
+    // Only mark a battle "prepared" when launched in a battle context.
+    if (dragonId) setPreparedRite(rite);
     haptics.success(settings.hapticsEnabled);
     navigation.goBack();
   };
@@ -106,7 +107,7 @@ export function PrepareRiteScreen({ route, navigation }: Props) {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <Text style={styles.h1}>{t('rites.title')}</Text>
-        <Text style={styles.facing}>{t('rites.facing', { dragon })}</Text>
+        {dragon ? <Text style={styles.facing}>{t('rites.facing', { dragon })}</Text> : null}
 
         <View style={styles.stage}>
           {rite === 'breathe' && (
