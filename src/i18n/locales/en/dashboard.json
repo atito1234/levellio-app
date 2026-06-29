@@ -91,5 +91,6 @@
     "solidified": "Locked in 🌱 — keep it on autopilot",
     "graduated": "Runs on its own 🏅",
     "viewJourneyA11y": "See {{title}}'s journey from repetition to habit"
-  }
+  },
+  "addToGoal": "Add activity to {{goal}}"
 }

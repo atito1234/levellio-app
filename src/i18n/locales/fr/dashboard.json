@@ -91,5 +91,6 @@
     "solidified": "Ancré 🌱 — gardez-le en pilote automatique",
     "graduated": "Fonctionne tout seul 🏅",
     "viewJourneyA11y": "Voir le parcours de {{title}} de la répétition à l'habitude"
-  }
+  },
+  "addToGoal": "Ajouter une activité à {{goal}}"
 }

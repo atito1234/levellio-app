@@ -33,8 +33,9 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
   const { quests, character } = useGame();
   const complete = useCompleteActivity();
   const quest = quests.find((q) => q.id === route.params.questId);
-  // One stable, science-grounded quote per focus session.
+  // One stable, science-grounded quote per focus session (localized).
   const quote = useMemo(() => pickFocusQuote(route.params.questId.length + new Date().getDate()), [route.params.questId]);
+  const quoteText = t(`focusQuotes:${quote.id}`, { defaultValue: quote.text });
 
   const timing = quest ? activityTiming(quest) : null;
   const totalSec = (timing?.minutes ?? 25) * 60;
@@ -201,8 +202,8 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
         <Text style={styles.title} accessibilityRole="header">
           {quest.title}
         </Text>
-        <Text style={styles.quote} accessibilityLabel={quote.text}>
-          “{quote.text}”
+        <Text style={styles.quote} accessibilityLabel={quoteText}>
+          “{quoteText}”
         </Text>
 
         <View style={styles.ringStage} accessibilityLabel={t('remainingA11y', { time: formatClock(remaining) })}>

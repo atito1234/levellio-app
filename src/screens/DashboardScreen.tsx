@@ -335,6 +335,21 @@ export function DashboardScreen() {
           projectActivityIds={projectActivityIds}
         />
 
+        {/* With a goal selected, a one-tap way to add an activity straight into it
+            (the sheet is pre-filed via defaultGoalId below). */}
+        {selectedGoal && (
+          <Pressable
+            onPress={() => setAddOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('dashboard:addToGoal', { goal: selectedGoal.title })}
+            style={[styles.addToGoal, { borderColor: focusAccent }]}
+          >
+            <Text style={[styles.addToGoalText, { color: focusAccent }]} numberOfLines={1}>
+              ＋ {t('dashboard:addToGoal', { goal: selectedGoal.title })}
+            </Text>
+          </Pressable>
+        )}
+
         {/* Hero billboard — Zeigarnik: a large open ring pulls completion.
             Swipe to browse open activities: left = next, right = prioritize. */}
         <View style={styles.billboard} {...todayTarget} {...(canBrowse ? pan.panHandlers : {})}>
@@ -634,6 +649,9 @@ const styles = StyleSheet.create({
   pill: { backgroundColor: '#FFF', borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4, borderWidth: 1, borderColor: '#E8E6E0' },
   pillViolet: { borderColor: '#E2DBFB', backgroundColor: '#F4F1FE' },
   pillText: { ...typography.caption, color: INK, fontWeight: '800' },
+
+  addToGoal: { alignSelf: 'flex-start', marginHorizontal: PAD, borderRadius: radii.pill, borderWidth: 1, borderStyle: 'dashed', paddingHorizontal: spacing.md, paddingVertical: 7, backgroundColor: CARD, maxWidth: SCREEN_W - PAD * 2 },
+  addToGoalText: { ...typography.label, fontWeight: '800' },
 
   habitCue: { alignSelf: 'stretch', alignItems: 'center', gap: 4, marginTop: spacing.xs },
   habitTrack: { alignSelf: 'stretch', height: 5, borderRadius: 3, backgroundColor: '#ECEAE4', overflow: 'hidden' },

@@ -91,5 +91,6 @@
     "solidified": "Fijado 🌱 — mantenlo en piloto automático",
     "graduated": "Funciona solo 🏅",
     "viewJourneyA11y": "Ver el camino de {{title}} de la repetición al hábito"
-  }
+  },
+  "addToGoal": "Añadir actividad a {{goal}}"
 }

@@ -21,7 +21,7 @@ import {
   type ProjectMember,
   type ProjectSuggestedHabit,
 } from '@/lib/projects';
-import { localizeProject } from '@/lib/projectText';
+import { localizeProject, localizeFeaturedHabit } from '@/lib/projectText';
 import type { ProjectSnapshot } from '@/services/projects';
 import { CATEGORY_META } from '@/lib/categories';
 import { getBucketColor } from '@/lib/buckets';
@@ -354,7 +354,7 @@ export function ProjectDetailScreen({ route, navigation }: Props) {
                   <SuggestedActivityCard
                     key={`${h.title}-${i}`}
                     emoji={CATEGORY_META[h.category].icon}
-                    title={h.title}
+                    title={localizeFeaturedHabit(t, project.id, i, h.title)}
                     contribution={t('detail.contribution', { value: h.contribution, unit: text.unit })}
                     accent={c.accent}
                     added={linked}
