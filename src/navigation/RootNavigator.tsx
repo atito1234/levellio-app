@@ -30,6 +30,7 @@ import { BattleSetupScreen } from '@/screens/BattleSetupScreen';
 import { BattleScreen } from '@/screens/BattleScreen';
 import { PrepareRiteScreen } from '@/screens/PrepareRiteScreen';
 import { DragonDenScreen } from '@/screens/DragonDenScreen';
+import { AchievementsScreen } from '@/screens/AchievementsScreen';
 import { JournalComposerScreen } from '@/screens/JournalComposerScreen';
 import { JournalScreen } from '@/screens/JournalScreen';
 import { AnalyticsScreen } from '@/screens/AnalyticsScreen';
@@ -158,6 +159,7 @@ export function RootNavigator() {
         <Stack.Screen name="Battle" component={BattleScreen} options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="PrepareRite" component={PrepareRiteScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="DragonDen" component={DragonDenScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="JournalComposer" component={JournalComposerScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Journal" component={JournalScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="Analytics" component={AnalyticsScreen} options={{ presentation: 'modal' }} />

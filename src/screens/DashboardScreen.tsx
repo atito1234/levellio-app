@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
 import { AddActivityFab, AddActivitySheet, AppHeader, HeroAvatar, MoreSheet, ProjectBadge, ScreenContainer } from '@/components';
+import { AchievementCelebrationHost } from '@/components/AchievementCelebrationHost';
 import { GoalTicker } from '@/components/GoalTicker';
 import { useSpotlightTarget, useWelcomeTour } from '@/components/spotlight';
 import { radii, spacing, typography } from '@/theme';
@@ -633,6 +634,8 @@ export function DashboardScreen() {
         canShare={signedIn && communityAllowed}
         suggesting={suggesting}
       />
+      {/* Auto-celebrate milestones newly earned this session (queue-driven). */}
+      <AchievementCelebrationHost />
     </ScreenContainer>
   );
 }

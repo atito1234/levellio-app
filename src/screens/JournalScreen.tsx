@@ -3,8 +3,8 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, HeroAvatar } from '@/components';
-import { spacing, typography } from '@/theme';
+import { ScreenContainer, ScreenHeader, HeroAvatar } from '@/components';
+import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useJournal } from '@/state/JournalContext';
 import { audienceMeta, moodMeta, type JournalEntry } from '@/lib/journal';
@@ -44,17 +44,16 @@ export function JournalScreen({ route, navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('list.a11yBack')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.title} accessibilityRole="header">
-          {t('list.title')}
-        </Text>
-        <Pressable onPress={() => navigation.navigate('JournalComposer')} accessibilityRole="button" accessibilityLabel={t('list.a11yNew')} hitSlop={12}>
-          <Text style={styles.new}>＋</Text>
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title={t('list.title')}
+        onBack={() => navigation.goBack()}
+        backLabel={t('list.a11yBack')}
+        right={
+          <Pressable onPress={() => navigation.navigate('JournalComposer')} accessibilityRole="button" accessibilityLabel={t('list.a11yNew')} hitSlop={12}>
+            <Text style={styles.new}>＋</Text>
+          </Pressable>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <Text style={styles.banner}>{t('list.banner')}</Text>
@@ -152,16 +151,13 @@ function EntryCard({
 }
 
 const styles = StyleSheet.create({
-  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm },
-  chevron: { fontSize: 30, lineHeight: 30, color: INK, width: 28 },
-  title: { ...typography.heading, color: INK },
   new: { fontSize: 26, color: VIOLET, fontWeight: '800', width: 28, textAlign: 'right' },
 
   content: { gap: spacing.md, paddingBottom: spacing.xl },
   banner: { ...typography.caption, color: MUTED, backgroundColor: VIOLET_SOFT, borderRadius: 12, padding: spacing.sm },
   empty: { ...typography.body, color: MUTED, textAlign: 'center', paddingTop: spacing.xl },
 
-  card: { backgroundColor: CARD, borderRadius: 20, padding: spacing.md, gap: spacing.sm, borderWidth: 1, borderColor: TRACK },
+  card: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.md, gap: spacing.sm, borderWidth: 1, borderColor: TRACK },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   you: { ...typography.body, color: INK, fontWeight: '800' },
   meta: { ...typography.caption, color: MUTED },

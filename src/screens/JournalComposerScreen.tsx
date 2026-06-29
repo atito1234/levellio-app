@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, HeroAvatar } from '@/components';
-import { spacing, typography } from '@/theme';
+import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useJournal } from '@/state/JournalContext';
 import { MOODS, AUDIENCES, type JournalAudience, type JournalMedia, type JournalMood } from '@/lib/journal';
@@ -183,24 +183,24 @@ const styles = StyleSheet.create({
   you: { ...typography.body, color: INK, fontWeight: '800' },
   context: { ...typography.caption, color: MUTED },
 
-  teachingCard: { backgroundColor: VIOLET_SOFT, borderRadius: 14, padding: spacing.md, gap: 4, borderWidth: 1, borderColor: '#E2DBFB' },
+  teachingCard: { backgroundColor: VIOLET_SOFT, borderRadius: radii.lg, padding: spacing.md, gap: 4, borderWidth: 1, borderColor: '#E2DBFB' },
   teachingLabel: { ...typography.caption, color: VIOLET, fontWeight: '800', letterSpacing: 1 },
   teachingText: { ...typography.body, color: INK },
   promptText: { ...typography.title, color: INK, fontWeight: '800' },
-  input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: 16, padding: spacing.md, minHeight: 120, textAlignVertical: 'top', borderWidth: 1, borderColor: TRACK },
+  input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: radii.lg, padding: spacing.md, minHeight: 120, textAlignVertical: 'top', borderWidth: 1, borderColor: TRACK },
 
   mediaWrap: { position: 'relative' },
-  mediaImage: { width: '100%', height: 200, borderRadius: 16, backgroundColor: TRACK },
-  videoTile: { width: '100%', height: 120, borderRadius: 16, backgroundColor: VIOLET_SOFT, alignItems: 'center', justifyContent: 'center' },
+  mediaImage: { width: '100%', height: 200, borderRadius: radii.lg, backgroundColor: TRACK },
+  videoTile: { width: '100%', height: 120, borderRadius: radii.lg, backgroundColor: VIOLET_SOFT, alignItems: 'center', justifyContent: 'center' },
   videoTileText: { ...typography.body, color: VIOLET, fontWeight: '700' },
-  mediaRemove: { position: 'absolute', top: 8, right: 8, width: 30, height: 30, borderRadius: 999, backgroundColor: 'rgba(31,41,55,0.7)', alignItems: 'center', justifyContent: 'center' },
+  mediaRemove: { position: 'absolute', top: 8, right: 8, width: 30, height: 30, borderRadius: radii.pill, backgroundColor: 'rgba(31,41,55,0.7)', alignItems: 'center', justifyContent: 'center' },
   mediaRemoveText: { color: '#FFFFFF', fontWeight: '800' },
-  mediaBtn: { alignSelf: 'flex-start', backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
+  mediaBtn: { alignSelf: 'flex-start', backgroundColor: CARD, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
   mediaBtnText: { ...typography.label, color: INK, fontWeight: '600' },
 
   fieldLabel: { ...typography.label, color: MUTED, letterSpacing: 1 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: { backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
+  chip: { backgroundColor: CARD, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
   chipOn: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET },
   chipText: { ...typography.label, color: MUTED, fontWeight: '600' },
   chipTextOn: { color: VIOLET, fontWeight: '700' },

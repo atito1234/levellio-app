@@ -1,0 +1,113 @@
+{
+  "title": "Logros",
+  "back": "Atrás",
+  "progress": "{{unlocked}} de {{total}} desbloqueados",
+  "unlocked": "Desbloqueado",
+  "locked": "Bloqueado",
+  "group": {
+    "journey": "TU CAMINO",
+    "habits": "HÁBITOS FORMADOS",
+    "capacities": "CAPACIDADES",
+    "goals": "METAS",
+    "battles": "BATALLAS",
+    "community": "COMUNIDAD"
+  },
+  "stat": {
+    "bestStreak": "Mejor racha",
+    "daysShownUp": "Días cumplidos",
+    "currentStreak": "Racha actual",
+    "bestDay": "Mejor día",
+    "bestTime": "Mejor hora",
+    "streak": "Racha",
+    "consistency": "Constancia",
+    "totalReps": "Repeticiones",
+    "habitsFormed": "Hábitos formados",
+    "capacity": "Capacidad",
+    "level": "Nivel",
+    "goals": "Metas",
+    "slain": "Dragones vencidos",
+    "rites": "Ritos",
+    "projects": "Proyectos",
+    "reps": "Repeticiones"
+  },
+  "cert": {
+    "unlocked": "LOGRO DESBLOQUEADO",
+    "achievedBy": "Logrado por {{name}}",
+    "brand": "Levellio",
+    "howYouDidIt": "CÓMO LO LOGRASTE",
+    "share": "Compartir",
+    "download": "Descargar",
+    "downloadSoonTitle": "Descarga de imagen muy pronto",
+    "downloadSoonBody": "Guardar el certificado como imagen llega en la próxima actualización. Por ahora, toca Compartir para difundir la noticia.",
+    "close": "Cerrar",
+    "you": "Tú"
+  },
+  "shareText": "¡Desbloqueé \"{{title}}\" en Levellio — {{headline}} 🏆!",
+  "items": {
+    "first-step": {
+      "title": "Primer paso",
+      "desc": "Completa tu primera actividad",
+      "takeaway": "Todo hábito empieza con una repetición — la diste."
+    },
+    "rhythm-3": {
+      "title": "Encontrando tu ritmo",
+      "desc": "3 días seguidos",
+      "takeaway": "Tres días seguidos así nace el impulso."
+    },
+    "two-weeks-14": {
+      "title": "Dos semanas fuerte",
+      "desc": "Una racha de 14 días",
+      "takeaway": "Dos semanas — el hábito está echando raíces."
+    },
+    "resilient-30": {
+      "title": "Resiliente",
+      "desc": "Una racha de 30 días",
+      "takeaway": "Un mes cumpliendo — prueba de que puedes sostenerlo."
+    },
+    "locked-in": {
+      "title": "Fijado",
+      "desc": "Un hábito llegó a 21 días",
+      "takeaway": "A los ~21 días un hábito se fija. La constancia, no la intensidad, te trajo aquí."
+    },
+    "automatic-66": {
+      "title": "Automático",
+      "desc": "Un hábito llegó a 66 días",
+      "takeaway": "~66 días es donde los hábitos funcionan solos. Ya es parte de ti."
+    },
+    "habit-collector": {
+      "title": "Coleccionista de hábitos",
+      "desc": "3 hábitos fijados",
+      "takeaway": "Tres hábitos componiéndose a la vez — tu sistema funciona."
+    },
+    "fully-charged": {
+      "title": "Cargado al máximo",
+      "desc": "Una capacidad llegó al 100%",
+      "takeaway": "Tus pequeñas repeticiones llenaron una capacidad por completo."
+    },
+    "goal-setter": {
+      "title": "Meta fijada",
+      "desc": "Crea tu primera meta",
+      "takeaway": "Nombrar el sueño es el primer paso para volverlo hábito."
+    },
+    "dragon-slayer": {
+      "title": "Cazador de dragones",
+      "desc": "Vence a tu primer dragón",
+      "takeaway": "Enfrentaste lo que te frenaba — y avanzaste igual."
+    },
+    "dragon-hunter": {
+      "title": "Cazador experto",
+      "desc": "Vence 10 dragones",
+      "takeaway": "Diez batallas ganadas — vencer la resistencia se vuelve tu hábito."
+    },
+    "prepared-mind": {
+      "title": "Mente preparada",
+      "desc": "Completa un rito de preparación",
+      "takeaway": "Preparar la mente primero hace el trabajo más fácil."
+    },
+    "team-player": {
+      "title": "Jugador de equipo",
+      "desc": "Únete a un proyecto comunitario",
+      "takeaway": "El impulso compartido te mantiene en los días difíciles."
+    }
+  }
+}

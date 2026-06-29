@@ -5,8 +5,9 @@
  * without pulling in React Native.
  *
  * Translation status: `en` is the human-authored source of truth. `fr`/`es` are
- * machine drafts pending review; `ht` (Haitian Creole) is a machine draft flagged
- * for human verification before any Creole-targeted launch.
+ * complete, human-quality translations (parity-tested against `en`) and shipped as
+ * stable; `ht` (Haitian Creole) is a machine draft flagged for human verification
+ * before any Creole-targeted launch.
  */
 
 /** Languages we ship strings for. `en` is always complete (source of truth). */
@@ -26,14 +27,14 @@ export type LocaleSetting = 'system' | SupportedLocale;
 export const DEFAULT_LOCALE: SupportedLocale = 'en';
 
 /** Namespaces (one JSON file per area, per locale). Add new areas here. */
-export const NAMESPACES = ['common', 'tabs', 'feed', 'settings', 'paywall', 'profile', 'notifications', 'discover', 'stories', 'messaging', 'ai', 'onboarding', 'auth', 'dashboard', 'capacities', 'hero', 'danger', 'projects', 'featured', 'addActivity', 'goals', 'quests', 'quickCapture', 'scheduler', 'plan', 'progress', 'categories', 'activityJourney', 'activityTimer', 'analytics', 'battle', 'bucketEdit', 'capacityFocus', 'coaching', 'connections', 'dragons', 'goalTemplates', 'habits', 'insights', 'intervention', 'journal', 'kitSelect', 'kits', 'milestone', 'monthly', 'organize', 'questComplete', 'ripple', 'timePicker', 'momentum', 'coachingContent', 'milestonesContent', 'techniques', 'rating', 'charts', 'tour', 'recipes', 'checklists', 'focusQuotes'] as const;
+export const NAMESPACES = ['common', 'tabs', 'feed', 'settings', 'paywall', 'profile', 'notifications', 'discover', 'stories', 'messaging', 'ai', 'onboarding', 'auth', 'dashboard', 'capacities', 'hero', 'danger', 'projects', 'featured', 'addActivity', 'goals', 'quests', 'quickCapture', 'scheduler', 'plan', 'progress', 'categories', 'activityJourney', 'activityTimer', 'analytics', 'battle', 'bucketEdit', 'capacityFocus', 'coaching', 'connections', 'dragons', 'goalTemplates', 'habits', 'insights', 'intervention', 'journal', 'kitSelect', 'kits', 'milestone', 'monthly', 'organize', 'questComplete', 'ripple', 'timePicker', 'momentum', 'coachingContent', 'milestonesContent', 'techniques', 'rating', 'charts', 'tour', 'recipes', 'checklists', 'focusQuotes', 'achievements'] as const;
 export type Namespace = (typeof NAMESPACES)[number];
 
 /** Translation maturity, surfaced in the language picker so testers know. */
 export const LOCALE_STATUS: Record<SupportedLocale, 'stable' | 'draft'> = {
   en: 'stable',
-  fr: 'draft',
-  es: 'draft',
+  fr: 'stable',
+  es: 'stable',
   ht: 'draft',
 };
 
