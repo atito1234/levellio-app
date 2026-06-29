@@ -1,5 +1,6 @@
 import {
   checkOutChecklist,
+  checklistDayState,
   checklistProgress,
   isItemDone,
   rolloverChecklist,
@@ -8,26 +9,23 @@ import {
 } from './checklist';
 
 describe('isItemDone', () => {
-  it('text items use the daily checked list', () => {
-    expect(isItemDone({ id: 'a', label: 'x' }, ['a'], new Set())).toBe(true);
-    expect(isItemDone({ id: 'b', label: 'y' }, ['a'], new Set())).toBe(false);
-  });
-  it('linked items derive from the quest done-today set (not checkedItemIds)', () => {
-    const linked = { id: 'i1', label: 'Walk', questId: 'q1' };
-    expect(isItemDone(linked, [], new Set(['q1']))).toBe(true);
-    expect(isItemDone(linked, ['i1'], new Set())).toBe(false); // ticking the item id doesn't count
+  it('uses the checklist\'s own ticks for every item (linked or text)', () => {
+    expect(isItemDone({ id: 'a', label: 'x' }, ['a'])).toBe(true);
+    expect(isItemDone({ id: 'b', label: 'y' }, ['a'])).toBe(false);
+    // A linked item is NOT auto-done just because its quest was completed elsewhere.
+    expect(isItemDone({ id: 'i1', label: 'Walk', questId: 'q1' }, [])).toBe(false);
+    expect(isItemDone({ id: 'i1', label: 'Walk', questId: 'q1' }, ['i1'])).toBe(true);
   });
 });
 
-describe('checklistProgress with linked items', () => {
-  it('counts a linked item as done when its quest is done today', () => {
-    const c: Checklist = {
-      id: 'c', title: 'AM', emoji: '🌅', colorId: 'violet',
-      items: [{ id: 'i1', label: 'Walk', questId: 'q1' }, { id: 'i2', label: 'Water' }],
-      recurring: true, createdAt: 0, order: 0, checkedItemIds: [], checkoutStreak: 0,
-    };
-    expect(checklistProgress(c, new Set(['q1'])).done).toBe(1);
-    expect(checklistProgress({ ...c, checkedItemIds: ['i2'] }, new Set(['q1'])).complete).toBe(true);
+describe('checklistDayState', () => {
+  it('routine/undated lists are always today-scoped', () => {
+    expect(checklistDayState(make(), '2026-06-28')).toBe('today');
+  });
+  it('dated lists report past / today / future', () => {
+    expect(checklistDayState(make({ recurring: false, date: '2026-06-28' }), '2026-06-28')).toBe('today');
+    expect(checklistDayState(make({ recurring: false, date: '2026-06-27' }), '2026-06-28')).toBe('past');
+    expect(checklistDayState(make({ recurring: false, date: '2026-07-01' }), '2026-06-28')).toBe('future');
   });
 });
 
@@ -77,10 +75,15 @@ describe('toggle + rollover', () => {
     expect(today.checkedItemIds).toEqual(['a']); // b cleared by rollover, a freshly ticked
   });
 
-  it('rolloverChecklist resets stale day ticks', () => {
+  it('rolloverChecklist resets stale day ticks for routine lists', () => {
     const c = make({ checkedItemIds: ['a'], checkedDay: '2026-01-01' });
     expect(rolloverChecklist(c, '2026-01-02').checkedItemIds).toEqual([]);
     expect(rolloverChecklist(c, '2026-01-01')).toBe(c); // same day → unchanged ref
+  });
+
+  it('does NOT roll over a dated list (its ticks are a record for that day)', () => {
+    const dated = make({ recurring: false, date: '2026-01-01', checkedItemIds: ['a'], checkedDay: '2026-01-01' });
+    expect(rolloverChecklist(dated, '2026-01-02')).toBe(dated); // unchanged
   });
 });
 

@@ -50,7 +50,7 @@ export function PlanScreen({ route, navigation }: Props) {
   const { buckets, assignments } = useBuckets();
   const { projectsForHabit } = useProjects();
   const { getPlan, togglePlanned } = usePlan();
-  const { addChecklist } = useChecklists();
+  const { addChecklist, checklistForDate } = useChecklists();
   const { events } = useActivityLog();
 
   const todayK = dayKey(new Date());
@@ -97,8 +97,12 @@ export function PlanScreen({ route, navigation }: Props) {
 
   // Turn the selected day's planned activities into a checklist in one tap.
   const createChecklistFromDay = async () => {
-    const items = selSummary.scheduled.map((q) => ({ label: q.title, questId: q.id }));
-    await addChecklist({ title: t('checklists.fromDayTitle', { day: dayLabel(selected) }), recurring: false, items });
+    // One list per day: if this day already has a list, open it instead of
+    // creating a duplicate.
+    if (!checklistForDate(selected)) {
+      const items = selSummary.scheduled.map((q) => ({ label: q.title, questId: q.id }));
+      await addChecklist({ title: t('checklists.fromDayTitle', { day: dayLabel(selected) }), recurring: false, date: selected, items });
+    }
     navigation.navigate('Checklists');
   };
 

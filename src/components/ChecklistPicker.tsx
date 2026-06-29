@@ -23,7 +23,7 @@ export function ChecklistPicker({
   createLabel?: string;
 }) {
   const { t } = useTranslation('checklists');
-  const { checklists, doneQuestIds } = useChecklists();
+  const { checklists } = useChecklists();
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
   const shown = q
@@ -42,7 +42,7 @@ export function ChecklistPicker({
         />
       )}
       {shown.map((c) => {
-        const prog = checklistProgress(c, doneQuestIds);
+        const prog = checklistProgress(c);
         const accent = (BUCKET_COLORS.find((b) => b.id === c.colorId) ?? BUCKET_COLORS[0]!).accent;
         return (
           <PressableScale key={c.id} onPress={() => onOpen(c.id)} accessibilityRole="button" style={styles.row}>

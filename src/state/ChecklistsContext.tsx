@@ -29,6 +29,8 @@ export interface NewChecklistInput {
   colorId?: BucketColorId;
   recurring?: boolean;
   items?: { label: string; questId?: string }[];
+  /** Bind the list to a specific day (YYYY-MM-DD). Absent = routine/today-scoped. */
+  date?: string;
   goalId?: string;
   bucketId?: string;
   projectId?: string;
@@ -38,8 +40,8 @@ interface ChecklistsContextValue {
   ready: boolean;
   /** Active (non-archived) checklists, rolled over to today. */
   checklists: Checklist[];
-  /** Quest ids completed today — drives linked items' "done" state. */
-  doneQuestIds: ReadonlySet<string>;
+  /** The existing checklist bound to a given day, if any (for dedupe). */
+  checklistForDate: (day: string) => Checklist | undefined;
   addChecklist: (input: NewChecklistInput) => Promise<Checklist | null>;
   removeChecklist: (id: string) => Promise<void>;
   renameChecklist: (id: string, title: string) => Promise<void>;
@@ -53,14 +55,8 @@ interface ChecklistsContextValue {
 const ChecklistsContext = createContext<ChecklistsContextValue | null>(null);
 
 export function ChecklistsProvider({ children }: { children: React.ReactNode }) {
-  const { user, quests } = useGame();
+  const { user } = useGame();
   const uid = user?.uid ?? null;
-
-  // Quest ids completed today — linked checklist items derive their tick from this.
-  const doneQuestIds = useMemo(() => {
-    const today = dayKey(new Date());
-    return new Set(quests.filter((q) => q.completed && q.lastCompletedDate === today).map((q) => q.id));
-  }, [quests]);
 
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [ready, setReady] = useState(false);
@@ -113,6 +109,7 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
         order: checklists.length,
         checkedItemIds: [],
         checkoutStreak: 0,
+        ...(input.date ? { date: input.date } : {}),
         ...(input.goalId ? { goalId: input.goalId } : {}),
         ...(input.bucketId ? { bucketId: input.bucketId } : {}),
         ...(input.projectId ? { projectId: input.projectId } : {}),
@@ -152,16 +149,13 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
   );
 
   const toggleItem = useCallback(
+    // The tick is ALWAYS the checklist's own local state — for every item, linked
+    // or text. (A today-scoped list also completes the real habit; that side
+    // effect lives in the screen via the navigation-bound useCompleteActivity.)
     async (id: string, itemId: string) => {
-      const checklist = checklists.find((c) => c.id === id);
-      const item = checklist?.items.find((i) => i.id === itemId);
-      // Linked items are completed by the screen (completion needs the
-      // navigation-bound useCompleteActivity); their tick derives from the quest.
-      if (item?.questId) return;
-      // Text item → toggle the local daily tick.
       await update(id, (c) => toggleChecklistItem(c, itemId, dayKey(new Date())));
     },
-    [checklists, update],
+    [update],
   );
 
   const checkOut = useCallback(
@@ -179,9 +173,14 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
 
   const active = useMemo(() => checklists.filter((c) => !c.archived), [checklists]);
 
+  const checklistForDate = useCallback(
+    (day: string) => active.find((c) => c.date === day),
+    [active],
+  );
+
   const value = useMemo<ChecklistsContextValue>(
-    () => ({ ready, checklists: active, doneQuestIds, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut }),
-    [ready, active, doneQuestIds, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut],
+    () => ({ ready, checklists: active, checklistForDate, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut }),
+    [ready, active, checklistForDate, addChecklist, removeChecklist, renameChecklist, addItem, removeItem, toggleItem, checkOut],
   );
 
   return <ChecklistsContext.Provider value={value}>{children}</ChecklistsContext.Provider>;
