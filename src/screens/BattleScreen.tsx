@@ -2,17 +2,22 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { Animated, BackHandler, Easing, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst } from '@/components';
+import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst, JourneyScene } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBattles } from '@/state/BattlesContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
+import { useActivityLog } from '@/state/useActivityLog';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { getCelebrationTimings } from '@/lib/celebration';
 import { battleStateAt } from '@/lib/battle';
 import { getTechnique, workSeconds } from '@/lib/timeTechniques';
 import { getDragon } from '@/data/dragons';
+import { sessionsOf } from '@/lib/analytics';
+import { activityJourney, HABIT_DAYS } from '@/lib/journey';
+import { sceneForCategory } from '@/lib/journeyScene';
+import { dayKey } from '@/lib/dates';
 import { activityTiming, formatClock, isVerifiedDuration } from '@/lib/activityTimer';
 import { ACTIVITY_VERIFICATION_ENABLED, FOCUS_LOCK_ENABLED } from '@/config/features';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
@@ -47,7 +52,8 @@ export function BattleScreen({ route, navigation }: Props) {
   const { t } = useTranslation('battle');
   const { questIds, techniqueId, customMin, dragonId, dragonName } = route.params;
   const { quests, character } = useGame();
-  const { recordVictory, preparedRite } = useBattles();
+  const { recordVictory, preparedRite, perDragonStreak } = useBattles();
+  const { events } = useActivityLog();
   const PREP_BONUS = 25;
   const complete = useCompleteActivity();
   const guardAbandon = useAbandonGuard();
@@ -65,6 +71,14 @@ export function BattleScreen({ route, navigation }: Props) {
     () => questIds.map((id) => quests.find((q) => q.id === id)).filter((q): q is NonNullable<typeof q> => !!q),
     [questIds, quests],
   );
+
+  // The primary habit's "from repetition to habit" journey drives the victory scene.
+  const sessions = useMemo(() => sessionsOf(events), [events]);
+  const primaryJourney = useMemo(() => {
+    const primary = battleQuests[0];
+    return primary ? activityJourney(sessions, primary.id, primary.title, dayKey(new Date())) : null;
+  }, [battleQuests, sessions]);
+  const journeyScene = useMemo(() => sceneForCategory(battleQuests[0]?.category), [battleQuests]);
 
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
@@ -133,6 +147,19 @@ export function BattleScreen({ route, navigation }: Props) {
     await recordVictory(dragon.id, coins); // consumes the prep rite + advances the dragon streak
     setResult({ completed, selected: battleQuests.length, totalXp, coins, prepared });
   }, [stop, reduced, technique.countsUp, battleQuests, elapsed, complete, recordVictory, dragon.id, preparedRite]);
+
+  // After a win, take the user straight Home (works from any entry point), once.
+  const wentHomeRef = useRef(false);
+  const goHome = useCallback(() => {
+    if (wentHomeRef.current) return;
+    wentHomeRef.current = true;
+    navigation.navigate('Main', { screen: 'Dashboard' });
+  }, [navigation]);
+  useEffect(() => {
+    if (!result) return;
+    const id = setTimeout(goHome, reduced ? 1400 : 3200);
+    return () => clearTimeout(id);
+  }, [result, reduced, goHome]);
 
   // Auto-slay when a timed block fully elapses.
   useEffect(() => {
@@ -256,6 +283,25 @@ export function BattleScreen({ route, navigation }: Props) {
               <Text style={styles.summaryCoins}>{t('battle.summaryCoins', { coins: result!.coins })}</Text>
               {result!.prepared && <Text style={styles.summaryPrepared}>{t('battle.preparedBadge')}</Text>}
             </View>
+
+            {/* The win as a step toward an automatic habit — climb / path forward. */}
+            {primaryJourney && (
+              <View style={styles.journey}>
+                <JourneyScene
+                  scene={journeyScene}
+                  progressPct={primaryJourney.progressPct}
+                  streak={perDragonStreak[dragon.id]?.streak ?? 0}
+                  graduated={primaryJourney.graduated}
+                />
+                <Text style={styles.journeyCaption}>
+                  {primaryJourney.graduated
+                    ? t('battle.journey.graduated')
+                    : primaryJourney.solidified
+                      ? t('battle.journey.solidified')
+                      : t('battle.journey.caption', { day: primaryJourney.currentStreak, total: HABIT_DAYS })}
+                </Text>
+              </View>
+            )}
           </>
         ) : (
           <>
@@ -295,8 +341,8 @@ export function BattleScreen({ route, navigation }: Props) {
       </View>
 
       {won ? (
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('battle.doneA11y')} style={[styles.primaryBtn, { backgroundColor: accent }]}>
-          <Text style={styles.primaryText}>{t('battle.done')}</Text>
+        <Pressable onPress={goHome} accessibilityRole="button" accessibilityLabel={t('battle.returnHome')} style={[styles.primaryBtn, { backgroundColor: accent }]}>
+          <Text style={styles.primaryText}>{t('battle.returnHome')}</Text>
         </Pressable>
       ) : (
         <View style={styles.controls}>
@@ -358,6 +404,8 @@ const styles = StyleSheet.create({
   summaryText: { ...typography.body, color: INK, fontWeight: '700' },
   summaryCoins: { ...typography.label, color: '#B8860B', fontWeight: '800' },
   summaryPrepared: { ...typography.caption, color: '#0A6E5C', fontWeight: '800' },
+  journey: { alignSelf: 'stretch', marginTop: spacing.md, gap: spacing.xs },
+  journeyCaption: { ...typography.label, color: INK, fontWeight: '800', textAlign: 'center' },
 
   controls: { gap: spacing.sm, marginBottom: spacing.md },
   primaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.lg, alignItems: 'center', marginBottom: spacing.md },

@@ -2,6 +2,7 @@ export { PrimaryButton } from './PrimaryButton';
 export { ScreenContainer } from './ScreenContainer';
 export { ScreenHeader } from './ScreenHeader';
 export { SectionLabel } from './SectionLabel';
+export { JourneyScene } from './JourneyScene';
 export { DataDangerZone } from './DataDangerZone';
 export { ProgressBar } from './ProgressBar';
 export { XPBar } from './XPBar';

@@ -101,7 +101,13 @@
     "lockMeIn": "🔒 Bloquéame",
     "lockedEndEarly": "🔒 Bloqueado · ¿Retirarte?",
     "endEarlyA11y": "Retirarte de esta batalla bloqueada",
-    "preparedBadge": "⚜️ La enfrentaste preparado (+25 🪙)"
+    "preparedBadge": "⚜️ La enfrentaste preparado (+25 🪙)",
+    "returnHome": "Volver al inicio",
+    "journey": {
+      "caption": "Día {{day}} de {{total}} — volviéndose automático",
+      "solidified": "Fijado 🌱 — sigue subiendo",
+      "graduated": "Funciona solo 🏁"
+    }
   },
   "den": {
     "title": "Guarida del Dragón",

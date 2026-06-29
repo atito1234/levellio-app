@@ -101,7 +101,13 @@
     "lockMeIn": "🔒 Verrouille-moi",
     "lockedEndEarly": "🔒 Verrouillé · Battre en retraite ?",
     "endEarlyA11y": "Battre en retraite de ce combat verrouillé",
-    "preparedBadge": "⚜️ Affronté préparé (+25 🪙)"
+    "preparedBadge": "⚜️ Affronté préparé (+25 🪙)",
+    "returnHome": "Retour à l'accueil",
+    "journey": {
+      "caption": "Jour {{day}} sur {{total}} — devient automatique",
+      "solidified": "Ancré 🌱 — continue de grimper",
+      "graduated": "Fonctionne tout seul 🏁"
+    }
   },
   "den": {
     "title": "Repaire du Dragon",

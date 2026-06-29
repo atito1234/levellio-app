@@ -101,7 +101,13 @@
     "lockMeIn": "🔒 Lock me in",
     "lockedEndEarly": "🔒 Locked in · Retreat?",
     "endEarlyA11y": "Retreat from this locked battle",
-    "preparedBadge": "⚜️ Faced it prepared (+25 🪙)"
+    "preparedBadge": "⚜️ Faced it prepared (+25 🪙)",
+    "returnHome": "Return home",
+    "journey": {
+      "caption": "Day {{day}} of {{total}} — becoming automatic",
+      "solidified": "Locked in 🌱 — keep climbing",
+      "graduated": "Runs on its own 🏁"
+    }
   },
   "den": {
     "title": "Dragon Den",
