@@ -53,7 +53,12 @@
     "share": "Share",
     "discover": "Discover",
     "close": "Close",
-    "community": "Community"
+    "community": "Community",
+    "analytics": "Analytics"
+  },
+  "hero": {
+    "viewAnalytics": "View analytics ›",
+    "a11yAnalytics": "View your analytics"
   },
   "capacitiesTitle": "Your capacities · last 7 days",
   "progress": "Progress ›",

@@ -40,6 +40,7 @@ export function MoreSheet({
     { key: 'community', icon: '🤝', label: t('dashboard:more.community'), onPress: () => go(() => navigation.navigate('Main', { screen: 'Projects' })) },
     { key: 'den', icon: '🐉', label: t('battle:den.title'), onPress: () => go(() => navigation.navigate('DragonDen')) },
     { key: 'achievements', icon: '🏆', label: t('achievements:title'), onPress: () => go(() => navigation.navigate('Achievements')) },
+    { key: 'analytics', icon: '📊', label: t('dashboard:more.analytics'), onPress: () => go(() => navigation.navigate('Analytics')) },
     { key: 'share', icon: '✏️', label: t('dashboard:more.share'), onPress: () => go(() => navigation.navigate('PostComposer')), show: canShare },
     { key: 'recipes', icon: '🍽️', label: t('recipes:screen.title'), onPress: () => go(() => navigation.navigate('Recipes')) },
     { key: 'journal', icon: '📓', label: t('dashboard:chips.journal'), onPress: () => go(() => navigation.navigate('Journal')) },

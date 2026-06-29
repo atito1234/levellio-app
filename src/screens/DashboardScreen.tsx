@@ -362,7 +362,12 @@ export function DashboardScreen() {
             ]}
           >
           <Text style={styles.billboardKicker}>{selectedGoal ? selectedGoal.title.toUpperCase() : t('dashboard:focusKicker')}</Text>
-          <View style={styles.ringStage}>
+          <Pressable
+            style={styles.ringStage}
+            onPress={() => navigation.navigate('Analytics')}
+            accessibilityRole="button"
+            accessibilityLabel={t('dashboard:hero.a11yAnalytics')}
+          >
             {/* subtle glassmorphism glow behind the ring */}
             <View style={[styles.glow, { backgroundColor: heroDone ? GOLD : focusAccent }]} pointerEvents="none" />
             <Svg width={HRING} height={HRING} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
@@ -390,8 +395,9 @@ export function DashboardScreen() {
               <Text style={styles.ringSub}>
                 {t('dashboard:ringSub', { done: progress.done, total: progress.total })}
               </Text>
+              <Text style={styles.ringAnalytics}>{t('dashboard:hero.viewAnalytics')}</Text>
             </View>
-          </View>
+          </Pressable>
 
           {focus ? (
             <View
@@ -705,6 +711,7 @@ const styles = StyleSheet.create({
   ringPctWrap: { width: HRING - 2 * HSTROKE - 24, alignItems: 'center' },
   ringPct: { ...typography.heading, color: INK, fontWeight: '900', fontSize: 34 },
   ringSub: { ...typography.caption, color: MUTED },
+  ringAnalytics: { ...typography.caption, color: VIOLET, fontWeight: '700', marginTop: 2 },
   focusBlock: { width: '100%', alignItems: 'center', gap: spacing.sm },
   focusName: { ...typography.title, color: INK, textAlign: 'center', fontWeight: '700' },
   focusFeeds: { ...typography.caption, color: MUTED, textAlign: 'center' },

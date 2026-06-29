@@ -53,7 +53,12 @@
     "share": "Compartir",
     "discover": "Descubrir",
     "close": "Cerrar",
-    "community": "Comunidad"
+    "community": "Comunidad",
+    "analytics": "Analíticas"
+  },
+  "hero": {
+    "viewAnalytics": "Ver analíticas ›",
+    "a11yAnalytics": "Ver tus analíticas"
   },
   "capacitiesTitle": "Tus capacidades · últimos 7 días",
   "progress": "Progreso ›",
