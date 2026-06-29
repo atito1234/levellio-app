@@ -47,7 +47,15 @@
     "connections": "🔗 Conexiones",
     "suggest": "✨ Sugerir"
   },
-  "more": { "title": "Más", "openLabel": "Más ▾", "share": "Compartir", "discover": "Descubrir", "close": "Cerrar" },
+  "more": {
+    "title": "Más",
+    "openLabel": "Más ▾",
+    "share": "Compartir",
+    "discover": "Descubrir",
+    "close": "Cerrar",
+    "focusGoal": "Enfocar una meta",
+    "community": "Comunidad"
+  },
   "capacitiesTitle": "Tus capacidades · últimos 7 días",
   "progress": "Progreso ›",
   "goalsEmptyTitle": "¿Qué quieres lograr?",
@@ -71,5 +79,11 @@
   "warStrategyA11y": "Prepara tu estrategia de guerra para {{title}}",
   "bringToFocusA11y": "Poner {{title}} en foco",
   "goalCardA11y": "{{title}}. {{done}} de {{planned}} hechos hoy, {{pct}} por ciento esta semana.{{selected}}",
-  "goalCardSelected": " Seleccionado."
+  "goalCardSelected": " Seleccionado.",
+  "focusPicker": {
+    "title": "Enfoca el día en…",
+    "allHabits": "Todos los hábitos",
+    "closeA11y": "Cerrar selector de enfoque"
+  },
+  "focusChipA11y": "Enfocado en {{goal}}. Toca para ver todos los hábitos."
 }
