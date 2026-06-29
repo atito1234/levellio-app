@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CapacityRing, ScreenContainer } from '@/components';
+import { CapacityRing, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useCapacities } from '@/state/CapacitiesContext';
 import { CAPACITIES } from '@/lib/compounding';
@@ -42,26 +42,20 @@ export function MonthlyProgressScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer backgroundColor={BG}>
-      <View style={styles.topbar}>
-        <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('a11yBack')} hitSlop={12}>
-          <Text style={styles.chevron}>‹</Text>
-        </Pressable>
-        <Text style={styles.title} accessibilityRole="header">
-          {t('title')}
-        </Text>
-        <Pressable
-          onPress={() => navigation.navigate('Insights')}
-          accessibilityRole="button"
-          accessibilityLabel={t('a11yInsights')}
-          hitSlop={10}
-        >
-          <Text style={styles.insightsLink}>{t('insightsLink')}</Text>
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title={t('title')}
+        onBack={() => navigation.goBack()}
+        backLabel={t('a11yBack')}
+        right={
+          <Pressable onPress={() => navigation.navigate('Insights')} accessibilityRole="button" accessibilityLabel={t('a11yInsights')} hitSlop={10}>
+            <Text style={styles.insightsLink}>{t('insightsLink')}</Text>
+          </Pressable>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* Current capacity rings (real, persisted). */}
-        <Text style={styles.sectionLabel}>{t('capacitiesNow')}</Text>
+        <SectionLabel>{t('capacitiesNow')}</SectionLabel>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.capStrip}>
           {CAPACITIES.map((cap) => {
             const lvl = Math.round(levels[cap.id]);
