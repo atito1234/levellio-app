@@ -3,7 +3,7 @@ import { Animated, Easing, Pressable, RefreshControl, ScrollView, StyleSheet, Te
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AppHeader, CommunityGate, HeroAvatar, PostCard, PressableScale, ScreenContainer, StoriesRail } from '@/components';
+import { AppHeader, CommunityGate, HeroAvatar, PostCard, PressableScale, ScreenContainer, StoriesRail, UgcConsentGate, useUgcConsent } from '@/components';
 import { useRoomTour } from '@/components/spotlight';
 import { spacing, typography } from '@/theme';
 import { durations, springs } from '@/theme/motion';
@@ -32,6 +32,7 @@ export function NewsfeedScreen() {
   const { t } = useTranslation(['feed', 'common', 'messaging']);
   useRoomTour('feed');
   const allowed = useCommunityAccess();
+  const { consented } = useUgcConsent();
   const { signedIn, subscribeFeed } = useCommunity();
   const { character } = useGame();
   const reduced = useReducedMotion();
@@ -103,6 +104,16 @@ export function NewsfeedScreen() {
       <ScreenContainer backgroundColor={BG}>
         {header}
         <CommunityGate onPrimary={() => navigation.navigate('SignIn')} />
+      </ScreenContainer>
+    );
+  }
+
+  // Must accept community rules + confirm age before entering (Apple 1.2 / Google UGC).
+  if (!consented) {
+    return (
+      <ScreenContainer backgroundColor={BG}>
+        {header}
+        <UgcConsentGate />
       </ScreenContainer>
     );
   }

@@ -89,5 +89,20 @@
     "adoptedBodyProject": "“{{habit}}” is now a daily habit of yours, powering {{project}}. Find it on your Today."
   },
   "filterAll": "All",
-  "emptyCategory": "No posts in this area yet."
+  "emptyCategory": "No posts in this area yet.",
+  "consent": {
+    "title": "Welcome to the community",
+    "body": "A quick agreement before you join in.",
+    "rules": [
+      "Be kind and supportive — we're all building habits together.",
+      "No harassment, hate speech, threats, or explicit content.",
+      "No spam or impersonation.",
+      "Report anything that breaks these rules — we act within 24 hours.",
+      "Breaking the rules can get your content removed and your access revoked."
+    ],
+    "age": "I am 17 years of age or older",
+    "agree": "I agree — let me in",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  }
 }

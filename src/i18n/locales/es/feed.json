@@ -89,5 +89,20 @@
     "adoptedBodyProject": "«{{habit}}» ahora es un hábito diario tuyo, impulsando {{project}}. Encuéntralo en tu Hoy."
   },
   "filterAll": "Todo",
-  "emptyCategory": "Aún no hay publicaciones en esta área."
+  "emptyCategory": "Aún no hay publicaciones en esta área.",
+  "consent": {
+    "title": "Bienvenido a la comunidad",
+    "body": "Un acuerdo rápido antes de unirte.",
+    "rules": [
+      "Sé amable y solidario — todos construimos hábitos juntos.",
+      "Sin acoso, discurso de odio, amenazas ni contenido explícito.",
+      "Sin spam ni suplantación de identidad.",
+      "Reporta cualquier cosa que rompa estas reglas — actuamos en 24 horas.",
+      "Romper las reglas puede eliminar tu contenido y revocar tu acceso."
+    ],
+    "age": "Tengo 17 años o más",
+    "agree": "Acepto — déjame entrar",
+    "terms": "Términos del servicio",
+    "privacy": "Política de privacidad"
+  }
 }

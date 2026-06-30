@@ -3,7 +3,7 @@ import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, St
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
-import { CommunityGate, ScreenContainer } from '@/components';
+import { CommunityGate, ScreenContainer, UgcConsentGate, useUgcConsent } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
 import { useProjects } from '@/state/ProjectsContext';
@@ -32,6 +32,7 @@ export function PostComposerScreen({ route, navigation }: Props) {
   const { createPost, uid } = useCommunity();
   const { myProjects } = useProjects();
   const { settings, update } = useSettings();
+  const { consented } = useUgcConsent();
   const isAsk = route.params?.kind === 'ask';
   const isWin = route.params?.kind === 'contribution';
   const winHabit = route.params?.habitTitle;
@@ -116,6 +117,15 @@ export function PostComposerScreen({ route, navigation }: Props) {
     return (
       <ScreenContainer backgroundColor={BG}>
         <CommunityGate onPrimary={() => navigation.navigate('SignIn')} />
+      </ScreenContainer>
+    );
+  }
+
+  // …and acceptance of the community rules + age (Apple 1.2 / Google UGC).
+  if (!consented) {
+    return (
+      <ScreenContainer backgroundColor={BG}>
+        <UgcConsentGate onAccepted={() => undefined} />
       </ScreenContainer>
     );
   }

@@ -74,6 +74,13 @@ export interface AppSettings {
   feedTourSeen?: boolean;
   projectsTourSeen?: boolean;
   settingsTourSeen?: boolean;
+  /**
+   * Community consent (required before any user-generated content): epoch ms when
+   * the user accepted the community rules + Terms + Privacy. Absent = not accepted.
+   */
+  communityTermsAcceptedAt?: number;
+  /** Confirmed they are 17 or older (backs the 17+ store rating). */
+  ageConfirmed?: boolean;
   /** Where the user said they heard about Levellio (onboarding attribution). */
   attributionSource?: string;
   /** Preferred reminder time of day captured in onboarding ('morning'|'afternoon'|'evening'). */
@@ -145,6 +152,8 @@ export function normalizeSettings(raw: unknown): AppSettings {
     ...(r.feedTourSeen === true ? { feedTourSeen: true } : {}),
     ...(r.projectsTourSeen === true ? { projectsTourSeen: true } : {}),
     ...(r.settingsTourSeen === true ? { settingsTourSeen: true } : {}),
+    ...(typeof r.communityTermsAcceptedAt === 'number' ? { communityTermsAcceptedAt: r.communityTermsAcceptedAt } : {}),
+    ...(r.ageConfirmed === true ? { ageConfirmed: true } : {}),
     ...(typeof r.attributionSource === 'string' ? { attributionSource: r.attributionSource } : {}),
     ...(typeof r.reminderTime === 'string' ? { reminderTime: r.reminderTime } : {}),
     ...(r.onboardingAnswers && typeof r.onboardingAnswers === 'object'

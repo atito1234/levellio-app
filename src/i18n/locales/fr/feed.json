@@ -89,5 +89,20 @@
     "adoptedBodyProject": "« {{habit}} » est désormais une de vos habitudes quotidiennes, au service de {{project}}. Retrouvez-la dans votre Aujourd'hui."
   },
   "filterAll": "Tout",
-  "emptyCategory": "Pas encore de publications dans ce domaine."
+  "emptyCategory": "Pas encore de publications dans ce domaine.",
+  "consent": {
+    "title": "Bienvenue dans la communauté",
+    "body": "Un accord rapide avant de vous lancer.",
+    "rules": [
+      "Soyez bienveillant et solidaire — nous bâtissons des habitudes ensemble.",
+      "Aucun harcèlement, propos haineux, menace ou contenu explicite.",
+      "Aucun spam ni usurpation d'identité.",
+      "Signalez tout ce qui enfreint ces règles — nous agissons sous 24 heures.",
+      "Enfreindre les règles peut supprimer votre contenu et révoquer votre accès."
+    ],
+    "age": "J'ai 17 ans ou plus",
+    "agree": "J'accepte — laissez-moi entrer",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité"
+  }
 }

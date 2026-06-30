@@ -30,6 +30,7 @@ export { StoriesRail } from './StoriesRail';
 export { PressableScale } from './PressableScale';
 export { SelectActivitySheet } from './SelectActivitySheet';
 export { LibraryPickerSheet, type LibraryPrefill } from './LibraryPickerSheet';
+export { UgcConsentGate, useUgcConsent } from './UgcConsentGate';
 export { ChecklistPicker } from './ChecklistPicker';
 export { MoreSheet } from './MoreSheet';
 export { AppHeader } from './AppHeader';
