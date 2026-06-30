@@ -4,7 +4,7 @@
  *   B) swipe right/left to choose the activities that build it
  *   C) cast your first vote — do one right now for an instant win.
  * Reuses GOAL_TEMPLATES, HABIT_LIBRARY, addGoal/linkGoals, addLibraryHabit/addQuest,
- * togglePlanned and useCompleteActivity — no new data model.
+ * togglePlanned — and hands the first vote to the ActivityTimer. No new data model.
  */
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -16,7 +16,6 @@ import { spacing, typography } from '@/theme';
 import { useGoals } from '@/state/GoalContext';
 import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
-import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { GOAL_TEMPLATES, type GoalTemplate } from '@/data/goalTemplates';
 import { HABIT_LIBRARY } from '@/data/habitLibrary';
 import { getBucketColor, type BucketColorId } from '@/lib/buckets';
@@ -45,7 +44,6 @@ export function NewGoalFlowScreen({ navigation }: Props) {
   const { addGoal, linkGoals } = useGoals();
   const { addLibraryHabit, addQuest } = useGame();
   const { togglePlanned } = usePlan();
-  const completeActivity = useCompleteActivity();
 
   const [step, setStep] = useState<Step>('identity');
   const [template, setTemplate] = useState<GoalTemplate | null>(null);
@@ -128,9 +126,11 @@ export function NewGoalFlowScreen({ navigation }: Props) {
     else setStep('firstVote');
   };
 
-  const castVote = async (quest: Quest) => {
-    await completeActivity(quest, { method: 'manual', durationSec: 0 });
-    navigation.goBack(); // celebration fires via the app-root MilestoneCelebration
+  // Casting a vote = actually DOING the activity: hand off to the focus timer
+  // (where the rep is logged and the screen can be locked), replacing this flow
+  // so finishing returns the user Home. The goal + quests are already created.
+  const castVote = (quest: Quest) => {
+    navigation.replace('ActivityTimer', { questId: quest.id });
   };
 
   return (

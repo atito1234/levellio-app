@@ -10,7 +10,11 @@
 import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { PressableScale, PrimaryButton } from '@/components';
+// Import directly (not via the '@/components' barrel) — the barrel re-exports this
+// file, so importing from it creates a require cycle that can leave these
+// components undefined at render and crash the screen.
+import { PressableScale } from '@/components/PressableScale';
+import { PrimaryButton } from '@/components/PrimaryButton';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBuckets } from '@/state/BucketsContext';
