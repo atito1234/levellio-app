@@ -18,5 +18,65 @@
   "finish": {
     "title": "Tout est prêt ✨",
     "body": "C'est la fin du tour. Lancez-vous — votre héros progresse à chaque fois que vous êtes au rendez-vous."
+  },
+  "rooms": {
+    "warRoom": {
+      "intro": {
+        "title": "Bienvenue dans la Salle de Guerre",
+        "body": "C'est ici que vos intentions deviennent une action concentrée. Vous choisirez ce que vous combattez, comment vous concentrer et ce que vous ferez — puis vous lancerez une séance sans distraction."
+      },
+      "dragon": {
+        "title": "Choisissez votre dragon",
+        "body": "Votre dragon est l'obstacle que vous affrontez : distraction, procrastination, doute. Le nommer aide à le vaincre. Choisissez celui qui vous bloque aujourd'hui, ou créez le vôtre."
+      },
+      "gadget": {
+        "title": "Choisissez un gadget de guerre",
+        "body": "Un gadget de guerre est votre technique de concentration, comme Pomodoro ou Travail profond. Chacun fixe la durée de concentration avant une pause. Choisissez selon votre énergie — la note 🧠 explique pourquoi ça marche."
+      },
+      "missions": {
+        "title": "Choisissez vos missions",
+        "body": "Les missions sont les activités que vous ferez pendant cette séance. Ajoutez-en une ou plusieurs, puis touchez Commencer le combat."
+      }
+    },
+    "planner": {
+      "intro": {
+        "title": "Planifiez vos journées",
+        "body": "Le planificateur est votre calendrier d'habitudes. Touchez un jour pour voir ce qui est prévu et ajouter des activités à l'avance."
+      },
+      "checklists": {
+        "title": "Les listes de chaque jour",
+        "body": "Sous la date sélectionnée, vous ne voyez que les listes de ce jour, aux couleurs assorties au calendrier. Touchez « Voir toutes les listes » pour toutes les afficher."
+      }
+    },
+    "feed": {
+      "intro": {
+        "title": "Votre fil communautaire",
+        "body": "Le fil est l'endroit où vous et les autres partagez vos réussites et vos encouragements sur le même chemin."
+      },
+      "privacy": {
+        "title": "Vous gardez le contrôle",
+        "body": "Les publications sont privées par défaut — vous choisissez qui voit chacune. Partagez une série ou une séance difficile quand vous voulez ; c'est toujours facultatif."
+      }
+    },
+    "projects": {
+      "intro": {
+        "title": "Projets communautaires",
+        "body": "Les projets vous permettent de bâtir des habitudes ensemble vers un objectif concret partagé."
+      },
+      "join": {
+        "title": "Rejoignez ou préparez",
+        "body": "Choisissez un projet qui vous inspire. Les habitudes que vous faites déjà peuvent y compter — petites actions, grand impact collectif."
+      }
+    },
+    "settings": {
+      "intro": {
+        "title": "Personnalisez l'app",
+        "body": "Les réglages vous permettent de contrôler la confidentialité, la langue, l'IA, votre héros et plus encore. Tout est privé par défaut."
+      },
+      "helpers": {
+        "title": "Revoyez les astuces quand vous voulez",
+        "body": "Besoin d'un rappel ? Réactivez ces astuces de première utilisation ici dès que vous le souhaitez."
+      }
+    }
   }
 }

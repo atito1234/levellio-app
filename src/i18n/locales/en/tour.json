@@ -18,5 +18,65 @@
   "finish": {
     "title": "You're all set ✨",
     "body": "That's the tour. Dive in — your hero levels up every time you show up."
+  },
+  "rooms": {
+    "warRoom": {
+      "intro": {
+        "title": "Welcome to the War Room",
+        "body": "This is where you turn intentions into focused action. You'll pick what you're fighting, how you'll focus, and what you'll actually do — then start a distraction-free session."
+      },
+      "dragon": {
+        "title": "Choose your dragon",
+        "body": "Your dragon is the obstacle you're battling — distraction, procrastination, self-doubt. Naming it makes it easier to beat. Pick the one in your way today, or create your own."
+      },
+      "gadget": {
+        "title": "Pick a war gadget",
+        "body": "A war gadget is your focus technique, like Pomodoro or Deep Work. Each one sets how long you focus before a break. Choose what fits your energy — the 🧠 note explains why it works."
+      },
+      "missions": {
+        "title": "Choose your missions",
+        "body": "Missions are the activities you'll do this session. Add one or a few, then tap Begin battle to start a focused run."
+      }
+    },
+    "planner": {
+      "intro": {
+        "title": "Plan your days",
+        "body": "The planner is your calendar of habits. Tap any day to see what's scheduled and add activities ahead of time."
+      },
+      "checklists": {
+        "title": "Each day's checklists",
+        "body": "Under the selected date you'll see only that day's checklists, color-matched to the calendar. Tap \"View all checklists\" to see every list."
+      }
+    },
+    "feed": {
+      "intro": {
+        "title": "Your community feed",
+        "body": "The feed is where you and others share wins and encouragement on the same journey."
+      },
+      "privacy": {
+        "title": "You're in control",
+        "body": "Posts are private by default — you choose who sees each one. Share a streak or a hard-won session whenever you like; it's always optional."
+      }
+    },
+    "projects": {
+      "intro": {
+        "title": "Community Projects",
+        "body": "Projects let you build habits together toward a shared, real-world goal."
+      },
+      "join": {
+        "title": "Join or prepare",
+        "body": "Pick a project that inspires you. The habits you already do can count toward it — small actions, big collective impact."
+      }
+    },
+    "settings": {
+      "intro": {
+        "title": "Make it yours",
+        "body": "Settings is where you control privacy, language, AI, your hero and more. Everything is private by default."
+      },
+      "helpers": {
+        "title": "Replay tips anytime",
+        "body": "Want a refresher? Turn these first-time tips back on here whenever you want them again."
+      }
+    }
   }
 }

@@ -41,8 +41,12 @@ interface SpotlightContextValue {
   /** The running tour's steps, or null when idle. */
   steps: TourStep[] | null;
   index: number;
-  /** Begin a tour. No-op if one is already running. */
-  start: (steps: TourStep[]) => void;
+  /**
+   * Begin a tour. No-op if one is already running. Pass an optional per-tour
+   * `onDone` to persist that tour's own completion flag (e.g. a per-room tour);
+   * when omitted, the provider's default `onDone` runs.
+   */
+  start: (steps: TourStep[], onDone?: () => void) => void;
   next: () => void;
   /** End early. Both finish + skip call `onDone` so callers can persist a flag. */
   skip: () => void;
@@ -65,16 +69,25 @@ export function SpotlightProvider({
   const [index, setIndex] = useState(0);
   const targets = useRef<Map<string, SpotlightRect>>(new Map());
   const [, force] = useState(0);
+  const runningRef = useRef(false);
+  // The completion callback for the tour currently running (per-tour override).
+  const tourDoneRef = useRef<(() => void) | undefined>(undefined);
 
-  const start = useCallback((next: TourStep[]) => {
-    setSteps((cur) => (cur ? cur : next.length ? next : null));
+  const start = useCallback((nextSteps: TourStep[], onTourDone?: () => void) => {
+    if (runningRef.current || nextSteps.length === 0) return;
+    runningRef.current = true;
+    tourDoneRef.current = onTourDone;
+    setSteps(nextSteps);
     setIndex(0);
   }, []);
 
   const end = useCallback(() => {
+    runningRef.current = false;
     setSteps(null);
     setIndex(0);
-    onDone?.();
+    const cb = tourDoneRef.current;
+    tourDoneRef.current = undefined;
+    (cb ?? onDone)?.();
   }, [onDone]);
 
   const next = useCallback(() => {

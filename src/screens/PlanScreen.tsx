@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AddActivityFab, AddActivitySheet, ChecklistPicker, ProjectBadge, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { useRoomTour } from '@/components/spotlight';
 import { radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useChecklists } from '@/state/ChecklistsContext';
@@ -57,6 +58,7 @@ export function PlanScreen({ route, navigation }: Props) {
 
   const todayK = dayKey(new Date());
   useMaterializeRecurring([todayK, route.params?.day ?? todayK]);
+  useRoomTour('planner');
 
   const [view, setView] = useState<CalView>('month');
   const [selected, setSelected] = useState(() => route.params?.day ?? todayK);

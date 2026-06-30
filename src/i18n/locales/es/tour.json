@@ -18,5 +18,65 @@
   "finish": {
     "title": "¡Todo listo! ✨",
     "body": "Ese fue el tour. Adelante — tu héroe sube de nivel cada vez que apareces."
+  },
+  "rooms": {
+    "warRoom": {
+      "intro": {
+        "title": "Bienvenido a la Sala de Guerra",
+        "body": "Aquí conviertes tus intenciones en acción enfocada. Elegirás contra qué luchas, cómo te concentrarás y qué harás — y luego comenzarás una sesión sin distracciones."
+      },
+      "dragon": {
+        "title": "Elige tu dragón",
+        "body": "Tu dragón es el obstáculo que enfrentas: distracción, procrastinación, dudas. Ponerle nombre facilita vencerlo. Elige el que se interpone hoy, o crea el tuyo."
+      },
+      "gadget": {
+        "title": "Elige un artilugio de guerra",
+        "body": "Un artilugio de guerra es tu técnica de enfoque, como Pomodoro o Trabajo Profundo. Cada uno define cuánto te concentras antes de un descanso. Elige el que encaje con tu energía — la nota 🧠 explica por qué funciona."
+      },
+      "missions": {
+        "title": "Elige tus misiones",
+        "body": "Las misiones son las actividades que harás en esta sesión. Añade una o varias y toca Iniciar batalla para empezar."
+      }
+    },
+    "planner": {
+      "intro": {
+        "title": "Planifica tus días",
+        "body": "El planificador es tu calendario de hábitos. Toca cualquier día para ver lo programado y añadir actividades con antelación."
+      },
+      "checklists": {
+        "title": "Las listas de cada día",
+        "body": "Bajo la fecha seleccionada verás solo las listas de ese día, con colores que coinciden con el calendario. Toca \"Ver todas las listas\" para verlas todas."
+      }
+    },
+    "feed": {
+      "intro": {
+        "title": "Tu feed de comunidad",
+        "body": "El feed es donde tú y otros comparten logros y ánimos en el mismo camino."
+      },
+      "privacy": {
+        "title": "Tú tienes el control",
+        "body": "Las publicaciones son privadas por defecto — tú eliges quién ve cada una. Comparte una racha o una sesión difícil cuando quieras; siempre es opcional."
+      }
+    },
+    "projects": {
+      "intro": {
+        "title": "Proyectos comunitarios",
+        "body": "Los proyectos te permiten construir hábitos juntos hacia una meta real compartida."
+      },
+      "join": {
+        "title": "Únete o prepárate",
+        "body": "Elige un proyecto que te inspire. Los hábitos que ya haces pueden contar para él — pequeñas acciones, gran impacto colectivo."
+      }
+    },
+    "settings": {
+      "intro": {
+        "title": "Hazlo tuyo",
+        "body": "En Ajustes controlas privacidad, idioma, IA, tu héroe y más. Todo es privado por defecto."
+      },
+      "helpers": {
+        "title": "Repite los consejos cuando quieras",
+        "body": "¿Quieres un repaso? Vuelve a activar estos consejos iniciales aquí cuando los necesites de nuevo."
+      }
+    }
   }
 }

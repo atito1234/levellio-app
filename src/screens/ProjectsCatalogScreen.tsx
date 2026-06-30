@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppHeader, CommunityGate, ScreenContainer, SectionLabel } from '@/components';
+import { useRoomTour } from '@/components/spotlight';
 import { radii, shadows, spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useProjects } from '@/state/ProjectsContext';
@@ -28,6 +29,7 @@ const MUTED = '#5A5A72';
 export function ProjectsCatalogScreen() {
   const { t } = useTranslation('projects');
   const navigation = useNavigation<Nav>();
+  useRoomTour('projects');
   const { account } = useAuth();
   const { signedIn, isShared, featured, myProjects, refresh } = useProjects();
   const { settings } = useSettings();

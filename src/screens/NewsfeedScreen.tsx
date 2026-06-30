@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppHeader, CommunityGate, HeroAvatar, PostCard, PressableScale, ScreenContainer, StoriesRail } from '@/components';
+import { useRoomTour } from '@/components/spotlight';
 import { spacing, typography } from '@/theme';
 import { durations, springs } from '@/theme/motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -29,6 +30,7 @@ type ScopeKey = 'all' | 'network';
 export function NewsfeedScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useTranslation(['feed', 'common', 'messaging']);
+  useRoomTour('feed');
   const allowed = useCommunityAccess();
   const { signedIn, subscribeFeed } = useCommunity();
   const { character } = useGame();
