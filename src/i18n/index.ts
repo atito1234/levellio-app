@@ -3,6 +3,9 @@
  * so the first render already has strings. The active language is driven by the
  * user's settings (see SettingsContext), which calls `setI18nLanguage`.
  */
+// Guarantees Intl.PluralRules on every JS engine (Hermes included) so i18next's
+// v4 plural keys (`_one`/`_other`) resolve. Must run before i18n init.
+import 'intl-pluralrules';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { DEFAULT_LOCALE, NAMESPACES, type SupportedLocale } from './config';
@@ -24,9 +27,10 @@ export function initI18n(initialLocale: SupportedLocale = DEFAULT_LOCALE) {
     ns: NAMESPACES as unknown as string[],
     defaultNS: 'common',
     returnNull: false,
-    // Hermes lacks Intl.PluralRules; use the v3 plural format (we use manual
-    // _one/_other keys anyway) so i18next doesn't log a console error.
-    compatibilityJSON: 'v3',
+    // Plural keys use i18next v4 form (`_one`/`_other`); `intl-pluralrules`
+    // (imported above) supplies Intl.PluralRules so they resolve on Hermes.
+    // (Previously `compatibilityJSON: 'v3'` forced the old `_plural` form and
+    // made every `_one`/`_other` key render as a raw key.)
     // Blank values (e.g. experimental Haitian Creole) fall back to English.
     returnEmptyString: false,
     interpolation: { escapeValue: false }, // React already escapes
