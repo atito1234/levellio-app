@@ -45,6 +45,7 @@ export function LibraryPickerSheet({
   defaultGoalId = null,
   onPick,
   onPrefill,
+  embedded = false,
 }: {
   visible: boolean;
   onClose: () => void;
@@ -54,6 +55,12 @@ export function LibraryPickerSheet({
   onPick?: (quest: Quest) => void;
   /** When set, picking an idea returns its fields to prefill a form instead. */
   onPrefill?: (prefill: LibraryPrefill) => void;
+  /**
+   * Render as an in-tree absolute overlay instead of its own Modal. REQUIRED when
+   * the host is itself a React Native Modal (e.g. AddActivitySheet,
+   * SelectActivitySheet) — two stacked RN Modals deadlock iOS into a frozen screen.
+   */
+  embedded?: boolean;
 }) {
   const { t } = useTranslation('quests');
   const { quests, addLibraryHabit } = useGame();
@@ -128,9 +135,8 @@ export function LibraryPickerSheet({
   const isAdded = (h: LibraryHabit) =>
     addedIds.includes(h.id) || findDuplicateActivity(quests, habitTitle(h)) !== undefined;
 
-  return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+  const body = (
+    <>
         <Pressable style={styles.backdropTap} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('library.done')} />
         <View style={styles.sheet}>
           <View style={styles.head}>
@@ -221,6 +227,19 @@ export function LibraryPickerSheet({
             {sections.length === 0 && <Text style={styles.empty}>{t('library.noIdeas')}</Text>}
           </ScrollView>
         </View>
+    </>
+  );
+
+  // Embedded: an in-tree overlay (no second Modal) so it can safely sit over a
+  // host that is already a Modal. Standalone: its own Modal (fine over a screen).
+  if (embedded) {
+    if (!visible) return null;
+    return <View style={styles.embeddedOverlay}>{body}</View>;
+  }
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {body}
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -228,6 +247,7 @@ export function LibraryPickerSheet({
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
+  embeddedOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end', zIndex: 1000, elevation: 1000 },
   backdropTap: { flex: 1 },
   sheet: { backgroundColor: colors.background, borderTopLeftRadius: radii.xl, borderTopRightRadius: radii.xl, padding: spacing.lg, maxHeight: '88%', gap: spacing.sm },
   head: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.md },

@@ -220,7 +220,6 @@ export function AddActivitySheet({
   };
 
   return (
-    <>
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {/* Tap the dimmed area above the sheet to dismiss. */}
@@ -418,18 +417,18 @@ export function AddActivitySheet({
             <Text style={styles.addBtnText}>{t('addActivity')}</Text>
           </Pressable>
         </View>
+        <LibraryPickerSheet
+          embedded
+          visible={libraryOpen}
+          onClose={() => setLibraryOpen(false)}
+          defaultGoalId={goalId}
+          onPrefill={(p) => {
+            setTitle(p.title);
+            setAdded(null);
+          }}
+        />
       </KeyboardAvoidingView>
     </Modal>
-    <LibraryPickerSheet
-      visible={libraryOpen}
-      onClose={() => setLibraryOpen(false)}
-      defaultGoalId={goalId}
-      onPrefill={(p) => {
-        setTitle(p.title);
-        setAdded(null);
-      }}
-    />
-    </>
   );
 }
 
