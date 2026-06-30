@@ -7,6 +7,7 @@ import { ScreenContainer, ScreenHeader, HeroAvatar } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useJournal } from '@/state/JournalContext';
+import { CATEGORY_COLOR, CATEGORY_META } from '@/lib/categories';
 import { audienceMeta, moodMeta, type JournalEntry } from '@/lib/journal';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -80,6 +81,10 @@ function EntryCard({
 }) {
   const { t } = useTranslation('journal');
   const { addFollowUp } = useJournal();
+  const { quests } = useGame();
+  const linkedActivities = (entry.questIds ?? [])
+    .map((id) => quests.find((q) => q.id === id))
+    .filter((q): q is NonNullable<typeof q> => !!q);
   const [note, setNote] = useState('');
   const aud = audienceMeta(entry.audience);
   const audLabel = t(`audience.${entry.audience}.label`);
@@ -104,6 +109,17 @@ function EntryCard({
           </Text>
         </View>
       </View>
+
+      {linkedActivities.length > 0 && (
+        <View style={styles.actvRow}>
+          {linkedActivities.map((q) => (
+            <View key={q.id} style={styles.actvChip}>
+              <View style={[styles.actvDot, { backgroundColor: CATEGORY_COLOR[q.category] }]} />
+              <Text style={styles.actvChipText} numberOfLines={1}>{CATEGORY_META[q.category].icon} {q.title}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {entry.text.length > 0 && <Text style={styles.body}>{entry.text}</Text>}
 
@@ -162,6 +178,10 @@ const styles = StyleSheet.create({
   you: { ...typography.body, color: INK, fontWeight: '800' },
   meta: { ...typography.caption, color: MUTED },
   body: { ...typography.body, color: INK },
+  actvRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  actvChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: VIOLET_SOFT, borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4, maxWidth: '100%' },
+  actvDot: { width: 8, height: 8, borderRadius: radii.pill },
+  actvChipText: { ...typography.caption, color: VIOLET, fontWeight: '700', flexShrink: 1 },
   media: { width: '100%', height: 200, borderRadius: 14, backgroundColor: TRACK },
   videoTile: { width: '100%', height: 110, borderRadius: 14, backgroundColor: VIOLET_SOFT, alignItems: 'center', justifyContent: 'center' },
   videoTileText: { ...typography.body, color: VIOLET, fontWeight: '700' },

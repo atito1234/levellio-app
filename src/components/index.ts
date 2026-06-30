@@ -43,6 +43,7 @@ export { AddActivitySheet } from './AddActivitySheet';
 export { TimePicker } from './TimePicker';
 export { MiniCalendar } from './MiniCalendar';
 export { DialTimer } from './DialTimer';
+export { ActivityPickerDeck } from './ActivityPickerDeck';
 export { StatTile } from './analytics/StatTile';
 export { Pill, type PillTone } from './analytics/Pill';
 export { AnalyticsEmptyState } from './analytics/EmptyState';
