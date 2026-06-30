@@ -11,6 +11,7 @@
     "pastReflectionsA11y": "Ver {{count}} reflexiones pasadas",
     "pastReflectionsLink": "{{n}} pasadas ›",
     "defaultPrompt": "¿Qué te detiene? Ponle nombre al dragón.",
+    "theseHabits": "estos hábitos",
     "lastReflection": "Última: {{emoji}} {{text}}",
     "reflectionSaved": "Reflexión guardada",
     "addAnotherReflection": "Añadir otra reflexión ›",

@@ -29,7 +29,10 @@ export function useAchievementStats(): AchievementEvidenceCtx {
   const { events } = useActivityLog();
 
   const sessions = useMemo(() => sessionsOf(events), [events]);
-  const todayKey = dayKey(new Date());
+  // Stable for the component's life — `new Date()` per render gave `todayKey` a new
+  // string each render, which made `stats`/the returned ctx churn every render and
+  // cascaded into an infinite re-render via AchievementCelebrationHost on Home.
+  const todayKey = useMemo(() => dayKey(new Date()), []);
   const weekdayNames = (t('common:weekdaysShort', { returnObjects: true }) as string[]) ?? [];
 
   const stats = useMemo<AchievementStats>(() => {
@@ -94,5 +97,10 @@ export function useAchievementStats(): AchievementEvidenceCtx {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessions, quests, levels, goals.length, totalSlain, ritesPerformed, myProjects.length, character?.streakDays, todayKey]);
 
-  return { stats, sessions: sessions as readonly ActivitySessionEvent[], todayKey };
+  // Memoize the ctx object so consumers (evaluateAchievements, the celebration
+  // host) get a stable identity that only changes when the stats actually change.
+  return useMemo(
+    () => ({ stats, sessions: sessions as readonly ActivitySessionEvent[], todayKey }),
+    [stats, sessions, todayKey],
+  );
 }

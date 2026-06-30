@@ -11,6 +11,7 @@
     "pastReflectionsA11y": "Voir {{count}} réflexions passées",
     "pastReflectionsLink": "{{n}} passées ›",
     "defaultPrompt": "Qu’est-ce qui te bloque ? Nomme le dragon.",
+    "theseHabits": "ces habitudes",
     "lastReflection": "Dernière : {{emoji}} {{text}}",
     "reflectionSaved": "Réflexion enregistrée",
     "addAnotherReflection": "Ajouter une autre réflexion ›",

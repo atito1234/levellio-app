@@ -149,13 +149,22 @@ export function BattleSetupScreen({ route, navigation }: Props) {
     });
   };
 
-  const openReflect = () =>
+  // A reflection prompt personalized to THIS dragon and ALL the chosen activities
+  // (not just the first) — so the question feels pointed and earned.
+  const openReflect = () => {
+    const titles = selectedQuests.map((q) => q.title);
+    const activities = titles.length > 0 ? titles.join(', ') : t('setup.theseHabits');
+    const prompt = t(`dragons:${dragonId}.reflect`, { activities, defaultValue: t('dragons:custom.reflect', { activities }) });
+    const dragonWhy = t(`dragons:${dragonId}.reflectWhy`, { defaultValue: t('dragons:custom.reflectWhy') });
+    const teaching = ctx?.teaching ? `${dragonWhy}\n\n${ctx.teaching}` : dragonWhy;
     navigation.navigate('JournalComposer', {
       dragonId,
       dragonName: resolvedDragonName,
       questIds: [...selected],
-      ...(ctx ? { prompt: ctx.prompt, teaching: ctx.teaching } : {}),
+      prompt,
+      teaching,
     });
+  };
 
   const openCoaching = () => {
     const secs = workSeconds(getTechnique(techniqueId), customMin);

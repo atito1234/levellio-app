@@ -3,42 +3,56 @@
     "name": "le Dragon de la Paresse",
     "short": "Paresse",
     "taunt": "« Tu le feras demain… »",
-    "victory": "Paresse terrassée — l’élan est à toi."
+    "victory": "Paresse terrassée — l’élan est à toi.",
+    "reflect": "La Paresse murmure « demain ». Tu as choisi {{activities}} — que gagne celui qui agit maintenant, que ton « toi de demain » continue de perdre ?",
+    "reflectWhy": "La paresse se nourrit du report. Une répétition commencée l’affame."
   },
   "fear": {
     "name": "le Dragon de la Peur",
     "short": "Peur",
     "taunt": "« Et si tu échoues ? »",
-    "victory": "Peur terrassée — tu as avancé malgré tout."
+    "victory": "Peur terrassée — tu as avancé malgré tout.",
+    "reflect": "La Peur demande « et si tu échoues ? ». Imagine finir {{activities}} aujourd’hui — quel est le pire qui arrive vraiment, et qui deviens-tu en le faisant malgré la peur ?",
+    "reflectWhy": "Le courage n’est pas l’absence de peur : c’est agir avant de se sentir prêt."
   },
   "unworthiness": {
     "name": "le Dragon de l’Indignité",
     "short": "Indignité",
     "taunt": "« Tu n’es pas à la hauteur. »",
-    "victory": "Indignité terrassée — tu as été présent pour toi."
+    "victory": "Indignité terrassée — tu as été présent pour toi.",
+    "reflect": "L’Indignité dit que tu n’es pas assez. Que prouverait à cette voix le fait de faire {{activities}} — et à qui est cette voix, au fond ?",
+    "reflectWhy": "La valeur se construit en se montrant, pas en attendant de se sentir digne."
   },
   "tooold": {
     "name": "le Dragon du « Trop Vieux »",
     "short": "« Trop Vieux »",
     "taunt": "« Il est trop tard pour changer. »",
-    "victory": "« Trop Vieux » terrassé — aujourd’hui compte."
+    "victory": "« Trop Vieux » terrassé — aujourd’hui compte.",
+    "reflect": "« Trop tard » est le mensonge. Si l’âge n’existait pas, comment attaquerais-tu {{activities}} — et quelle répétition le rend réel aujourd’hui ?",
+    "reflectWhy": "Le meilleur jour était hier ; le suivant, c’est aujourd’hui."
   },
   "procrastination": {
     "name": "le Dragon de la Procrastination",
     "short": "Procrastination",
     "taunt": "« Encore cinq minutes… »",
-    "victory": "Procrastination terrassée — tu as commencé."
+    "victory": "Procrastination terrassée — tu as commencé.",
+    "reflect": "La Procrastination adore le « dans une minute ». Quel est le plus petit premier pas sur {{activities}} dont tu ne peux pas te défiler — et qu’est-ce qui le déclenchera ?",
+    "reflectWhy": "Commencer, c’est toute la bataille : le mouvement crée l’élan."
   },
   "doubt": {
     "name": "le Dragon du Doute",
     "short": "Doute",
     "taunt": "« Ça ne marchera même pas. »",
-    "victory": "Doute terrassé — la preuve plutôt que l’avis."
+    "victory": "Doute terrassé — la preuve plutôt que l’avis.",
+    "reflect": "Le Doute demande « est-ce que ça marchera ? ». Quelle preuve passée dit que tu peux faire {{activities}} — et quelle preuve ajouteras-tu aujourd’hui ?",
+    "reflectWhy": "La preuve l’emporte sur l’avis. Chaque répétition est une preuve."
   },
   "custom": {
     "name": "ton Dragon",
     "short": "Perso",
     "taunt": "« Tu ne peux pas me vaincre. »",
-    "victory": "Dragon terrassé — bien joué."
+    "victory": "Dragon terrassé — bien joué.",
+    "reflect": "Nomme ton dragon. Qu’est-ce qui t’empêche vraiment de faire {{activities}} — et quelle vérité est plus forte que l’excuse ?",
+    "reflectWhy": "Nommer la résistance la réduit."
   }
 }

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, BackHandler, Easing, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
+import { Animated, BackHandler, Easing, Pressable, ScrollView, StyleSheet, Text, Vibration, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst, JourneyScene, DialTimer, ActivityPickerDeck } from '@/components';
 import { radii, spacing, typography } from '@/theme';
@@ -346,7 +346,7 @@ export function BattleScreen({ route, navigation }: Props) {
         )}
       </View>
 
-      <View style={styles.stage}>
+      <ScrollView style={styles.stage} contentContainerStyle={styles.stageContent} showsVerticalScrollIndicator={false}>
         {won ? (
           <>
             <DragonSprite colorId={dragon.colorId} slain size={150} />
@@ -449,7 +449,7 @@ export function BattleScreen({ route, navigation }: Props) {
             </View>
           </>
         )}
-      </View>
+      </ScrollView>
 
       {won ? (
         <Pressable onPress={goHome} accessibilityRole="button" accessibilityLabel={t('battle.returnHome')} style={[styles.primaryBtn, { backgroundColor: accent }]}>
@@ -526,7 +526,8 @@ const styles = StyleSheet.create({
   topbar: { flexDirection: 'row', justifyContent: 'flex-end', minHeight: 28, paddingVertical: spacing.sm },
   retreat: { ...typography.label, color: MUTED, fontWeight: '600' },
 
-  stage: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
+  stage: { flex: 1 },
+  stageContent: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingBottom: spacing.md },
   kicker: { ...typography.label, color: MUTED, letterSpacing: 2 },
   dragonName: { ...typography.title, color: INK, fontWeight: '800', textAlign: 'center', textTransform: 'capitalize' },
   taunt: { ...typography.body, color: MUTED, fontStyle: 'italic', textAlign: 'center' },

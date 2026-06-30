@@ -3,42 +3,56 @@
     "name": "the Dragon of Laziness",
     "short": "Laziness",
     "taunt": "“You’ll do it tomorrow…”",
-    "victory": "Laziness slain — momentum is yours."
+    "victory": "Laziness slain — momentum is yours.",
+    "reflect": "Laziness whispers “later.” You chose {{activities}} — what does the version of you who acts now gain that “tomorrow you” keeps losing?",
+    "reflectWhy": "Laziness feeds on delay. One started rep starves it."
   },
   "fear": {
     "name": "the Dragon of Fear",
     "short": "Fear",
     "taunt": "“What if you fail?”",
-    "victory": "Fear slain — you moved anyway."
+    "victory": "Fear slain — you moved anyway.",
+    "reflect": "Fear asks “what if you fail?” Picture finishing {{activities}} today — what’s the worst that truly happens, and who do you become by doing it scared?",
+    "reflectWhy": "Courage isn’t the absence of fear — it’s acting before you feel ready."
   },
   "unworthiness": {
     "name": "the Dragon of Unworthiness",
     "short": "Unworthiness",
     "taunt": "“You’re not good enough for this.”",
-    "victory": "Unworthiness slain — you showed up for yourself."
+    "victory": "Unworthiness slain — you showed up for yourself.",
+    "reflect": "Unworthiness says you’re not enough. What would doing {{activities}} prove to that doubting voice — and whose voice is it, really?",
+    "reflectWhy": "Worth is built by showing up, not by waiting to feel worthy."
   },
   "tooold": {
     "name": "the Dragon of “Too Old”",
     "short": "“Too Old”",
     "taunt": "“It’s too late to change.”",
-    "victory": "“Too Old” slain — today counts."
+    "victory": "“Too Old” slain — today counts.",
+    "reflect": "“Too late” is the lie. If age weren’t a factor, how would you attack {{activities}} — and what’s one rep that makes that real today?",
+    "reflectWhy": "The best day was yesterday; the next best is today."
   },
   "procrastination": {
     "name": "the Dragon of Procrastination",
     "short": "Procrastination",
     "taunt": "“Just five more minutes…”",
-    "victory": "Procrastination slain — you started."
+    "victory": "Procrastination slain — you started.",
+    "reflect": "Procrastination loves “in a minute.” What’s the smallest first move on {{activities}} you can’t talk yourself out of — and what will trigger it?",
+    "reflectWhy": "Starting is the whole battle — motion makes momentum."
   },
   "doubt": {
     "name": "the Dragon of Doubt",
     "short": "Doubt",
     "taunt": "“This won’t even work.”",
-    "victory": "Doubt slain — proof over opinion."
+    "victory": "Doubt slain — proof over opinion.",
+    "reflect": "Doubt asks “will this even work?” What past evidence says you can do {{activities}} — and what proof will you add today?",
+    "reflectWhy": "Proof beats opinion. Each rep is evidence."
   },
   "custom": {
     "name": "your Dragon",
     "short": "Custom",
     "taunt": "“You can’t beat me.”",
-    "victory": "Dragon slain — well fought."
+    "victory": "Dragon slain — well fought.",
+    "reflect": "Name your dragon. What’s really stopping you from {{activities}} — and what truth is stronger than the excuse?",
+    "reflectWhy": "Naming the resistance shrinks it."
   }
 }

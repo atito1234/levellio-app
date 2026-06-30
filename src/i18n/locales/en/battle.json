@@ -11,6 +11,7 @@
     "pastReflectionsA11y": "View {{count}} past reflections",
     "pastReflectionsLink": "{{n}} past ›",
     "defaultPrompt": "What’s stopping you? Name the dragon.",
+    "theseHabits": "these habits",
     "lastReflection": "Last: {{emoji}} {{text}}",
     "reflectionSaved": "Reflection saved",
     "addAnotherReflection": "Add another reflection ›",
