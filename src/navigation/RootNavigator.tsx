@@ -110,76 +110,60 @@ export function RootNavigator() {
   return (
     <SpotlightProvider onDone={() => void update({ welcomeTourCompleted: true })}>
     <NavigationContainer ref={navigationRef} theme={navTheme} linking={linking}>
-      <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false, animation: 'slide_from_bottom' }}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen
           name="QuestComplete"
           component={QuestCompleteScreen}
-          options={{ presentation: 'modal', animation: 'fade' }}
+          options={{ animation: 'fade' }}
         />
-        <Stack.Screen
-          name="QuestEditor"
-          component={QuestEditorScreen}
-          options={{ presentation: 'modal' }}
-        />
-        <Stack.Screen
-          name="HabitLibrary"
-          component={HabitLibraryScreen}
-          options={{ presentation: 'modal' }}
-        />
-        <Stack.Screen
-          name="Paywall"
-          component={PaywallScreen}
-          options={{ presentation: 'modal' }}
-        />
-        <Stack.Screen name="Legal" component={LegalScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen
-          name="KitSelect"
-          component={KitSelectScreen}
-          options={{ presentation: 'modal' }}
-        />
+        <Stack.Screen name="QuestEditor" component={QuestEditorScreen} />
+        <Stack.Screen name="HabitLibrary" component={HabitLibraryScreen} />
+        <Stack.Screen name="Paywall" component={PaywallScreen} />
+        <Stack.Screen name="Legal" component={LegalScreen} />
+        <Stack.Screen name="KitSelect" component={KitSelectScreen} />
         {/* Buckets retired from the UI (BUCKETS_ENABLED); code kept for re-enable. */}
-        {BUCKETS_ENABLED && <Stack.Screen name="Organize" component={OrganizeScreen} options={{ presentation: 'modal' }} />}
-        {BUCKETS_ENABLED && <Stack.Screen name="BucketEdit" component={BucketEditScreen} options={{ presentation: 'modal' }} />}
-        <Stack.Screen name="Ripple" component={RippleScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="ActivityTimer" component={ActivityTimerScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Connections" component={ConnectionsScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="MonthlyProgress" component={MonthlyProgressScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Insights" component={InsightsScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Plan" component={PlanScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="CapacityFocus" component={CapacityFocusScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="GoalEditor" component={GoalEditorScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="NewGoal" component={NewGoalFlowScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="GoalFocus" component={GoalFocusScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="QuickCapture" component={QuickCaptureScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="BattleSetup" component={BattleSetupScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Battle" component={BattleScreen} options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen name="PrepareRite" component={PrepareRiteScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="DragonDen" component={DragonDenScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="JournalComposer" component={JournalComposerScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Journal" component={JournalScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Analytics" component={AnalyticsScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="CoachingEncounter" component={CoachingEncounterScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="ActivityJourney" component={ActivityJourneyScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Progress" component={ProgressHubScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="ProjectEditor" component={ProjectEditorScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="JoinProject" component={JoinProjectScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="SignIn" component={SignInScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="PostComposer" component={PostComposerScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="PostDetail" component={PostDetailScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="People" component={PeopleScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Profile" component={ProfileScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Discover" component={DiscoverScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="StoryViewer" component={StoryViewerScreen} options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen name="Inbox" component={InboxScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Chat" component={ChatScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="AISetup" component={AISetupScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Recipes" component={RecipesScreen} options={{ presentation: 'modal' }} />
-        <Stack.Screen name="Checklists" component={ChecklistsScreen} options={{ presentation: 'modal' }} />
+        {BUCKETS_ENABLED && <Stack.Screen name="Organize" component={OrganizeScreen} />}
+        {BUCKETS_ENABLED && <Stack.Screen name="BucketEdit" component={BucketEditScreen} />}
+        <Stack.Screen name="Ripple" component={RippleScreen} />
+        <Stack.Screen name="ActivityTimer" component={ActivityTimerScreen} />
+        <Stack.Screen name="Connections" component={ConnectionsScreen} />
+        <Stack.Screen name="MonthlyProgress" component={MonthlyProgressScreen} />
+        <Stack.Screen name="Insights" component={InsightsScreen} />
+        <Stack.Screen name="Plan" component={PlanScreen} />
+        <Stack.Screen name="CapacityFocus" component={CapacityFocusScreen} />
+        <Stack.Screen name="GoalEditor" component={GoalEditorScreen} />
+        <Stack.Screen name="NewGoal" component={NewGoalFlowScreen} />
+        <Stack.Screen name="GoalFocus" component={GoalFocusScreen} />
+        <Stack.Screen name="QuickCapture" component={QuickCaptureScreen} />
+        <Stack.Screen name="BattleSetup" component={BattleSetupScreen} />
+        <Stack.Screen name="Battle" component={BattleScreen} />
+        <Stack.Screen name="PrepareRite" component={PrepareRiteScreen} />
+        <Stack.Screen name="DragonDen" component={DragonDenScreen} />
+        <Stack.Screen name="Achievements" component={AchievementsScreen} />
+        <Stack.Screen name="JournalComposer" component={JournalComposerScreen} />
+        <Stack.Screen name="Journal" component={JournalScreen} />
+        <Stack.Screen name="Analytics" component={AnalyticsScreen} />
+        <Stack.Screen name="CoachingEncounter" component={CoachingEncounterScreen} />
+        <Stack.Screen name="ActivityJourney" component={ActivityJourneyScreen} />
+        <Stack.Screen name="Progress" component={ProgressHubScreen} />
+        <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
+        <Stack.Screen name="ProjectEditor" component={ProjectEditorScreen} />
+        <Stack.Screen name="JoinProject" component={JoinProjectScreen} />
+        <Stack.Screen name="SignIn" component={SignInScreen} />
+        <Stack.Screen name="PostComposer" component={PostComposerScreen} />
+        <Stack.Screen name="PostDetail" component={PostDetailScreen} />
+        <Stack.Screen name="People" component={PeopleScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} />
+        <Stack.Screen name="Discover" component={DiscoverScreen} />
+        <Stack.Screen name="StoryViewer" component={StoryViewerScreen} />
+        <Stack.Screen name="Inbox" component={InboxScreen} />
+        <Stack.Screen name="Chat" component={ChatScreen} />
+        <Stack.Screen name="AISetup" component={AISetupScreen} />
+        <Stack.Screen name="Recipes" component={RecipesScreen} />
+        <Stack.Screen name="Checklists" component={ChecklistsScreen} />
       </Stack.Navigator>
       {/* Overlays any screen to celebrate earned milestones (queue-driven). */}
       <MilestoneCelebration />

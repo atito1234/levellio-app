@@ -149,7 +149,6 @@ export function SelectActivitySheet({
   };
 
   return (
-    <>
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.sheet}>
@@ -239,17 +238,17 @@ export function SelectActivitySheet({
             </>
           )}
         </View>
+        <LibraryPickerSheet
+          embedded
+          visible={libraryOpen}
+          onClose={() => setLibraryOpen(false)}
+          onPick={(quest) => {
+            setLibraryOpen(false);
+            onPick(quest);
+          }}
+        />
       </KeyboardAvoidingView>
     </Modal>
-    <LibraryPickerSheet
-      visible={libraryOpen}
-      onClose={() => setLibraryOpen(false)}
-      onPick={(quest) => {
-        setLibraryOpen(false);
-        onPick(quest);
-      }}
-    />
-    </>
   );
 }
 
