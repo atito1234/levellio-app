@@ -102,6 +102,8 @@
     "perActivityHint": "Total · ajusta cada una abajo",
     "fightingFor": "LUCHANDO POR",
     "chooseActivities": "Elegir actividades",
+    "scrollForActivities": "Desliza para elegir actividades",
+    "scrollForActivitiesA11y": "Desliza hacia abajo para elegir las actividades de esta sesión",
     "fightWord": "Combatir esta",
     "fightingWord": "Combatiendo",
     "done": "Listo",

@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, G } from 'react-native-svg';
-import { AddActivityFab, AddActivitySheet, AppHeader, HeroAvatar, MoreSheet, ProjectBadge, ScreenContainer } from '@/components';
+import { AddActivityFab, AddActivitySheet, AppHeader, HeroAvatar, MoreSheet, ProjectBadge, ScreenContainer, WorldProjectsStrip } from '@/components';
 import { AchievementCelebrationHost } from '@/components/AchievementCelebrationHost';
 import { GoalTicker } from '@/components/GoalTicker';
 import { useSpotlightTarget, useWelcomeTour } from '@/components/spotlight';
@@ -81,7 +81,7 @@ export function DashboardScreen() {
   const { getPlan, reorderPlan } = usePlan();
   const { goals, membershipFor } = useGoals();
   const { events } = useActivityLog();
-  const { signedIn, projectsForHabit, projectActivityIds } = useProjects();
+  const { signedIn, featured, projectsForHabit, projectActivityIds } = useProjects();
   const { settings } = useSettings();
   const communityAllowed = useCommunityAccess();
   const reduced = useReducedMotion();
@@ -321,6 +321,14 @@ export function DashboardScreen() {
             <View style={[styles.pill, styles.pillViolet]} accessibilityLabel={t('levelA11y', { level: character.level })}>
               <Text style={[styles.pillText, { color: VIOLET }]}>Lv {character.level}</Text>
             </View>
+            <Pressable
+              onPress={() => navigation.navigate('Main', { screen: 'Projects' })}
+              accessibilityRole="button"
+              accessibilityLabel={t('dashboard:worldProjectsA11y')}
+              style={styles.pill}
+            >
+              <Text style={styles.pillText}>🌍</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -335,6 +343,15 @@ export function DashboardScreen() {
           onAddGoal={() => navigation.navigate('NewGoal')}
           projectActivityIds={projectActivityIds}
         />
+
+        {/* World projects — featured community goals, each card colour-coded to its
+            project, so the worldwide movement is visible right from home. */}
+        {featured.length > 0 && (
+          <WorldProjectsStrip
+            projects={featured}
+            onOpen={(projectId) => navigation.navigate('ProjectDetail', { projectId })}
+          />
+        )}
 
         {/* With a goal selected, a one-tap way to add an activity straight into it
             (the sheet is pre-filed via defaultGoalId below). */}

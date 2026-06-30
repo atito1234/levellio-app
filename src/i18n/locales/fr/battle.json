@@ -102,6 +102,8 @@
     "perActivityHint": "Total · règle chacune ci-dessous",
     "fightingFor": "POUR VAINCRE",
     "chooseActivities": "Choisir des activités",
+    "scrollForActivities": "Faites défiler pour choisir des activités",
+    "scrollForActivitiesA11y": "Faites défiler vers le bas pour choisir les activités de cette séance",
     "fightWord": "Combattre",
     "fightingWord": "En combat",
     "done": "Terminé",

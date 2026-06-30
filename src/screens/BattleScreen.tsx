@@ -118,6 +118,18 @@ export function BattleScreen({ route, navigation }: Props) {
     });
   }, [quests]);
 
+  // "Scroll for more" hint: shown while the activity chooser sits below the fold,
+  // so users know to scroll down to pick what they're fighting for.
+  const scrollRef = useRef<ScrollView>(null);
+  const [scrollHint, setScrollHint] = useState(false);
+  const viewH = useRef(0);
+  const contentH = useRef(0);
+  const lastY = useRef(0);
+  const refreshScrollHint = useCallback(() => {
+    const overflow = contentH.current - viewH.current;
+    setScrollHint(overflow > 24 && lastY.current < overflow - 24);
+  }, []);
+
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<VictoryResult | null>(null);
@@ -346,7 +358,26 @@ export function BattleScreen({ route, navigation }: Props) {
         )}
       </View>
 
-      <ScrollView style={styles.stage} contentContainerStyle={styles.stageContent} showsVerticalScrollIndicator={false}>
+      <View style={styles.stageWrap}>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.stage}
+        contentContainerStyle={styles.stageContent}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={(e) => {
+          lastY.current = e.nativeEvent.contentOffset.y;
+          refreshScrollHint();
+        }}
+        onLayout={(e) => {
+          viewH.current = e.nativeEvent.layout.height;
+          refreshScrollHint();
+        }}
+        onContentSizeChange={(_w, h) => {
+          contentH.current = h;
+          refreshScrollHint();
+        }}
+      >
         {won ? (
           <>
             <DragonSprite colorId={dragon.colorId} slain size={150} />
@@ -451,6 +482,21 @@ export function BattleScreen({ route, navigation }: Props) {
         )}
       </ScrollView>
 
+      {!won && scrollHint && (
+        <Pressable
+          onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}
+          accessibilityRole="button"
+          accessibilityLabel={t('battle.scrollForActivitiesA11y')}
+          style={styles.scrollHintWrap}
+        >
+          <View style={styles.scrollHintPill}>
+            <Text style={styles.scrollHintText}>{t('battle.scrollForActivities')}</Text>
+            <Text style={styles.scrollHintChevron}>⌄</Text>
+          </View>
+        </Pressable>
+      )}
+      </View>
+
       {won ? (
         <Pressable onPress={goHome} accessibilityRole="button" accessibilityLabel={t('battle.returnHome')} style={[styles.primaryBtn, { backgroundColor: accent }]}>
           <Text style={styles.primaryText}>{t('battle.returnHome')}</Text>
@@ -526,8 +572,13 @@ const styles = StyleSheet.create({
   topbar: { flexDirection: 'row', justifyContent: 'flex-end', minHeight: 28, paddingVertical: spacing.sm },
   retreat: { ...typography.label, color: MUTED, fontWeight: '600' },
 
+  stageWrap: { flex: 1 },
   stage: { flex: 1 },
   stageContent: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingBottom: spacing.md },
+  scrollHintWrap: { position: 'absolute', left: 0, right: 0, bottom: spacing.sm, alignItems: 'center' },
+  scrollHintPill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(31,41,55,0.88)', borderRadius: 999, paddingHorizontal: 14, paddingVertical: 6 },
+  scrollHintText: { ...typography.caption, color: '#FFFFFF', fontWeight: '800' },
+  scrollHintChevron: { color: '#FFFFFF', fontSize: 16, fontWeight: '900', lineHeight: 16 },
   kicker: { ...typography.label, color: MUTED, letterSpacing: 2 },
   dragonName: { ...typography.title, color: INK, fontWeight: '800', textAlign: 'center', textTransform: 'capitalize' },
   taunt: { ...typography.body, color: MUTED, fontStyle: 'italic', textAlign: 'center' },
