@@ -8,7 +8,7 @@
  * PlanContext — no new data layer.
  */
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 // Import directly (not via the '@/components' barrel) — the barrel re-exports this
 // file, so importing from it creates a require cycle that can leave these
@@ -151,7 +151,7 @@ export function SelectActivitySheet({
   return (
     <>
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.sheet}>
           <View style={styles.handleRow}>
             <Text style={styles.title}>{t('addActivity')}</Text>
@@ -239,7 +239,7 @@ export function SelectActivitySheet({
             </>
           )}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
     <LibraryPickerSheet
       visible={libraryOpen}

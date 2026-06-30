@@ -74,7 +74,7 @@ export function JournalComposerScreen({ route, navigation }: Props) {
   const audNote = t(`audience.${audience}.note`);
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <View style={styles.topbar}>
         <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('composer.a11yCancel')} hitSlop={12}>
           <Text style={styles.cancel}>{t('common:action.cancel')}</Text>

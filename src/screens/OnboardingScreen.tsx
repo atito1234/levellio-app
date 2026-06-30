@@ -133,7 +133,7 @@ export function OnboardingScreen({ navigation }: Props) {
   const detailTpl = detailKey ? goalTemplateByKey(detailKey) : null;
 
   return (
-    <ScreenContainer backgroundColor={colors.background}>
+    <ScreenContainer backgroundColor={colors.background} keyboardAvoiding>
       {/* Progress */}
       {step !== 'building' && (
         <View style={styles.progressTrack}>

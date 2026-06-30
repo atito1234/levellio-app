@@ -169,7 +169,7 @@ export function ChecklistsScreen() {
     ]);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer keyboardAvoiding>
       {confetti > 0 && <ConfettiBurst key={confetti} />}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>{t('title')}</Text>

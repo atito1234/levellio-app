@@ -88,14 +88,14 @@ export function GoalEditorScreen({ route, navigation }: Props) {
   };
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <ScreenHeader
         title={isEditing ? t('editTitle') : t('newTitle')}
         onBack={() => navigation.goBack()}
         backLabel={t('back')}
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {!isEditing && (
           <>
             <Text style={styles.lead}>{t('lead')}</Text>

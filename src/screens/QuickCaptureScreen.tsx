@@ -92,7 +92,7 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
   };
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <ScreenHeader title={t('title')} onBack={() => navigation.goBack()} backLabel={t('close')} />
 
       <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>

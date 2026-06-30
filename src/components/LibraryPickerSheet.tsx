@@ -16,7 +16,7 @@
  * Habit Library screen — no new data layer.
  */
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DifficultyBadge } from '@/components/DifficultyBadge';
 import { PressableScale } from '@/components/PressableScale';
@@ -130,7 +130,7 @@ export function LibraryPickerSheet({
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={styles.backdropTap} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('library.done')} />
         <View style={styles.sheet}>
           <View style={styles.head}>
@@ -221,7 +221,7 @@ export function LibraryPickerSheet({
             {sections.length === 0 && <Text style={styles.empty}>{t('library.noIdeas')}</Text>}
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

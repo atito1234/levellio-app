@@ -179,8 +179,8 @@ export function SettingsScreen() {
   };
 
   return (
-    <ScreenContainer>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+    <ScreenContainer keyboardAvoiding>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* Account — only when signed in (community/projects). */}
         {account && (
           <View style={styles.card}>

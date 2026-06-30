@@ -66,7 +66,7 @@ export function SignInScreen({ navigation }: Props) {
   };
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <View style={styles.topbar}>
         <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t('auth:close')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>

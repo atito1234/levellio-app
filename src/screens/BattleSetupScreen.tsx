@@ -177,7 +177,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   };
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <View style={styles.topbar}>
         <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={t('setup.close')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
@@ -190,7 +190,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         </Pressable>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* 1 — Reflection on top (social post). */}
         <Pressable onPress={openReflect} accessibilityRole="button" accessibilityLabel={t('setup.reflectA11y')} style={[styles.reflectCard, shadow]}>
           <View style={styles.reflectHead}>
@@ -362,7 +362,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
                 <Text style={[styles.addBtnText, customActivity.trim().length === 0 && styles.addBtnOff]}>{t('setup.add')}</Text>
               </Pressable>
             </View>
-            <ScrollView style={styles.sheetList} contentContainerStyle={styles.sheetListContent} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.sheetList} contentContainerStyle={styles.sheetListContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               {available.length === 0 ? (
                 <Text style={styles.sheetEmpty}>{t('setup.allIn')}</Text>
               ) : (
