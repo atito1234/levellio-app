@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { Animated, BackHandler, Easing, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst, JourneyScene } from '@/components';
+import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst, JourneyScene, DialTimer } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBattles } from '@/state/BattlesContext';
@@ -63,7 +63,6 @@ export function BattleScreen({ route, navigation }: Props) {
   const timings = getCelebrationTimings(reduced);
 
   const technique = getTechnique(techniqueId);
-  const totalSec = useMemo(() => workSeconds(technique, customMin), [technique, customMin]);
   const dragon = useMemo(() => getDragon(dragonId, dragonName), [dragonId, dragonName]);
   const dragonDisplayName = t('dragons:' + dragon.id + '.name', { defaultValue: dragon.name });
   const dragonTaunt = t('dragons:' + dragon.id + '.taunt', { defaultValue: dragon.taunt });
@@ -73,6 +72,17 @@ export function BattleScreen({ route, navigation }: Props) {
     () => questIds.map((id) => quests.find((q) => q.id === id)).filter((q): q is NonNullable<typeof q> => !!q),
     [questIds, quests],
   );
+
+  // Fully customizable session length: a circular dial the user spins. Defaults to
+  // the technique's minutes, else the sum of the activities' own timers.
+  const defaultMinutes = useMemo(() => {
+    const w = workSeconds(technique, customMin);
+    if (w && w > 0) return Math.max(1, Math.round(w / 60));
+    const sum = battleQuests.reduce((acc, q) => acc + activityTiming(q).minutes, 0);
+    return Math.max(1, sum || 25);
+  }, [technique, customMin, battleQuests]);
+  const [minutes, setMinutes] = useState(defaultMinutes);
+  const totalSec = minutes * 60;
 
   // The primary habit's "from repetition to habit" journey drives the victory scene.
   const sessions = useMemo(() => sessionsOf(events), [events]);
@@ -373,13 +383,35 @@ export function BattleScreen({ route, navigation }: Props) {
               />
             </View>
 
-            <Text style={styles.clock} accessibilityLabel={totalSec === null ? t('battle.clockElapsedA11y', { clock }) : t('battle.clockRemainingA11y', { clock })}>
-              {clock}
-            </Text>
-            <Text style={styles.clockSub}>
-              {t('techniques:' + technique.id + '.name', { defaultValue: technique.name })}
-              {totalSec === null ? t('battle.countUp') : ''}
-            </Text>
+            {/* Spin the ring (clockwise) to set/adjust your focus time — even mid-battle. */}
+            <View style={styles.dialWrap} accessibilityLabel={t('battle.clockRemainingA11y', { clock })}>
+              <DialTimer
+                minutes={minutes}
+                onChange={setMinutes}
+                color={accent}
+                size={200}
+                centerLabel={clock}
+                sublabel={t('battle.dialHint')}
+                {...(running ? { progress: state.dragonHealthPct / 100 } : {})}
+              />
+            </View>
+
+            {/* The activities you're fighting to complete (each with its own timer). */}
+            {battleQuests.length > 0 && (
+              <View style={styles.actvList}>
+                <Text style={styles.actvHead}>{t('battle.fightingFor')}</Text>
+                {battleQuests.map((q) => {
+                  const covered = completedRef.current.has(q.id) || elapsed >= activityTiming(q).minutes * 60;
+                  return (
+                    <View key={q.id} style={styles.actvRow}>
+                      <Text style={styles.actvMark}>{covered ? '✅' : '•'}</Text>
+                      <Text style={styles.actvTitle} numberOfLines={1}>{q.title}</Text>
+                      <Text style={styles.actvTime}>{t('battle.minShort', { count: activityTiming(q).minutes })}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
           </>
         )}
       </View>
@@ -449,9 +481,15 @@ const styles = StyleSheet.create({
   healthTrack: { width: '70%', height: 10, borderRadius: 999, backgroundColor: TRACK, overflow: 'hidden', marginTop: spacing.md },
   healthFill: { height: 10, borderRadius: 999 },
 
-  heroRow: { marginTop: spacing.lg },
-  clock: { ...typography.heading, color: INK, fontWeight: '900', fontSize: 48, marginTop: spacing.sm },
-  clockSub: { ...typography.caption, color: MUTED },
+  heroRow: { marginTop: spacing.md },
+  dialWrap: { marginTop: spacing.sm },
+
+  actvList: { alignSelf: 'stretch', marginTop: spacing.sm, gap: 4, paddingHorizontal: spacing.lg },
+  actvHead: { ...typography.label, color: MUTED, letterSpacing: 1, fontWeight: '800' },
+  actvRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  actvMark: { ...typography.body, width: 22, textAlign: 'center' },
+  actvTitle: { ...typography.body, color: INK, flex: 1 },
+  actvTime: { ...typography.caption, color: MUTED, fontWeight: '700' },
 
   victory: { ...typography.heading, fontWeight: '900' },
   victoryLine: { ...typography.body, color: INK, textAlign: 'center', paddingHorizontal: spacing.lg },
