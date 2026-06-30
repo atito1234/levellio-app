@@ -45,6 +45,13 @@
     "added": "✓ Añadido",
     "addA11y": "Añadir {{title}} a tus misiones",
     "addedA11y": "{{title}} añadido",
-    "done": "Listo"
+    "done": "Listo",
+    "ideas": "📚 Ideas de la biblioteca",
+    "pickerTitle": "Ideas de la biblioteca",
+    "pickerSub": "Toca una idea para usarla.",
+    "pickerSubGoal": "Elige una meta y toca ideas para archivarlas directamente en ella.",
+    "searchIdeas": "Buscar ideas…",
+    "noGoal": "Sin meta",
+    "noIdeas": "Ninguna idea coincide con tu búsqueda."
   }
 }

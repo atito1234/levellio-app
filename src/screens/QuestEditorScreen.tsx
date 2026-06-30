@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   ChipSelector,
+  LibraryPickerSheet,
   PrimaryButton,
   ScreenContainer,
   TextField,
@@ -71,6 +72,7 @@ export function QuestEditorScreen({ route, navigation }: Props) {
   const [category, setCategory] = useState<QuestCategory>(existing?.category ?? prefill?.category ?? 'health');
   const [titleError, setTitleError] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [scheduleOn, setScheduleOn] = useState(isValidScheduleMinutes(initialTime));
   const [parts, setParts] = useState<TimeParts>(
     isValidScheduleMinutes(initialTime) ? minutesToParts(initialTime!) : DEFAULT_SCHEDULE_PARTS,
@@ -197,6 +199,11 @@ export function QuestEditorScreen({ route, navigation }: Props) {
             maxLength={TITLE_MAX}
             error={titleError}
           />
+          {!isEditing && (
+            <Pressable onPress={() => setLibraryOpen(true)} accessibilityRole="button" style={styles.ideasRow}>
+              <Text style={styles.ideasText}>{t('library.ideas')}</Text>
+            </Pressable>
+          )}
           <TextField
             label={t('description')}
             value={description}
@@ -338,6 +345,17 @@ export function QuestEditorScreen({ route, navigation }: Props) {
           )}
         </View>
       </KeyboardAvoidingView>
+
+      <LibraryPickerSheet
+        visible={libraryOpen}
+        onClose={() => setLibraryOpen(false)}
+        onPrefill={(p) => {
+          setTitle(p.title);
+          setCategory(p.category);
+          setDifficulty(p.difficulty);
+          if (titleError) setTitleError(undefined);
+        }}
+      />
     </ScreenContainer>
   );
 }
@@ -365,6 +383,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingTop: spacing.md,
   },
+  ideasRow: { alignSelf: 'flex-start', marginTop: -spacing.sm },
+  ideasText: { ...typography.label, color: colors.violetDeep, fontWeight: '800' },
   scheduleBlock: { gap: spacing.md },
   scheduleHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
   scheduleHeadText: { flex: 1, gap: 2 },

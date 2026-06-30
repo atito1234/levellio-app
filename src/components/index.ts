@@ -29,6 +29,7 @@ export { PostCard } from './PostCard';
 export { StoriesRail } from './StoriesRail';
 export { PressableScale } from './PressableScale';
 export { SelectActivitySheet } from './SelectActivitySheet';
+export { LibraryPickerSheet, type LibraryPrefill } from './LibraryPickerSheet';
 export { ChecklistPicker } from './ChecklistPicker';
 export { MoreSheet } from './MoreSheet';
 export { AppHeader } from './AppHeader';
