@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
+import { LibraryPickerSheet, ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
@@ -51,6 +51,7 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [planToday, setPlanToday] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
   const parsed = useMemo(() => parseCapture(text), [text]);
   const included = parsed.filter((p) => !excluded.has(normalizeTitle(p.title)));
@@ -91,11 +92,15 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
   };
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <ScreenHeader title={t('title')} onBack={() => navigation.goBack()} backLabel={t('close')} />
 
       <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <Text style={styles.lead}>{t('lead')}</Text>
+
+        <Pressable onPress={() => setLibraryOpen(true)} accessibilityRole="button" style={styles.ideasRow}>
+          <Text style={styles.ideasText}>{t('quests:library.ideas')}</Text>
+        </Pressable>
 
         {targetLabel.length > 0 && (
           <View style={styles.scopeBanner}>
@@ -170,6 +175,12 @@ export function QuickCaptureScreen({ route, navigation }: Props) {
           {included.length === 0 ? t('addEmpty') : t('add', { count: included.length })}
         </Text>
       </Pressable>
+
+      <LibraryPickerSheet
+        visible={libraryOpen}
+        onClose={() => setLibraryOpen(false)}
+        defaultGoalId={route.params?.goalId ?? null}
+      />
     </ScreenContainer>
   );
 }
@@ -182,6 +193,8 @@ const styles = StyleSheet.create({
 
   content: { gap: spacing.md, paddingBottom: spacing.xl },
   lead: { ...typography.body, color: MUTED },
+  ideasRow: { alignSelf: 'flex-start' },
+  ideasText: { ...typography.label, color: VIOLET, fontWeight: '800' },
   scopeBanner: { backgroundColor: VIOLET_SOFT, borderRadius: radii.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   scopeText: { ...typography.label, color: VIOLET, fontWeight: '800' },
   input: {

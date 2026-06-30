@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, type ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View, type ViewStyle } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import { colors, spacing } from '@/theme';
 
@@ -11,6 +11,12 @@ interface ScreenContainerProps {
   edges?: readonly Edge[];
   /** Remove default horizontal padding (e.g. full-bleed screens). */
   noPadding?: boolean;
+  /**
+   * Lift content above the on-screen keyboard so fields and submit buttons stay
+   * visible while typing. Enable on any screen with text inputs. (Off by default
+   * so screens with their own KeyboardAvoidingView don't double-shift.)
+   */
+  keyboardAvoiding?: boolean;
   style?: ViewStyle;
 }
 
@@ -20,11 +26,19 @@ export function ScreenContainer({
   backgroundColor = colors.background,
   edges = ['top', 'bottom', 'left', 'right'],
   noPadding = false,
+  keyboardAvoiding = false,
   style,
 }: ScreenContainerProps) {
+  const content = <View style={[styles.content, !noPadding && styles.padded, style]}>{children}</View>;
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor }]} edges={edges}>
-      <View style={[styles.content, !noPadding && styles.padded, style]}>{children}</View>
+      {keyboardAvoiding ? (
+        <KeyboardAvoidingView style={styles.content} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          {content}
+        </KeyboardAvoidingView>
+      ) : (
+        content
+      )}
     </SafeAreaView>
   );
 }

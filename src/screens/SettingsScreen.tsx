@@ -49,7 +49,7 @@ import {
   isSupportedLocale,
   type LocaleSetting,
 } from '@/i18n/config';
-import { useSpotlight, WELCOME_TOUR } from '@/components/spotlight';
+import { useSpotlight, useRoomTour, WELCOME_TOUR } from '@/components/spotlight';
 import { COSMETIC_THEMES, getTheme } from '@/data/cosmetics';
 import { canUseCosmetics } from '@/services/monetization';
 import { useEntitlements } from '@/state/SubscriptionContext';
@@ -73,10 +73,20 @@ export function SettingsScreen() {
   const { settings, ready, update } = useSettings();
   const { start: startTour } = useSpotlight();
   const entitlements = useEntitlements();
+  useRoomTour('settings');
 
-  // Replay the first-run tour on demand: clear the flag, jump to Today, run it.
+  // Replay the first-run helpers on demand: clear the welcome flag AND every
+  // per-room "seen" flag, jump to Today, and run the welcome tour now. Each room's
+  // helper then re-shows the next time it's opened.
   const replayTour = () => {
-    void update({ welcomeTourCompleted: false });
+    void update({
+      welcomeTourCompleted: false,
+      warRoomTourSeen: false,
+      plannerTourSeen: false,
+      feedTourSeen: false,
+      projectsTourSeen: false,
+      settingsTourSeen: false,
+    });
     navigation.navigate('Main', { screen: 'Dashboard' });
     setTimeout(() => startTour(WELCOME_TOUR), 350);
   };
@@ -179,8 +189,8 @@ export function SettingsScreen() {
   };
 
   return (
-    <ScreenContainer>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+    <ScreenContainer keyboardAvoiding>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* Account — only when signed in (community/projects). */}
         {account && (
           <View style={styles.card}>
@@ -423,10 +433,7 @@ export function SettingsScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{t('insights.title')}</Text>
           <Text style={styles.note}>{t('insights.note')}</Text>
-          <PrivacyToggle label={t('insights.recordProvenance')} value={settings.metadataPrivacy.recordProvenance} field="recordProvenance" privacy={settings.metadataPrivacy} update={update} />
-          <PrivacyToggle label={t('insights.recordContribution')} value={settings.metadataPrivacy.recordContribution} field="recordContribution" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.includeContext')} value={settings.metadataPrivacy.includeContext} field="includeContext" privacy={settings.metadataPrivacy} update={update} />
-          <PrivacyToggle label={t('insights.includeSourceActivities')} value={settings.metadataPrivacy.includeSourceActivities} field="includeSourceActivities" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.includeTimestamps')} value={settings.metadataPrivacy.includeTimestamps} field="includeTimestamps" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.recordSession')} value={settings.metadataPrivacy.recordSession} field="recordSession" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.includeLocation')} value={settings.metadataPrivacy.includeLocation} field="includeLocation" privacy={settings.metadataPrivacy} update={update} />

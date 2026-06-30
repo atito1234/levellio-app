@@ -45,6 +45,13 @@
     "added": "✓ Ajouté",
     "addA11y": "Ajouter {{title}} à vos quêtes",
     "addedA11y": "{{title}} ajouté",
-    "done": "Terminé"
+    "done": "Terminé",
+    "ideas": "📚 Idées de la bibliothèque",
+    "pickerTitle": "Idées de la bibliothèque",
+    "pickerSub": "Touchez une idée pour l'utiliser.",
+    "pickerSubGoal": "Choisissez un objectif, puis touchez des idées pour les y classer directement.",
+    "searchIdeas": "Rechercher des idées…",
+    "noGoal": "Aucun objectif",
+    "noIdeas": "Aucune idée ne correspond à votre recherche."
   }
 }

@@ -57,7 +57,7 @@ export function DiscoverScreen({ navigation }: Props) {
   const projectResults = useMemo(() => searchProjects(projects, query), [projects, query]);
 
   return (
-    <ScreenContainer backgroundColor={colors.background}>
+    <ScreenContainer backgroundColor={colors.background} keyboardAvoiding>
       <Text style={styles.title}>{t('discover:title')}</Text>
 
       <View style={styles.searchPill}>

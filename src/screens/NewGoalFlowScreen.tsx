@@ -134,11 +134,11 @@ export function NewGoalFlowScreen({ navigation }: Props) {
   };
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <ScreenHeader onBack={() => navigation.goBack()} backLabel={t('back')} />
 
       {step === 'identity' && (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <Text style={styles.h1}>{t('become.title')}</Text>
           <Text style={styles.sub}>{t('become.subtitle')}</Text>
           <View style={styles.grid}>
@@ -168,7 +168,7 @@ export function NewGoalFlowScreen({ navigation }: Props) {
       )}
 
       {step === 'custom' && (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <Text style={styles.h1}>{t('become.customTitle')}</Text>
           <TextInput
             value={customTitle}
@@ -257,7 +257,7 @@ export function NewGoalFlowScreen({ navigation }: Props) {
       )}
 
       {step === 'firstVote' && created && (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <Text style={styles.voteEmoji}>{created.goal.emoji}</Text>
           <Text style={styles.h1}>{t('become.firstVoteTitle')}</Text>
           <Text style={styles.sub}>{t('become.firstVoteSub', { title: created.goal.title })}</Text>

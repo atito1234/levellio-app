@@ -39,7 +39,7 @@ export function JoinProjectScreen({ route, navigation }: Props) {
   };
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <ScreenHeader title={t('join.title')} onBack={() => navigation.goBack()} backLabel={t('join.close')} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">

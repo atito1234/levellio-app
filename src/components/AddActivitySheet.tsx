@@ -18,6 +18,7 @@ import { recurrenceLabelOpts } from '@/lib/recurrenceLabels';
 import { minutesToLabel } from '@/lib/schedule';
 import { MiniCalendar } from './MiniCalendar';
 import { TimePicker } from './TimePicker';
+import { LibraryPickerSheet } from './LibraryPickerSheet';
 import type { QuestCategory } from '@/types';
 import type { QuestDraft } from '@/lib/questForm';
 import type { RootStackParamList } from '@/navigation/types';
@@ -84,6 +85,7 @@ export function AddActivitySheet({
   const [timeOn, setTimeOn] = useState(false);
   const [timeMinutes, setTimeMinutes] = useState(DEFAULT_TIME);
   const [added, setAdded] = useState<string | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
   // Re-sync to the opening context each time the sheet appears.
   React.useEffect(() => {
@@ -218,6 +220,7 @@ export function AddActivitySheet({
   };
 
   return (
+    <>
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {/* Tap the dimmed area above the sheet to dismiss. */}
@@ -254,6 +257,10 @@ export function AddActivitySheet({
               blurOnSubmit={false}
               accessibilityLabel={t('nameLabel')}
             />
+
+            <Pressable onPress={() => setLibraryOpen(true)} accessibilityRole="button" style={styles.ideasRow}>
+              <Text style={styles.ideasText}>{t('quests:library.ideas')}</Text>
+            </Pressable>
 
             {scopedProjects.length > 0 && (
               <View style={styles.scopeBanner}>
@@ -413,6 +420,16 @@ export function AddActivitySheet({
         </View>
       </KeyboardAvoidingView>
     </Modal>
+    <LibraryPickerSheet
+      visible={libraryOpen}
+      onClose={() => setLibraryOpen(false)}
+      defaultGoalId={goalId}
+      onPrefill={(p) => {
+        setTitle(p.title);
+        setAdded(null);
+      }}
+    />
+    </>
   );
 }
 
@@ -463,6 +480,8 @@ const styles = StyleSheet.create({
   timeToggleText: { ...typography.label, color: INK, fontWeight: '700' },
   timeToggleHint: { ...typography.caption, color: MUTED },
   added: { ...typography.caption, color: '#0A6E5C', fontWeight: '700' },
+  ideasRow: { alignSelf: 'flex-start', paddingVertical: spacing.xs },
+  ideasText: { ...typography.label, color: VIOLET, fontWeight: '800' },
   pledge: { ...typography.caption, color: VIOLET, fontWeight: '700' },
   scopeBanner: { backgroundColor: VIOLET_SOFT, borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   scopeText: { ...typography.label, color: VIOLET, fontWeight: '800' },

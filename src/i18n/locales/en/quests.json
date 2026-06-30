@@ -45,6 +45,13 @@
     "added": "✓ Added",
     "addA11y": "Add {{title}} to your quests",
     "addedA11y": "{{title}} added",
-    "done": "Done"
+    "done": "Done",
+    "ideas": "📚 Ideas from library",
+    "pickerTitle": "Ideas from the library",
+    "pickerSub": "Tap an idea to use it.",
+    "pickerSubGoal": "Pick a goal, then tap ideas to file them straight into it.",
+    "searchIdeas": "Search ideas…",
+    "noGoal": "No goal",
+    "noIdeas": "No ideas match your search."
   }
 }

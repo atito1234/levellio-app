@@ -44,7 +44,7 @@ export function JournalScreen({ route, navigation }: Props) {
   );
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <ScreenHeader
         title={t('list.title')}
         onBack={() => navigation.goBack()}
@@ -56,7 +56,7 @@ export function JournalScreen({ route, navigation }: Props) {
         }
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.banner}>{t('list.banner')}</Text>
         {list.length === 0 ? (
           <Text style={styles.empty}>{t('list.empty')}</Text>

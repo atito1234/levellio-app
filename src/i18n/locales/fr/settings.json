@@ -82,12 +82,9 @@
     "audienceHelp": "Choisissez qui voit vos publications par défaut. Vous pouvez toujours le changer pour chaque publication. La confidentialité et la sécurité avant tout."
   },
   "insights": {
-    "title": "Analyses d'habitudes",
-    "note": "Levellio garde de simples notes sur votre appareil sur la formation de vos habitudes, pour qu'une future mise à jour puisse vous montrer des analyses. Rien n'est téléversé — pas d'analytique, pas de comptes. Vous choisissez exactement ce qui est enregistré.",
-    "recordProvenance": "Se souvenir comment les groupes se forment",
-    "recordContribution": "Suivre quelles activités construisent quels groupes",
+    "title": "Analyses d'habitudes et confidentialité",
+    "note": "Tout ce qui alimente tes analyses reste sur cet appareil — rien n'est téléversé, pas d'analytique, pas de comptes. Plus tu enregistres avec constance, plus tes séries, tendances et ta progression vers l'« automatique » sont nettes. Tu choisis exactement ce qui est conservé.",
     "includeContext": "Inclure les détails d'activité (catégorie, difficulté, XP)",
-    "includeSourceActivities": "Inclure les activités qui ont inspiré un groupe",
     "includeTimestamps": "Conserver les horodatages exacts",
     "recordSession": "Enregistrer les séances (durée, moment de la journée)",
     "includeLocation": "Capturer la position et la vitesse (autorisation requise)"
@@ -96,7 +93,7 @@
     "title": "À propos et mentions légales",
     "contact": "Contacter le support",
     "emailSupportA11y": "Contacter le support par e-mail à {{email}}",
-    "replayTour": "Revoir le tour de bienvenue"
+    "replayTour": "Revoir les astuces et guides"
   },
   "reset": {
     "title": "Tout recommencer",

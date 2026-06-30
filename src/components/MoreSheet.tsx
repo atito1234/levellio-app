@@ -44,7 +44,6 @@ export function MoreSheet({
     { key: 'share', icon: '✏️', label: t('dashboard:more.share'), onPress: () => go(() => navigation.navigate('PostComposer')), show: canShare },
     { key: 'recipes', icon: '🍽️', label: t('recipes:screen.title'), onPress: () => go(() => navigation.navigate('Recipes')) },
     { key: 'journal', icon: '📓', label: t('dashboard:chips.journal'), onPress: () => go(() => navigation.navigate('Journal')) },
-    { key: 'library', icon: '📚', label: t('dashboard:chips.library'), onPress: () => go(() => navigation.navigate('HabitLibrary')) },
     { key: 'buckets', icon: '🗂️', label: t('dashboard:chips.buckets'), onPress: () => go(() => navigation.navigate('Organize')), show: BUCKETS_ENABLED },
     { key: 'connections', icon: '🔗', label: t('dashboard:chips.connections'), onPress: () => go(() => navigation.navigate('Connections')) },
     { key: 'discover', icon: '🌍', label: t('dashboard:more.discover'), onPress: () => go(() => navigation.navigate('Discover')) },

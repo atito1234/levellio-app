@@ -64,6 +64,16 @@ export interface AppSettings {
   onboardingCompleted: boolean;
   /** First-run interactive spotlight tour finished or skipped — runs once only. */
   welcomeTourCompleted: boolean;
+  /**
+   * Per-room first-run helper tours seen (each runs once on first visit unless the
+   * user re-enables tips in Settings). Absent = not yet seen. Stored only when true
+   * so resetting (set false) cleanly re-arms the tour.
+   */
+  warRoomTourSeen?: boolean;
+  plannerTourSeen?: boolean;
+  feedTourSeen?: boolean;
+  projectsTourSeen?: boolean;
+  settingsTourSeen?: boolean;
   /** Where the user said they heard about Levellio (onboarding attribution). */
   attributionSource?: string;
   /** Preferred reminder time of day captured in onboarding ('morning'|'afternoon'|'evening'). */
@@ -130,6 +140,11 @@ export function normalizeSettings(raw: unknown): AppSettings {
         : 'ask',
     onboardingCompleted: r.onboardingCompleted === true,
     welcomeTourCompleted: r.welcomeTourCompleted === true,
+    ...(r.warRoomTourSeen === true ? { warRoomTourSeen: true } : {}),
+    ...(r.plannerTourSeen === true ? { plannerTourSeen: true } : {}),
+    ...(r.feedTourSeen === true ? { feedTourSeen: true } : {}),
+    ...(r.projectsTourSeen === true ? { projectsTourSeen: true } : {}),
+    ...(r.settingsTourSeen === true ? { settingsTourSeen: true } : {}),
     ...(typeof r.attributionSource === 'string' ? { attributionSource: r.attributionSource } : {}),
     ...(typeof r.reminderTime === 'string' ? { reminderTime: r.reminderTime } : {}),
     ...(r.onboardingAnswers && typeof r.onboardingAnswers === 'object'

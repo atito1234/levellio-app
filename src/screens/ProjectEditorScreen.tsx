@@ -94,7 +94,7 @@ export function ProjectEditorScreen({ navigation }: Props) {
   };
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <ScreenHeader title={t('editor.title')} onBack={() => navigation.goBack()} backLabel={t('editor.close')} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">

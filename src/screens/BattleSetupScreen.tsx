@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, DragonSprite } from '@/components';
+import { useRoomTour, useSpotlightTarget } from '@/components/spotlight';
 import { spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { usePlan } from '@/state/PlanContext';
@@ -67,6 +68,12 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const { lastTechniqueId, lastCustomMin, setTechnique, coins } = useBattles();
   const { entriesForDragon } = useJournal();
   const guardAbandon = useAbandonGuard();
+
+  // First-visit helper tour + section highlight targets.
+  useRoomTour('warRoom');
+  const dragonTarget = useSpotlightTarget('war-dragon');
+  const gadgetTarget = useSpotlightTarget('war-gadget');
+  const missionsTarget = useSpotlightTarget('war-missions');
 
   const activeQuests = useMemo(() => quests.filter((q) => !q.completed), [quests]);
 
@@ -177,7 +184,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   };
 
   return (
-    <ScreenContainer backgroundColor={BG}>
+    <ScreenContainer backgroundColor={BG} keyboardAvoiding>
       <View style={styles.topbar}>
         <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={t('setup.close')} hitSlop={12}>
           <Text style={styles.chevron}>‹</Text>
@@ -190,7 +197,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         </Pressable>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* 1 — Reflection on top (social post). */}
         <Pressable onPress={openReflect} accessibilityRole="button" accessibilityLabel={t('setup.reflectA11y')} style={[styles.reflectCard, shadow]}>
           <View style={styles.reflectHead}>
@@ -222,7 +229,10 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         </Pressable>
 
         {/* 2 — Choose your dragon. */}
-        <Text style={styles.sectionLabel}>{t('setup.yourDragon')}</Text>
+        <View style={styles.sectionBlock} {...dragonTarget}>
+          <Text style={styles.sectionLabel}>{t('setup.yourDragon')}</Text>
+          <Text style={styles.sectionHint}>{t('setup.dragonHint')}</Text>
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
           {DRAGONS.map((d) => {
             const on = dragonId === d.id;
@@ -266,7 +276,10 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         )}
 
         {/* 3 — Pick your gadget (technique). */}
-        <Text style={styles.sectionLabel}>{t('setup.yourWarGadget')}</Text>
+        <View style={styles.sectionBlock} {...gadgetTarget}>
+          <Text style={styles.sectionLabel}>{t('setup.yourWarGadget')}</Text>
+          <Text style={styles.sectionHint}>{t('setup.gadgetHint')}</Text>
+        </View>
         <View style={styles.gadgetGrid}>
           {TECHNIQUES.map((tech) => {
             const on = techniqueId === tech.id;
@@ -300,11 +313,14 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         )}
 
         {/* 4 — Missions (habits), compact: chips + add. */}
-        <View style={styles.missionHead}>
-          <Text style={styles.sectionLabel}>{t('setup.missionsLabel', { n: selected.size })}</Text>
-          <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" accessibilityLabel={t('setup.addMissionsA11y')} hitSlop={8}>
-            <Text style={styles.addMissions}>{t('setup.addShort')}</Text>
-          </Pressable>
+        <View style={styles.sectionBlock} {...missionsTarget}>
+          <View style={styles.missionHead}>
+            <Text style={styles.sectionLabel}>{t('setup.missionsLabel', { n: selected.size })}</Text>
+            <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" accessibilityLabel={t('setup.addMissionsA11y')} hitSlop={8}>
+              <Text style={styles.addMissions}>{t('setup.addShort')}</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.sectionHint}>{t('setup.missionsHint')}</Text>
         </View>
         {selectedQuests.length === 0 ? (
           <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" style={styles.emptyMissions}>
@@ -362,7 +378,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
                 <Text style={[styles.addBtnText, customActivity.trim().length === 0 && styles.addBtnOff]}>{t('setup.add')}</Text>
               </Pressable>
             </View>
-            <ScrollView style={styles.sheetList} contentContainerStyle={styles.sheetListContent} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.sheetList} contentContainerStyle={styles.sheetListContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               {available.length === 0 ? (
                 <Text style={styles.sheetEmpty}>{t('setup.allIn')}</Text>
               ) : (
@@ -393,6 +409,8 @@ const styles = StyleSheet.create({
 
   content: { gap: spacing.md, paddingBottom: spacing.xl },
   sectionLabel: { ...typography.label, color: MUTED, letterSpacing: 2 },
+  sectionBlock: { gap: 4 },
+  sectionHint: { ...typography.caption, color: MUTED },
 
   // Reflect card
   reflectCard: { backgroundColor: CARD, borderRadius: 20, padding: spacing.md, gap: spacing.sm, borderWidth: 1, borderColor: '#E2DBFB' },

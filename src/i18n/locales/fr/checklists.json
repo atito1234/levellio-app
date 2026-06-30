@@ -17,6 +17,8 @@
   "srcToday": "Aujourd'hui",
   "srcWeek": "Cette semaine",
   "searchChecklists": "Rechercher des listes…",
+  "noneForDay": "Pas encore de liste pour ce jour.",
+  "viewAll": "Voir toutes les listes",
   "fromProject": "De ce projet",
   "recurring": "Se répète chaque jour",
   "oneOff": "Ponctuelle",

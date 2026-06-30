@@ -8,13 +8,14 @@
  * PlanContext — no new data layer.
  */
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 // Import directly (not via the '@/components' barrel) — the barrel re-exports this
 // file, so importing from it creates a require cycle that can leave these
 // components undefined at render and crash the screen.
 import { PressableScale } from '@/components/PressableScale';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { LibraryPickerSheet } from '@/components/LibraryPickerSheet';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBuckets } from '@/state/BucketsContext';
@@ -58,6 +59,7 @@ export function SelectActivitySheet({
   const [newTitle, setNewTitle] = useState('');
   const [newCat, setNewCat] = useState<QuestCategory>('health');
   const [busy, setBusy] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
   // Quest ids planned across the next 7 days (explicit plan, else recurring).
   const weekIds = useMemo(() => {
@@ -147,8 +149,9 @@ export function SelectActivitySheet({
   };
 
   return (
+    <>
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.sheet}>
           <View style={styles.handleRow}>
             <Text style={styles.title}>{t('addActivity')}</Text>
@@ -206,6 +209,9 @@ export function SelectActivitySheet({
                 <Text style={styles.newPlus}>＋</Text>
                 <Text style={styles.newText}>{t('newHabit')}</Text>
               </Pressable>
+              <Pressable onPress={() => setLibraryOpen(true)} accessibilityRole="button" style={styles.newRow}>
+                <Text style={styles.newText}>{t('quests:library.ideas')}</Text>
+              </Pressable>
 
               <ScrollView style={styles.list} keyboardShouldPersistTaps="handled">
                 {filtered.map((quest) => (
@@ -233,8 +239,17 @@ export function SelectActivitySheet({
             </>
           )}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
+    <LibraryPickerSheet
+      visible={libraryOpen}
+      onClose={() => setLibraryOpen(false)}
+      onPick={(quest) => {
+        setLibraryOpen(false);
+        onPick(quest);
+      }}
+    />
+    </>
   );
 }
 
