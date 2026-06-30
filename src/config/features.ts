@@ -25,6 +25,14 @@ export const AUDIENCE_CONTROLS_ENABLED = true;
 /** Reciprocal friends graph (request/accept) layered on one-way follow. */
 export const FRIENDS_GRAPH_ENABLED = false;
 
+/**
+ * Third-party sign-in (Apple / Google). OFF for launch: the providers are stubbed
+ * (return "unavailable"), so showing the buttons is broken UX and, on iOS, would
+ * trigger Apple's "must offer Sign in with Apple" rule (4.8). Email/password only
+ * until these are really implemented. Flip on once wired (add Sign in with Apple).
+ */
+export const THIRD_PARTY_AUTH_ENABLED = false;
+
 /** Verified-vs-self-reported activity completion + keep-awake lock-in. */
 export const ACTIVITY_VERIFICATION_ENABLED = true;
 

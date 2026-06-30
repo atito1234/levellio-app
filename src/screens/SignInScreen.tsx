@@ -6,6 +6,7 @@ import { AnimatedHero, PressableScale, ScreenContainer } from '@/components';
 import { spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useGame } from '@/state/GameContext';
+import { THIRD_PARTY_AUTH_ENABLED } from '@/config/features';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
@@ -85,7 +86,11 @@ export function SignInScreen({ navigation }: Props) {
           <Text style={styles.lead}>{t('auth:claimLead')}</Text>
         </View>
 
-        {/* One-tap providers (light up once OAuth is configured in the full build). */}
+        {/* Third-party sign-in is gated OFF until really implemented — the stubs
+            return "unavailable" (broken UX) and, on iOS, showing them triggers
+            Apple's Sign-in-with-Apple rule (4.8). Email/password only for launch. */}
+        {THIRD_PARTY_AUTH_ENABLED && (
+        <>
         <View style={styles.providers}>
           {Platform.OS === 'ios' && (
             <PressableScale
@@ -114,6 +119,8 @@ export function SignInScreen({ navigation }: Props) {
           <Text style={styles.dividerText}>{t('auth:or')}</Text>
           <View style={styles.dividerLine} />
         </View>
+        </>
+        )}
 
         {!isReal && <Text style={styles.note}>{t('auth:offline')}</Text>}
 
