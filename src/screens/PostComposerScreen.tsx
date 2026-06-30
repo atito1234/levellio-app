@@ -11,6 +11,7 @@ import { useSettings } from '@/state/SettingsContext';
 import { getBucketColor } from '@/lib/buckets';
 import { CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import { MAX_POST_TEXT, isValidPostText, type PostAudience, type PostMedia } from '@/lib/community';
+import { screenText } from '@/lib/contentSafety';
 import { uploadMedia } from '@/services/firebase/storage';
 import { MEDIA_UPLOADS_ENABLED, AUDIENCE_CONTROLS_ENABLED } from '@/config/features';
 import type { QuestCategory } from '@/types';
@@ -70,6 +71,7 @@ export function PostComposerScreen({ route, navigation }: Props) {
   };
 
   const needsAudience = AUDIENCE_CONTROLS_ENABLED && audience === null;
+  const blocked = text.trim().length > 0 && !screenText(text).ok;
   const canPost = isValidPostText(text) && !posting && !needsAudience;
 
   const submit = async () => {
@@ -159,6 +161,7 @@ export function PostComposerScreen({ route, navigation }: Props) {
             accessibilityLabel={isAsk ? t('feed:composerScreen.a11yAsk') : t('feed:composerScreen.a11yPost')}
           />
           <Text style={styles.counter}>{t('feed:composerScreen.counter', { current: text.length, max: MAX_POST_TEXT })}</Text>
+          {blocked && <Text style={styles.blocked}>{t('common:contentBlocked')}</Text>}
 
           {/* Audience — who can see this. Privacy-first: must be chosen unless a
               sticky default is set. */}
@@ -264,6 +267,7 @@ const styles = StyleSheet.create({
   body: { gap: spacing.sm, paddingTop: spacing.md },
   input: { ...typography.body, color: INK, backgroundColor: CARD, borderRadius: 16, padding: spacing.md, minHeight: 140, textAlignVertical: 'top', borderWidth: 1, borderColor: TRACK },
   counter: { ...typography.caption, color: MUTED, textAlign: 'right' },
+  blocked: { ...typography.caption, color: '#C0202C', fontWeight: '700' },
   mediaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   mediaBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, backgroundColor: CARD, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
   mediaBtnOff: { opacity: 0.45 },

@@ -61,5 +61,6 @@
   "time": {
     "justNow": "ahora mismo"
   },
-  "documentA11y": "Documento {{title}}"
+  "documentA11y": "Documento {{title}}",
+  "contentBlocked": "Eso no se puede publicar — quita el lenguaje ofensivo o inseguro."
 }

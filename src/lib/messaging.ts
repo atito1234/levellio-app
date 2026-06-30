@@ -4,6 +4,7 @@
  * the same conversation without a lookup.
  */
 import type { HeroPresentation } from '@/types';
+import { screenText } from './contentSafety';
 
 export const MAX_MESSAGE_TEXT = 1000;
 
@@ -40,7 +41,7 @@ export function threadIdFor(a: string, b: string): string {
 
 export function isValidMessageText(text: string): boolean {
   const t = text.trim();
-  return t.length > 0 && t.length <= MAX_MESSAGE_TEXT;
+  return t.length > 0 && t.length <= MAX_MESSAGE_TEXT && screenText(t).ok;
 }
 
 export function otherParticipant(thread: Pick<Thread, 'participants'>, myUid: string): string {

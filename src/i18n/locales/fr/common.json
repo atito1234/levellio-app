@@ -61,5 +61,6 @@
   "time": {
     "justNow": "à l’instant"
   },
-  "documentA11y": "Document {{title}}"
+  "documentA11y": "Document {{title}}",
+  "contentBlocked": "Impossible de publier ceci — retirez le langage offensant ou inapproprié."
 }

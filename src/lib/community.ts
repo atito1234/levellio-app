@@ -10,6 +10,7 @@
  */
 import type { BucketColorId } from './buckets';
 import type { ContributionMode } from './projects';
+import { screenText } from './contentSafety';
 import type { HeroPresentation, QuestCategory } from '@/types';
 
 /** The one-tap reactions, in display order (clap, fire, strength, heart). */
@@ -150,12 +151,12 @@ export function toggleReaction(
 
 export function isValidPostText(text: string): boolean {
   const t = text.trim();
-  return t.length > 0 && t.length <= MAX_POST_TEXT;
+  return t.length > 0 && t.length <= MAX_POST_TEXT && screenText(t).ok;
 }
 
 export function isValidCommentText(text: string): boolean {
   const t = text.trim();
-  return t.length > 0 && t.length <= MAX_COMMENT_TEXT;
+  return t.length > 0 && t.length <= MAX_COMMENT_TEXT && screenText(t).ok;
 }
 
 /** Does a post pass the current feed scope for the given viewer + network? */

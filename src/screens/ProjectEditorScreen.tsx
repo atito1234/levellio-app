@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { screenText } from '@/lib/contentSafety';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer, ScreenHeader, SectionLabel } from '@/components';
 import { radii, shadows, spacing, typography } from '@/theme';
@@ -73,6 +74,11 @@ export function ProjectEditorScreen({ navigation }: Props) {
 
   const save = async () => {
     if (!canSave) return;
+    // Owner-authored project text is public UGC — screen it like posts.
+    if ([title, region, summary, unit, reward].some((s) => !screenText(s).ok)) {
+      Alert.alert(t('common:contentBlocked'));
+      return;
+    }
     setSaving(true);
     const project = await createProject({
       title,

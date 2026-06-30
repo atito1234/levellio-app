@@ -26,10 +26,41 @@
     "body": "Photo & video sharing arrives next week."
   },
   "plusBadge": "Founder",
-  "weekdaysShort": ["S", "M", "T", "W", "T", "F", "S"],
-  "weekdaysFull": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-  "weekdaysAbbr": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-  "recurrence": { "everyDay": "Every day", "weekdays": "Weekdays", "weekends": "Weekends" },
-  "time": { "justNow": "just now" },
-  "documentA11y": "{{title}} document"
+  "weekdaysShort": [
+    "S",
+    "M",
+    "T",
+    "W",
+    "T",
+    "F",
+    "S"
+  ],
+  "weekdaysFull": [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ],
+  "weekdaysAbbr": [
+    "Sun",
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat"
+  ],
+  "recurrence": {
+    "everyDay": "Every day",
+    "weekdays": "Weekdays",
+    "weekends": "Weekends"
+  },
+  "time": {
+    "justNow": "just now"
+  },
+  "documentA11y": "{{title}} document",
+  "contentBlocked": "That can't be posted — please remove offensive or unsafe language."
 }

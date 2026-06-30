@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { screenText } from '@/lib/contentSafety';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -175,6 +176,11 @@ function EditProfileButton() {
   const [country, setCountry] = useState(settings.profileCountry ?? '');
 
   const save = async () => {
+    // Profile fields are public UGC — screen them like posts.
+    if ([name, headline, country].some((s) => !screenText(s).ok)) {
+      Alert.alert(t('common:contentBlocked'));
+      return;
+    }
     if (name.trim() && name.trim() !== character?.name) await setName(name);
     await update({ profileHeadline: headline.trim(), profileCountry: country.trim() });
     setOpen(false);
