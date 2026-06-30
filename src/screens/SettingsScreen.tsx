@@ -28,6 +28,7 @@ import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useAuth } from '@/state/AuthContext';
 import { useSettings } from '@/state/SettingsContext';
+import { useCommunity } from '@/state/CommunityContext';
 import { type AIMode, type CloudProvider } from '@/services/settings';
 import type { MetadataPrivacy } from '@/lib/metadata';
 import { clearByoApiKey, getByoApiKey, setByoApiKey } from '@/services/security/secureKeyStore';
@@ -71,6 +72,7 @@ export function SettingsScreen() {
   const [nameDraft, setNameDraft] = useState(character?.name ?? '');
   const { account, isReal, signOut, deleteAccount } = useAuth();
   const { settings, ready, update } = useSettings();
+  const { isModerator } = useCommunity();
   const { start: startTour } = useSpotlight();
   const entitlements = useEntitlements();
   useRoomTour('settings');
@@ -497,6 +499,21 @@ export function SettingsScreen() {
               ›
             </Text>
           </Pressable>
+
+          {/* Owner-only: the moderation console (open reports → remove / ban). */}
+          {isModerator && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('feed:console.title')}
+              onPress={() => navigation.navigate('AdminModeration')}
+              style={styles.row}
+            >
+              <Text style={styles.rowLabel}>🛡️ {t('feed:console.title')}</Text>
+              <Text style={styles.rowChevron} accessibilityElementsHidden>
+                ›
+              </Text>
+            </Pressable>
+          )}
 
           <Text style={styles.mission}>{MISSION}</Text>
           <Text style={styles.help}>

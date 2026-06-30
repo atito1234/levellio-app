@@ -13,6 +13,7 @@ import type {
   ReactionEmoji,
   SuggestedHabit,
 } from '@/lib/community';
+import type { NewReport, Report, ReportTarget } from '@/lib/moderation';
 
 export type Unsubscribe = () => void;
 
@@ -38,4 +39,18 @@ export interface CommunityBackend {
 
   /** Remove all of a user's data (posts, comments, reactions, follows) — for account deletion. */
   deleteMyData(uid: string): Promise<void>;
+
+  // --- Moderation (App Store 1.2 / Google UGC) -------------------------------
+  /** File a report against content or a user. */
+  submitReport(report: NewReport): Promise<void>;
+  /** Is this user a configured moderator (an `admins/{uid}` doc exists)? */
+  isModerator(uid: string): Promise<boolean>;
+  /** Live queue of OPEN reports — owner console only (admin-gated by rules). */
+  subscribeReports(cb: (reports: Report[]) => void): Unsubscribe;
+  /** Mark a report handled (keeps it out of the open queue). */
+  resolveReport(reportId: string): Promise<void>;
+  /** Eject a user: writes a `bans/{uid}` doc so all their writes fail. */
+  banUser(uid: string): Promise<void>;
+  /** Remove a reported piece of content (admin delete). */
+  removeContent(target: ReportTarget): Promise<void>;
 }

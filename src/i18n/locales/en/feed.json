@@ -104,5 +104,33 @@
     "agree": "I agree — let me in",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy"
+  },
+  "report": {
+    "title": "Report",
+    "sub": "What’s wrong? We act on reports within 24 hours.",
+    "reportPost": "Report this post",
+    "reportUser": "Report {{name}}",
+    "mute": "Mute {{name}}",
+    "reason_harassment": "Harassment or bullying",
+    "reason_hate": "Hate speech",
+    "reason_sexual": "Sexual or explicit content",
+    "reason_spam": "Spam or scam",
+    "reason_selfHarm": "Self-harm or threats",
+    "reason_other": "Something else",
+    "ack": "Thanks — we’ll review this."
+  },
+  "console": {
+    "title": "Moderation",
+    "subtitle": "Open reports — act within 24 hours.",
+    "empty": "No open reports. 🌱",
+    "reportedBy": "Reported",
+    "reasonLabel": "Reason",
+    "remove": "Remove content",
+    "ban": "Ban user",
+    "dismiss": "Dismiss",
+    "banConfirmTitle": "Ban this user?",
+    "banConfirmBody": "They will no longer be able to post, comment, or message. This can be undone in Firebase.",
+    "removedAck": "Content removed.",
+    "bannedAck": "User banned."
   }
 }

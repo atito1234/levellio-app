@@ -105,6 +105,8 @@ export type RootStackParamList = {
   Profile: { uid: string };
   /** The in-app notification center (reactions, comments, follows). */
   Notifications: undefined;
+  /** Owner-only moderation console (open reports → remove / ban). */
+  AdminModeration: undefined;
   /** Search & discover people, habits, and projects. */
   Discover: undefined;
   /** Full-screen story viewer for one user's active stories. */

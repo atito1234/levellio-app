@@ -104,5 +104,33 @@
     "agree": "Acepto — déjame entrar",
     "terms": "Términos del servicio",
     "privacy": "Política de privacidad"
+  },
+  "report": {
+    "title": "Reportar",
+    "sub": "¿Qué ocurre? Actuamos sobre los reportes en 24 horas.",
+    "reportPost": "Reportar esta publicación",
+    "reportUser": "Reportar a {{name}}",
+    "mute": "Silenciar a {{name}}",
+    "reason_harassment": "Acoso o intimidación",
+    "reason_hate": "Discurso de odio",
+    "reason_sexual": "Contenido sexual o explícito",
+    "reason_spam": "Spam o estafa",
+    "reason_selfHarm": "Autolesión o amenazas",
+    "reason_other": "Otra cosa",
+    "ack": "Gracias — lo revisaremos."
+  },
+  "console": {
+    "title": "Moderación",
+    "subtitle": "Reportes abiertos — actúa en 24 horas.",
+    "empty": "No hay reportes abiertos. 🌱",
+    "reportedBy": "Reportado",
+    "reasonLabel": "Motivo",
+    "remove": "Eliminar contenido",
+    "ban": "Vetar usuario",
+    "dismiss": "Descartar",
+    "banConfirmTitle": "¿Vetar a este usuario?",
+    "banConfirmBody": "Ya no podrá publicar, comentar ni enviar mensajes. Se puede deshacer en Firebase.",
+    "removedAck": "Contenido eliminado.",
+    "bannedAck": "Usuario vetado."
   }
 }

@@ -104,5 +104,33 @@
     "agree": "J'accepte — laissez-moi entrer",
     "terms": "Conditions d'utilisation",
     "privacy": "Politique de confidentialité"
+  },
+  "report": {
+    "title": "Signaler",
+    "sub": "Quel est le problème ? Nous agissons sous 24 heures.",
+    "reportPost": "Signaler cette publication",
+    "reportUser": "Signaler {{name}}",
+    "mute": "Masquer {{name}}",
+    "reason_harassment": "Harcèlement ou intimidation",
+    "reason_hate": "Propos haineux",
+    "reason_sexual": "Contenu sexuel ou explicite",
+    "reason_spam": "Spam ou arnaque",
+    "reason_selfHarm": "Automutilation ou menaces",
+    "reason_other": "Autre chose",
+    "ack": "Merci — nous allons examiner cela."
+  },
+  "console": {
+    "title": "Modération",
+    "subtitle": "Signalements ouverts — agissez sous 24 heures.",
+    "empty": "Aucun signalement ouvert. 🌱",
+    "reportedBy": "Signalé",
+    "reasonLabel": "Motif",
+    "remove": "Supprimer le contenu",
+    "ban": "Bannir l’utilisateur",
+    "dismiss": "Ignorer",
+    "banConfirmTitle": "Bannir cet utilisateur ?",
+    "banConfirmBody": "Il ne pourra plus publier, commenter ni envoyer de messages. Réversible dans Firebase.",
+    "removedAck": "Contenu supprimé.",
+    "bannedAck": "Utilisateur banni."
   }
 }

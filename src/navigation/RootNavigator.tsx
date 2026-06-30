@@ -47,6 +47,7 @@ import { PostDetailScreen } from '@/screens/PostDetailScreen';
 import { PeopleScreen } from '@/screens/PeopleScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { NotificationsScreen } from '@/screens/NotificationsScreen';
+import { AdminModerationScreen } from '@/screens/AdminModerationScreen';
 import { DiscoverScreen } from '@/screens/DiscoverScreen';
 import { StoryViewerScreen } from '@/screens/StoryViewerScreen';
 import { InboxScreen } from '@/screens/InboxScreen';
@@ -157,6 +158,7 @@ export function RootNavigator() {
         <Stack.Screen name="People" component={PeopleScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
+        <Stack.Screen name="AdminModeration" component={AdminModerationScreen} />
         <Stack.Screen name="Discover" component={DiscoverScreen} />
         <Stack.Screen name="StoryViewer" component={StoryViewerScreen} />
         <Stack.Screen name="Inbox" component={InboxScreen} />

@@ -17,6 +17,7 @@ import {
   type ReactionEmoji,
   type SuggestedHabit,
 } from '@/lib/community';
+import type { NewReport, Report, ReportTarget } from '@/lib/moderation';
 import type { CommunityBackend, Unsubscribe } from './CommunityBackend';
 
 const NS = 'levellio:community';
@@ -216,6 +217,25 @@ export class LocalCommunityBackend implements CommunityBackend {
     this.feedListeners.forEach((fn) => fn());
     this.followListeners.get(uid)?.forEach((fn) => fn());
   }
+
+  // --- Moderation -----------------------------------------------------------
+  // Offline/single-device: there are no other users to moderate. Reports are
+  // recorded locally (so nothing throws) and the console stays empty. Real
+  // moderation lights up with the Firebase backend.
+  async submitReport(report: NewReport): Promise<void> {
+    const all = await this.read<unknown[]>(`${NS}:reports`, []);
+    await this.write(`${NS}:reports`, [...all, { ...report, createdAt: Date.now() }]);
+  }
+  async isModerator(): Promise<boolean> {
+    return false;
+  }
+  subscribeReports(cb: (reports: Report[]) => void): Unsubscribe {
+    cb([]);
+    return () => {};
+  }
+  async resolveReport(): Promise<void> {}
+  async banUser(): Promise<void> {}
+  async removeContent(_target: ReportTarget): Promise<void> {}
 }
 
 // Exported only for tests that want the toggle helper alongside the backend.

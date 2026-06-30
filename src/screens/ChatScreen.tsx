@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HeroAvatar, ScreenContainer } from '@/components';
 import { colors, radii, spacing, typography } from '@/theme';
 import { useMessaging } from '@/state/MessagingContext';
+import { useCommunity } from '@/state/CommunityContext';
 import { isValidMessageText, sortMessages, type Message } from '@/lib/messaging';
 import { MEDIA_UPLOADS_ENABLED } from '@/config/features';
 import type { RootStackParamList } from '@/navigation/types';
@@ -15,6 +16,13 @@ export function ChatScreen({ route, navigation }: Props) {
   const { uid, displayName, presentation } = route.params;
   const { t } = useTranslation(['messaging', 'common', 'feed']);
   const { openThreadWith, subscribeMessages, send, markRead, myUid } = useMessaging();
+  const { requestReport, blockUser } = useCommunity();
+  const openModeration = () =>
+    Alert.alert(displayName ?? 'Hero', undefined, [
+      { text: t('feed:report.reportUser', { name: displayName ?? 'Hero' }), onPress: () => requestReport({ type: 'user', id: uid, targetUid: uid, preview: displayName }) },
+      { text: t('feed:post.block', { name: displayName ?? 'Hero' }), style: 'destructive', onPress: () => { void blockUser(uid); navigation.goBack(); } },
+      { text: t('common:action.cancel'), style: 'cancel' },
+    ]);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
@@ -51,7 +59,9 @@ export function ChatScreen({ route, navigation }: Props) {
             <HeroAvatar presentation={presentation ?? 'neutral'} tier="novice" size={32} />
             <Text style={styles.peerName} numberOfLines={1}>{displayName ?? 'Hero'}</Text>
           </Pressable>
-          <View style={{ width: 28 }} />
+          <Pressable onPress={openModeration} accessibilityRole="button" accessibilityLabel={t('feed:post.moreA11y')} hitSlop={10}>
+            <Text style={styles.chevron}>⋯</Text>
+          </Pressable>
         </View>
 
         <ScrollView

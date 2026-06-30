@@ -14,6 +14,7 @@ import {
   deleteDoc,
   deleteField,
   doc,
+  getDoc,
   getDocs,
   increment,
   limit,
@@ -40,9 +41,26 @@ import {
   type ReactionEmoji,
   type SuggestedHabit,
 } from '@/lib/community';
+import type { NewReport, Report, ReportReason, ReportTarget, ReportTargetType } from '@/lib/moderation';
 import type { CommunityBackend, Unsubscribe } from './CommunityBackend';
 
 const FEED_LIMIT = 100;
+
+function toReport(reportId: string, d: DocumentData): Report {
+  return {
+    reportId,
+    type: (d.type ?? 'post') as ReportTargetType,
+    id: d.id ?? '',
+    targetUid: d.targetUid ?? '',
+    reporterUid: d.reporterUid ?? '',
+    reason: (d.reason ?? 'other') as ReportReason,
+    status: d.status === 'resolved' ? 'resolved' : 'open',
+    createdAt: typeof d.createdAt === 'number' ? d.createdAt : 0,
+    ...(d.preview ? { preview: d.preview } : {}),
+    ...(d.postId ? { postId: d.postId } : {}),
+    ...(d.threadId ? { threadId: d.threadId } : {}),
+  };
+}
 
 function toPost(id: string, d: DocumentData): Post {
   return {
@@ -180,5 +198,58 @@ export class FirebaseCommunityBackend implements CommunityBackend {
     // by a now-deleted uid — left as a harmless best-effort orphan.)
     const following = await getDocs(collection(this.db, 'users', uid, 'following'));
     for (const f of following.docs) await deleteDoc(f.ref);
+  }
+
+  // --- Moderation ------------------------------------------------------------
+  async submitReport(report: NewReport): Promise<void> {
+    const ref = doc(collection(this.db, 'reports'));
+    await setDoc(ref, { ...report, status: 'open', createdAt: Date.now(), serverAt: serverTimestamp() });
+  }
+
+  async isModerator(uid: string): Promise<boolean> {
+    if (!uid) return false;
+    try {
+      return (await getDoc(doc(this.db, 'admins', uid))).exists();
+    } catch {
+      return false;
+    }
+  }
+
+  subscribeReports(cb: (reports: Report[]) => void): Unsubscribe {
+    return onSnapshot(
+      query(collection(this.db, 'reports'), where('status', '==', 'open'), orderBy('createdAt', 'desc'), limit(200)),
+      (s) => cb(s.docs.map((d) => toReport(d.id, d.data()))),
+      () => cb([]), // non-admins get permission-denied → empty queue
+    );
+  }
+
+  async resolveReport(reportId: string): Promise<void> {
+    await updateDoc(doc(this.db, 'reports', reportId), { status: 'resolved', resolvedAt: Date.now() });
+  }
+
+  async banUser(uid: string): Promise<void> {
+    await setDoc(doc(this.db, 'bans', uid), { at: Date.now() });
+  }
+
+  async removeContent(target: ReportTarget): Promise<void> {
+    switch (target.type) {
+      case 'post':
+        await deleteDoc(doc(this.db, 'posts', target.id));
+        break;
+      case 'comment':
+        if (target.postId) await deleteDoc(doc(this.db, 'posts', target.postId, 'comments', target.id));
+        break;
+      case 'message':
+        if (target.threadId) await deleteDoc(doc(this.db, 'threads', target.threadId, 'messages', target.id));
+        break;
+      case 'story':
+        await deleteDoc(doc(this.db, 'stories', target.id));
+        break;
+      case 'profile':
+        await deleteDoc(doc(this.db, 'profiles', target.id));
+        break;
+      case 'user':
+        break; // nothing to delete; ban handles ejection
+    }
   }
 }

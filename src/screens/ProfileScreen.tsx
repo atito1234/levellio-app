@@ -38,7 +38,14 @@ export function ProfileScreen({ route, navigation }: Props) {
   const { profile, loading } = useProfile(uid);
   const { character } = useGame();
   const { myProjects } = useProjects();
-  const { subscribeFeed } = useCommunity();
+  const { subscribeFeed, requestReport, blockUser, muteUser } = useCommunity();
+  const openModeration = () =>
+    Alert.alert(profile?.displayName ?? '', undefined, [
+      { text: t('feed:report.reportUser', { name: profile?.displayName ?? '' }), onPress: () => requestReport({ type: 'user', id: uid, targetUid: uid, preview: profile?.displayName }) },
+      { text: t('feed:report.mute', { name: profile?.displayName ?? '' }), onPress: () => void muteUser(uid) },
+      { text: t('feed:post.block', { name: profile?.displayName ?? '' }), style: 'destructive', onPress: () => void blockUser(uid) },
+      { text: t('common:action.cancel'), style: 'cancel' },
+    ]);
 
   const [posts, setPosts] = useState<Post[]>([]);
   useEffect(() => {
@@ -93,6 +100,9 @@ export function ProfileScreen({ route, navigation }: Props) {
                   <Text style={styles.messageBtnText}>{t('messaging:message')}</Text>
                 </Pressable>
                 <FollowButton targetUid={uid} size="md" />
+                <Pressable onPress={openModeration} accessibilityRole="button" accessibilityLabel={t('feed:post.moreA11y')} hitSlop={10} style={styles.moreBtn}>
+                  <Text style={styles.moreDots}>⋯</Text>
+                </Pressable>
               </View>
             )}
           </View>
@@ -251,6 +261,8 @@ const styles = StyleSheet.create({
   },
   headerRight: { position: 'absolute', right: spacing.lg, top: spacing.lg },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  moreBtn: { paddingHorizontal: 4 },
+  moreDots: { ...typography.title, color: colors.textMuted, fontWeight: '800' },
   messageBtn: { backgroundColor: colors.surface, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: 6, borderWidth: 1, borderColor: colors.identity },
   messageBtnText: { ...typography.caption, color: colors.identity, fontWeight: '800' },
   name: { ...typography.heading, color: colors.textPrimary },

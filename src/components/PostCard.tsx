@@ -43,17 +43,19 @@ const TRACK = '#ECEAE4';
 export function PostCard({ post, onOpen }: { post: Post; onOpen: (postId: string) => void }) {
   const { t, i18n } = useTranslation(['feed', 'common']);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { uid, setReaction, blockUser, reportPost } = useCommunity();
+  const { uid, setReaction, blockUser, muteUser, requestReport } = useCommunity();
   const { notifyReaction } = useNotifications();
   const { isFounding } = useSubscription();
   const { settings } = useSettings();
   const reduced = useReducedMotion();
   const openProfile = () => navigation.navigate('Profile', { uid: post.authorUid });
 
-  // Safety: report (hide + flag) or block the author. Surfaced on others' posts.
+  // Safety: report this post / the author, mute, or block. Surfaced on others' posts.
   const openModeration = () => {
     Alert.alert(t('feed:post.moreA11y'), undefined, [
-      { text: t('feed:post.report'), onPress: () => { void reportPost(post.id); Alert.alert(t('feed:post.reportedAck')); } },
+      { text: t('feed:report.reportPost'), onPress: () => requestReport({ type: 'post', id: post.id, targetUid: post.authorUid, preview: post.text }) },
+      { text: t('feed:report.reportUser', { name: post.displayName }), onPress: () => requestReport({ type: 'user', id: post.authorUid, targetUid: post.authorUid, preview: post.displayName }) },
+      { text: t('feed:report.mute', { name: post.displayName }), onPress: () => void muteUser(post.authorUid) },
       { text: t('feed:post.block', { name: post.displayName }), style: 'destructive', onPress: () => void blockUser(post.authorUid) },
       { text: t('common:action.cancel'), style: 'cancel' },
     ]);
