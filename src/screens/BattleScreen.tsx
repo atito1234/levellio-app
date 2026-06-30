@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { Animated, BackHandler, Easing, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst, JourneyScene, DialTimer } from '@/components';
+import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst, JourneyScene, DialTimer, ActivityPickerDeck } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBattles } from '@/state/BattlesContext';
@@ -13,16 +13,18 @@ import { useAbandonGuard } from '@/hooks/useAbandonGuard';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { getCelebrationTimings } from '@/lib/celebration';
 import { battleStateAt } from '@/lib/battle';
-import { getTechnique, workSeconds } from '@/lib/timeTechniques';
+import { getTechnique } from '@/lib/timeTechniques';
 import { getDragon } from '@/data/dragons';
 import { sessionsOf } from '@/lib/analytics';
 import { activityJourney, HABIT_DAYS } from '@/lib/journey';
 import { sceneForCategory } from '@/lib/journeyScene';
+import { CATEGORY_COLOR, CATEGORY_META } from '@/lib/categories';
 import { dayKey } from '@/lib/dates';
 import { activityTiming, formatClock, isVerifiedDuration } from '@/lib/activityTimer';
 import { ACTIVITY_VERIFICATION_ENABLED, FOCUS_LOCK_ENABLED } from '@/config/features';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import type { RootStackParamList } from '@/navigation/types';
+import type { Quest } from '@/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Battle'>;
 
@@ -68,29 +70,53 @@ export function BattleScreen({ route, navigation }: Props) {
   const dragonTaunt = t('dragons:' + dragon.id + '.taunt', { defaultValue: dragon.taunt });
   const dragonVictory = t('dragons:' + dragon.id + '.victory', { defaultValue: dragon.victory });
   const accent = dragon.colorId === 'teal' ? TEAL : VIOLET;
-  const battleQuests = useMemo(
-    () => questIds.map((id) => quests.find((q) => q.id === id)).filter((q): q is NonNullable<typeof q> => !!q),
-    [questIds, quests],
+  // Choose one OR many activities to fight for under this one dragon — each with
+  // its OWN duration. Selection + per-activity minutes both live here (seeded from
+  // the launch bundle), so the user can add/drop activities and set each time.
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(questIds));
+  const [durations, setDurations] = useState<Record<string, number>>({});
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const getDur = useCallback((q: Quest) => durations[q.id] ?? activityTiming(q).minutes, [durations]);
+  const setDuration = useCallback((id: string, m: number) => setDurations((p) => ({ ...p, [id]: m })), []);
+  const toggleSelected = useCallback(
+    (id: string) =>
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+      }),
+    [],
   );
-
-  // Fully customizable session length: a circular dial the user spins. Defaults to
-  // the technique's minutes, else the sum of the activities' own timers.
-  const defaultMinutes = useMemo(() => {
-    const w = workSeconds(technique, customMin);
-    if (w && w > 0) return Math.max(1, Math.round(w / 60));
-    const sum = battleQuests.reduce((acc, q) => acc + activityTiming(q).minutes, 0);
-    return Math.max(1, sum || 25);
-  }, [technique, customMin, battleQuests]);
-  const [minutes, setMinutes] = useState(defaultMinutes);
-  const totalSec = minutes * 60;
+  const activeQuests = useMemo(() => quests.filter((q) => selectedIds.has(q.id)), [quests, selectedIds]);
+  // Total session = the SUM of each chosen activity's own time (min 1 minute).
+  const totalSec = useMemo(
+    () => Math.max(60, activeQuests.reduce((acc, q) => acc + getDur(q), 0) * 60),
+    [activeQuests, getDur],
+  );
 
   // The primary habit's "from repetition to habit" journey drives the victory scene.
   const sessions = useMemo(() => sessionsOf(events), [events]);
   const primaryJourney = useMemo(() => {
-    const primary = battleQuests[0];
+    const primary = activeQuests[0];
     return primary ? activityJourney(sessions, primary.id, primary.title, dayKey(new Date())) : null;
-  }, [battleQuests, sessions]);
-  const journeyScene = useMemo(() => sceneForCategory(battleQuests[0]?.category), [battleQuests]);
+  }, [activeQuests, sessions]);
+  const journeyScene = useMemo(() => sceneForCategory(activeQuests[0]?.category), [activeQuests]);
+
+  // Seed each activity's dial with its own default time, so the chooser shows the
+  // real per-activity duration (the user can then spin any of them up/down).
+  useEffect(() => {
+    setDurations((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const q of quests) {
+        if (next[q.id] == null) {
+          next[q.id] = activityTiming(q).minutes;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [quests]);
 
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
@@ -141,9 +167,9 @@ export function BattleScreen({ route, navigation }: Props) {
     const method = technique.countsUp ? 'timer' : 'pomodoro';
     let completed = 0;
     let totalXp = 0;
-    for (const q of battleQuests) {
+    for (const q of activeQuests) {
       if (completedRef.current.has(q.id)) continue;
-      const reqSec = activityTiming(q).minutes * 60;
+      const reqSec = getDur(q) * 60; // this activity's OWN chosen duration
       if (elapsed < reqSec) continue; // not focused long enough to count it
       completedRef.current.add(q.id);
       const verified = ACTIVITY_VERIFICATION_ENABLED && isVerifiedDuration(elapsed, reqSec);
@@ -154,7 +180,7 @@ export function BattleScreen({ route, navigation }: Props) {
       }
     }
     return { completed, totalXp };
-  }, [technique.countsUp, battleQuests, elapsed, complete]);
+  }, [technique.countsUp, activeQuests, getDur, elapsed, complete]);
 
   // Leaving early still records the activities the focus time already covered.
   const creditPerformed = useCallback(async () => {
@@ -188,8 +214,8 @@ export function BattleScreen({ route, navigation }: Props) {
         i18n: { labelKey: 'dragonSlain', labelParams: { dragon: dragonDisplayName } },
       },
     ]);
-    setResult({ completed, selected: battleQuests.length, totalXp, coins, prepared });
-  }, [stop, reduced, completeCovered, battleQuests.length, recordVictory, dragon.id, preparedRite, perDragon, recordMilestones, t, dragonDisplayName]);
+    setResult({ completed, selected: activeQuests.length, totalXp, coins, prepared });
+  }, [stop, reduced, completeCovered, activeQuests.length, recordVictory, dragon.id, preparedRite, perDragon, recordMilestones, t, dragonDisplayName]);
 
   // After a win, dismiss the battle (a fullScreenModal) once. goBack returns to
   // the launching screen; the slaying milestone celebrates via the global overlay
@@ -224,7 +250,7 @@ export function BattleScreen({ route, navigation }: Props) {
     setRunning(false);
   }, [stop]);
 
-  if (battleQuests.length === 0) {
+  if (quests.length === 0) {
     return (
       <ScreenContainer backgroundColor={BG}>
         <View style={styles.center}>
@@ -250,11 +276,11 @@ export function BattleScreen({ route, navigation }: Props) {
       ctx: { focusLockedRunning: true },
       dragonId,
       ...(dragonName ? { dragonName } : {}),
-      ...(battleQuests[0] ? { questId: battleQuests[0].id } : {}),
+      ...(activeQuests[0] ? { questId: activeQuests[0].id } : {}),
       onProceed: leaveNow,
     });
     if (!intervened) leaveNow();
-  }, [guardAbandon, dragonId, dragonName, battleQuests, leaveNow]);
+  }, [guardAbandon, dragonId, dragonName, activeQuests, leaveNow]);
 
   // Frictionless exit: close the battle cleanly (dismiss the modal) — never
   // replace/navigate across presentations, which left a stuck dragon screen.
@@ -280,7 +306,7 @@ export function BattleScreen({ route, navigation }: Props) {
     navigation.navigate('PrepareRite', {
       dragonId,
       ...(dragonName ? { dragonName } : {}),
-      ...(battleQuests[0] ? { category: battleQuests[0].category } : {}),
+      ...(activeQuests[0] ? { category: activeQuests[0].category } : {}),
     });
 
   // Block swipe / back / hardware-back while locked.
@@ -305,6 +331,9 @@ export function BattleScreen({ route, navigation }: Props) {
   }, [lockActive, attemptLeave]);
 
   const clock = totalSec === null ? formatClock(elapsed) : formatClock(state.remainingSec ?? 0);
+  // With one activity, spinning the big dial sets its time; with many, each time is
+  // set per-activity in the chooser and the big dial just shows the total countdown.
+  const single = activeQuests.length === 1 ? activeQuests[0] : null;
 
   return (
     <ScreenContainer backgroundColor={BG}>
@@ -386,32 +415,38 @@ export function BattleScreen({ route, navigation }: Props) {
             {/* Spin the ring (clockwise) to set/adjust your focus time — even mid-battle. */}
             <View style={styles.dialWrap} accessibilityLabel={t('battle.clockRemainingA11y', { clock })}>
               <DialTimer
-                minutes={minutes}
-                onChange={setMinutes}
+                minutes={single ? getDur(single) : Math.round(totalSec / 60)}
+                onChange={(m) => single && setDuration(single.id, m)}
+                disabled={!single}
                 color={accent}
                 size={200}
                 centerLabel={clock}
-                sublabel={t('battle.dialHint')}
+                sublabel={single ? t('battle.dialHint') : t('battle.perActivityHint')}
                 {...(running ? { progress: state.dragonHealthPct / 100 } : {})}
               />
             </View>
 
-            {/* The activities you're fighting to complete (each with its own timer). */}
-            {battleQuests.length > 0 && (
-              <View style={styles.actvList}>
-                <Text style={styles.actvHead}>{t('battle.fightingFor')}</Text>
-                {battleQuests.map((q) => {
-                  const covered = completedRef.current.has(q.id) || elapsed >= activityTiming(q).minutes * 60;
+            {/* Which activities you're fighting for — choose one or many, each with its
+                own time. Chips are removable; "＋" opens the chooser (with per-activity dials). */}
+            <View style={styles.actvList}>
+              <Text style={styles.actvHead}>{t('battle.fightingFor')}</Text>
+              <View style={styles.chipWrap}>
+                {activeQuests.map((q) => {
+                  const covered = completedRef.current.has(q.id) || elapsed >= getDur(q) * 60;
                   return (
-                    <View key={q.id} style={styles.actvRow}>
-                      <Text style={styles.actvMark}>{covered ? '✅' : '•'}</Text>
-                      <Text style={styles.actvTitle} numberOfLines={1}>{q.title}</Text>
-                      <Text style={styles.actvTime}>{t('battle.minShort', { count: activityTiming(q).minutes })}</Text>
-                    </View>
+                    <Pressable key={q.id} onPress={() => toggleSelected(q.id)} accessibilityRole="button" style={[styles.chip, { borderColor: CATEGORY_COLOR[q.category] }]}>
+                      <Text style={styles.chipText} numberOfLines={1}>
+                        {covered ? '✅ ' : ''}{CATEGORY_META[q.category].icon} {q.title} · {t('battle.minShort', { count: getDur(q) })}
+                      </Text>
+                      <Text style={styles.chipX}>✕</Text>
+                    </Pressable>
                   );
                 })}
+                <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" style={styles.addChip}>
+                  <Text style={styles.addChipText}>＋ {t('battle.chooseActivities')}</Text>
+                </Pressable>
               </View>
-            )}
+            </View>
           </>
         )}
       </View>
@@ -424,9 +459,11 @@ export function BattleScreen({ route, navigation }: Props) {
         <View style={styles.controls}>
           <Pressable
             onPress={running ? pause : start}
+            disabled={activeQuests.length === 0}
             accessibilityRole="button"
+            accessibilityState={{ disabled: activeQuests.length === 0 }}
             accessibilityLabel={running ? t('battle.pauseA11y') : elapsed > 0 ? t('battle.resumeA11y') : t('battle.startBattleA11y')}
-            style={[styles.primaryBtn, { backgroundColor: accent }]}
+            style={[styles.primaryBtn, { backgroundColor: accent }, activeQuests.length === 0 && styles.primaryBtnOff]}
           >
             <Text style={styles.primaryText}>{running ? t('battle.pause') : elapsed > 0 ? t('battle.resume') : t('battle.start')}</Text>
           </Pressable>
@@ -464,6 +501,22 @@ export function BattleScreen({ route, navigation }: Props) {
           </View>
         </View>
       )}
+
+      <ActivityPickerDeck
+        visible={pickerOpen}
+        quests={quests}
+        selectedIds={selectedIds}
+        onToggle={toggleSelected}
+        onClose={() => setPickerOpen(false)}
+        title={t('battle.chooseActivities')}
+        selectWord={t('battle.fightWord')}
+        selectedWord={t('battle.fightingWord')}
+        doneWord={t('battle.done')}
+        emptyText={t('battle.noHabits')}
+        showTimer
+        durations={durations}
+        onSetDuration={setDuration}
+      />
     </ScreenContainer>
   );
 }
@@ -484,12 +537,14 @@ const styles = StyleSheet.create({
   heroRow: { marginTop: spacing.md },
   dialWrap: { marginTop: spacing.sm },
 
-  actvList: { alignSelf: 'stretch', marginTop: spacing.sm, gap: 4, paddingHorizontal: spacing.lg },
+  actvList: { alignSelf: 'stretch', marginTop: spacing.sm, gap: spacing.xs, paddingHorizontal: spacing.lg },
   actvHead: { ...typography.label, color: MUTED, letterSpacing: 1, fontWeight: '800' },
-  actvRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  actvMark: { ...typography.body, width: 22, textAlign: 'center' },
-  actvTitle: { ...typography.body, color: INK, flex: 1 },
-  actvTime: { ...typography.caption, color: MUTED, fontWeight: '700' },
+  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, backgroundColor: CARD, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1.5, maxWidth: '100%' },
+  chipText: { ...typography.label, color: INK, fontWeight: '700', flexShrink: 1 },
+  chipX: { ...typography.caption, color: MUTED, fontWeight: '900' },
+  addChip: { borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: VIOLET, backgroundColor: '#EDE9FE' },
+  addChipText: { ...typography.label, color: VIOLET, fontWeight: '800' },
 
   victory: { ...typography.heading, fontWeight: '900' },
   victoryLine: { ...typography.body, color: INK, textAlign: 'center', paddingHorizontal: spacing.lg },
@@ -502,6 +557,7 @@ const styles = StyleSheet.create({
 
   controls: { gap: spacing.sm, marginBottom: spacing.md },
   primaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.lg, alignItems: 'center', marginBottom: spacing.md },
+  primaryBtnOff: { opacity: 0.4 },
   primaryText: { ...typography.title, color: '#FFFFFF', fontWeight: '800' },
   secondaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.md, alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E8E6E0' },
   secondaryText: { ...typography.label, color: INK, fontWeight: '700' },
