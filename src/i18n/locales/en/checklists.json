@@ -17,6 +17,8 @@
   "srcToday": "Today",
   "srcWeek": "This week",
   "searchChecklists": "Search checklists…",
+  "noneForDay": "No checklists for this day yet.",
+  "viewAll": "View all checklists",
   "fromProject": "From this project",
   "recurring": "Repeats daily",
   "oneOff": "One-off",

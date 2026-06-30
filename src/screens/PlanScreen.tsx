@@ -13,6 +13,8 @@ import { useActivityLog } from '@/state/useActivityLog';
 import { useMaterializeRecurring } from '@/hooks/useMaterializeRecurring';
 import { groupHabitsIntoRails } from '@/lib/dashboard';
 import { sessionDay, sessionsOf } from '@/lib/analytics';
+import { checklistShowsOn } from '@/lib/checklist';
+import { getBucketColor } from '@/lib/buckets';
 import { daySchedule, dayCategoryColors, dominantColor, type DaySchedule } from '@/lib/scheduleCalendar';
 import {
   addMonths,
@@ -50,7 +52,7 @@ export function PlanScreen({ route, navigation }: Props) {
   const { buckets, assignments } = useBuckets();
   const { projectsForHabit } = useProjects();
   const { getPlan, togglePlanned } = usePlan();
-  const { addChecklist, checklistForDate } = useChecklists();
+  const { checklists, addChecklist, checklistForDate } = useChecklists();
   const { events } = useActivityLog();
 
   const todayK = dayKey(new Date());
@@ -86,6 +88,26 @@ export function PlanScreen({ route, navigation }: Props) {
 
   const selSummary = summaryFor(selected);
   const isPastDay = dayDiff(todayK, selected) < 0;
+
+  // day → distinct checklist accent colours (so calendar days match their checklists).
+  const activeChecklists = useMemo(() => checklists.filter((c) => !c.archived), [checklists]);
+  const checklistColorsFor = useMemo(
+    () =>
+      (k: string): string[] => {
+        const seen = new Set<string>();
+        const out: string[] = [];
+        for (const c of activeChecklists) {
+          if (!checklistShowsOn(c, k)) continue;
+          const accent = getBucketColor(c.colorId).accent;
+          if (!seen.has(accent)) {
+            seen.add(accent);
+            out.push(accent);
+          }
+        }
+        return out;
+      },
+    [activeChecklists],
+  );
 
   const rails = useMemo(() => groupHabitsIntoRails(quests, buckets, assignments), [quests, buckets, assignments]);
   const plannedSet = useMemo(() => new Set(getPlan(selected) ?? []), [getPlan, selected]);
@@ -135,6 +157,7 @@ export function PlanScreen({ route, navigation }: Props) {
             onPrev={() => setMonthRef((r) => addMonths(r, -1))}
             onNext={() => setMonthRef((r) => addMonths(r, 1))}
             summaryFor={summaryFor}
+            checklistColorsFor={checklistColorsFor}
             todayKey={todayK}
             selected={selected}
             onSelect={setSelected}
@@ -260,11 +283,13 @@ export function PlanScreen({ route, navigation }: Props) {
           )}
         </View>
 
-        {/* Checklists — create from this day's plan, or search/open existing. */}
+        {/* Checklists — only this day's, create from its plan, or view all. */}
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>{t('checklists.title')}</Text>
+          <Text style={styles.panelTitle}>{`${dayLabel(selected)} · ${t('checklists.title')}`}</Text>
           <ChecklistPicker
             onOpen={() => navigation.navigate('Checklists')}
+            selectedDate={selected}
+            onViewAll={() => navigation.navigate('Checklists')}
             {...(selSummary.scheduled.length > 0 ? { onCreate: () => void createChecklistFromDay(), createLabel: t('checklists.fromDay') } : {})}
           />
         </View>
@@ -283,6 +308,7 @@ function MonthGrid({
   onPrev,
   onNext,
   summaryFor,
+  checklistColorsFor,
   todayKey,
   selected,
   onSelect,
@@ -291,6 +317,7 @@ function MonthGrid({
   onPrev: () => void;
   onNext: () => void;
   summaryFor: (k: string) => DaySchedule;
+  checklistColorsFor: (k: string) => string[];
   todayKey: string;
   selected: string;
   onSelect: (k: string) => void;
@@ -324,6 +351,7 @@ function MonthGrid({
             const isToday = cell.key === todayKey;
             const on = cell.key === selected;
             const allDone = s.count > 0 && s.doneCount >= s.count;
+            const clColors = checklistColorsFor(cell.key);
             return (
               <Pressable
                 key={ci}
@@ -343,6 +371,13 @@ function MonthGrid({
                     ))
                   )}
                 </View>
+                {clColors.length > 0 && (
+                  <View style={styles.clBar}>
+                    {clColors.slice(0, 3).map((c, i) => (
+                      <View key={i} style={[styles.clMark, { backgroundColor: on ? '#FFFFFF' : c }]} />
+                    ))}
+                  </View>
+                )}
               </Pressable>
             );
           })}
@@ -469,6 +504,8 @@ const styles = StyleSheet.create({
   dots: { flexDirection: 'row', gap: 2, height: 6, marginTop: 2, alignItems: 'center' },
   miniDot: { width: 5, height: 5, borderRadius: 3 },
   allDone: { fontSize: 9, color: VIOLET, fontWeight: '800', lineHeight: 9 },
+  clBar: { flexDirection: 'row', gap: 2, height: 3, marginTop: 2, alignItems: 'center' },
+  clMark: { width: 7, height: 3, borderRadius: 1.5 },
 
   yearWrap: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: spacing.sm },
   miniMonth: { width: '31%', gap: 3, marginBottom: spacing.sm },
