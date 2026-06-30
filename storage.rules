@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// Cloud Storage rules for Levellio media (post photos/videos, stories). Media
+// uploads are OFF until MEDIA_UPLOADS_ENABLED is flipped on (needs the Blaze plan
+// + Firebase Storage). Deploy with: firebase deploy --only storage
+//
+// A user writes only under their own users/{uid}/ prefix; any signed-in user can
+// read (the community is auth-gated). Size + content-type are constrained.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /users/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 15 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*|video/.*');
+    }
+  }
+}
