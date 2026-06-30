@@ -234,7 +234,11 @@ export function LibraryPickerSheet({
   // host that is already a Modal. Standalone: its own Modal (fine over a screen).
   if (embedded) {
     if (!visible) return null;
-    return <View style={styles.embeddedOverlay}>{body}</View>;
+    return (
+      <KeyboardAvoidingView style={styles.embeddedOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {body}
+      </KeyboardAvoidingView>
+    );
   }
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
