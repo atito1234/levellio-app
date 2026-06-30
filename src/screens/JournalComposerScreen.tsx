@@ -3,10 +3,11 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View 
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, HeroAvatar } from '@/components';
+import { ScreenContainer, HeroAvatar, ActivityPickerDeck } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useJournal } from '@/state/JournalContext';
+import { CATEGORY_COLOR, CATEGORY_META } from '@/lib/categories';
 import { MOODS, AUDIENCES, type JournalAudience, type JournalMedia, type JournalMood } from '@/lib/journal';
 import type { RootStackParamList } from '@/navigation/types';
 
@@ -23,7 +24,7 @@ const TRACK = '#ECEAE4';
 export function JournalComposerScreen({ route, navigation }: Props) {
   const { t } = useTranslation('journal');
   const { dragonId, dragonName, questIds, prompt, teaching } = route.params ?? {};
-  const { character } = useGame();
+  const { character, quests } = useGame();
   const { addEntry } = useJournal();
 
   const [text, setText] = useState('');
@@ -31,6 +32,16 @@ export function JournalComposerScreen({ route, navigation }: Props) {
   const [audience, setAudience] = useState<JournalAudience>('private');
   const [media, setMedia] = useState<JournalMedia | undefined>(undefined);
   const [saving, setSaving] = useState(false);
+  // One OR many activities this reflection is about (seeded from the launch context).
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(questIds ?? []));
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const toggle = (id: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  const selectedQuests = quests.filter((q) => selectedIds.has(q.id));
 
   const canPost = (text.trim().length > 0 || !!media) && !saving;
 
@@ -56,7 +67,7 @@ export function JournalComposerScreen({ route, navigation }: Props) {
   const post = async () => {
     if (!canPost) return;
     setSaving(true);
-    await addEntry({ text, audience, mood, media, dragonId, dragonName, questIds });
+    await addEntry({ text, audience, mood, media, dragonId, dragonName, questIds: [...selectedIds] });
     navigation.goBack();
   };
 
@@ -83,6 +94,23 @@ export function JournalComposerScreen({ route, navigation }: Props) {
           <View style={{ flex: 1 }}>
             <Text style={styles.you}>{t('composer.you')}</Text>
             {dragonName ? <Text style={styles.context}>{t('composer.battling', { name: dragonName })}</Text> : <Text style={styles.context}>{t('composer.battleReflection')}</Text>}
+          </View>
+        </View>
+
+        {/* Which activities this reflection is about — one or many. */}
+        <View style={styles.actvSection}>
+          <Text style={styles.fieldLabel}>{t('composer.activitiesLabel')}</Text>
+          <View style={styles.chips}>
+            {selectedQuests.map((q) => (
+              <Pressable key={q.id} onPress={() => toggle(q.id)} accessibilityRole="button" style={[styles.actvChip, { borderColor: CATEGORY_COLOR[q.category] }]}>
+                <View style={[styles.actvDot, { backgroundColor: CATEGORY_COLOR[q.category] }]} />
+                <Text style={styles.actvChipText} numberOfLines={1}>{CATEGORY_META[q.category].icon} {q.title}</Text>
+                <Text style={styles.actvChipX}>✕</Text>
+              </Pressable>
+            ))}
+            <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button" style={styles.addActv}>
+              <Text style={styles.addActvText}>＋ {t('composer.chooseActivities')}</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -167,6 +195,19 @@ export function JournalComposerScreen({ route, navigation }: Props) {
         </View>
         <Text style={styles.audienceNote}>{audNote} {t('composer.audienceNoteSuffix')}</Text>
       </ScrollView>
+
+      <ActivityPickerDeck
+        visible={pickerOpen}
+        quests={quests}
+        selectedIds={selectedIds}
+        onToggle={toggle}
+        onClose={() => setPickerOpen(false)}
+        title={t('composer.chooseActivities')}
+        selectWord={t('composer.select')}
+        selectedWord={t('composer.selected')}
+        doneWord={t('composer.done')}
+        emptyText={t('composer.noActivities')}
+      />
     </ScreenContainer>
   );
 }
@@ -199,6 +240,13 @@ const styles = StyleSheet.create({
   mediaBtnText: { ...typography.label, color: INK, fontWeight: '600' },
 
   fieldLabel: { ...typography.label, color: MUTED, letterSpacing: 1 },
+  actvSection: { gap: spacing.sm },
+  actvChip: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: VIOLET_SOFT, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, maxWidth: '100%' },
+  actvDot: { width: 9, height: 9, borderRadius: radii.pill },
+  actvChipText: { ...typography.label, color: VIOLET, fontWeight: '700', flexShrink: 1 },
+  actvChipX: { ...typography.caption, color: VIOLET, fontWeight: '800' },
+  addActv: { borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK, backgroundColor: CARD },
+  addActvText: { ...typography.label, color: VIOLET, fontWeight: '800' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: { backgroundColor: CARD, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: TRACK },
   chipOn: { backgroundColor: VIOLET_SOFT, borderColor: VIOLET },
