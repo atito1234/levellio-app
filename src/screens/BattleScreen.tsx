@@ -6,6 +6,7 @@ import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst, JourneyScen
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBattles } from '@/state/BattlesContext';
+import { useMilestones } from '@/state/MilestonesContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
@@ -52,7 +53,8 @@ export function BattleScreen({ route, navigation }: Props) {
   const { t } = useTranslation('battle');
   const { questIds, techniqueId, customMin, dragonId, dragonName } = route.params;
   const { quests, character } = useGame();
-  const { recordVictory, preparedRite, perDragonStreak } = useBattles();
+  const { recordVictory, preparedRite, perDragonStreak, perDragon } = useBattles();
+  const { recordMilestones } = useMilestones();
   const { events } = useActivityLog();
   const PREP_BONUS = 25;
   const complete = useCompleteActivity();
@@ -87,6 +89,8 @@ export function BattleScreen({ route, navigation }: Props) {
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wonRef = useRef(false);
   const allowLeave = useRef(false);
+  // Quests already credited this session (so win + leave never double-complete).
+  const completedRef = useRef<Set<string>>(new Set());
 
   const state = battleStateAt(totalSec, elapsed);
   const won = result !== null;
@@ -120,6 +124,33 @@ export function BattleScreen({ route, navigation }: Props) {
   }, [running, reduced, sway]);
   const swayX = sway.interpolate({ inputRange: [-1, 1], outputRange: [-6, 6] });
 
+  // Complete every activity whose OWN timer the focus time has covered (each
+  // activity has its own duration). Records what the user actually performed —
+  // used by both victory (full elapse covers all) and an early leave (partial).
+  const completeCovered = useCallback(async (): Promise<{ completed: number; totalXp: number }> => {
+    const method = technique.countsUp ? 'timer' : 'pomodoro';
+    let completed = 0;
+    let totalXp = 0;
+    for (const q of battleQuests) {
+      if (completedRef.current.has(q.id)) continue;
+      const reqSec = activityTiming(q).minutes * 60;
+      if (elapsed < reqSec) continue; // not focused long enough to count it
+      completedRef.current.add(q.id);
+      const verified = ACTIVITY_VERIFICATION_ENABLED && isVerifiedDuration(elapsed, reqSec);
+      const reward = await complete(q, { method, durationSec: reqSec, ...(verified ? { verified: true } : {}) });
+      if (reward) {
+        completed += 1;
+        totalXp += reward.totalXp;
+      }
+    }
+    return { completed, totalXp };
+  }, [technique.countsUp, battleQuests, elapsed, complete]);
+
+  // Leaving early still records the activities the focus time already covered.
+  const creditPerformed = useCallback(async () => {
+    await completeCovered();
+  }, [completeCovered]);
+
   const winBattle = useCallback(async () => {
     if (wonRef.current) return;
     wonRef.current = true;
@@ -130,30 +161,35 @@ export function BattleScreen({ route, navigation }: Props) {
     } catch {
       /* vibration unavailable — ignore */
     }
-    const method = technique.countsUp ? 'timer' : 'pomodoro';
-    const per = battleQuests.length > 0 ? Math.round(elapsed / battleQuests.length) : 0;
-    let completed = 0;
-    let totalXp = 0;
-    for (const q of battleQuests) {
-      const verified = ACTIVITY_VERIFICATION_ENABLED && isVerifiedDuration(per, activityTiming(q).minutes * 60);
-      const reward = await complete(q, { method, durationSec: per, ...(verified ? { verified: true } : {}) });
-      if (reward) {
-        completed += 1;
-        totalXp += reward.totalXp;
-      }
-    }
+    const { completed, totalXp } = await completeCovered();
     const prepared = preparedRite !== null;
     const coins = coinsFor(completed) + (prepared ? PREP_BONUS : 0);
     await recordVictory(dragon.id, coins); // consumes the prep rite + advances the dragon streak
+    // Record the slaying as a celebrated milestone (shows over any screen + in the
+    // profile's milestones). The id is per-dragon-per-count so each slaying lands once.
+    const count = (perDragon[dragon.id] ?? 0) + 1;
+    await recordMilestones([
+      {
+        id: `dragon-${dragon.id}-${count}`,
+        kind: 'dragon',
+        emoji: '⚔️',
+        label: t('milestonesContent:dragonSlain', { dragon: dragonDisplayName }),
+        earnedAt: Date.now(),
+        i18n: { labelKey: 'dragonSlain', labelParams: { dragon: dragonDisplayName } },
+      },
+    ]);
     setResult({ completed, selected: battleQuests.length, totalXp, coins, prepared });
-  }, [stop, reduced, technique.countsUp, battleQuests, elapsed, complete, recordVictory, dragon.id, preparedRite]);
+  }, [stop, reduced, completeCovered, battleQuests.length, recordVictory, dragon.id, preparedRite, perDragon, recordMilestones, t, dragonDisplayName]);
 
-  // After a win, take the user straight Home (works from any entry point), once.
+  // After a win, dismiss the battle (a fullScreenModal) once. goBack returns to
+  // the launching screen; the slaying milestone celebrates via the global overlay
+  // no matter where we land. (navigate('Main') here left the battle mounted in the
+  // background and broke the back stack — the "cannot go back" / stuck popup bug.)
   const wentHomeRef = useRef(false);
   const goHome = useCallback(() => {
     if (wentHomeRef.current) return;
     wentHomeRef.current = true;
-    navigation.navigate('Main', { screen: 'Dashboard' });
+    navigation.goBack();
   }, [navigation]);
   useEffect(() => {
     if (!result) return;
@@ -210,17 +246,16 @@ export function BattleScreen({ route, navigation }: Props) {
     if (!intervened) leaveNow();
   }, [guardAbandon, dragonId, dragonName, battleQuests, leaveNow]);
 
-  // Frictionless exit: leave the battle anytime and go straight to the activity.
-  // Only the opt-in Focus Lock adds friction (the user chose it); otherwise no
-  // "think twice" guard and no penalty — the session is optional.
+  // Frictionless exit: close the battle cleanly (dismiss the modal) — never
+  // replace/navigate across presentations, which left a stuck dragon screen.
+  // Credit any activities the focus time already covered before leaving.
   const backToActivity = useCallback(() => {
     allowLeave.current = true;
     setLocked(false);
     stop();
-    const qid = battleQuests[0]?.id;
-    if (battleQuests.length === 1 && qid) navigation.replace('Ripple', { questId: qid });
-    else navigation.navigate('Main', { screen: 'Dashboard' });
-  }, [navigation, battleQuests, stop]);
+    void creditPerformed();
+    navigation.goBack();
+  }, [navigation, stop, creditPerformed]);
 
   const onExit = () => {
     if (lockActive) {
@@ -385,17 +420,16 @@ export function BattleScreen({ route, navigation }: Props) {
             )
           )}
 
-          {/* Optional mind-games during the battle (was pre-battle on setup). */}
-          {!lockActive && (
-            <View style={styles.miniGames}>
-              <Pressable onPress={openBrainBreak} accessibilityRole="button" accessibilityLabel={t('battle.brainBreakA11y')} style={styles.miniBtn}>
-                <Text style={styles.miniText}>🧠 {t('battle.brainBreak')}</Text>
-              </Pressable>
-              <Pressable onPress={() => navigation.navigate('DragonDen')} accessibilityRole="button" accessibilityLabel={t('battle.denA11y')} style={styles.miniBtn}>
-                <Text style={styles.miniText}>🐉 {t('battle.den')}</Text>
-              </Pressable>
-            </View>
-          )}
+          {/* Mind-games stay available even while locked — they open on top of the
+              battle (which is NOT removed, so the lock holds) and return here. */}
+          <View style={styles.miniGames}>
+            <Pressable onPress={openBrainBreak} accessibilityRole="button" accessibilityLabel={t('battle.brainBreakA11y')} style={styles.miniBtn}>
+              <Text style={styles.miniText}>🧠 {t('battle.brainBreak')}</Text>
+            </Pressable>
+            <Pressable onPress={() => navigation.navigate('DragonDen')} accessibilityRole="button" accessibilityLabel={t('battle.denA11y')} style={styles.miniBtn}>
+              <Text style={styles.miniText}>🐉 {t('battle.den')}</Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </ScreenContainer>

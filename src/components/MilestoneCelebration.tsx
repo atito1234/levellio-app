@@ -25,6 +25,7 @@ const KIND_EMOJI: Record<MilestoneKind, string> = {
   goal: '🏆',
   project: '🤝',
   project_goal: '🏆',
+  dragon: '⚔️',
 };
 
 /**

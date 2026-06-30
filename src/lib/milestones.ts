@@ -18,7 +18,9 @@ export type MilestoneKind =
   /** A community-project contribution beat ("+3 sites → Fort-Liberté"). */
   | 'project'
   /** The team crossed this week's project goal — the shared-win moment. */
-  | 'project_goal';
+  | 'project_goal'
+  /** A dragon (inner blocker) slain in a focus battle. */
+  | 'dragon';
 
 export interface Milestone {
   id: string;

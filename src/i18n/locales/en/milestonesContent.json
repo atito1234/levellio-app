@@ -2,6 +2,7 @@
   "streak_one": "{{count}}-day streak! 🔥",
   "streak_other": "{{count}}-day streak! 🔥",
   "activitySolid": "“{{title}}” is a habit now 🌱",
+  "dragonSlain": "Slayed the {{dragon}} ⚔️",
   "capacityFull": "{{name}} fully charged ✨",
   "goalStronger": "Your “{{title}}” goal just got stronger {{emoji}}",
   "projectGoalLabel": "{{title}} hit this week’s goal!",

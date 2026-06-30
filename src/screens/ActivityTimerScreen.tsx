@@ -285,18 +285,17 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
             </View>
           )}
 
-          {/* Brain Break — a short mind-game, playable before/during/after. The
-              timer keeps running underneath; closing the break returns here. */}
-          {!lockActive && (
-            <Pressable
-              onPress={() => navigation.navigate('PrepareRite', { category: quest.category })}
-              accessibilityRole="button"
-              accessibilityLabel={t('battle:brainBreakA11y')}
-              style={styles.lockRow}
-            >
-              <Text style={[styles.lockText, { color: accent }]}>🧠 {t('battle:brainBreak')}</Text>
-            </Pressable>
-          )}
+          {/* Brain Break — a short mind-game, playable before/during/after AND while
+              locked. It opens on top of the timer (which keeps running underneath, not
+              removed, so the lock holds) and returns here on close. */}
+          <Pressable
+            onPress={() => navigation.navigate('PrepareRite', { category: quest.category })}
+            accessibilityRole="button"
+            accessibilityLabel={t('battle:brainBreakA11y')}
+            style={styles.lockRow}
+          >
+            <Text style={[styles.lockText, { color: accent }]}>🧠 {t('battle:brainBreak')}</Text>
+          </Pressable>
         </View>
       )}
 

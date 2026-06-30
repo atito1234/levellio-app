@@ -2,6 +2,7 @@
   "streak_one": "¡Racha de {{count}} día! 🔥",
   "streak_other": "¡Racha de {{count}} días! 🔥",
   "activitySolid": "«{{title}}» ya es un hábito 🌱",
+  "dragonSlain": "Venciste al {{dragon}} ⚔️",
   "capacityFull": "{{name}} completamente cargada ✨",
   "goalStronger": "Tu meta «{{title}}» acaba de fortalecerse {{emoji}}",
   "projectGoalLabel": "¡{{title}} alcanzó la meta de esta semana!",
