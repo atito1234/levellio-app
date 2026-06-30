@@ -31,6 +31,11 @@ export interface NewChecklistInput {
   items?: { label: string; questId?: string }[];
   /** Bind the list to a specific day (YYYY-MM-DD). Absent = routine/today-scoped. */
   date?: string;
+  /** Weekly recurrence (0=Sun…6=Sat). Absent + recurring = every day. */
+  scheduledDays?: number[];
+  /** Finite recurrence window (YYYY-MM-DD, inclusive). */
+  startDate?: string;
+  endDate?: string;
   goalId?: string;
   bucketId?: string;
   projectId?: string;
@@ -110,6 +115,9 @@ export function ChecklistsProvider({ children }: { children: React.ReactNode }) 
         checkedItemIds: [],
         checkoutStreak: 0,
         ...(input.date ? { date: input.date } : {}),
+        ...(input.scheduledDays && input.scheduledDays.length > 0 ? { scheduledDays: input.scheduledDays } : {}),
+        ...(input.startDate ? { startDate: input.startDate } : {}),
+        ...(input.endDate ? { endDate: input.endDate } : {}),
         ...(input.goalId ? { goalId: input.goalId } : {}),
         ...(input.bucketId ? { bucketId: input.bucketId } : {}),
         ...(input.projectId ? { projectId: input.projectId } : {}),

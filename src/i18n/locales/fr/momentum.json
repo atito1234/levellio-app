@@ -10,8 +10,7 @@
     },
     "building": {
       "label": "L'élan se construit",
-      "reason_one": "{{active}} jour actif cette semaine{{trend}} Un peu plus et ça tient.",
-      "reason_other": "{{active}} jours actifs cette semaine{{trend}} Un peu plus et ça tient."
+      "reason": "{{active}} jours actifs cette semaine{{trend}} Un peu plus et ça tient."
     },
     "drifting": {
       "label": "Le moment d'un petit coup de pouce",

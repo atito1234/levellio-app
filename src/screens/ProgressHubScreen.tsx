@@ -66,7 +66,8 @@ const RANGE_DAYS = 28;
 const TREND_DAYS = 56;
 
 export function ProgressHubScreen({ route, navigation }: Props) {
-  const { t } = useTranslation('progress');
+  // 'momentum' holds the verdict copy that directionVerdict() resolves.
+  const { t } = useTranslation(['progress', 'momentum']);
   const initialTab = route.params?.tab && TAB_KEYS.includes(route.params.tab) ? route.params.tab : 'overview';
   const [tab, setTab] = useState<Tab>(initialTab);
   const { events, ready } = useActivityLog();
@@ -342,10 +343,8 @@ function Overview({
               accessibilityRole="button"
               accessibilityLabel={`${rec.title}. ${rec.reason}. ${rec.action.label}`}
             >
-              <View style={styles.rowMain}>
-                <Text style={styles.rowTitle}>{rec.title}</Text>
-                <Text style={styles.rowSub}>{rec.reason}</Text>
-              </View>
+              <Text style={styles.rowTitle}>{rec.title}</Text>
+              <Text style={styles.rowSub}>{rec.reason}</Text>
               <Text style={styles.cta}>{actLabel(rec.action.label, t)} ›</Text>
             </Pressable>
           ))}
@@ -628,8 +627,8 @@ function EmptyState() {
 const styles = StyleSheet.create({
   content: { gap: spacing.lg, paddingBottom: spacing.xl, paddingTop: spacing.md },
 
-  segWrap: { gap: spacing.sm, paddingVertical: spacing.sm },
-  seg: { paddingHorizontal: spacing.md, paddingVertical: 8, borderRadius: 999, backgroundColor: '#ECECF2' },
+  segWrap: { gap: spacing.sm, paddingVertical: spacing.sm, alignItems: 'center' },
+  seg: { alignSelf: 'center', paddingHorizontal: spacing.md, paddingVertical: 8, borderRadius: 999, backgroundColor: '#ECECF2' },
   segActive: { backgroundColor: VIOLET },
   segText: { ...typography.caption, color: MUTED, fontWeight: '700' },
   segTextActive: { color: '#FFFFFF' },
@@ -640,8 +639,8 @@ const styles = StyleSheet.create({
   card: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, gap: spacing.sm, ...shadows.md },
   cardCenter: { backgroundColor: CARD, borderRadius: radii.xl, padding: spacing.lg, alignItems: 'center', gap: spacing.sm, ...shadows.md },
 
-  focusCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: '#EDE9FE', borderRadius: radii.lg, padding: spacing.md },
-  cta: { ...typography.label, color: VIOLET, fontWeight: '800' },
+  focusCard: { gap: 4, backgroundColor: '#EDE9FE', borderRadius: radii.lg, padding: spacing.md },
+  cta: { ...typography.label, color: VIOLET, fontWeight: '800', marginTop: 4 },
 
   verdictCard: { borderRadius: radii.xl, padding: spacing.lg, gap: 4 },
   verdictLabel: { ...typography.title, color: INK },

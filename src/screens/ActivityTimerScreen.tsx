@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, G } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
-import { ScreenContainer, AnimatedHero, RatingPrompt } from '@/components';
+import { ScreenContainer, AnimatedHero, DialTimer, RatingPrompt } from '@/components';
 import type { RatingValue } from '@/types';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
@@ -22,14 +21,10 @@ const BG = '#F7F6F2';
 const TEAL = '#16C8A8';
 const VIOLET = '#6C4CF1';
 const MUTED = '#5A5A72';
-const TRACK = '#E8E6E0';
 const RING = 248;
-const STROKE = 18;
-const R = (RING - STROKE) / 2;
-const CIRC = 2 * Math.PI * R;
 
 export function ActivityTimerScreen({ route, navigation }: Props) {
-  const { t } = useTranslation('activityTimer');
+  const { t } = useTranslation(['activityTimer', 'battle']);
   const { quests, character } = useGame();
   const complete = useCompleteActivity();
   const quest = quests.find((q) => q.id === route.params.questId);
@@ -38,9 +33,13 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
   const quoteText = t(`focusQuotes:${quote.id}`, { defaultValue: quote.text });
 
   const timing = quest ? activityTiming(quest) : null;
-  const totalSec = (timing?.minutes ?? 25) * 60;
-
-  const [remaining, setRemaining] = useState(totalSec);
+  // Fully customizable: the user spins the dial to set/adjust minutes (even mid-
+  // session). Track elapsed (count-up) so changing the total re-regulates the
+  // remaining time live.
+  const [minutes, setMinutes] = useState(timing?.minutes ?? 25);
+  const totalSec = minutes * 60;
+  const [elapsed, setElapsed] = useState(0);
+  const remaining = Math.max(0, totalSec - elapsed);
   const [running, setRunning] = useState(false);
   const [logged, setLogged] = useState(false);
   const [wasVerified, setWasVerified] = useState(false);
@@ -154,7 +153,7 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
     setRunning(true);
     // Lock the screen on so a timed activity must actually be lived through.
     void activateKeepAwakeAsync();
-    intervalRef.current = setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000);
+    intervalRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
   }, [running, remaining]);
 
   const pause = useCallback(() => {
@@ -175,9 +174,7 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
     );
   }
 
-  const elapsed = totalSec - remaining;
   const progress = totalSec > 0 ? elapsed / totalSec : 0;
-  const offset = CIRC * (1 - progress);
   const accent = timing.method === 'pomodoro' ? VIOLET : TEAL;
 
   return (
@@ -207,31 +204,24 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
         </Text>
 
         <View style={styles.ringStage} accessibilityLabel={t('remainingA11y', { time: formatClock(remaining) })}>
-          <Svg width={RING} height={RING} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-            <Circle cx={RING / 2} cy={RING / 2} r={R} stroke={TRACK} strokeWidth={STROKE} fill="none" />
-            <G transform={`rotate(-90, ${RING / 2}, ${RING / 2})`}>
-              <Circle
-                cx={RING / 2}
-                cy={RING / 2}
-                r={R}
-                stroke={accent}
-                strokeWidth={STROKE}
-                strokeLinecap="round"
-                fill="none"
-                strokeDasharray={CIRC}
-                strokeDashoffset={offset}
-              />
-            </G>
-          </Svg>
-          <View style={styles.clockWrap} pointerEvents="none">
-            <Text style={styles.clock}>{logged ? '✓' : formatClock(remaining)}</Text>
-            <Text style={styles.clockSub}>{logged ? t('logged') : running ? t('inProgress') : t('ready')}</Text>
-            {logged && ACTIVITY_VERIFICATION_ENABLED && (
+          {/* Spin the ring clockwise to set/adjust how long you'll dedicate. */}
+          <DialTimer
+            minutes={minutes}
+            onChange={setMinutes}
+            color={accent}
+            size={RING}
+            disabled={logged}
+            centerLabel={logged ? '✓' : formatClock(remaining)}
+            sublabel={logged ? t('logged') : running ? t('inProgress') : t('battle:dialHint')}
+            {...(running || logged ? { progress: 1 - progress } : {})}
+          />
+          {logged && ACTIVITY_VERIFICATION_ENABLED && (
+            <View style={styles.verifyWrap} pointerEvents="none">
               <Text style={[styles.verifyTag, wasVerified ? styles.verifyOk : styles.verifySelf]}>
                 {wasVerified ? t('verified') : t('selfReported')}
               </Text>
-            )}
-          </View>
+            </View>
+          )}
         </View>
       </View>
 
@@ -247,7 +237,7 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
             accessibilityLabel={running ? t('pauseTimerA11y') : t('startTimerA11y')}
             style={[styles.primaryBtn, { backgroundColor: accent }]}
           >
-            <Text style={styles.primaryText}>{running ? t('pause') : remaining < totalSec ? t('resume') : t('start')}</Text>
+            <Text style={styles.primaryText}>{running ? t('pause') : elapsed > 0 ? t('resume') : t('start')}</Text>
           </Pressable>
 
           {/* Focus Lock: while locked, the early-exit shortcuts are hidden — the
@@ -284,6 +274,18 @@ export function ActivityTimerScreen({ route, navigation }: Props) {
               </Pressable>
             </View>
           )}
+
+          {/* Brain Break — a short mind-game, playable before/during/after AND while
+              locked. It opens on top of the timer (which keeps running underneath, not
+              removed, so the lock holds) and returns here on close. */}
+          <Pressable
+            onPress={() => navigation.navigate('PrepareRite', { category: quest.category })}
+            accessibilityRole="button"
+            accessibilityLabel={t('battle:brainBreakA11y')}
+            style={styles.lockRow}
+          >
+            <Text style={[styles.lockText, { color: accent }]}>🧠 {t('battle:brainBreak')}</Text>
+          </Pressable>
         </View>
       )}
 
@@ -315,9 +317,7 @@ const styles = StyleSheet.create({
   sub: { ...typography.body, color: MUTED },
   quote: { ...typography.body, color: MUTED, fontStyle: 'italic', textAlign: 'center', paddingHorizontal: spacing.lg, marginTop: spacing.xs },
   ringStage: { width: RING, height: RING, alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg },
-  clockWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
-  clock: { ...typography.heading, color: INK, fontWeight: '900', fontSize: 52 },
-  clockSub: { ...typography.caption, color: MUTED },
+  verifyWrap: { position: 'absolute', bottom: spacing.lg, alignItems: 'center' },
   verifyTag: { ...typography.caption, fontWeight: '800', marginTop: 4 },
   verifyOk: { color: '#5C9A1B' },
   verifySelf: { color: MUTED },

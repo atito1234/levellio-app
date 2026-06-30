@@ -10,6 +10,8 @@ import {
   weekCells,
   INSIGHT_TIERS,
 } from './heroAnalytics';
+import i18next from 'i18next';
+import enMomentum from '../i18n/locales/en/momentum.json';
 import type { ActivitySessionEvent } from './metadata';
 
 // Build a session on a given local day key at noon.
@@ -77,6 +79,25 @@ describe('directionVerdict', () => {
   });
   it('mentions the weekly trend in the reason', () => {
     expect(directionVerdict({ daysDone: 10, streakDays: 4, activeThisWeek: 5, activePrevWeek: 2 }).reason).toContain('up from last week');
+  });
+
+  it('resolves every tone via i18n without leaking a raw key', () => {
+    // Guards the building-tone regression: it used plural keys (reason_one/_other)
+    // the call site didn't request, so the reason rendered as "verdict.building.reason".
+    const i18n = i18next.createInstance();
+    void i18n.init({ lng: 'en', resources: { en: { momentum: enMomentum } }, ns: ['momentum'] });
+    const t = i18n.getFixedT('en', 'momentum');
+    const inputs: Parameters<typeof directionVerdict>[0][] = [
+      { daysDone: 0, streakDays: 0, activeThisWeek: 0, activePrevWeek: 0 }, // start
+      { daysDone: 10, streakDays: 4, activeThisWeek: 4, activePrevWeek: 2 }, // onTrack
+      { daysDone: 10, streakDays: 1, activeThisWeek: 2, activePrevWeek: 1 }, // building
+      { daysDone: 10, streakDays: 0, activeThisWeek: 0, activePrevWeek: 5 }, // drifting
+    ];
+    for (const input of inputs) {
+      const v = directionVerdict(input, t as never);
+      expect(v.label).not.toContain('verdict.');
+      expect(v.reason).not.toContain('verdict.');
+    }
   });
 });
 

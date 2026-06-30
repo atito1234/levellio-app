@@ -8,7 +8,7 @@
  * delivers a discrete completion reward; the streak makes returning worthwhile.
  */
 import { advanceStreak } from './streak';
-import { dayKey } from './dates';
+import { dayKey, weekdayOf, endOfWeekKey, endOfMonthKey } from './dates';
 import type { BucketColorId } from './buckets';
 
 export interface ChecklistItem {
@@ -44,6 +44,14 @@ export interface Checklist {
   archived?: boolean;
   /** Day this list is bound to (YYYY-MM-DD). Absent = routine/undated (today-scoped). */
   date?: string;
+  /**
+   * Weekly recurrence: weekday numbers (0 = Sun … 6 = Sat) the list appears on.
+   * Absent + recurring = every day (legacy/back-compat). Ignored when `date` is set.
+   */
+  scheduledDays?: number[];
+  /** Optional recurrence window (YYYY-MM-DD, inclusive) for finite ranges. */
+  startDate?: string;
+  endDate?: string;
   /** Optional scope — the list belongs to a goal / group (bucket) / project. */
   goalId?: string;
   bucketId?: string;
@@ -57,6 +65,68 @@ export interface Checklist {
  */
 export function isItemDone(item: ChecklistItem, checkedItemIds: readonly string[]): boolean {
   return checkedItemIds.includes(item.id);
+}
+
+/** The scheduling choices offered when creating a checklist. */
+export type ChecklistScopeKind =
+  | 'day' // just the selected day (one-off)
+  | 'everyday'
+  | 'weekdays' // Mon–Fri
+  | 'weekends' // Sat + Sun
+  | 'restOfWeek' // selected day → end of that week
+  | 'month' // selected day → end of that month
+  | 'pick'; // explicit weekday set
+
+/** The persisted fields a scope maps to (fed straight into addChecklist). */
+export interface ChecklistScope {
+  recurring: boolean;
+  date?: string;
+  scheduledDays?: number[];
+  startDate?: string;
+  endDate?: string;
+}
+
+/** Translate a scope choice (relative to `selectedDay`) into checklist fields. Pure. */
+export function buildChecklistScope(
+  kind: ChecklistScopeKind,
+  selectedDay: string,
+  pickedDays: readonly number[] = [],
+): ChecklistScope {
+  switch (kind) {
+    case 'day':
+      return { recurring: false, date: selectedDay };
+    case 'everyday':
+      return { recurring: true, scheduledDays: [0, 1, 2, 3, 4, 5, 6] };
+    case 'weekdays':
+      return { recurring: true, scheduledDays: [1, 2, 3, 4, 5] };
+    case 'weekends':
+      return { recurring: true, scheduledDays: [0, 6] };
+    case 'restOfWeek':
+      return { recurring: true, scheduledDays: [0, 1, 2, 3, 4, 5, 6], startDate: selectedDay, endDate: endOfWeekKey(selectedDay) };
+    case 'month':
+      return { recurring: true, scheduledDays: [0, 1, 2, 3, 4, 5, 6], startDate: selectedDay, endDate: endOfMonthKey(selectedDay) };
+    case 'pick': {
+      const days = [...new Set(pickedDays.filter((d) => d >= 0 && d <= 6))].sort((a, b) => a - b);
+      return { recurring: true, scheduledDays: days.length ? days : [weekdayOf(selectedDay)] };
+    }
+  }
+}
+
+/**
+ * Does a checklist appear on a given day?
+ *  - dated one-off  → only its exact day;
+ *  - else bounded by startDate/endDate when present;
+ *  - else weekly recurrence via scheduledDays;
+ *  - else legacy recurring/undated → every day.
+ */
+export function checklistShowsOn(c: Checklist, day: string): boolean {
+  if (c.date) return c.date === day;
+  if (c.startDate && day < c.startDate) return false;
+  if (c.endDate && day > c.endDate) return false;
+  if (c.scheduledDays && c.scheduledDays.length > 0) {
+    return c.scheduledDays.includes(weekdayOf(day));
+  }
+  return true;
 }
 
 /** Where a checklist sits relative to today. Routine/undated lists are always 'today'. */

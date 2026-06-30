@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { Animated, BackHandler, Easing, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst, JourneyScene } from '@/components';
+import { ScreenContainer, AnimatedHero, DragonSprite, ConfettiBurst, JourneyScene, DialTimer } from '@/components';
 import { radii, spacing, typography } from '@/theme';
 import { useGame } from '@/state/GameContext';
 import { useBattles } from '@/state/BattlesContext';
+import { useMilestones } from '@/state/MilestonesContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { useActivityLog } from '@/state/useActivityLog';
 import { useAbandonGuard } from '@/hooks/useAbandonGuard';
@@ -52,7 +53,8 @@ export function BattleScreen({ route, navigation }: Props) {
   const { t } = useTranslation('battle');
   const { questIds, techniqueId, customMin, dragonId, dragonName } = route.params;
   const { quests, character } = useGame();
-  const { recordVictory, preparedRite, perDragonStreak } = useBattles();
+  const { recordVictory, preparedRite, perDragonStreak, perDragon } = useBattles();
+  const { recordMilestones } = useMilestones();
   const { events } = useActivityLog();
   const PREP_BONUS = 25;
   const complete = useCompleteActivity();
@@ -61,7 +63,6 @@ export function BattleScreen({ route, navigation }: Props) {
   const timings = getCelebrationTimings(reduced);
 
   const technique = getTechnique(techniqueId);
-  const totalSec = useMemo(() => workSeconds(technique, customMin), [technique, customMin]);
   const dragon = useMemo(() => getDragon(dragonId, dragonName), [dragonId, dragonName]);
   const dragonDisplayName = t('dragons:' + dragon.id + '.name', { defaultValue: dragon.name });
   const dragonTaunt = t('dragons:' + dragon.id + '.taunt', { defaultValue: dragon.taunt });
@@ -71,6 +72,17 @@ export function BattleScreen({ route, navigation }: Props) {
     () => questIds.map((id) => quests.find((q) => q.id === id)).filter((q): q is NonNullable<typeof q> => !!q),
     [questIds, quests],
   );
+
+  // Fully customizable session length: a circular dial the user spins. Defaults to
+  // the technique's minutes, else the sum of the activities' own timers.
+  const defaultMinutes = useMemo(() => {
+    const w = workSeconds(technique, customMin);
+    if (w && w > 0) return Math.max(1, Math.round(w / 60));
+    const sum = battleQuests.reduce((acc, q) => acc + activityTiming(q).minutes, 0);
+    return Math.max(1, sum || 25);
+  }, [technique, customMin, battleQuests]);
+  const [minutes, setMinutes] = useState(defaultMinutes);
+  const totalSec = minutes * 60;
 
   // The primary habit's "from repetition to habit" journey drives the victory scene.
   const sessions = useMemo(() => sessionsOf(events), [events]);
@@ -87,6 +99,8 @@ export function BattleScreen({ route, navigation }: Props) {
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wonRef = useRef(false);
   const allowLeave = useRef(false);
+  // Quests already credited this session (so win + leave never double-complete).
+  const completedRef = useRef<Set<string>>(new Set());
 
   const state = battleStateAt(totalSec, elapsed);
   const won = result !== null;
@@ -120,6 +134,33 @@ export function BattleScreen({ route, navigation }: Props) {
   }, [running, reduced, sway]);
   const swayX = sway.interpolate({ inputRange: [-1, 1], outputRange: [-6, 6] });
 
+  // Complete every activity whose OWN timer the focus time has covered (each
+  // activity has its own duration). Records what the user actually performed —
+  // used by both victory (full elapse covers all) and an early leave (partial).
+  const completeCovered = useCallback(async (): Promise<{ completed: number; totalXp: number }> => {
+    const method = technique.countsUp ? 'timer' : 'pomodoro';
+    let completed = 0;
+    let totalXp = 0;
+    for (const q of battleQuests) {
+      if (completedRef.current.has(q.id)) continue;
+      const reqSec = activityTiming(q).minutes * 60;
+      if (elapsed < reqSec) continue; // not focused long enough to count it
+      completedRef.current.add(q.id);
+      const verified = ACTIVITY_VERIFICATION_ENABLED && isVerifiedDuration(elapsed, reqSec);
+      const reward = await complete(q, { method, durationSec: reqSec, ...(verified ? { verified: true } : {}) });
+      if (reward) {
+        completed += 1;
+        totalXp += reward.totalXp;
+      }
+    }
+    return { completed, totalXp };
+  }, [technique.countsUp, battleQuests, elapsed, complete]);
+
+  // Leaving early still records the activities the focus time already covered.
+  const creditPerformed = useCallback(async () => {
+    await completeCovered();
+  }, [completeCovered]);
+
   const winBattle = useCallback(async () => {
     if (wonRef.current) return;
     wonRef.current = true;
@@ -130,30 +171,35 @@ export function BattleScreen({ route, navigation }: Props) {
     } catch {
       /* vibration unavailable — ignore */
     }
-    const method = technique.countsUp ? 'timer' : 'pomodoro';
-    const per = battleQuests.length > 0 ? Math.round(elapsed / battleQuests.length) : 0;
-    let completed = 0;
-    let totalXp = 0;
-    for (const q of battleQuests) {
-      const verified = ACTIVITY_VERIFICATION_ENABLED && isVerifiedDuration(per, activityTiming(q).minutes * 60);
-      const reward = await complete(q, { method, durationSec: per, ...(verified ? { verified: true } : {}) });
-      if (reward) {
-        completed += 1;
-        totalXp += reward.totalXp;
-      }
-    }
+    const { completed, totalXp } = await completeCovered();
     const prepared = preparedRite !== null;
     const coins = coinsFor(completed) + (prepared ? PREP_BONUS : 0);
     await recordVictory(dragon.id, coins); // consumes the prep rite + advances the dragon streak
+    // Record the slaying as a celebrated milestone (shows over any screen + in the
+    // profile's milestones). The id is per-dragon-per-count so each slaying lands once.
+    const count = (perDragon[dragon.id] ?? 0) + 1;
+    await recordMilestones([
+      {
+        id: `dragon-${dragon.id}-${count}`,
+        kind: 'dragon',
+        emoji: '⚔️',
+        label: t('milestonesContent:dragonSlain', { dragon: dragonDisplayName }),
+        earnedAt: Date.now(),
+        i18n: { labelKey: 'dragonSlain', labelParams: { dragon: dragonDisplayName } },
+      },
+    ]);
     setResult({ completed, selected: battleQuests.length, totalXp, coins, prepared });
-  }, [stop, reduced, technique.countsUp, battleQuests, elapsed, complete, recordVictory, dragon.id, preparedRite]);
+  }, [stop, reduced, completeCovered, battleQuests.length, recordVictory, dragon.id, preparedRite, perDragon, recordMilestones, t, dragonDisplayName]);
 
-  // After a win, take the user straight Home (works from any entry point), once.
+  // After a win, dismiss the battle (a fullScreenModal) once. goBack returns to
+  // the launching screen; the slaying milestone celebrates via the global overlay
+  // no matter where we land. (navigate('Main') here left the battle mounted in the
+  // background and broke the back stack — the "cannot go back" / stuck popup bug.)
   const wentHomeRef = useRef(false);
   const goHome = useCallback(() => {
     if (wentHomeRef.current) return;
     wentHomeRef.current = true;
-    navigation.navigate('Main', { screen: 'Dashboard' });
+    navigation.goBack();
   }, [navigation]);
   useEffect(() => {
     if (!result) return;
@@ -210,24 +256,32 @@ export function BattleScreen({ route, navigation }: Props) {
     if (!intervened) leaveNow();
   }, [guardAbandon, dragonId, dragonName, battleQuests, leaveNow]);
 
-  const onRetreat = () => {
+  // Frictionless exit: close the battle cleanly (dismiss the modal) — never
+  // replace/navigate across presentations, which left a stuck dragon screen.
+  // Credit any activities the focus time already covered before leaving.
+  const backToActivity = useCallback(() => {
+    allowLeave.current = true;
+    setLocked(false);
+    stop();
+    void creditPerformed();
+    navigation.goBack();
+  }, [navigation, stop, creditPerformed]);
+
+  const onExit = () => {
     if (lockActive) {
       attemptLeave();
       return;
     }
-    if (
-      guardAbandon({
-        kind: 'battle-retreat',
-        ctx: { battleRunning: running },
-        dragonId,
-        ...(dragonName ? { dragonName } : {}),
-        ...(battleQuests[0] ? { questId: battleQuests[0].id } : {}),
-        onProceed: () => navigation.goBack(),
-      })
-    )
-      return;
-    navigation.goBack();
+    backToActivity();
   };
+
+  // Open the Brain Break mind-game (over the battle) — returns here on close.
+  const openBrainBreak = () =>
+    navigation.navigate('PrepareRite', {
+      dragonId,
+      ...(dragonName ? { dragonName } : {}),
+      ...(battleQuests[0] ? { category: battleQuests[0].category } : {}),
+    });
 
   // Block swipe / back / hardware-back while locked.
   useEffect(() => {
@@ -257,8 +311,8 @@ export function BattleScreen({ route, navigation }: Props) {
       {won && timings.confetti && <ConfettiBurst />}
       <View style={styles.topbar}>
         {!won && (
-          <Pressable onPress={onRetreat} accessibilityRole="button" accessibilityLabel={t('battle.retreatA11y')} hitSlop={12}>
-            <Text style={styles.retreat}>{t('battle.retreat')}</Text>
+          <Pressable onPress={onExit} accessibilityRole="button" accessibilityLabel={t('battle.backToActivityA11y')} hitSlop={12}>
+            <Text style={styles.retreat}>{t('battle.backToActivity')}</Text>
           </Pressable>
         )}
       </View>
@@ -329,13 +383,35 @@ export function BattleScreen({ route, navigation }: Props) {
               />
             </View>
 
-            <Text style={styles.clock} accessibilityLabel={totalSec === null ? t('battle.clockElapsedA11y', { clock }) : t('battle.clockRemainingA11y', { clock })}>
-              {clock}
-            </Text>
-            <Text style={styles.clockSub}>
-              {t('techniques:' + technique.id + '.name', { defaultValue: technique.name })}
-              {totalSec === null ? t('battle.countUp') : ''}
-            </Text>
+            {/* Spin the ring (clockwise) to set/adjust your focus time — even mid-battle. */}
+            <View style={styles.dialWrap} accessibilityLabel={t('battle.clockRemainingA11y', { clock })}>
+              <DialTimer
+                minutes={minutes}
+                onChange={setMinutes}
+                color={accent}
+                size={200}
+                centerLabel={clock}
+                sublabel={t('battle.dialHint')}
+                {...(running ? { progress: state.dragonHealthPct / 100 } : {})}
+              />
+            </View>
+
+            {/* The activities you're fighting to complete (each with its own timer). */}
+            {battleQuests.length > 0 && (
+              <View style={styles.actvList}>
+                <Text style={styles.actvHead}>{t('battle.fightingFor')}</Text>
+                {battleQuests.map((q) => {
+                  const covered = completedRef.current.has(q.id) || elapsed >= activityTiming(q).minutes * 60;
+                  return (
+                    <View key={q.id} style={styles.actvRow}>
+                      <Text style={styles.actvMark}>{covered ? '✅' : '•'}</Text>
+                      <Text style={styles.actvTitle} numberOfLines={1}>{q.title}</Text>
+                      <Text style={styles.actvTime}>{t('battle.minShort', { count: activityTiming(q).minutes })}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
           </>
         )}
       </View>
@@ -375,6 +451,17 @@ export function BattleScreen({ route, navigation }: Props) {
               </Pressable>
             )
           )}
+
+          {/* Mind-games stay available even while locked — they open on top of the
+              battle (which is NOT removed, so the lock holds) and return here. */}
+          <View style={styles.miniGames}>
+            <Pressable onPress={openBrainBreak} accessibilityRole="button" accessibilityLabel={t('battle.brainBreakA11y')} style={styles.miniBtn}>
+              <Text style={styles.miniText}>🧠 {t('battle.brainBreak')}</Text>
+            </Pressable>
+            <Pressable onPress={() => navigation.navigate('DragonDen')} accessibilityRole="button" accessibilityLabel={t('battle.denA11y')} style={styles.miniBtn}>
+              <Text style={styles.miniText}>🐉 {t('battle.den')}</Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </ScreenContainer>
@@ -394,9 +481,15 @@ const styles = StyleSheet.create({
   healthTrack: { width: '70%', height: 10, borderRadius: 999, backgroundColor: TRACK, overflow: 'hidden', marginTop: spacing.md },
   healthFill: { height: 10, borderRadius: 999 },
 
-  heroRow: { marginTop: spacing.lg },
-  clock: { ...typography.heading, color: INK, fontWeight: '900', fontSize: 48, marginTop: spacing.sm },
-  clockSub: { ...typography.caption, color: MUTED },
+  heroRow: { marginTop: spacing.md },
+  dialWrap: { marginTop: spacing.sm },
+
+  actvList: { alignSelf: 'stretch', marginTop: spacing.sm, gap: 4, paddingHorizontal: spacing.lg },
+  actvHead: { ...typography.label, color: MUTED, letterSpacing: 1, fontWeight: '800' },
+  actvRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  actvMark: { ...typography.body, width: 22, textAlign: 'center' },
+  actvTitle: { ...typography.body, color: INK, flex: 1 },
+  actvTime: { ...typography.caption, color: MUTED, fontWeight: '700' },
 
   victory: { ...typography.heading, fontWeight: '900' },
   victoryLine: { ...typography.body, color: INK, textAlign: 'center', paddingHorizontal: spacing.lg },
@@ -413,6 +506,9 @@ const styles = StyleSheet.create({
   secondaryBtn: { borderRadius: radii.pill, paddingVertical: spacing.md, alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E8E6E0' },
   secondaryText: { ...typography.label, color: INK, fontWeight: '700' },
   sub: { ...typography.body, color: MUTED },
+  miniGames: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
+  miniBtn: { flex: 1, borderRadius: radii.pill, paddingVertical: spacing.sm, alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E8E6E0' },
+  miniText: { ...typography.label, color: INK, fontWeight: '700' },
   lockRow: { alignItems: 'center', paddingVertical: spacing.sm },
   lockText: { ...typography.label, fontWeight: '800' },
   lockedText: { ...typography.label, color: MUTED, fontWeight: '700' },

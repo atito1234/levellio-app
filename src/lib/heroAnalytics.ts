@@ -148,7 +148,7 @@ export function directionVerdict(
       tone: 'building',
       label: t ? t('momentum:verdict.building.label') : 'Building momentum',
       reason: t
-        ? t('momentum:verdict.building.reason', { count: activeThisWeek, active: activeThisWeek, trend })
+        ? t('momentum:verdict.building.reason', { active: activeThisWeek, trend })
         : `${activeThisWeek} active ${activeThisWeek === 1 ? 'day' : 'days'} this week${trend} A little more makes it stick.`,
     };
   }

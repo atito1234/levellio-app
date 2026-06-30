@@ -44,6 +44,7 @@ const MILESTONE_EMOJI: Record<MilestoneKind, string> = {
   goal: '🎯',
   project: '🤝',
   project_goal: '🏆',
+  dragon: '⚔️',
 };
 
 /** A display emoji for a milestone (its override, else a per-kind default). */

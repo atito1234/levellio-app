@@ -57,7 +57,8 @@ const { ink: INK, muted: MUTED, card: CARD, bg: BG, violet: VIOLET, violetSoft: 
 const WEEKDAY_LETTER = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
 export function AnalyticsScreen({ navigation }: Props) {
-  const { t, i18n } = useTranslation('analytics');
+  // 'momentum' holds the verdict copy that directionVerdict() resolves.
+  const { t, i18n } = useTranslation(['analytics', 'momentum']);
   const locale = i18n.language;
   const weekdayNames = t('common:weekdaysAbbr', { returnObjects: true }) as string[];
   const { character } = useGame();

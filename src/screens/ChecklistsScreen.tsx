@@ -21,7 +21,9 @@ import { useGoals } from '@/state/GoalContext';
 import { useBuckets } from '@/state/BucketsContext';
 import { useCompleteActivity } from '@/state/useCompleteActivity';
 import { MoveToBucketSheet } from '@/components/MoveToBucketSheet';
-import { checklistDayState, checklistProgress, isItemDone, type ChecklistItem, type Checklist } from '@/lib/checklist';
+import { ChecklistScopeSheet } from '@/components/ChecklistScopeSheet';
+import { buildChecklistScope, checklistDayState, checklistProgress, checklistShowsOn, isItemDone, type ChecklistItem, type Checklist, type ChecklistScopeKind } from '@/lib/checklist';
+import { weekdaysLabel } from '@/lib/recurrence';
 import { BUCKET_COLORS, getBucketColor } from '@/lib/buckets';
 import { dayKey, relativeDayLabel, shiftDayKey } from '@/lib/dates';
 
@@ -51,6 +53,26 @@ export function ChecklistsScreen() {
   const dayLabel = (key: string) =>
     relativeDayLabel(key, todayK, { today: t('jumpToday'), locale: i18n.language });
 
+  const dayNamesShort = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 7 + i).toLocaleDateString(i18n.language, { weekday: 'short' })),
+    [i18n.language],
+  );
+
+  // The small tag under a recurring list's title: "Daily" / "Weekdays" / "Mon · Wed"
+  // / "Weekdays · until Jul 31" for finite ranges.
+  const recurrenceTag = (c: Checklist): string => {
+    if (c.scheduledDays && c.scheduledDays.length > 0) {
+      const base = weekdaysLabel(c.scheduledDays, {
+        everyDay: t('daily'),
+        weekdays: t('scope.weekdays'),
+        weekends: t('scope.weekends'),
+        dayNames: dayNamesShort,
+      });
+      return c.endDate ? t('scope.untilTag', { label: base, date: dayLabel(c.endDate) }) : base;
+    }
+    return t('daily');
+  };
+
   const days = useMemo(
     () => Array.from({ length: DAY_RANGE_BACK + DAY_RANGE_FWD + 1 }, (_, i) => shiftDayKey(todayK, i - DAY_RANGE_BACK)),
     [todayK],
@@ -60,23 +82,18 @@ export function ChecklistsScreen() {
   const matchesQuery = (c: Checklist) =>
     c.title.toLowerCase().includes(q) || c.items.some((i) => i.label.toLowerCase().includes(q));
 
-  // When searching, show all matches. Otherwise filter by the selected day:
-  // routine/undated lists always show; dated lists only on their day.
+  // When searching, show all matches. Otherwise show every checklist scheduled on
+  // the selected day (one-off, weekly recurrence, or finite range).
   const shown = useMemo(() => {
-    const base = q
-      ? checklists.filter(matchesQuery)
-      : checklists.filter((c) => !c.date || c.date === selectedDay);
+    const base = q ? checklists.filter(matchesQuery) : checklists.filter((c) => checklistShowsOn(c, selectedDay));
     return [...base].sort((a, b) => {
-      // Undated (routine) first, then dated ascending by their day.
+      // Recurring (undated) first, then dated ascending by their day.
       if (!a.date && !b.date) return a.order - b.order;
       if (!a.date) return -1;
       if (!b.date) return 1;
       return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
     });
   }, [checklists, q, selectedDay]);
-
-  const dayHasList = !q && checklists.some((c) => c.date === selectedDay);
-  const showCreateForDay = !q && selectedDay !== todayK && !dayHasList;
 
   // Where a linked activity belongs — shown as a small subtitle (project > goal > group).
   const subtitleForQuest = (questId: string): string | null => {
@@ -124,14 +141,20 @@ export function ChecklistsScreen() {
     }
   };
 
-  const create = async () => {
+  const [scopeOpen, setScopeOpen] = useState(false);
+
+  // Creating always asks "Which days?" so a one-day list never silently recurs.
+  const create = () => {
     if (!newTitle.trim()) return;
-    await addChecklist({ title: newTitle, recurring: true });
-    setNewTitle('');
+    setScopeOpen(true);
   };
 
-  const createForDay = async () => {
-    await addChecklist({ title: dayLabel(selectedDay), recurring: false, date: selectedDay });
+  const createWithScope = async (kind: ChecklistScopeKind, pickedDays?: number[]) => {
+    setScopeOpen(false);
+    if (!newTitle.trim()) return;
+    const scope = buildChecklistScope(kind, selectedDay, pickedDays);
+    await addChecklist({ title: newTitle, ...scope });
+    setNewTitle('');
   };
 
   const onCheckOut = async (c: Checklist) => {
@@ -205,19 +228,13 @@ export function ChecklistsScreen() {
 
         {checklists.length === 0 && <Text style={styles.empty}>{t('empty')}</Text>}
 
-        {showCreateForDay && (
-          <View style={styles.dayPlanRow}>
-            <Text style={styles.dayPlanNote}>{t('noListForDay', { day: dayLabel(selectedDay) })}</Text>
-            <PrimaryButton label={t('newForDay', { day: dayLabel(selectedDay) })} variant="action" onPress={() => void createForDay()} />
-          </View>
-        )}
-
         {shown.map((c) => (
           <ChecklistCard
             key={c.id}
             checklist={c}
             dayState={checklistDayState(c, todayK)}
             dateLabel={c.date ? dayLabel(c.date) : null}
+            tag={recurrenceTag(c)}
             subtitleFor={subtitleForQuest}
             groupFor={groupForQuest}
             onMoveGroup={(item) => item.questId && setGroupTarget({ questId: item.questId, label: item.label })}
@@ -231,6 +248,14 @@ export function ChecklistsScreen() {
           />
         ))}
       </ScrollView>
+
+      <ChecklistScopeSheet
+        visible={scopeOpen}
+        selectedDayLabel={dayLabel(selectedDay)}
+        locale={i18n.language}
+        onSelect={(kind, pickedDays) => void createWithScope(kind, pickedDays)}
+        onClose={() => setScopeOpen(false)}
+      />
 
       <MoveToBucketSheet
         visible={groupTarget !== null}
@@ -251,6 +276,7 @@ function ChecklistCard({
   checklist,
   dayState,
   dateLabel,
+  tag,
   subtitleFor,
   groupFor,
   onMoveGroup,
@@ -265,6 +291,7 @@ function ChecklistCard({
   checklist: Checklist;
   dayState: 'today' | 'past' | 'future';
   dateLabel: string | null;
+  tag: string;
   subtitleFor: (questId: string) => string | null;
   groupFor: (questId: string) => { name: string; accent: string; soft: string } | null;
   onMoveGroup: (item: ChecklistItem) => void;
@@ -299,7 +326,7 @@ function ChecklistCard({
           {dateLabel ? (
             <Text style={styles.cardDate}>📅 {dateLabel}</Text>
           ) : (
-            <Text style={styles.cardTag}>{t('daily')}</Text>
+            <Text style={styles.cardTag}>{tag}</Text>
           )}
           <Text style={styles.cardMeta}>
             {t('progress', { done: prog.done, total: prog.total })}

@@ -42,7 +42,7 @@ const HR = (HRING - HSTROKE) / 2;
 const HC = 2 * Math.PI * HR;
 
 export function RippleScreen({ route, navigation }: Props) {
-  const { t } = useTranslation('ripple');
+  const { t } = useTranslation(['ripple', 'battle']);
   const reduced = useReducedMotion();
   const { quests } = useGame();
   const { goals } = useGoals();
@@ -383,6 +383,18 @@ export function RippleScreen({ route, navigation }: Props) {
           <Text style={[styles.doneText, done && styles.doneTextDone]}>{done ? t('loggedShort') : t('doneBtn')}</Text>
         </Pressable>
       )}
+
+      {/* A short mind-game, available before or after the activity. */}
+      {quest && (
+        <Pressable
+          onPress={() => navigation.navigate('PrepareRite', { category: quest.category })}
+          accessibilityRole="button"
+          accessibilityLabel={t('battle:brainBreakA11y')}
+          style={styles.brainBreak}
+        >
+          <Text style={styles.brainBreakText}>🧠 {t('battle:brainBreak')}</Text>
+        </Pressable>
+      )}
     </ScreenContainer>
   );
 }
@@ -492,4 +504,6 @@ const styles = StyleSheet.create({
   timerBtnText: { ...typography.title, color: '#FFFFFF', fontWeight: '800' },
   logBtn: { alignItems: 'center', paddingVertical: spacing.sm },
   logBtnText: { ...typography.label, color: MUTED, fontWeight: '700' },
+  brainBreak: { alignItems: 'center', paddingVertical: spacing.sm, marginTop: spacing.xs },
+  brainBreakText: { ...typography.label, color: VIOLET, fontWeight: '800' },
 });

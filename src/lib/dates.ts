@@ -32,6 +32,24 @@ export function shiftDayKey(key: string, deltaDays: number): string {
   return dayKey(dt);
 }
 
+/** Weekday of a `YYYY-MM-DD` key: 0 = Sunday … 6 = Saturday (local). */
+export function weekdayOf(key: string): number {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1).getDay();
+}
+
+/** The Saturday ending the (Sunday-start) week that `key` falls in. */
+export function endOfWeekKey(key: string): string {
+  return shiftDayKey(key, 6 - weekdayOf(key));
+}
+
+/** The last calendar day of the month that `key` falls in. */
+export function endOfMonthKey(key: string): string {
+  const [y, m] = key.split('-').map(Number);
+  const last = new Date(y ?? 1970, m ?? 1, 0).getDate(); // day 0 of next month = last of this
+  return `${y}-${`${m}`.padStart(2, '0')}-${`${last}`.padStart(2, '0')}`;
+}
+
 /** Friendly label for a day key, e.g. "Sun, Jun 14". Locale defaults to en-US. */
 export function formatDayKey(key: string, locale = 'en-US'): string {
   const [y, m, d] = key.split('-').map(Number);

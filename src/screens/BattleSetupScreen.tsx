@@ -64,7 +64,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
   const { assignments, buckets } = useBuckets();
   const { goals, membershipFor } = useGoals();
   const { projectActivityIds } = useProjects();
-  const { lastTechniqueId, lastCustomMin, setTechnique, coins, preparedRite } = useBattles();
+  const { lastTechniqueId, lastCustomMin, setTechnique, coins } = useBattles();
   const { entriesForDragon } = useJournal();
   const guardAbandon = useAbandonGuard();
 
@@ -316,28 +316,7 @@ export function BattleSetupScreen({ route, navigation }: Props) {
         )}
       </ScrollView>
 
-      {/* Prep rite (mind & soul) + the Dragon Den — both optional, additive. */}
-      <View style={styles.prepRow}>
-        <Pressable
-          onPress={() =>
-            navigation.navigate('PrepareRite', {
-              dragonId,
-              ...(dragonId === CUSTOM_DRAGON_ID && dragonName.trim() ? { dragonName: dragonName.trim() } : {}),
-              ...(primary ? { category: primary.category } : {}),
-            })
-          }
-          accessibilityRole="button"
-          style={[styles.prepBtn, preparedRite ? styles.prepBtnDone : null]}
-        >
-          <Text style={[styles.prepText, preparedRite ? styles.prepTextDone : null]}>
-            {preparedRite ? t('setup.preparedDone') : t('setup.prepareCta')}
-          </Text>
-        </Pressable>
-        <Pressable onPress={() => navigation.navigate('DragonDen')} accessibilityRole="button" style={styles.denBtn}>
-          <Text style={styles.denText}>{t('setup.denCta')}</Text>
-        </Pressable>
-      </View>
-
+      {/* Brain Break + Dragon Den now live inside the battle (after Begin battle). */}
       <Pressable
         onPress={() => void begin()}
         disabled={!canFight}
