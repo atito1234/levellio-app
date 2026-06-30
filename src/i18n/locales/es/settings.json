@@ -82,12 +82,9 @@
     "audienceHelp": "Elige quién ve tus publicaciones de forma predeterminada. Siempre puedes cambiarlo en cada publicación. La privacidad y la seguridad son lo primero."
   },
   "insights": {
-    "title": "Análisis de hábitos",
-    "note": "Levellio guarda notas simples en tu dispositivo sobre cómo se forman tus hábitos, para que una futura actualización pueda mostrarte análisis. Nada se sube — sin analíticas, sin cuentas. Tú eliges exactamente qué se registra.",
-    "recordProvenance": "Recordar cómo se forman los grupos",
-    "recordContribution": "Seguir qué actividades construyen qué grupos",
+    "title": "Análisis de hábitos y privacidad",
+    "note": "Todo lo que alimenta tus análisis se queda en este dispositivo — nada se sube, sin analíticas, sin cuentas. Cuanto más constante seas al registrar, más nítidos se vuelven tus rachas, tendencias y tu progreso hacia lo \"automático\". Tú eliges exactamente qué se guarda.",
     "includeContext": "Incluir detalles de actividad (categoría, dificultad, XP)",
-    "includeSourceActivities": "Incluir qué actividades inspiraron un grupo",
     "includeTimestamps": "Conservar marcas de tiempo exactas",
     "recordSession": "Registrar sesiones (duración, hora del día)",
     "includeLocation": "Capturar ubicación y velocidad (requiere permiso)"

@@ -82,12 +82,9 @@
     "audienceHelp": "Choose who sees your posts by default. You can always change it per post. Privacy and safety come first."
   },
   "insights": {
-    "title": "Habit insights",
-    "note": "Levellio keeps simple notes on your device about how your habits form, so a future update can show you insights. Nothing is uploaded — no analytics, no accounts. You choose exactly what's recorded.",
-    "recordProvenance": "Remember how buckets are formed",
-    "recordContribution": "Track which activities build which buckets",
+    "title": "Habit insights & privacy",
+    "note": "Everything that powers your insights stays on this device — nothing is uploaded, no analytics, no accounts. The more consistently you log, the sharper your streaks, trends and \"becoming automatic\" picture get. You choose exactly what's kept.",
     "includeContext": "Include activity details (category, difficulty, XP)",
-    "includeSourceActivities": "Include which activities inspired a bucket",
     "includeTimestamps": "Keep exact timestamps",
     "recordSession": "Record activity sessions (duration, time of day)",
     "includeLocation": "Capture location & speed (needs permission)"

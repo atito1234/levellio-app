@@ -423,10 +423,7 @@ export function SettingsScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>{t('insights.title')}</Text>
           <Text style={styles.note}>{t('insights.note')}</Text>
-          <PrivacyToggle label={t('insights.recordProvenance')} value={settings.metadataPrivacy.recordProvenance} field="recordProvenance" privacy={settings.metadataPrivacy} update={update} />
-          <PrivacyToggle label={t('insights.recordContribution')} value={settings.metadataPrivacy.recordContribution} field="recordContribution" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.includeContext')} value={settings.metadataPrivacy.includeContext} field="includeContext" privacy={settings.metadataPrivacy} update={update} />
-          <PrivacyToggle label={t('insights.includeSourceActivities')} value={settings.metadataPrivacy.includeSourceActivities} field="includeSourceActivities" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.includeTimestamps')} value={settings.metadataPrivacy.includeTimestamps} field="includeTimestamps" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.recordSession')} value={settings.metadataPrivacy.recordSession} field="recordSession" privacy={settings.metadataPrivacy} update={update} />
           <PrivacyToggle label={t('insights.includeLocation')} value={settings.metadataPrivacy.includeLocation} field="includeLocation" privacy={settings.metadataPrivacy} update={update} />
