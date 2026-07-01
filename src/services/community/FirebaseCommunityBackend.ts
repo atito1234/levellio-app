@@ -41,6 +41,7 @@ import {
   type ReactionEmoji,
   type SuggestedHabit,
 } from '@/lib/community';
+import { normalizeInviteCode } from '@/lib/projects';
 import type { NewReport, Report, ReportReason, ReportTarget, ReportTargetType } from '@/lib/moderation';
 import type { CommunityBackend, Unsubscribe } from './CommunityBackend';
 
@@ -250,6 +251,16 @@ export class FirebaseCommunityBackend implements CommunityBackend {
         break;
       case 'user':
         break; // nothing to delete; ban handles ejection
+    }
+  }
+
+  async isValidFoundingCode(code: string): Promise<boolean> {
+    const norm = normalizeInviteCode(code);
+    if (!norm) return false;
+    try {
+      return (await getDoc(doc(this.db, 'foundingCodes', norm))).exists();
+    } catch {
+      return false;
     }
   }
 }

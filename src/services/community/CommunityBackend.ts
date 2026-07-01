@@ -53,4 +53,7 @@ export interface CommunityBackend {
   banUser(uid: string): Promise<void>;
   /** Remove a reported piece of content (admin delete). */
   removeContent(target: ReportTarget): Promise<void>;
+
+  /** Is this a valid founding invite code (a `foundingCodes/{CODE}` doc exists)? */
+  isValidFoundingCode(code: string): Promise<boolean>;
 }

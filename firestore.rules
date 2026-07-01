@@ -44,6 +44,13 @@ service cloud.firestore {
       allow create: if canCreate() && request.resource.data.reporterUid == request.auth.uid;
       allow read, update, delete: if isAdmin();
     }
+    // Founding invite codes (invite-only beta): the owner creates code docs in the
+    // console; a signed-in user may check one exists to unlock the community. Never
+    // client-writable and never listable (so codes can't be enumerated).
+    match /foundingCodes/{code} {
+      allow get: if signedIn();
+      allow list, write: if false;
+    }
     // Project applications (delegated moderation): applicant creates + reads their
     // own; admins review / approve / reject.
     match /projectApplications/{appId} {

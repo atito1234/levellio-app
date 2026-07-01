@@ -81,6 +81,8 @@ export interface AppSettings {
   communityTermsAcceptedAt?: number;
   /** Confirmed they are 17 or older (backs the 17+ store rating). */
   ageConfirmed?: boolean;
+  /** Entered a valid founding invite code — unlocks the invite-only community. */
+  foundingInviteCodeAccepted?: boolean;
   /** Where the user said they heard about Levellio (onboarding attribution). */
   attributionSource?: string;
   /** Preferred reminder time of day captured in onboarding ('morning'|'afternoon'|'evening'). */
@@ -154,6 +156,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
     ...(r.settingsTourSeen === true ? { settingsTourSeen: true } : {}),
     ...(typeof r.communityTermsAcceptedAt === 'number' ? { communityTermsAcceptedAt: r.communityTermsAcceptedAt } : {}),
     ...(r.ageConfirmed === true ? { ageConfirmed: true } : {}),
+    ...(r.foundingInviteCodeAccepted === true ? { foundingInviteCodeAccepted: true } : {}),
     ...(typeof r.attributionSource === 'string' ? { attributionSource: r.attributionSource } : {}),
     ...(typeof r.reminderTime === 'string' ? { reminderTime: r.reminderTime } : {}),
     ...(r.onboardingAnswers && typeof r.onboardingAnswers === 'object'

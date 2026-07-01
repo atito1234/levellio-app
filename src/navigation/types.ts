@@ -107,6 +107,8 @@ export type RootStackParamList = {
   Notifications: undefined;
   /** Owner-only moderation console (open reports → remove / ban). */
   AdminModeration: undefined;
+  /** Invite-only founding gate — enter a founding code to unlock the community. */
+  FoundingGate: undefined;
   /** Search & discover people, habits, and projects. */
   Discover: undefined;
   /** Full-screen story viewer for one user's active stories. */

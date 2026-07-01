@@ -132,5 +132,17 @@
     "banConfirmBody": "Il ne pourra plus publier, commenter ni envoyer de messages. Réversible dans Firebase.",
     "removedAck": "Contenu supprimé.",
     "bannedAck": "Utilisateur banni."
+  },
+  "founding": {
+    "title": "Membres fondateurs uniquement",
+    "body": "La communauté Levellio est sur invitation pour l’instant. Saisissez votre code fondateur pour rejoindre le mouvement.",
+    "placeholder": "CODE FONDATEUR",
+    "cta": "Déverrouiller la communauté",
+    "invalid": "Ce code n’est pas valide. Vérifiez-le et réessayez."
+  },
+  "inviteGate": {
+    "title": "Vous y êtes presque",
+    "body": "La communauté est sur invitation pendant la bêta. Saisissez votre code fondateur pour déverrouiller le fil et les projets.",
+    "cta": "Saisir le code fondateur"
   }
 }

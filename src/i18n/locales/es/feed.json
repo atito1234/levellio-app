@@ -132,5 +132,17 @@
     "banConfirmBody": "Ya no podrá publicar, comentar ni enviar mensajes. Se puede deshacer en Firebase.",
     "removedAck": "Contenido eliminado.",
     "bannedAck": "Usuario vetado."
+  },
+  "founding": {
+    "title": "Solo miembros fundadores",
+    "body": "La comunidad de Levellio es solo por invitación por ahora. Ingresa tu código fundador para unirte al movimiento.",
+    "placeholder": "CÓDIGO FUNDADOR",
+    "cta": "Desbloquear la comunidad",
+    "invalid": "Ese código no es válido. Revísalo e inténtalo de nuevo."
+  },
+  "inviteGate": {
+    "title": "Ya casi estás dentro",
+    "body": "La comunidad es solo por invitación durante la beta. Ingresa tu código fundador para desbloquear el feed y los proyectos.",
+    "cta": "Ingresar código fundador"
   }
 }

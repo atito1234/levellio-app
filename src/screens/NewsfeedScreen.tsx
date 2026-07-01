@@ -11,6 +11,8 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useCommunity } from '@/state/CommunityContext';
 import { useGame } from '@/state/GameContext';
 import { useCommunityAccess } from '@/services/community/access';
+import { useSettings } from '@/state/SettingsContext';
+import { INVITE_ONLY } from '@/config/features';
 import { type FeedScope, type Post } from '@/lib/community';
 import { CATEGORY_COLOR, CATEGORY_META, CATEGORY_ORDER } from '@/lib/categories';
 import type { QuestCategory } from '@/types';
@@ -32,6 +34,7 @@ export function NewsfeedScreen() {
   const { t } = useTranslation(['feed', 'common', 'messaging']);
   useRoomTour('feed');
   const allowed = useCommunityAccess();
+  const { settings } = useSettings();
   const { consented } = useUgcConsent();
   const { signedIn, subscribeFeed } = useCommunity();
   const { character } = useGame();
@@ -104,6 +107,21 @@ export function NewsfeedScreen() {
       <ScreenContainer backgroundColor={BG}>
         {header}
         <CommunityGate onPrimary={() => navigation.navigate('SignIn')} />
+      </ScreenContainer>
+    );
+  }
+
+  // Invite-only founding beta: unlock with a founding code first.
+  if (INVITE_ONLY && !settings.foundingInviteCodeAccepted) {
+    return (
+      <ScreenContainer backgroundColor={BG}>
+        {header}
+        <CommunityGate
+          title={t('feed:inviteGate.title')}
+          body={t('feed:inviteGate.body')}
+          ctaLabel={t('feed:inviteGate.cta')}
+          onPrimary={() => navigation.navigate('FoundingGate')}
+        />
       </ScreenContainer>
     );
   }

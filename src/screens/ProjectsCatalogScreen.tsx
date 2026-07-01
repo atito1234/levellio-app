@@ -5,6 +5,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppHeader, CommunityGate, ScreenContainer, SectionLabel } from '@/components';
 import { useRoomTour } from '@/components/spotlight';
+import { INVITE_ONLY } from '@/config/features';
 import { radii, shadows, spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useProjects } from '@/state/ProjectsContext';
@@ -58,6 +59,20 @@ export function ProjectsCatalogScreen() {
         <CommunityGate
           onPrimary={() => navigation.navigate('SignIn')}
           onSecondary={() => navigation.navigate('JoinProject', {})}
+        />
+      </ScreenContainer>
+    );
+  }
+
+  // Invite-only founding beta: unlock with a founding code first.
+  if (INVITE_ONLY && !settings.foundingInviteCodeAccepted) {
+    return (
+      <ScreenContainer backgroundColor={BG}>
+        <CommunityGate
+          title={t('feed:inviteGate.title')}
+          body={t('feed:inviteGate.body')}
+          ctaLabel={t('feed:inviteGate.cta')}
+          onPrimary={() => navigation.navigate('FoundingGate')}
         />
       </ScreenContainer>
     );

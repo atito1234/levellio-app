@@ -17,6 +17,7 @@ import {
   type ReactionEmoji,
   type SuggestedHabit,
 } from '@/lib/community';
+import { MIN_INVITE_CODE_LENGTH, normalizeInviteCode } from '@/lib/projects';
 import type { NewReport, Report, ReportTarget } from '@/lib/moderation';
 import type { CommunityBackend, Unsubscribe } from './CommunityBackend';
 
@@ -236,6 +237,10 @@ export class LocalCommunityBackend implements CommunityBackend {
   async resolveReport(): Promise<void> {}
   async banUser(): Promise<void> {}
   async removeContent(_target: ReportTarget): Promise<void> {}
+  // Offline/dev: no founding-code registry, so accept any well-formed code.
+  async isValidFoundingCode(code: string): Promise<boolean> {
+    return normalizeInviteCode(code).length >= MIN_INVITE_CODE_LENGTH;
+  }
 }
 
 // Exported only for tests that want the toggle helper alongside the backend.

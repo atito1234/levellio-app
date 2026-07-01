@@ -132,5 +132,17 @@
     "banConfirmBody": "They will no longer be able to post, comment, or message. This can be undone in Firebase.",
     "removedAck": "Content removed.",
     "bannedAck": "User banned."
+  },
+  "founding": {
+    "title": "Founding members only",
+    "body": "Levellio’s community is invite-only right now. Enter your founding code to join the movement.",
+    "placeholder": "FOUNDING CODE",
+    "cta": "Unlock the community",
+    "invalid": "That code isn’t valid. Check it and try again."
+  },
+  "inviteGate": {
+    "title": "You’re almost in",
+    "body": "The community is invite-only during the beta. Enter your founding code to unlock the feed and projects.",
+    "cta": "Enter founding code"
   }
 }

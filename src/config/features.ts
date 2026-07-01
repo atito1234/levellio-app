@@ -26,6 +26,14 @@ export const AUDIENCE_CONTROLS_ENABLED = true;
 export const FRIENDS_GRAPH_ENABLED = false;
 
 /**
+ * Invite-only founding launch: the community (feed, projects, DMs) is gated behind
+ * a founding invite code until the user enters a valid one (validated against the
+ * Firestore `foundingCodes` collection the owner manages). Keeps the beta cohort
+ * small, vetted, and easy to moderate solo. Flip to `false` to open the community.
+ */
+export const INVITE_ONLY = true;
+
+/**
  * Third-party sign-in (Apple / Google). OFF for launch: the providers are stubbed
  * (return "unavailable"), so showing the buttons is broken UX and, on iOS, would
  * trigger Apple's "must offer Sign in with Apple" rule (4.8). Email/password only
