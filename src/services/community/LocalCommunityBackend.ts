@@ -18,7 +18,7 @@ import {
   type SuggestedHabit,
 } from '@/lib/community';
 import { MIN_INVITE_CODE_LENGTH, normalizeInviteCode } from '@/lib/projects';
-import type { NewReport, Report, ReportTarget } from '@/lib/moderation';
+import type { ApplicationStatus, NewProjectApplication, NewReport, ProjectApplication, Report, ReportTarget } from '@/lib/moderation';
 import type { CommunityBackend, Unsubscribe } from './CommunityBackend';
 
 const NS = 'levellio:community';
@@ -241,6 +241,20 @@ export class LocalCommunityBackend implements CommunityBackend {
   async isValidFoundingCode(code: string): Promise<boolean> {
     return normalizeInviteCode(code).length >= MIN_INVITE_CODE_LENGTH;
   }
+
+  // Offline/dev: no admin to approve, so auto-approve so a solo user can create.
+  async submitProjectApplication(app: NewProjectApplication): Promise<void> {
+    const rec: ProjectApplication = { ...app, id: genId('app'), status: 'approved', createdAt: Date.now() };
+    await this.write(`${NS}:myApplication`, rec);
+  }
+  async myLatestApplication(): Promise<ProjectApplication | null> {
+    return this.read<ProjectApplication | null>(`${NS}:myApplication`, null);
+  }
+  subscribeApplications(cb: (apps: ProjectApplication[]) => void): Unsubscribe {
+    cb([]);
+    return () => {};
+  }
+  async setApplicationStatus(_appId: string, _status: ApplicationStatus): Promise<void> {}
 }
 
 // Exported only for tests that want the toggle helper alongside the backend.

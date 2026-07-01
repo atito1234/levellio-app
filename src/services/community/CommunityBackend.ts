@@ -13,7 +13,7 @@ import type {
   ReactionEmoji,
   SuggestedHabit,
 } from '@/lib/community';
-import type { NewReport, Report, ReportTarget } from '@/lib/moderation';
+import type { ApplicationStatus, NewProjectApplication, NewReport, ProjectApplication, Report, ReportTarget } from '@/lib/moderation';
 
 export type Unsubscribe = () => void;
 
@@ -56,4 +56,12 @@ export interface CommunityBackend {
 
   /** Is this a valid founding invite code (a `foundingCodes/{CODE}` doc exists)? */
   isValidFoundingCode(code: string): Promise<boolean>;
+
+  // --- Delegated project creation (vetted application → owner approval) -------
+  submitProjectApplication(app: NewProjectApplication): Promise<void>;
+  /** The applicant's most recent application (drives the create-project gate). */
+  myLatestApplication(uid: string): Promise<ProjectApplication | null>;
+  /** Live queue of PENDING applications — owner console only. */
+  subscribeApplications(cb: (apps: ProjectApplication[]) => void): Unsubscribe;
+  setApplicationStatus(appId: string, status: ApplicationStatus): Promise<void>;
 }

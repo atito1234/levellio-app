@@ -190,5 +190,27 @@
     "cta": "Unirse al proyecto",
     "ctaA11y": "Unirse al proyecto"
   },
-  "recommended": "RECOMENDADO PARA TI"
+  "recommended": "RECOMENDADO PARA TI",
+  "application": {
+    "title": "Solicita liderar un proyecto",
+    "lead": "Los Proyectos comunitarios los lideran miembros verificados. Cuéntanos sobre el tuyo — si se aprueba, podrás crearlo y te comprometes a mantenerlo seguro.",
+    "namePlaceholder": "Nombre del proyecto (p. ej. Limpiar el canal)",
+    "regionPlaceholder": "Región (p. ej. Fort-Liberté, Haití)",
+    "summaryPlaceholder": "¿Qué es el proyecto y su meta real?",
+    "whyPlaceholder": "¿Por qué tú y cómo lo mantendrás acogedor?",
+    "visibilityLabel": "Visibilidad",
+    "visibility_public": "Público",
+    "visibility_private": "Privado (por invitación)",
+    "visibilityHint_public": "Visible para que todos lo descubran y se unan.",
+    "visibilityHint_private": "Solo quienes tengan tu código pueden unirse.",
+    "agree": "Me comprometo a moderar este proyecto — revisar reportes sobre él y cumplir las reglas de la comunidad. Entiendo que mi acceso puede revocarse si no lo hago.",
+    "submit": "Enviar solicitud",
+    "pendingTitle": "Solicitud en revisión",
+    "pendingBody": "¡Gracias! Revisamos las solicitudes en unos días. Podrás crear tu proyecto una vez aprobado.",
+    "consoleTitle": "SOLICITUDES DE PROYECTO",
+    "whyLabel": "Por qué",
+    "by": "De {{name}}",
+    "approve": "Aprobar",
+    "reject": "Rechazar"
+  }
 }

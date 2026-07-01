@@ -131,7 +131,8 @@
     "banConfirmTitle": "Ban this user?",
     "banConfirmBody": "They will no longer be able to post, comment, or message. This can be undone in Firebase.",
     "removedAck": "Content removed.",
-    "bannedAck": "User banned."
+    "bannedAck": "User banned.",
+    "reportsSection": "REPORTS"
   },
   "founding": {
     "title": "Founding members only",

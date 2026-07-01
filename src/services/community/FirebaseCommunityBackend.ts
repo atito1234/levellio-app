@@ -42,8 +42,24 @@ import {
   type SuggestedHabit,
 } from '@/lib/community';
 import { normalizeInviteCode } from '@/lib/projects';
-import type { NewReport, Report, ReportReason, ReportTarget, ReportTargetType } from '@/lib/moderation';
+import type { ApplicationStatus, NewProjectApplication, NewReport, ProjectApplication, Report, ReportReason, ReportTarget, ReportTargetType } from '@/lib/moderation';
 import type { CommunityBackend, Unsubscribe } from './CommunityBackend';
+
+function toApplication(id: string, d: DocumentData): ProjectApplication {
+  return {
+    id,
+    applicantUid: d.applicantUid ?? '',
+    applicantName: d.applicantName ?? 'Hero',
+    title: d.title ?? '',
+    summary: d.summary ?? '',
+    region: d.region ?? '',
+    visibility: d.visibility === 'public' ? 'public' : 'private',
+    why: d.why ?? '',
+    agreedToModerate: d.agreedToModerate === true,
+    status: d.status === 'approved' ? 'approved' : d.status === 'rejected' ? 'rejected' : 'pending',
+    createdAt: typeof d.createdAt === 'number' ? d.createdAt : 0,
+  };
+}
 
 const FEED_LIMIT = 100;
 
@@ -217,9 +233,10 @@ export class FirebaseCommunityBackend implements CommunityBackend {
   }
 
   subscribeReports(cb: (reports: Report[]) => void): Unsubscribe {
+    // No orderBy (avoids a composite index); sort newest-first client-side.
     return onSnapshot(
-      query(collection(this.db, 'reports'), where('status', '==', 'open'), orderBy('createdAt', 'desc'), limit(200)),
-      (s) => cb(s.docs.map((d) => toReport(d.id, d.data()))),
+      query(collection(this.db, 'reports'), where('status', '==', 'open'), limit(200)),
+      (s) => cb(s.docs.map((d) => toReport(d.id, d.data())).sort((a, b) => b.createdAt - a.createdAt)),
       () => cb([]), // non-admins get permission-denied → empty queue
     );
   }
@@ -262,5 +279,31 @@ export class FirebaseCommunityBackend implements CommunityBackend {
     } catch {
       return false;
     }
+  }
+
+  // --- Project applications --------------------------------------------------
+  async submitProjectApplication(app: NewProjectApplication): Promise<void> {
+    const ref = doc(collection(this.db, 'projectApplications'));
+    await setDoc(ref, { ...app, status: 'pending', createdAt: Date.now(), serverAt: serverTimestamp() });
+  }
+
+  async myLatestApplication(uid: string): Promise<ProjectApplication | null> {
+    if (!uid) return null;
+    // Single where (no composite index); pick the newest client-side.
+    const snap = await getDocs(query(collection(this.db, 'projectApplications'), where('applicantUid', '==', uid)));
+    const apps = snap.docs.map((d) => toApplication(d.id, d.data())).sort((a, b) => b.createdAt - a.createdAt);
+    return apps[0] ?? null;
+  }
+
+  subscribeApplications(cb: (apps: ProjectApplication[]) => void): Unsubscribe {
+    return onSnapshot(
+      query(collection(this.db, 'projectApplications'), where('status', '==', 'pending'), limit(100)),
+      (s) => cb(s.docs.map((d) => toApplication(d.id, d.data())).sort((a, b) => b.createdAt - a.createdAt)),
+      () => cb([]),
+    );
+  }
+
+  async setApplicationStatus(appId: string, status: ApplicationStatus): Promise<void> {
+    await updateDoc(doc(this.db, 'projectApplications', appId), { status, decidedAt: Date.now() });
   }
 }

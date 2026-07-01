@@ -131,7 +131,8 @@
     "banConfirmTitle": "Bannir cet utilisateur ?",
     "banConfirmBody": "Il ne pourra plus publier, commenter ni envoyer de messages. Réversible dans Firebase.",
     "removedAck": "Contenu supprimé.",
-    "bannedAck": "Utilisateur banni."
+    "bannedAck": "Utilisateur banni.",
+    "reportsSection": "SIGNALEMENTS"
   },
   "founding": {
     "title": "Membres fondateurs uniquement",

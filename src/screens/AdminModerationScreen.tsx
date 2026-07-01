@@ -12,21 +12,36 @@ import { ScreenContainer, ScreenHeader } from '@/components';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
 import { useCommunity } from '@/state/CommunityContext';
 import { relTime } from '@/lib/relTime';
-import type { Report } from '@/lib/moderation';
+import type { ProjectApplication, Report } from '@/lib/moderation';
 import type { RootStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AdminModeration'>;
 
 export function AdminModerationScreen({ navigation }: Props) {
-  const { t, i18n } = useTranslation(['feed', 'common']);
-  const { isModerator, subscribeReports, resolveReport, banUser, removeContent } = useCommunity();
+  const { t, i18n } = useTranslation(['feed', 'projects', 'common']);
+  const { isModerator, subscribeReports, resolveReport, banUser, removeContent, subscribeApplications, setApplicationStatus } = useCommunity();
   const [reports, setReports] = useState<Report[]>([]);
+  const [applications, setApplications] = useState<ProjectApplication[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isModerator) return;
-    return subscribeReports(setReports);
-  }, [isModerator, subscribeReports]);
+    const unsubR = subscribeReports(setReports);
+    const unsubA = subscribeApplications(setApplications);
+    return () => {
+      unsubR();
+      unsubA();
+    };
+  }, [isModerator, subscribeReports, subscribeApplications]);
+
+  const decideApp = async (app: ProjectApplication, status: 'approved' | 'rejected') => {
+    setBusy(app.id);
+    try {
+      await setApplicationStatus(app.id, status);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const act = async (r: Report, fn: () => Promise<void>) => {
     setBusy(r.reportId);
@@ -56,6 +71,32 @@ export function AdminModerationScreen({ navigation }: Props) {
       <Text style={styles.subtitle}>{t('feed:console.subtitle')}</Text>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
+        {applications.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>{t('projects:application.consoleTitle')}</Text>
+            {applications.map((a) => (
+              <View key={a.id} style={styles.card}>
+                <View style={styles.cardHead}>
+                  <Text style={styles.kind}>{t(`projects:application.visibility_${a.visibility}`)}</Text>
+                  <Text style={styles.time}>{relTime(a.createdAt, t, i18n.language)}</Text>
+                </View>
+                <Text style={styles.appTitle}>{a.title}</Text>
+                <Text style={styles.preview} numberOfLines={3}>{a.region} — {a.summary}</Text>
+                {a.why ? <Text style={styles.reason}>{t('projects:application.whyLabel')}: {a.why}</Text> : null}
+                <Text style={styles.reason}>{t('projects:application.by', { name: a.applicantName })}</Text>
+                <View style={styles.actions}>
+                  <Pressable disabled={busy === a.id} onPress={() => void decideApp(a, 'approved')} accessibilityRole="button" style={[styles.btn, styles.btnRemove]}>
+                    <Text style={styles.btnRemoveText}>{t('projects:application.approve')}</Text>
+                  </Pressable>
+                  <Pressable disabled={busy === a.id} onPress={() => void decideApp(a, 'rejected')} accessibilityRole="button" style={[styles.btn, styles.btnDismiss]}>
+                    <Text style={styles.btnDismissText}>{t('projects:application.reject')}</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ))}
+            <Text style={styles.sectionLabel}>{t('feed:console.reportsSection')}</Text>
+          </>
+        )}
         {reports.length === 0 ? (
           <Text style={styles.empty}>{t('feed:console.empty')}</Text>
         ) : (
@@ -92,6 +133,8 @@ export function AdminModerationScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   subtitle: { ...typography.caption, color: colors.textSecondary, paddingBottom: spacing.sm },
+  sectionLabel: { ...typography.label, color: colors.textSecondary, letterSpacing: 1, fontWeight: '800', marginTop: spacing.sm },
+  appTitle: { ...typography.title, color: colors.textPrimary, fontWeight: '800' },
   list: { gap: spacing.md, paddingBottom: spacing.xl },
   empty: { ...typography.body, color: colors.textSecondary, textAlign: 'center', paddingTop: spacing.xxl },
   card: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md, gap: spacing.sm, borderWidth: 1, borderColor: colors.border, ...shadows.sm },

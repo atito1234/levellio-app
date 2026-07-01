@@ -7,7 +7,7 @@ import { communityBackend, type Unsubscribe } from '@/services/community';
 import { AsyncStorageStore } from '@/services/storage';
 import { colors, radii, spacing, typography } from '@/theme';
 import { canViewPost, type Comment, type CommunityIdentity, type FeedScope, type Post, type PostDraft, type ReactionEmoji, type SuggestedHabit } from '@/lib/community';
-import { newReport, REPORT_REASONS, type Report, type ReportReason, type ReportTarget } from '@/lib/moderation';
+import { newReport, REPORT_REASONS, type ApplicationStatus, type NewProjectApplication, type ProjectApplication, type Report, type ReportReason, type ReportTarget } from '@/lib/moderation';
 
 // Local safety lists (per-uid): people you've blocked/muted + posts you've hidden.
 const safetyStore = new AsyncStorageStore();
@@ -65,6 +65,13 @@ interface CommunityContextValue {
   resolveReport: (reportId: string) => Promise<void>;
   banUser: (uid: string) => Promise<void>;
   removeContent: (target: ReportTarget) => Promise<void>;
+
+  // --- Delegated project creation (application → owner approval) -------------
+  /** The viewer's most recent project application (gates project creation). */
+  myApplication: ProjectApplication | null;
+  submitProjectApplication: (app: Omit<NewProjectApplication, 'applicantUid' | 'applicantName'>) => Promise<void>;
+  subscribeApplications: (cb: (apps: ProjectApplication[]) => void) => Unsubscribe;
+  setApplicationStatus: (appId: string, status: ApplicationStatus) => Promise<void>;
 }
 
 const CommunityContext = createContext<CommunityContextValue | null>(null);
@@ -80,6 +87,7 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [pendingReport, setPendingReport] = useState<ReportTarget | null>(null);
   const [isModerator, setIsModerator] = useState(false);
+  const [myApplication, setMyApplication] = useState<ProjectApplication | null>(null);
   const [ready, setReady] = useState(false);
 
   const identity = useMemo<CommunityIdentity | null>(() => {
@@ -95,6 +103,7 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
     if (!uid) {
       setFollowing(new Set());
       setIsModerator(false);
+      setMyApplication(null);
       setReady(false);
       return;
     }
@@ -106,6 +115,7 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
     void loadList(mutedKey(uid)).then((ids) => setMuted(new Set(ids)));
     void loadList(hiddenKey(uid)).then((ids) => setHidden(new Set(ids)));
     void communityBackend.isModerator(uid).then(setIsModerator).catch(() => setIsModerator(false));
+    void communityBackend.myLatestApplication(uid).then(setMyApplication).catch(() => setMyApplication(null));
     return unsub;
   }, [uid]);
 
@@ -177,6 +187,19 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
   const resolveReport = useCallback((reportId: string) => communityBackend.resolveReport(reportId), []);
   const banUser = useCallback((targetUid: string) => communityBackend.banUser(targetUid), []);
   const removeContent = useCallback((target: ReportTarget) => communityBackend.removeContent(target), []);
+
+  // Delegated project creation.
+  const submitProjectApplication = useCallback(
+    async (app: Omit<NewProjectApplication, 'applicantUid' | 'applicantName'>) => {
+      if (!identity) return;
+      await communityBackend.submitProjectApplication({ ...app, applicantUid: identity.uid, applicantName: identity.displayName });
+      const latest = await communityBackend.myLatestApplication(identity.uid);
+      setMyApplication(latest);
+    },
+    [identity],
+  );
+  const subscribeApplications = useCallback((cb: (apps: ProjectApplication[]) => void) => communityBackend.subscribeApplications(cb), []);
+  const setApplicationStatus = useCallback((appId: string, status: ApplicationStatus) => communityBackend.setApplicationStatus(appId, status), []);
 
   const follow = useCallback(async (targetUid: string) => {
     if (uid) await communityBackend.follow(uid, targetUid);
@@ -261,8 +284,12 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
       resolveReport,
       banUser,
       removeContent,
+      myApplication,
+      submitProjectApplication,
+      subscribeApplications,
+      setApplicationStatus,
     }),
-    [ready, uid, following, blocked, muted, follow, unfollow, createPost, addComment, setReaction, subscribeFeed, subscribeComments, blockUser, unblockUser, muteUser, unmuteUser, requestReport, pendingReport, submitPendingReport, cancelReport, isModerator, subscribeReports, resolveReport, banUser, removeContent],
+    [ready, uid, following, blocked, muted, follow, unfollow, createPost, addComment, setReaction, subscribeFeed, subscribeComments, blockUser, unblockUser, muteUser, unmuteUser, requestReport, pendingReport, submitPendingReport, cancelReport, isModerator, subscribeReports, resolveReport, banUser, removeContent, myApplication, submitProjectApplication, subscribeApplications, setApplicationStatus],
   );
 
   return (

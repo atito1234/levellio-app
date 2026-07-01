@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import { INVITE_ONLY } from '@/config/features';
 import { radii, shadows, spacing, typography } from '@/theme';
 import { useAuth } from '@/state/AuthContext';
 import { useProjects } from '@/state/ProjectsContext';
+import { useCommunity } from '@/state/CommunityContext';
 import { useSettings } from '@/state/SettingsContext';
 import { useEntitlements } from '@/state/SubscriptionContext';
 import { canUseProjectsUnlimited } from '@/services/monetization';
@@ -33,6 +34,7 @@ export function ProjectsCatalogScreen() {
   useRoomTour('projects');
   const { account } = useAuth();
   const { signedIn, isShared, featured, myProjects, refresh } = useProjects();
+  const { myApplication } = useCommunity();
   const { settings } = useSettings();
   const entitlements = useEntitlements();
 
@@ -44,8 +46,16 @@ export function ProjectsCatalogScreen() {
 
   const ownedCount = account?.uid ? myProjects.filter((p) => p.ownerUid === account.uid).length : 0;
   const canCreate = canUseProjectsUnlimited(entitlements) || ownedCount < FREE_OWNED_PROJECT_CAP;
-  const onCreate = () =>
-    canCreate ? navigation.navigate('ProjectEditor') : navigation.navigate('Paywall');
+  // Creating a project is vetted: apply → owner approves → then you can create.
+  const onCreate = () => {
+    if (myApplication?.status === 'approved') {
+      canCreate ? navigation.navigate('ProjectEditor') : navigation.navigate('Paywall');
+    } else if (myApplication?.status === 'pending') {
+      Alert.alert(t('application.pendingTitle'), t('application.pendingBody'));
+    } else {
+      navigation.navigate('ProjectApplication');
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {

@@ -109,6 +109,8 @@ export type RootStackParamList = {
   AdminModeration: undefined;
   /** Invite-only founding gate — enter a founding code to unlock the community. */
   FoundingGate: undefined;
+  /** Apply to create a Community Project (vetted, manager-approved). */
+  ProjectApplication: undefined;
   /** Search & discover people, habits, and projects. */
   Discover: undefined;
   /** Full-screen story viewer for one user's active stories. */

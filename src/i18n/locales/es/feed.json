@@ -131,7 +131,8 @@
     "banConfirmTitle": "¿Vetar a este usuario?",
     "banConfirmBody": "Ya no podrá publicar, comentar ni enviar mensajes. Se puede deshacer en Firebase.",
     "removedAck": "Contenido eliminado.",
-    "bannedAck": "Usuario vetado."
+    "bannedAck": "Usuario vetado.",
+    "reportsSection": "REPORTES"
   },
   "founding": {
     "title": "Solo miembros fundadores",

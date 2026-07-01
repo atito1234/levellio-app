@@ -45,6 +45,29 @@ export interface Report extends ReportTarget {
 /** Payload written when filing (reportId/status/createdAt are set by the backend). */
 export type NewReport = Omit<Report, 'reportId' | 'status' | 'createdAt'>;
 
+// --- Project applications (delegated, manager-approved project creation) ------
+
+export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
+
+/** A request to create a project. Approved applicants become the project's owner
+ *  and agree to moderate it. `visibility` maps to the project `featured` flag
+ *  (public = world-listed; private = invite-only). */
+export interface ProjectApplication {
+  id: string;
+  applicantUid: string;
+  applicantName: string;
+  title: string;
+  summary: string;
+  region: string;
+  visibility: 'public' | 'private';
+  why: string;
+  agreedToModerate: boolean;
+  status: ApplicationStatus;
+  createdAt: number;
+}
+
+export type NewProjectApplication = Omit<ProjectApplication, 'id' | 'status' | 'createdAt'>;
+
 export function newReport(target: ReportTarget, reporterUid: string, reason: ReportReason): NewReport {
   return {
     type: target.type,

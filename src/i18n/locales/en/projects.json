@@ -190,5 +190,27 @@
     "cta": "Join project",
     "ctaA11y": "Join project"
   },
-  "recommended": "RECOMMENDED FOR YOU"
+  "recommended": "RECOMMENDED FOR YOU",
+  "application": {
+    "title": "Apply to lead a project",
+    "lead": "Community Projects are led by vetted members. Tell us about yours — if approved, you can create it and you agree to keep it safe.",
+    "namePlaceholder": "Project name (e.g. Clean the canal)",
+    "regionPlaceholder": "Region (e.g. Fort-Liberté, Haiti)",
+    "summaryPlaceholder": "What is the project and its real-world goal?",
+    "whyPlaceholder": "Why you, and how will you keep it welcoming?",
+    "visibilityLabel": "Visibility",
+    "visibility_public": "Public",
+    "visibility_private": "Private (invite-only)",
+    "visibilityHint_public": "Listed for everyone to discover and join.",
+    "visibilityHint_private": "Only people with your invite code can join.",
+    "agree": "I agree to moderate this project — review reports about it and uphold the community rules. I understand my access can be revoked if I don’t.",
+    "submit": "Submit application",
+    "pendingTitle": "Application under review",
+    "pendingBody": "Thanks! We review applications within a few days. You’ll be able to create your project once approved.",
+    "consoleTitle": "PROJECT APPLICATIONS",
+    "whyLabel": "Why",
+    "by": "By {{name}}",
+    "approve": "Approve",
+    "reject": "Reject"
+  }
 }

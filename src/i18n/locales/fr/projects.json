@@ -190,5 +190,27 @@
     "cta": "Rejoindre le projet",
     "ctaA11y": "Rejoindre le projet"
   },
-  "recommended": "RECOMMANDÉ POUR VOUS"
+  "recommended": "RECOMMANDÉ POUR VOUS",
+  "application": {
+    "title": "Postuler pour diriger un projet",
+    "lead": "Les Projets communautaires sont dirigés par des membres vérifiés. Parlez-nous du vôtre — s’il est approuvé, vous pourrez le créer et vous vous engagez à le garder sûr.",
+    "namePlaceholder": "Nom du projet (ex. Nettoyer le canal)",
+    "regionPlaceholder": "Région (ex. Fort-Liberté, Haïti)",
+    "summaryPlaceholder": "Quel est le projet et son objectif concret ?",
+    "whyPlaceholder": "Pourquoi vous, et comment le garderez-vous accueillant ?",
+    "visibilityLabel": "Visibilité",
+    "visibility_public": "Public",
+    "visibility_private": "Privé (sur invitation)",
+    "visibilityHint_public": "Listé pour que tout le monde le découvre et le rejoigne.",
+    "visibilityHint_private": "Seules les personnes avec votre code peuvent rejoindre.",
+    "agree": "Je m’engage à modérer ce projet — examiner les signalements le concernant et respecter les règles de la communauté. Je comprends que mon accès peut être révoqué sinon.",
+    "submit": "Envoyer la candidature",
+    "pendingTitle": "Candidature en cours d’examen",
+    "pendingBody": "Merci ! Nous examinons les candidatures sous quelques jours. Vous pourrez créer votre projet une fois approuvé.",
+    "consoleTitle": "CANDIDATURES DE PROJET",
+    "whyLabel": "Pourquoi",
+    "by": "Par {{name}}",
+    "approve": "Approuver",
+    "reject": "Rejeter"
+  }
 }
