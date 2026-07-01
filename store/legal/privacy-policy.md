@@ -36,13 +36,17 @@ account. When you sign up we collect your **email address** and a **display name
 handled by Firebase Authentication; we never see it.
 
 **Community Projects & the community feed — only if you use them.** When you join
-or create a Community Project, post, comment, react, or follow someone, that
-content is stored in our cloud database (**Google Firebase / Firestore**) so it
-can be shared with other members. This can include: your display name and chosen
-hero look, the **habit titles you choose to share** to a project, your
-contribution counts, the text of your **posts and comments**, your **reactions**,
-who you **follow**, and your account identifier (uid). You control feed
-visibility with the "Share my activity" toggle on each project.
+or create a Community Project, post, comment, react, follow someone, send a direct
+message, or share a story, that content is stored in our cloud database (**Google
+Firebase / Firestore**) so it can be shared with other members. This can include:
+your display name and chosen hero look, the **habit titles you choose to share** to
+a project, your contribution counts, the text of your **posts and comments**, your
+**reactions**, who you **follow**, the text of **direct messages** you send to
+other members, **stories** you post, **notifications** generated for you (e.g. when
+someone reacts to or comments on your post), and your account identifier (uid). You
+control feed visibility with the "Share my activity" toggle on each project, and you
+can report or block other members and delete your account (which removes this data)
+at any time.
 
 **Optional location — off by default.** If you turn on "Capture location & speed"
 in Settings, the App may attach where an activity happened to your logs and
